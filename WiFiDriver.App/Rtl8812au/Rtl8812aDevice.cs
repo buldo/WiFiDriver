@@ -17,11 +17,12 @@ public class Rtl8812aDevice
     private const byte REALTEK_USB_IN_INT_EP_IDX = 1;
 
     private readonly UsbDevice _usbDevice;
+    private readonly _adapter adapter;
 
     public Rtl8812aDevice(UsbDevice usbDevice)
     {
         _usbDevice = usbDevice;
-        var dvobj_priv = usb_intf.usb_dvobj_init(_usbDevice);
+        adapter = usb_intf.rtw_drv_init(_usbDevice);
     }
 
     public void Init()

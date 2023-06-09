@@ -10,4 +10,6 @@ public static class Bits
     public const byte BIT5 = 1 << 5;
     public const byte BIT6 = 1 << 6;
     public const byte BIT7 = 1 << 7;
+
+    public static byte BIT(int i) => (byte)(1 << i);
 }

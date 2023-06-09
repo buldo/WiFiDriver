@@ -1,0 +1,17 @@
+﻿namespace WiFiDriver.App.Rtl8812au;
+
+public static class usb_ops
+{
+    public static bool IS_FULL_SPEED_USB(_adapter Adapter) =>
+        (adapter_to_dvobj(Adapter).usb_speed == RTW_USB_SPEED_1_1);
+
+    public static bool IS_HIGH_SPEED_USB(_adapter Adapter) =>
+        (adapter_to_dvobj(Adapter).usb_speed == RTW_USB_SPEED_2);
+    public static bool IS_SUPER_SPEED_USB(_adapter Adapter) =>
+        (adapter_to_dvobj(Adapter).usb_speed == RTW_USB_SPEED_3);
+
+    public const uint USB_SUPER_SPEED_BULK_SIZE = 1024; /* usb 3.0 */
+    public const uint USB_HIGH_SPEED_BULK_SIZE = 512; /* usb 2.0 */
+    public const uint USB_FULL_SPEED_BULK_SIZE = 64; /* usb 1.1 */
+
+}
