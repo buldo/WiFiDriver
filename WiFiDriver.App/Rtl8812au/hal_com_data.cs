@@ -95,54 +95,54 @@ public class hal_com_data
 //    u8 EEPROMCustomerID;
 //    u8 EEPROMSubCustomerID;
     public u8 EEPROMVersion;
-//    u8 EEPROMRegulatory;
-//    u8 eeprom_thermal_meter;
-//    u8 EEPROMBluetoothCoexist;
-//    u8 EEPROMBluetoothType;
-//    u8 EEPROMBluetoothAntNum;
-//    u8 EEPROMBluetoothAntIsolation;
-//    u8 EEPROMBluetoothRadioShared;
-//    u8 EEPROMMACAddr[ETH_ALEN];
-//    u8 tx_bbswing_24G;
-//    u8 tx_bbswing_5G;
-//    u8 efuse0x3d7;  /* efuse[0x3D7] */
-//    u8 efuse0x3d8;  /* efuse[0x3D8] */
+public     u8 EEPROMRegulatory;
+    //    u8 eeprom_thermal_meter;
+    //    u8 EEPROMBluetoothCoexist;
+    //    u8 EEPROMBluetoothType;
+    //    u8 EEPROMBluetoothAntNum;
+    //    u8 EEPROMBluetoothAntIsolation;
+    //    u8 EEPROMBluetoothRadioShared;
+    //    u8 EEPROMMACAddr[ETH_ALEN];
+    //    u8 tx_bbswing_24G;
+    //    u8 tx_bbswing_5G;
+    //    u8 efuse0x3d7;  /* efuse[0x3D7] */
+    //    u8 efuse0x3d8;  /* efuse[0x3D8] */
 
-//# ifdef CONFIG_RF_POWER_TRIM
-//    u8 EEPROMRFGainOffset;
-//    u8 EEPROMRFGainVal;
-//    struct kfree_data_t kfree_data;
-//#endif /*CONFIG_RF_POWER_TRIM*/
+    //# ifdef CONFIG_RF_POWER_TRIM
+    //    u8 EEPROMRFGainOffset;
+    //    u8 EEPROMRFGainVal;
+    //    struct kfree_data_t kfree_data;
+    //#endif /*CONFIG_RF_POWER_TRIM*/
 
-//#if defined(CONFIG_RTL8723B) || defined(CONFIG_RTL8703B) || \
-//	defined(CONFIG_RTL8723D) || \
-//	defined(CONFIG_RTL8192F)
+    //#if defined(CONFIG_RTL8723B) || defined(CONFIG_RTL8703B) || \
+    //	defined(CONFIG_RTL8723D) || \
+    //	defined(CONFIG_RTL8192F)
 
-//	u8	adjuseVoltageVal;
-//	u8	need_restore;
-//#endif
-//	u8 EfuseUsedPercentage;
-//    u16 EfuseUsedBytes;
-//    /*u8		EfuseMap[2][HWSET_MAX_SIZE_JAGUAR];*/
-//    EFUSE_HAL EfuseHal;
+    //	u8	adjuseVoltageVal;
+    //	u8	need_restore;
+    //#endif
+    //	u8 EfuseUsedPercentage;
+    //    u16 EfuseUsedBytes;
+    //    /*u8		EfuseMap[2][HWSET_MAX_SIZE_JAGUAR];*/
+    //    EFUSE_HAL EfuseHal;
 
-//    /*---------------------------------------------------------------------------------*/
-//    /* 2.4G TX power info for target TX power*/
-//    u8 Index24G_CCK_Base[MAX_RF_PATH][CENTER_CH_2G_NUM];
-//	u8 Index24G_BW40_Base[MAX_RF_PATH][CENTER_CH_2G_NUM];
-//	s8 CCK_24G_Diff[MAX_RF_PATH][MAX_TX_COUNT];
-//	s8 OFDM_24G_Diff[MAX_RF_PATH][MAX_TX_COUNT];
-//	s8 BW20_24G_Diff[MAX_RF_PATH][MAX_TX_COUNT];
-//	s8 BW40_24G_Diff[MAX_RF_PATH][MAX_TX_COUNT];
+    //    /*---------------------------------------------------------------------------------*/
+    //    /* 2.4G TX power info for target TX power*/
+    public u8[,] Index24G_CCK_Base = new byte[MAX_RF_PATH, CENTER_CH_2G_NUM];
+    public u8[,] Index24G_BW40_Base = new byte[MAX_RF_PATH, CENTER_CH_2G_NUM];
+    public u8[,] CCK_24G_Diff = new byte[MAX_RF_PATH,MAX_TX_COUNT];
+    public s8[,] OFDM_24G_Diff = new s8[MAX_RF_PATH,MAX_TX_COUNT];
+    public s8[,] BW20_24G_Diff = new s8[MAX_RF_PATH,MAX_TX_COUNT];
+    public s8[,] BW40_24G_Diff = new s8[MAX_RF_PATH,MAX_TX_COUNT];
 
-//	/* 5G TX power info for target TX power*/
-//#ifdef CONFIG_IEEE80211_BAND_5GHZ
-//	u8 Index5G_BW40_Base[MAX_RF_PATH][CENTER_CH_5G_ALL_NUM];
-//	u8 Index5G_BW80_Base[MAX_RF_PATH][CENTER_CH_5G_80M_NUM];
-//	s8 OFDM_5G_Diff[MAX_RF_PATH][MAX_TX_COUNT];
-//	s8 BW20_5G_Diff[MAX_RF_PATH][MAX_TX_COUNT];
-//	s8 BW40_5G_Diff[MAX_RF_PATH][MAX_TX_COUNT];
-//	s8 BW80_5G_Diff[MAX_RF_PATH][MAX_TX_COUNT];
+    //	/* 5G TX power info for target TX power*/
+    //#ifdef CONFIG_IEEE80211_BAND_5GHZ
+    public u8[,] Index5G_BW40_Base = new byte[MAX_RF_PATH,CENTER_CH_5G_ALL_NUM];
+public u8[,] Index5G_BW80_Base = new byte[MAX_RF_PATH,CENTER_CH_5G_80M_NUM];
+    public s8[,] OFDM_5G_Diff = new s8[MAX_RF_PATH, MAX_TX_COUNT];
+    public s8[,] BW20_5G_Diff = new s8[MAX_RF_PATH,MAX_TX_COUNT];
+    public s8[,] BW40_5G_Diff = new s8[MAX_RF_PATH,MAX_TX_COUNT];
+    public s8[,] BW80_5G_Diff = new s8[MAX_RF_PATH,MAX_TX_COUNT];
 //#endif
 
 //	u8 txpwr_by_rate_undefined_band_path[TX_PWR_BY_RATE_NUM_BAND]
@@ -176,10 +176,10 @@ public class hal_com_data
     public u8 PAType_5G;
     public u8 LNAType_2G;
     public u8 LNAType_5G;
-//    u8 ExternalPA_2G;
-//    u8 ExternalLNA_2G;
-//    u8 external_pa_5g;
-//    u8 external_lna_5g;
+public    bool ExternalPA_2G;
+    public bool ExternalLNA_2G;
+public     bool? external_pa_5g;
+    public bool? external_lna_5g;
 public u16 TypeGLNA;
 public u16 TypeGPA;
     public u16 TypeALNA;

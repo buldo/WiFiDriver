@@ -1,6 +1,7 @@
 ﻿global using u32 = System.UInt32;
 global using u16 = System.UInt16;
 global using u8 = System.Byte;
+global using s8 = System.SByte;
 global using s32 = System.Int32;
 global using PHAL_DATA_TYPE = WiFiDriver.App.Rtl8812au.hal_com_data;
 global using HAL_DATA_TYPE = WiFiDriver.App.Rtl8812au.hal_com_data;
@@ -18,5 +19,6 @@ global using static WiFiDriver.App.Rtl8812au.hal_com_data_defs;
 global using static WiFiDriver.App.Rtl8812au.usb_ops;
 global using static WiFiDriver.App.Rtl8812au.hal_data;
 global using static WiFiDriver.App.Rtl8812au.rtw_io;
-global using static WiFiDriver.App.Rtl8812au.Registers;
+global using static WiFiDriver.App.Rtl8812au.CommonConsts;
 global using static WiFiDriver.App.Rtl8812au.hal_intf;
+global using static WiFiDriver.App.Rtl8812au.odm_board_type;

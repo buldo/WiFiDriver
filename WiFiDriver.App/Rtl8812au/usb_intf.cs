@@ -580,8 +580,8 @@ registry_par.wifi_spec = rtw_wifi_spec;
 //registry_par.bEn_RFE = 1;
 //registry_par.RFE_Type = (u8)rtw_RFE_type;
 //registry_par.PowerTracking_Type = (u8)rtw_powertracking_type;
-//registry_par.AmplifierType_2G = (u8)rtw_amplifier_type_2g;
-//registry_par.AmplifierType_5G = (u8)rtw_amplifier_type_5g;
+registry_par.AmplifierType_2G = 0;
+registry_par.AmplifierType_5G = 0;
 //registry_par.GLNA_Type = (u8)rtw_GLNA_type;
 //# ifdef CONFIG_LOAD_PHY_PARA_FROM_FILE
 //registry_par.load_phy_file = (u8)rtw_load_phy_file;

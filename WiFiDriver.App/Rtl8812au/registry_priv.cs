@@ -166,8 +166,8 @@ public class registry_priv
 
 //    s8 TxBBSwing_2G;
 //    s8 TxBBSwing_5G;
-//    u8 AmplifierType_2G;
-//    u8 AmplifierType_5G;
+    public u8 AmplifierType_2G;
+    public u8 AmplifierType_5G;
 //    u8 bEn_RFE;
 //    u8 RFE_Type;
 //    u8 PowerTracking_Type;

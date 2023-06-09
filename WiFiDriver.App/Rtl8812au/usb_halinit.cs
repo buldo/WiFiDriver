@@ -1,5 +1,8 @@
 ﻿using Microsoft.Win32;
 using System.Buffers.Binary;
+using System.IO;
+
+using WiFiDriver.App.Rtl8812au;
 
 namespace WiFiDriver.App.Rtl8812au;
 
@@ -22,6 +25,49 @@ public static class usb_halinit
     private const byte EEPROM_VERSION_8812 = 0xC4;
     private const byte EEPROM_XTAL_8812 = 0xB9;
     private const byte EEPROM_Default_CrystalCap_8812 = 0x20;
+
+    private static u8[] center_ch_5g_all = new byte[CENTER_CH_5G_ALL_NUM]
+    {
+        15, 16, 17, 18,
+        20, 24, 28, 32,
+/* G00 */36, 38, 40,
+        42,
+/* G01 */44, 46, 48,
+        /* 50, */
+/* G02 */52, 54, 56,
+        58,
+/* G03 */60, 62, 64,
+        68, 72, 76, 80,
+        84, 88, 92, 96,
+/* G04 */100, 102, 104,
+        106,
+/* G05 */108, 110, 112,
+        /* 114, */
+/* G06 */116, 118, 120,
+        122,
+/* G07 */124, 126, 128,
+/* G08 */132, 134, 136,
+        138,
+/* G09 */140, 142, 144,
+/* G10 */149, 151, 153,
+        155,
+/* G11 */157, 159, 161,
+        /* 163, */
+/* G12 */165, 167, 169,
+        171,
+/* G13 */173, 175, 177
+    };
+
+    private static u8[] center_ch_5g_80m = new byte[CENTER_CH_5G_80M_NUM]
+    {
+/* G00 ~ G01*/42,
+/* G02 ~ G03*/58,
+/* G04 ~ G05*/106,
+/* G06 ~ G07*/122,
+/* G08 ~ G09*/138,
+/* G10 ~ G11*/155,
+/* G12 ~ G13*/171
+    };
 
     public static void rtl8812au_interface_configure(_adapter padapter)
     {
@@ -110,7 +156,7 @@ public static class usb_halinit
 
     }
 
-    static bool HalUsbSetQueuePipeMapping8812AUsb(PADAPTER    pAdapter,u8      NumInPipe,u8      NumOutPipe)
+    static bool HalUsbSetQueuePipeMapping8812AUsb(PADAPTER pAdapter, u8 NumInPipe, u8 NumOutPipe)
     {
         var pHalData = GET_HAL_DATA(pAdapter);
         bool result = false;
@@ -154,7 +200,7 @@ public static class usb_halinit
 
     }
 
-    public static u8 ReadAdapterInfo8812AU(PADAPTER         Adapter)
+    public static u8 ReadAdapterInfo8812AU(PADAPTER Adapter)
     {
         /* Read all content in Efuse/EEPROM. */
         Hal_ReadPROMContent_8812A(Adapter);
@@ -187,7 +233,7 @@ public static class usb_halinit
 
     }
 
-    static void Hal_ReadPROMContent_8812A(PADAPTER     Adapter
+    static void Hal_ReadPROMContent_8812A(PADAPTER Adapter
     )
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
@@ -196,16 +242,17 @@ public static class usb_halinit
         /* check system boot selection */
         eeValue = rtw_read8(Adapter, REG_9346CR);
         pHalData.EepromOrEfuse = (eeValue & BOOT_FROM_EEPROM) != 0 ? true : false;
-        pHalData.bautoload_fail_flag = (eeValue & EEPROM_EN)!=0 ? false : true;
+        pHalData.bautoload_fail_flag = (eeValue & EEPROM_EN) != 0 ? false : true;
 
-        RTW_INFO("Boot from %s, Autoload %s !", (pHalData.EepromOrEfuse ? "EEPROM" : "EFUSE"), (pHalData.bautoload_fail_flag ? "Fail" : "OK"));
+        RTW_INFO("Boot from %s, Autoload %s !", (pHalData.EepromOrEfuse ? "EEPROM" : "EFUSE"),
+            (pHalData.bautoload_fail_flag ? "Fail" : "OK"));
 
         /* pHalData.EEType = IS_BOOT_FROM_EEPROM(Adapter) ? EEPROM_93C46 : EEPROM_BOOT_EFUSE; */
 
         InitAdapterVariablesByPROM_8812AU(Adapter);
     }
 
-    private static void InitAdapterVariablesByPROM_8812AU(PADAPTER    Adapter)
+    private static void InitAdapterVariablesByPROM_8812AU(PADAPTER Adapter)
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
@@ -248,8 +295,347 @@ public static class usb_halinit
         rtw_btcoex_set_ant_info(Adapter);
     }
 
-    public static void Hal_ReadAmplifierType_8812A(PADAPTER    Adapter, u8[]			PROMContent, BOOLEAN     AutoloadFail
-    )
+    private static void Hal_ReadTxPowerInfo8812A(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoLoadFail)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        TxPowerInfo24G pwrInfo24G = new TxPowerInfo24G();
+        TxPowerInfo5G pwrInfo5G = new TxPowerInfo5G();
+
+        hal_load_txpwr_info(Adapter, pwrInfo24G, pwrInfo5G, PROMContent);
+
+        /* 2010/10/19 MH Add Regulator recognize for CU. */
+        if (!AutoLoadFail)
+        {
+
+            if (PROMContent[EEPROM_RF_BOARD_OPTION_8812] == 0xFF)
+            {
+                pHalData.EEPROMRegulatory = (EEPROM_DEFAULT_BOARD_OPTION & 0x7); /* bit0~2 */
+            }
+            else
+            {
+                pHalData.EEPROMRegulatory = (byte)(PROMContent[EEPROM_RF_BOARD_OPTION_8812] & 0x7); /* bit0~2 */
+            }
+
+        }
+        else
+        {
+            pHalData.EEPROMRegulatory = 0;
+        }
+
+        RTW_INFO("EEPROMRegulatory = 0x%x", pHalData.EEPROMRegulatory);
+
+    }
+
+    private static void hal_load_txpwr_info(_adapter adapter, TxPowerInfo24G pwr_info_2g, TxPowerInfo5G pwr_info_5g, u8[] pg_data)
+    {
+        HAL_DATA_TYPE hal_data = GET_HAL_DATA(adapter);
+
+        var hal_spec = GET_HAL_SPEC(adapter);
+        u8 max_tx_cnt = hal_spec.max_tx_cnt;
+        u8 rfpath, ch_idx, group = 0, tx_idx;
+
+        /* load from pg data (or default value) */
+        hal_load_pg_txpwr_info(adapter, pwr_info_2g, pwr_info_5g, pg_data, false);
+
+        /* transform to hal_data */
+        for (rfpath = 0; rfpath < MAX_RF_PATH; rfpath++)
+        {
+
+            if (!HAL_SPEC_CHK_RF_PATH_2G(hal_spec, rfpath))
+                goto bypass_2g;
+
+            /* 2.4G base */
+            for (ch_idx = 0; ch_idx < CENTER_CH_2G_NUM; ch_idx++)
+            {
+                u8 cck_group = 0;
+
+                if (rtw_get_ch_group((byte)(ch_idx + 1), ref group, ref cck_group) != BAND_TYPE.BAND_ON_2_4G)
+                    continue;
+
+                hal_data.Index24G_CCK_Base[rfpath, ch_idx] = pwr_info_2g.IndexCCK_Base[rfpath, cck_group];
+                hal_data.Index24G_BW40_Base[rfpath, ch_idx] = pwr_info_2g.IndexBW40_Base[rfpath, group];
+            }
+
+            /* 2.4G diff */
+            for (tx_idx = 0; tx_idx < MAX_TX_COUNT; tx_idx++)
+            {
+                if (tx_idx >= max_tx_cnt)
+                    break;
+
+                hal_data.CCK_24G_Diff[rfpath, tx_idx] =
+                    (byte)(pwr_info_2g.CCK_Diff[rfpath, tx_idx] * hal_spec.pg_txgi_diff_factor);
+                hal_data.OFDM_24G_Diff[rfpath, tx_idx] =
+                    (sbyte)(pwr_info_2g.OFDM_Diff[rfpath, tx_idx] * hal_spec.pg_txgi_diff_factor);
+                hal_data.BW20_24G_Diff[rfpath, tx_idx] =
+                    (sbyte)(pwr_info_2g.BW20_Diff[rfpath, tx_idx] * hal_spec.pg_txgi_diff_factor);
+                hal_data.BW40_24G_Diff[rfpath, tx_idx] =
+                    (sbyte)(pwr_info_2g.BW40_Diff[rfpath, tx_idx] * hal_spec.pg_txgi_diff_factor);
+            }
+
+            bypass_2g: ;
+
+
+            if (!HAL_SPEC_CHK_RF_PATH_5G(hal_spec, rfpath))
+                goto bypass_5g;
+            u8 tmp = 0;
+/* 5G base */
+            for (ch_idx = 0; ch_idx < CENTER_CH_5G_ALL_NUM; ch_idx++)
+            {
+                if (rtw_get_ch_group(center_ch_5g_all[ch_idx], ref group, ref tmp) != BAND_TYPE.BAND_ON_5G)
+                    continue;
+                hal_data.Index5G_BW40_Base[rfpath, ch_idx] = pwr_info_5g.IndexBW40_Base[rfpath, group];
+            }
+
+            for (ch_idx = 0; ch_idx < CENTER_CH_5G_80M_NUM; ch_idx++)
+            {
+                u8 upper, lower;
+
+                if (rtw_get_ch_group(center_ch_5g_80m[ch_idx], ref group, ref tmp) != BAND_TYPE.BAND_ON_5G)
+                    continue;
+
+                upper = pwr_info_5g.IndexBW40_Base[rfpath, group];
+                lower = pwr_info_5g.IndexBW40_Base[rfpath, group + 1];
+                hal_data.Index5G_BW80_Base[rfpath, ch_idx] = (byte)((upper + lower) / 2);
+            }
+
+/* 5G diff */
+            for (tx_idx = 0; tx_idx < MAX_TX_COUNT; tx_idx++)
+            {
+                if (tx_idx >= max_tx_cnt)
+                    break;
+
+                hal_data.OFDM_5G_Diff[rfpath, tx_idx] =
+                    (sbyte)(pwr_info_5g.OFDM_Diff[rfpath, tx_idx] * hal_spec.pg_txgi_diff_factor);
+                hal_data.BW20_5G_Diff[rfpath, tx_idx] =
+                    (sbyte)(pwr_info_5g.BW20_Diff[rfpath, tx_idx] * hal_spec.pg_txgi_diff_factor);
+                hal_data.BW40_5G_Diff[rfpath, tx_idx] =
+                    (sbyte)(pwr_info_5g.BW40_Diff[rfpath, tx_idx] * hal_spec.pg_txgi_diff_factor);
+                hal_data.BW80_5G_Diff[rfpath, tx_idx] =
+                    (sbyte)(pwr_info_5g.BW80_Diff[rfpath, tx_idx] * hal_spec.pg_txgi_diff_factor);
+            }
+
+            bypass_5g: ;
+
+        }
+    }
+
+    private static void hal_load_pg_txpwr_info(_adapter adapter, TxPowerInfo24G pwr_info_2g, TxPowerInfo5G pwr_info_5g, u8[] pg_data, BOOLEAN AutoLoadFail)
+    {
+
+        var hal_spec = GET_HAL_SPEC(adapter);
+        u8 path;
+        u16 pg_offset;
+        u8 txpwr_src = PG_TXPWR_SRC_PG_DATA;
+        map_t pg_data_map = MAP_ENT(184, 1, 0xFF, MAPSEG_PTR_ENT(0x00, 184, pg_data));
+        map_t txpwr_map = null;
+
+        /* init with invalid value and some dummy base and diff */
+        hal_init_pg_txpwr_info_2g(adapter, pwr_info_2g);
+        hal_init_pg_txpwr_info_5g(adapter, pwr_info_5g);
+
+        select_src:
+        pg_offset = hal_spec.pg_txpwr_saddr;
+
+        switch (txpwr_src)
+        {
+            case PG_TXPWR_SRC_PG_DATA:
+                txpwr_map = pg_data_map;
+                break;
+            case PG_TXPWR_SRC_IC_DEF:
+                txpwr_map = hal_pg_txpwr_def_info(adapter);
+                break;
+            case PG_TXPWR_SRC_DEF:
+            default:
+                txpwr_map = pg_txpwr_def_info;
+                break;
+        }
+
+        ;
+
+        if (txpwr_map == null)
+            goto end_parse;
+
+        for (path = 0; path < MAX_RF_PATH; path++)
+        {
+            if (!HAL_SPEC_CHK_RF_PATH_2G(hal_spec, path) && !HAL_SPEC_CHK_RF_PATH_5G(hal_spec, path))
+                break;
+            pg_offset = hal_load_pg_txpwr_info_path_2g(adapter, pwr_info_2g, path, txpwr_src, txpwr_map, pg_offset);
+            pg_offset = hal_load_pg_txpwr_info_path_5g(adapter, pwr_info_5g, path, txpwr_src, txpwr_map, pg_offset);
+        }
+
+        if (hal_chk_pg_txpwr_info_2g(adapter, pwr_info_2g) == _SUCCESS && hal_chk_pg_txpwr_info_5g(adapter, pwr_info_5g) == _SUCCESS)
+            goto exit;
+
+        end_parse:
+        txpwr_src++;
+        if (txpwr_src < PG_TXPWR_SRC_NUM)
+            goto select_src;
+
+        if (hal_chk_pg_txpwr_info_2g(adapter, pwr_info_2g) != _SUCCESS || hal_chk_pg_txpwr_info_5g(adapter, pwr_info_5g) != _SUCCESS)
+        {
+            throw new Exception();
+        }
+
+        exit:
+
+        return;
+    }
+
+    static void hal_init_pg_txpwr_info_2g(_adapter adapter, TxPowerInfo24G pwr_info)
+    {
+        var hal_spec = GET_HAL_SPEC(adapter);
+        u8 path, group, tx_idx;
+
+        /* init with invalid value */
+        for (path = 0; path < MAX_RF_PATH; path++)
+        {
+            for (group = 0; group < MAX_CHNL_GROUP_24G; group++)
+            {
+                pwr_info.IndexCCK_Base[path, group] = PG_TXPWR_INVALID_BASE;
+                pwr_info.IndexBW40_Base[path, group] = PG_TXPWR_INVALID_BASE;
+            }
+
+            for (tx_idx = 0; tx_idx < MAX_TX_COUNT; tx_idx++)
+            {
+                pwr_info.CCK_Diff[path, tx_idx] = PG_TXPWR_INVALID_DIFF;
+                pwr_info.OFDM_Diff[path, tx_idx] = PG_TXPWR_INVALID_DIFF;
+                pwr_info.BW20_Diff[path, tx_idx] = PG_TXPWR_INVALID_DIFF;
+                pwr_info.BW40_Diff[path, tx_idx] = PG_TXPWR_INVALID_DIFF;
+            }
+        }
+
+        /* init for dummy base and diff */
+        for (path = 0; path < MAX_RF_PATH; path++)
+        {
+            if (!HAL_SPEC_CHK_RF_PATH_2G(hal_spec, path))
+                break;
+            /* 2.4G BW40 base has 1 less group than CCK base*/
+            pwr_info.IndexBW40_Base[path, MAX_CHNL_GROUP_24G - 1] = 0;
+
+            /* dummy diff */
+            pwr_info.CCK_Diff[path, 0] = 0; /* 2.4G CCK-1TX */
+            pwr_info.BW40_Diff[path, 0] = 0; /* 2.4G BW40-1S */
+        }
+    }
+
+    static void hal_init_pg_txpwr_info_5g(_adapter adapter, TxPowerInfo5G pwr_info)
+    {
+        var hal_spec = GET_HAL_SPEC(adapter);
+        u8 path, group, tx_idx;
+
+        /* init with invalid value */
+        for (path = 0; path<MAX_RF_PATH; path++) {
+            for (group = 0; group < MAX_CHNL_GROUP_5G; group++)
+            {
+                pwr_info.IndexBW40_Base[path,group] = PG_TXPWR_INVALID_BASE;
+            }
+            for (tx_idx = 0; tx_idx<MAX_TX_COUNT; tx_idx++)
+            {
+                pwr_info.OFDM_Diff[path,tx_idx] = PG_TXPWR_INVALID_DIFF;
+                pwr_info.BW20_Diff[path,tx_idx] = PG_TXPWR_INVALID_DIFF;
+                pwr_info.BW40_Diff[path,tx_idx] = PG_TXPWR_INVALID_DIFF;
+                pwr_info.BW80_Diff[path,tx_idx] = PG_TXPWR_INVALID_DIFF;
+                pwr_info.BW160_Diff[path,tx_idx] = PG_TXPWR_INVALID_DIFF;
+            }
+        }
+
+        for (path = 0; path < MAX_RF_PATH; path++)
+        {
+            if (!HAL_SPEC_CHK_RF_PATH_5G(hal_spec, path))
+                break;
+            /* dummy diff */
+            pwr_info.BW40_Diff[path,0] = 0; /* 5G BW40-1S */
+        }
+    }
+
+    private static BAND_TYPE rtw_get_ch_group(u8 ch, ref u8 group, ref u8 cck_group)
+    {
+        BAND_TYPE band = BAND_TYPE.BAND_MAX;
+        s8 gp = -1, cck_gp = -1;
+
+        if (ch <= 14)
+        {
+            band = BAND_TYPE.BAND_ON_2_4G;
+
+            if (1 <= ch && ch <= 2)
+                gp = 0;
+            else if (3 <= ch && ch <= 5)
+                gp = 1;
+            else if (6 <= ch && ch <= 8)
+                gp = 2;
+            else if (9 <= ch && ch <= 11)
+                gp = 3;
+            else if (12 <= ch && ch <= 14)
+                gp = 4;
+            else
+                band = BAND_TYPE.BAND_MAX;
+
+            if (ch == 14)
+                cck_gp = 5;
+            else
+                cck_gp = gp;
+        }
+        else
+        {
+            band = BAND_TYPE.BAND_ON_5G;
+
+            if (15 <= ch && ch <= 42)
+                gp = 0;
+            else if (44 <= ch && ch <= 48)
+                gp = 1;
+            else if (50 <= ch && ch <= 58)
+                gp = 2;
+            else if (60 <= ch && ch <= 80)
+                gp = 3;
+            else if (82 <= ch && ch <= 106)
+                gp = 4;
+            else if (108 <= ch && ch <= 114)
+                gp = 5;
+            else if (116 <= ch && ch <= 122)
+                gp = 6;
+            else if (124 <= ch && ch <= 130)
+                gp = 7;
+            else if (132 <= ch && ch <= 138)
+                gp = 8;
+            else if (140 <= ch && ch <= 144)
+                gp = 9;
+            else if (149 <= ch && ch <= 155)
+                gp = 10;
+            else if (157 <= ch && ch <= 161)
+                gp = 11;
+            else if (165 <= ch && ch <= 171)
+                gp = 12;
+            else if (173 <= ch && ch <= 177)
+                gp = 13;
+            else
+                band = BAND_TYPE.BAND_MAX;
+        }
+
+        if (band == BAND_TYPE.BAND_MAX
+            || (band == BAND_TYPE.BAND_ON_2_4G && cck_gp == -1)
+            || gp == -1
+           )
+        {
+            RTW_WARN("%s invalid channel:%u", "rtw_get_ch_group", ch);
+            //rtw_warn_on(1);
+            goto exit;
+        }
+
+        group = (byte)gp;
+
+        if (band == BAND_TYPE.BAND_ON_2_4G)
+        {
+            if (cck_gp >= 0)
+            {
+                cck_group = (byte)cck_gp;
+            }
+        }
+
+        exit:
+        return band;
+    }
+
+    private static void Hal_ReadAmplifierType_8812A(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
@@ -290,84 +676,96 @@ public static class usb_halinit
         RTW_INFO("pHalData.TypeALNA = 0x%X", pHalData.TypeALNA);
     }
 
-    private static void hal_ReadPAType_8812A(PADAPTER    Adapter,u8[]			PROMContent,  BOOLEAN     AutoloadFail)
+    private const int EEPROM_PA_TYPE_8812AU = 0xBC;
+    private const int EEPROM_LNA_TYPE_2G_8812AU = 0xBD;
+    private const int EEPROM_LNA_TYPE_5G_8812AU = 0xBF;
+
+    private static void hal_ReadPAType_8812A(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
         if (!AutoloadFail)
         {
             if (GetRegAmplifierType2G(Adapter) == 0)
-            { /* AUTO */
-                pHalData.PAType_2G = ReadLE1Byte(&PROMContent[EEPROM_PA_TYPE_8812AU]);
-                pHalData.LNAType_2G = ReadLE1Byte(&PROMContent[EEPROM_LNA_TYPE_2G_8812AU]);
+            {
+                /* AUTO */
+                pHalData.PAType_2G = PROMContent[EEPROM_PA_TYPE_8812AU];
+                pHalData.LNAType_2G = PROMContent[EEPROM_LNA_TYPE_2G_8812AU];
                 if (pHalData.PAType_2G == 0xFF)
                     pHalData.PAType_2G = 0;
                 if (pHalData.LNAType_2G == 0xFF)
                     pHalData.LNAType_2G = 0;
 
-                pHalData.ExternalPA_2G = ((pHalData.PAType_2G & BIT5) && (pHalData.PAType_2G & BIT4)) ? 1 : 0;
-                pHalData.ExternalLNA_2G = ((pHalData.LNAType_2G & BIT7) && (pHalData.LNAType_2G & BIT3)) ? 1 : 0;
+                pHalData.ExternalPA_2G = ((pHalData.PAType_2G & BIT5) != 0 && (pHalData.PAType_2G & BIT4) != 0);
+                pHalData.ExternalLNA_2G = ((pHalData.LNAType_2G & BIT7) != 0 && (pHalData.LNAType_2G & BIT3) != 0);
             }
             else
             {
-                pHalData.ExternalPA_2G = (GetRegAmplifierType2G(Adapter) & ODM_BOARD_EXT_PA) ? 1 : 0;
-                pHalData.ExternalLNA_2G = (GetRegAmplifierType2G(Adapter) & ODM_BOARD_EXT_LNA) ? 1 : 0;
+                pHalData.ExternalPA_2G = (GetRegAmplifierType2G(Adapter) & ODM_BOARD_EXT_PA) != 0;
+                pHalData.ExternalLNA_2G = (GetRegAmplifierType2G(Adapter) & ODM_BOARD_EXT_LNA) != 0;
             }
 
             if (GetRegAmplifierType5G(Adapter) == 0)
-            { /* AUTO */
-                pHalData.PAType_5G = ReadLE1Byte(&PROMContent[EEPROM_PA_TYPE_8812AU]);
-                pHalData.LNAType_5G = ReadLE1Byte(&PROMContent[EEPROM_LNA_TYPE_5G_8812AU]);
+            {
+                /* AUTO */
+                pHalData.PAType_5G = PROMContent[EEPROM_PA_TYPE_8812AU];
+                pHalData.LNAType_5G = PROMContent[EEPROM_LNA_TYPE_5G_8812AU];
                 if (pHalData.PAType_5G == 0xFF)
                     pHalData.PAType_5G = 0;
                 if (pHalData.LNAType_5G == 0xFF)
                     pHalData.LNAType_5G = 0;
 
-                pHalData.external_pa_5g = ((pHalData.PAType_5G & BIT1) && (pHalData.PAType_5G & BIT0)) ? 1 : 0;
-                pHalData.external_lna_5g = ((pHalData.LNAType_5G & BIT7) && (pHalData.LNAType_5G & BIT3)) ? 1 : 0;
+                pHalData.external_pa_5g = ((pHalData.PAType_5G & BIT1) != 0 && (pHalData.PAType_5G & BIT0) != 0);
+                pHalData.external_lna_5g = ((pHalData.LNAType_5G & BIT7) != 0 && (pHalData.LNAType_5G & BIT3) != 0);
             }
             else
             {
-                pHalData.external_pa_5g = (GetRegAmplifierType5G(Adapter) & ODM_BOARD_EXT_PA_5G) ? 1 : 0;
-                pHalData.external_lna_5g = (GetRegAmplifierType5G(Adapter) & ODM_BOARD_EXT_LNA_5G) ? 1 : 0;
+                pHalData.external_pa_5g = (GetRegAmplifierType5G(Adapter) & ODM_BOARD_EXT_PA_5G) != 0;
+                pHalData.external_lna_5g = (GetRegAmplifierType5G(Adapter) & ODM_BOARD_EXT_LNA_5G) != 0;
             }
         }
         else
         {
-            pHalData.ExternalPA_2G = EEPROM_Default_PAType;
-            pHalData.external_pa_5g = 0xFF;
-            pHalData.ExternalLNA_2G = EEPROM_Default_LNAType;
-            pHalData.external_lna_5g = 0xFF;
+            pHalData.ExternalPA_2G = false;
+            pHalData.external_pa_5g = null;
+            pHalData.ExternalLNA_2G = false;
+            pHalData.external_lna_5g = null;
 
             if (GetRegAmplifierType2G(Adapter) == 0)
-            { /* AUTO */
-                pHalData.ExternalPA_2G = 0;
-                pHalData.ExternalLNA_2G = 0;
+            {
+                /* AUTO */
+                pHalData.ExternalPA_2G = false;
+                pHalData.ExternalLNA_2G = false;
             }
             else
             {
-                pHalData.ExternalPA_2G = (GetRegAmplifierType2G(Adapter) & ODM_BOARD_EXT_PA) ? 1 : 0;
-                pHalData.ExternalLNA_2G = (GetRegAmplifierType2G(Adapter) & ODM_BOARD_EXT_LNA) ? 1 : 0;
+                pHalData.ExternalPA_2G = (GetRegAmplifierType2G(Adapter) & ODM_BOARD_EXT_PA) != 0;
+                pHalData.ExternalLNA_2G = (GetRegAmplifierType2G(Adapter) & ODM_BOARD_EXT_LNA) != 0;
             }
+
             if (GetRegAmplifierType5G(Adapter) == 0)
-            { /* AUTO */
-                pHalData.external_pa_5g = 0;
-                pHalData.external_lna_5g = 0;
+            {
+                /* AUTO */
+                pHalData.external_pa_5g = false;
+                pHalData.external_lna_5g = false;
             }
             else
             {
-                pHalData.external_pa_5g = (GetRegAmplifierType5G(Adapter) & ODM_BOARD_EXT_PA_5G) ? 1 : 0;
-                pHalData.external_lna_5g = (GetRegAmplifierType5G(Adapter) & ODM_BOARD_EXT_LNA_5G) ? 1 : 0;
+                pHalData.external_pa_5g = (GetRegAmplifierType5G(Adapter) & ODM_BOARD_EXT_PA_5G) != 0;
+                pHalData.external_lna_5g = (GetRegAmplifierType5G(Adapter) & ODM_BOARD_EXT_LNA_5G) != 0;
             }
         }
+
         RTW_INFO("pHalData.PAType_2G is 0x%x, pHalData.ExternalPA_2G = %d", pHalData.PAType_2G, pHalData.ExternalPA_2G);
-        RTW_INFO("pHalData.PAType_5G is 0x%x, pHalData.external_pa_5g = %d", pHalData.PAType_5G, pHalData.external_pa_5g);
-        RTW_INFO("pHalData.LNAType_2G is 0x%x, pHalData.ExternalLNA_2G = %d", pHalData.LNAType_2G, pHalData.ExternalLNA_2G);
-        RTW_INFO("pHalData.LNAType_5G is 0x%x, pHalData.external_lna_5g = %d", pHalData.LNAType_5G, pHalData.external_lna_5g);
+        RTW_INFO("pHalData.PAType_5G is 0x%x, pHalData.external_pa_5g = %d", pHalData.PAType_5G,
+            pHalData.external_pa_5g);
+        RTW_INFO("pHalData.LNAType_2G is 0x%x, pHalData.ExternalLNA_2G = %d", pHalData.LNAType_2G,
+            pHalData.ExternalLNA_2G);
+        RTW_INFO("pHalData.LNAType_5G is 0x%x, pHalData.external_lna_5g = %d", pHalData.LNAType_5G,
+            pHalData.external_lna_5g);
     }
 
-
-    private static void Hal_EfuseParseXtal_8812A(PADAPTER    pAdapter, u8[] hwinfo,bool     AutoLoadFail)
+    private static void Hal_EfuseParseXtal_8812A(PADAPTER pAdapter, u8[] hwinfo, bool AutoLoadFail)
     {
         var pHalData = GET_HAL_DATA(pAdapter);
 
@@ -375,12 +773,13 @@ public static class usb_halinit
         {
             pHalData.crystal_cap = hwinfo[EEPROM_XTAL_8812];
             if (pHalData.crystal_cap == 0xFF)
-                pHalData.crystal_cap = EEPROM_Default_CrystalCap_8812;  /* what value should 8812 set? */
+                pHalData.crystal_cap = EEPROM_Default_CrystalCap_8812; /* what value should 8812 set? */
         }
         else
         {
             pHalData.crystal_cap = EEPROM_Default_CrystalCap_8812;
         }
+
         RTW_INFO("crystal_cap: 0x%2x", pHalData.crystal_cap);
     }
 
@@ -437,7 +836,7 @@ public static class usb_halinit
         return true;
     }
 
-    static void Hal_ReadPROMVersion8812A(PADAPTER    Adapter, u8[] PROMContent,bool AutoloadFail)
+    static void Hal_ReadPROMVersion8812A(PADAPTER Adapter, u8[] PROMContent, bool AutoloadFail)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
@@ -455,10 +854,11 @@ public static class usb_halinit
                 pHalData.EEPROMVersion = EEPROM_Default_Version;
             }
         }
+
         RTW_INFO("pHalData.EEPROMVersion is 0x%x", pHalData.EEPROMVersion);
     }
 
-    private static void hal_ReadIDs_8812AU(PADAPTER    Adapter, byte[]     PROMContent,bool     AutoloadFail)
+    private static void hal_ReadIDs_8812AU(PADAPTER Adapter, byte[] PROMContent, bool AutoloadFail)
     {
         // TODO: Looks like not needed
         // HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
@@ -512,7 +912,7 @@ public static class usb_halinit
         // RTW_INFO("Customer ID: 0x%02X, SubCustomer ID: 0x%02X\n", pHalData.EEPROMCustomerID, pHalData.EEPROMSubCustomerID);
     }
 
-    static void Hal_EfuseParseIDCode8812A(PADAPTER    padapter,u8[] hwinfo)
+    static void Hal_EfuseParseIDCode8812A(PADAPTER padapter, u8[] hwinfo)
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
         u16 EEPROMId;
@@ -531,7 +931,7 @@ public static class usb_halinit
         RTW_INFO("EEPROM ID=0x%04x\n", EEPROMId);
     }
 
-    static void hal_InitPGData_8812A(PADAPTER        padapter, u8[] PROMContent)
+    static void hal_InitPGData_8812A(PADAPTER padapter, u8[] PROMContent)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
         u32 i;
@@ -585,7 +985,7 @@ public static class usb_halinit
             if (IS_HARDWARE_TYPE_8812AU(padapter))
             {
                 var efuse_content = new byte[4];
-                efuse_OneByteRead(padapter,0x200, out efuse_content[0]);
+                efuse_OneByteRead(padapter, 0x200, out efuse_content[0]);
                 efuse_OneByteRead(padapter, 0x202, out efuse_content[1]);
                 efuse_OneByteRead(padapter, 0x204, out efuse_content[2]);
                 efuse_OneByteRead(padapter, 0x210, out efuse_content[3]);
@@ -641,6 +1041,7 @@ public static class usb_halinit
                 return false;
             }
         }
+
         return true;
     }
 
@@ -661,14 +1062,14 @@ public static class usb_halinit
             Efuse_ReadAllMap(pAdapter, efuseType, pHalData.efuse_eeprom_data);
         }
 
-        rtw_mask_map_read( 0x00, mapLen, pHalData.efuse_eeprom_data);
+        rtw_mask_map_read(0x00, mapLen, pHalData.efuse_eeprom_data);
 
         //rtw_dump_cur_efuse(pAdapter);
     }
 
     static void Efuse_ReadAllMap(_adapter adapter, byte efuseType, byte[] Efuse)
     {
-        EfusePowerSwitch8812A(adapter,false, true);
+        EfusePowerSwitch8812A(adapter, false, true);
         efuse_ReadEFuse(adapter, efuseType, 0, EFUSE_MAP_LEN_JAGUAR, Efuse);
         EfusePowerSwitch8812A(adapter, false, false);
     }
@@ -677,7 +1078,7 @@ public static class usb_halinit
     {
         if (efuseType == EFUSE_WIFI)
         {
-            Hal_EfuseReadEFuse8812A(adapter,_offset, _size_byte, pbuf);
+            Hal_EfuseReadEFuse8812A(adapter, _offset, _size_byte, pbuf);
         }
         else
         {
@@ -752,7 +1153,8 @@ public static class usb_halinit
 
             /* Check PG header for section num. */
             if ((rtemp8[0] & 0x1F) == 0x0F)
-            {   /* extended header */
+            {
+                /* extended header */
                 u1temp = (byte)((rtemp8[0] & 0xE0) >> 5);
                 /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("extended header u1temp=%x *rtemp&0xE0 0x%x\n", u1temp, *rtemp8 & 0xE0)); */
 
@@ -820,7 +1222,8 @@ public static class usb_halinit
                 }
             }
             else
-            { /* deal with error offset,skip error data		 */
+            {
+                /* deal with error offset,skip error data		 */
                 // TODO: RTW_PRINT("invalid offset:0x%02x\n", offset);
                 for (i = 0; i < EFUSE_MAX_WORD_UNIT; i++)
                 {
@@ -838,6 +1241,7 @@ public static class usb_halinit
                     }
                 }
             }
+
             /* Read next PG header */
             ReadEFuseByte(adapter, eFuse_Addr, rtemp8);
             /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("Addr=%d rtemp 0x%x\n", eFuse_Addr, *rtemp8)); */
@@ -877,7 +1281,6 @@ public static class usb_halinit
         // TODO: SetHwReg8812AU(HW_VARIABLES.HW_VAR_EFUSE_BYTES, (u8*)&eFuse_Addr);
         // TODO: RTW_INFO("%s: eFuse_Addr offset(%#x) !!\n", __FUNCTION__, eFuse_Addr);
     }
-
 
     private static void rtw_mask_map_read(UInt16 addr, UInt16 cnts, byte[] data)
     {
@@ -923,8 +1326,9 @@ public static class usb_halinit
                 tmpV16 |= SysIsoCtrlBits.PWC_EV12V;
                 /* Write16(pAdapter,REG_SYS_ISO_CTRL,tmpV16); */
             }
+
             /* Reset: 0x0000h[28], default valid */
-            tmpV16 = rtw_read16(adapter,REG_SYS_FUNC_EN);
+            tmpV16 = rtw_read16(adapter, REG_SYS_FUNC_EN);
             if (!((tmpV16 & SysFuncEnBits.FEN_ELDR) == SysFuncEnBits.FEN_ELDR))
             {
                 tmpV16 |= SysFuncEnBits.FEN_ELDR;
@@ -933,7 +1337,8 @@ public static class usb_halinit
 
             /* Clock: Gated(0x0008h[5]) 8M(0x0008h[1]) clock from ANA, default valid */
             tmpV16 = rtw_read16(adapter, REG_SYS_CLKR);
-            if ((!((tmpV16 & SysClkrBits.LOADER_CLK_EN) == SysClkrBits.LOADER_CLK_EN)) || (!((tmpV16 & SysClkrBits.ANA8M) == SysClkrBits.ANA8M)))
+            if ((!((tmpV16 & SysClkrBits.LOADER_CLK_EN) == SysClkrBits.LOADER_CLK_EN)) ||
+                (!((tmpV16 & SysClkrBits.ANA8M) == SysClkrBits.ANA8M)))
             {
                 tmpV16 |= (SysClkrBits.LOADER_CLK_EN | SysClkrBits.ANA8M);
                 rtw_write16(adapter, REG_SYS_CLKR, tmpV16);
@@ -965,7 +1370,6 @@ public static class usb_halinit
 
     }
 
-
     static bool efuse_OneByteRead(PADAPTER pAdapter, UInt16 addr, out byte data)
     {
         /* -----------------e-fuse reg ctrl --------------------------------- */
@@ -973,7 +1377,7 @@ public static class usb_halinit
         var addressBytes = new byte[2];
         BinaryPrimitives.TryWriteUInt16LittleEndian(addressBytes, addr);
         rtw_write8(pAdapter, EFUSE_CTRL + 1, addressBytes[0]);
-        var tmpRead = rtw_read8(pAdapter, EFUSE_CTRL +2);
+        var tmpRead = rtw_read8(pAdapter, EFUSE_CTRL + 2);
         var secondAddr = (addressBytes[1] & 0x03) | (tmpRead & 0xFC);
         rtw_write8(pAdapter, EFUSE_CTRL + (2), (byte)secondAddr);
 
@@ -985,7 +1389,7 @@ public static class usb_halinit
 
 
         UInt32 tmpidx = 0;
-        while ((0x80 & rtw_read8(pAdapter, EFUSE_CTRL+(3))) == 0 && (tmpidx < 1000))
+        while ((0x80 & rtw_read8(pAdapter, EFUSE_CTRL + (3))) == 0 && (tmpidx < 1000))
         {
             Thread.Sleep(1);
             tmpidx++;
@@ -1017,20 +1421,20 @@ public static class usb_halinit
 
         /* Write Address */
         rtw_write8(adapter, EFUSE_CTRL + 1, (byte)(_offset & 0xff));
-        readbyte = rtw_read8(adapter, EFUSE_CTRL +(2));
-        rtw_write8(adapter, EFUSE_CTRL+(2), (byte)(((_offset >> 8) & 0x03) | (readbyte & 0xfc)));
+        readbyte = rtw_read8(adapter, EFUSE_CTRL + (2));
+        rtw_write8(adapter, EFUSE_CTRL + (2), (byte)(((_offset >> 8) & 0x03) | (readbyte & 0xfc)));
 
         /* Write bit 32 0 */
-        readbyte = rtw_read8(adapter, EFUSE_CTRL+(3));
-        rtw_write8(adapter, EFUSE_CTRL+(3), (byte)(readbyte & 0x7f));
+        readbyte = rtw_read8(adapter, EFUSE_CTRL + (3));
+        rtw_write8(adapter, EFUSE_CTRL + (3), (byte)(readbyte & 0x7f));
 
         /* Check bit 32 read-ready */
         retry = 0;
-        value32 = rtw_read32(adapter, EFUSE_CTRL+(0));
+        value32 = rtw_read32(adapter, EFUSE_CTRL + (0));
         /* while(!(((value32 >> 24) & 0xff) & 0x80)  && (retry<10)) */
         while (!((((value32 >> 24) & 0xff) & 0x80) == 0x80) && (retry < 10000))
         {
-            value32 = rtw_read32(adapter, EFUSE_CTRL+(0));
+            value32 = rtw_read32(adapter, EFUSE_CTRL + (0));
             retry++;
         }
 
@@ -1039,14 +1443,14 @@ public static class usb_halinit
         /* Designer says that there shall be some delay after ready bit is set, or the */
         /* result will always stay on last data we read. */
         Thread.Sleep(50);
-        value32 = rtw_read32(adapter, EFUSE_CTRL+(0));
+        value32 = rtw_read32(adapter, EFUSE_CTRL + (0));
 
         pbuf[0] = (byte)(value32 & 0xff);
         /* RTW_INFO("ReadEFuseByte _offset:%08u, in %d ms\n",_offset ,rtw_get_passing_time_ms(start)); */
 
     }
 
-    static void _ConfigChipOutEP_8812( PADAPTER    pAdapter, u8      NumOutPipe)
+    static void _ConfigChipOutEP_8812(PADAPTER pAdapter, u8 NumOutPipe)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapter);
 
@@ -1076,9 +1480,36 @@ public static class usb_halinit
                 break;
 
         }
-        RTW_INFO("%s OutEpQueueSel(0x%02x), OutEpNumber(%d)", "_ConfigChipOutEP_8812", pHalData.OutEpQueueSel, pHalData.OutEpNumber);
+
+        RTW_INFO("%s OutEpQueueSel(0x%02x), OutEpNumber(%d)", "_ConfigChipOutEP_8812", pHalData.OutEpQueueSel,
+            pHalData.OutEpNumber);
 
     }
 
-    public static bool is_boot_from_eeprom(_adapter adapter) => (GET_HAL_DATA(adapter).EepromOrEfuse);
+    private static bool is_boot_from_eeprom(_adapter adapter) => (GET_HAL_DATA(adapter).EepromOrEfuse);
+
+    private static map_seg_t MAPSEG_PTR_ENT(UInt16 _sa, u16 _len, u8[] _p)
+    {
+        return new map_seg_t()
+        {
+            sa = _sa,
+            len = _len,
+            c = _p
+        };
+
+    }
+
+    private static map_t MAP_ENT(ushort _len, ushort _seg_num, byte _init_v, map_seg_t _seg)
+    {
+        var t = new map_t()
+        {
+            len = _len,
+            seg_num = _seg_num,
+            init_value = _init_v,
+            segs = new map_seg_t[_seg_num]
+        };
+
+        t.segs[0] = _seg;
+        return t;
+    }
 }
