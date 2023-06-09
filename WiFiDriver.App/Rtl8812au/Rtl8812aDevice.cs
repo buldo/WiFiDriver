@@ -1,4 +1,10 @@
-﻿using LibUsbDotNet.LibUsb;
+﻿using System.Threading;
+
+using LibUsbDotNet;
+using LibUsbDotNet.LibUsb;
+
+using WiFiDriver.App.Rtl8812au;
+
 
 namespace WiFiDriver.App.Rtl8812au;
 
@@ -10,14 +16,15 @@ public class Rtl8812aDevice
     private const byte REALTEK_USB_VENQT_CMD_IDX = 0x00;
     private const byte REALTEK_USB_IN_INT_EP_IDX = 1;
 
-    private readonly IUsbDevice _usbDevice;
+    private readonly UsbDevice _usbDevice;
 
-    public Rtl8812aDevice(IUsbDevice usbDevice)
+    public Rtl8812aDevice(UsbDevice usbDevice)
     {
         _usbDevice = usbDevice;
+        var dvobj_priv = usb_intf.usb_dvobj_init(_usbDevice);
     }
 
-    public async Task InitAsync()
+    public void Init()
     {
         // Look at rtw_hal_ops_check in hal_init.c
         // 11 in  0xC0(REALTEK_USB_VENQT_READ)  0x00FC

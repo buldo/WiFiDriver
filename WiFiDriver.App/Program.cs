@@ -16,9 +16,9 @@ public class Program
 
         var device = devices.First();
 
-        var rtlDevice = new Rtl8812aDevice(device);
+        var rtlDevice = new Rtl8812aDevice((UsbDevice)device);
 
-        await rtlDevice.InitAsync();
+        rtlDevice.Init();
 
         Console.WriteLine("End");
     }
