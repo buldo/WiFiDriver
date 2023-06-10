@@ -73,7 +73,7 @@
     u8 bInternalAutoSuspend;
 
     u8 bInSuspend;
-    u8 bSupportRemoteWakeup;
+    public bool bSupportRemoteWakeup;
     u8 wowlan_wake_reason;
     u8 wowlan_last_wake_reason;
     u8 wowlan_ap_mode;
@@ -111,7 +111,7 @@
     /* rt_rf_power_state	current_rfpwrstate; */
     rt_rf_power_state change_rfpwrstate;
 
-    u8 bHWPowerdown; /* power down mode selection. 0:radio off, 1:power down */
+    public bool bHWPowerdown; /* power down mode selection. 0:radio off, 1:power down */
     u8 bHWPwrPindetect; /* come from registrypriv.hwpwrp_detect. enable power down function. 0:disable, 1:enable */
     u8 bkeepfwalive;
     u8 brfoffbyhw;

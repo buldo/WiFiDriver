@@ -77,7 +77,8 @@ public class hal_com_data
 //    u8 macaddr_file_status;
     public bool EepromOrEfuse;
     public u8[] efuse_eeprom_data = new u8[1024]; /*92C:256bytes, 88E:512bytes, we use union set (512bytes)*/
-//    u8 InterfaceSel; /* board type kept in eFuse */
+
+    public u8 InterfaceSel; /* board type kept in eFuse */
 //    u16 CustomerID;
 
 //    u16 EEPROMVID;
@@ -96,10 +97,10 @@ public class hal_com_data
 //    u8 EEPROMSubCustomerID;
     public u8 EEPROMVersion;
 public     u8 EEPROMRegulatory;
-    //    u8 eeprom_thermal_meter;
-    //    u8 EEPROMBluetoothCoexist;
-    //    u8 EEPROMBluetoothType;
-    //    u8 EEPROMBluetoothAntNum;
+    public    u8 eeprom_thermal_meter;
+    public     bool EEPROMBluetoothCoexist;
+    public    u8 EEPROMBluetoothType;
+        public u8 EEPROMBluetoothAntNum;
     //    u8 EEPROMBluetoothAntIsolation;
     //    u8 EEPROMBluetoothRadioShared;
     //    u8 EEPROMMACAddr[ETH_ALEN];
@@ -214,7 +215,7 @@ public u16 TypeGPA;
 //    _lock IQKSpinLock;
 //    u8 INIDATA_RATE[MACID_NUM_SW_LIMIT];
 
-//    struct dm_struct     odmpriv;
+    public dm_struct     odmpriv = new dm_struct();
 //	u64 bk_rf_ability;
 //    u8 bIQKInitialized;
 //    u8 bNeedIQK;
@@ -456,4 +457,14 @@ public u16 TypeGPA;
 //# ifdef CONFIG_RTW_LED
 //    struct led_priv led;
 //#endif
+}
+
+public class dm_struct
+{
+    public dm_rf_calibration_struct rf_calibrate_info = new dm_rf_calibration_struct();
+}
+
+public class dm_rf_calibration_struct
+{
+    public bool is_apk_thermal_meter_ignore;
 }

@@ -59,7 +59,7 @@ public class dvobj_priv
     byte xmit_block;
     //_lock xmit_block_lock;
 
-    pwrctrl_priv pwrctl_priv;
+    public pwrctrl_priv pwrctl_priv = new pwrctrl_priv();
 
     //rtw_traffic_statistics traffic_stat;
 

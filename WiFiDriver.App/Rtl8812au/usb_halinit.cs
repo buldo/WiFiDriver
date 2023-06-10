@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System.Buffers.Binary;
 using System.IO;
+using System.Xml.Linq;
 
 using WiFiDriver.App.Rtl8812au;
 
@@ -275,7 +276,8 @@ public static class usb_halinit
         Hal_EfuseParseXtal_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
         Hal_ReadThermalMeter_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
         Hal_ReadRemoteWakeup_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        Hal_ReadAntennaDiversity8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        // Fully disabled via CONFIG_ANTENNA_DIVERSITY
+        //Hal_ReadAntennaDiversity8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
 
 
         Hal_ReadAmplifierType_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
@@ -293,6 +295,510 @@ public static class usb_halinit
 
         /* set coex. ant info once efuse parsing is done */
         rtw_btcoex_set_ant_info(Adapter);
+    }
+
+    static void rtw_btcoex_set_ant_info(PADAPTER padapter)
+    {
+            rtw_btcoex_wifionly_AntInfoSetting(padapter);
+    }
+
+    static void hal_ReadUsbType_8812AU(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
+    {
+        /* if (IS_HARDWARE_TYPE_8812AU(Adapter) && Adapter->UsbModeMechanism.RegForcedUsbMode == 5) */
+        {
+            PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+
+            hal_spec_t hal_spc = GET_HAL_SPEC(Adapter);
+            u8 reg_tmp, i, j, antenna = 0, wmode = 0;
+            /* Read anenna type from EFUSE 1019/1018 */
+            for (i = 0; i < 2; i++)
+            {
+                /*
+                  Check efuse address 1019
+                  Check efuse address 1018
+                */
+                efuse_OneByteRead(Adapter, 1019 - i, reg_tmp);
+                /*
+                  CHeck bit 7-5
+                  Check bit 3-1
+                */
+                if (((reg_tmp >> 5) & 0x7) != 0)
+                {
+                    antenna = ((reg_tmp >> 5) & 0x7);
+                    break;
+                }
+                else if ((reg_tmp >> 1 & 0x07) != 0)
+                {
+                    antenna = ((reg_tmp >> 1) & 0x07);
+                    break;
+                }
+
+
+            }
+
+            /* Read anenna type from EFUSE 1021/1020 */
+            for (i = 0; i < 2; i++)
+            {
+                /*
+                  Check efuse address 1021
+                  Check efuse address 1020
+                */
+                efuse_OneByteRead(Adapter, 1021 - i, reg_tmp);
+
+                /* CHeck bit 3-2 */
+                if (((reg_tmp >> 2) & 0x3) != 0)
+                {
+                    wmode = ((reg_tmp >> 2) & 0x3);
+                    break;
+                }
+            }
+
+            RTW_INFO("%s: antenna=%d, wmode=%d\n", antenna, wmode);
+/* Antenna == 1 WMODE = 3 RTL8812AU-VL 11AC + USB2.0 Mode */
+            if (antenna == 1)
+            {
+                /* Config 8812AU as 1*1 mode AC mode. */
+                pHalData->rf_type = RF_1T1R;
+                /* UsbModeSwitch_SetUsbModeMechOn(Adapter, FALSE); */
+                /* pHalData->EFUSEHidden = EFUSE_HIDDEN_812AU_VL; */
+                RTW_INFO("%s(): EFUSE_HIDDEN_812AU_VL\n");
+            }
+            else if (antenna == 2)
+            {
+                if (wmode == 3)
+                {
+                    if (PROMContent[EEPROM_USB_MODE_8812] == 0x2)
+                    {
+                        /* RTL8812AU Normal Mode. No further action. */
+                        /* pHalData->EFUSEHidden = EFUSE_HIDDEN_812AU; */
+                        RTW_INFO("%s(): EFUSE_HIDDEN_812AU");
+                    }
+                    else
+                    {
+                        /* Antenna == 2 WMODE = 3 RTL8812AU-VS 11AC + USB2.0 Mode */
+                        /* Driver will not support USB automatic switch */
+                        /* UsbModeSwitch_SetUsbModeMechOn(Adapter, FALSE); */
+                        /* pHalData->EFUSEHidden = EFUSE_HIDDEN_812AU_VS; */
+                        RTW_INFO("%s(): EFUSE_HIDDEN_8812AU_VS");
+                    }
+                }
+                else if (wmode == 2)
+                {
+                    /* Antenna == 2 WMODE = 2 RTL8812AU-VN 11N only + USB2.0 Mode */
+                    /* UsbModeSwitch_SetUsbModeMechOn(Adapter, FALSE); */
+                    /* pHalData->EFUSEHidden = EFUSE_HIDDEN_812AU_VN; */
+                    RTW_INFO("%s(): EFUSE_HIDDEN_8812AU_VN");
+                    hal_spc->proto_cap &= ~PROTO_CAP_11AC;
+                }
+            }
+        }
+    }
+
+    static void ReadLEDSetting_8812AU(PADAPTER    Adapter,u8		[]PROMContent,BOOLEAN     AutoloadFail)
+    {
+//#ifdef CONFIG_RTW_LED
+//        struct led_priv *pledpriv = adapter_to_led(Adapter);
+
+//# ifdef CONFIG_RTW_SW_LED
+//        pledpriv->bRegUseLed = _TRUE;
+//#else /* HW LED */
+//        pledpriv->LedStrategy = HW_LED;
+//#endif /* CONFIG_RTW_SW_LED */
+//#endif
+    }
+
+static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapter);
+
+        /* For customized behavior. */
+        if ((pHalData->EEPROMVID == 0x103C) && (pHalData->EEPROMPID == 0x1629)) /* HP Lite-On for RTL8188CUS Slim Combo. */
+            pHalData->CustomerID = RT_CID_819x_HP;
+        else if ((pHalData->EEPROMVID == 0x9846) && (pHalData->EEPROMPID == 0x9041))
+            pHalData->CustomerID = RT_CID_NETGEAR;
+        else if ((pHalData->EEPROMVID == 0x2019) && (pHalData->EEPROMPID == 0x1201))
+            pHalData->CustomerID = RT_CID_PLANEX;
+        else if ((pHalData->EEPROMVID == 0x0BDA) && (pHalData->EEPROMPID == 0x5088))
+            pHalData->CustomerID = RT_CID_CC_C;
+        else if ((pHalData->EEPROMVID == 0x0411) && ((pHalData->EEPROMPID == 0x0242) || (pHalData->EEPROMPID == 0x025D)))
+            pHalData->CustomerID = RT_CID_DNI_BUFFALO;
+        else if (((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3314)) ||
+            ((pHalData->EEPROMVID == 0x20F4) && (pHalData->EEPROMPID == 0x804B)) ||
+            ((pHalData->EEPROMVID == 0x20F4) && (pHalData->EEPROMPID == 0x805B)) ||
+            ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3315)) ||
+            ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3316)))
+            pHalData->CustomerID = RT_CID_DLINK;
+
+        RTW_INFO("PID= 0x%x, VID=  %x\n", pHalData->EEPROMPID, pHalData->EEPROMVID);
+
+        /*	Decide CustomerID according to VID/DID or EEPROM */
+        switch (pHalData->EEPROMCustomerID)
+        {
+            case EEPROM_CID_DEFAULT:
+                if ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3308))
+                    pHalData->CustomerID = RT_CID_DLINK;
+                else if ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3309))
+                    pHalData->CustomerID = RT_CID_DLINK;
+                else if ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x330a))
+                    pHalData->CustomerID = RT_CID_DLINK;
+                else if ((pHalData->EEPROMVID == 0x0BFF) && (pHalData->EEPROMPID == 0x8160))
+                {
+                    /* pHalData->bAutoConnectEnable = _FALSE; */
+                    pHalData->CustomerID = RT_CID_CHINA_MOBILE;
+                }
+                else if ((pHalData->EEPROMVID == 0x0BDA) && (pHalData->EEPROMPID == 0x5088))
+                    pHalData->CustomerID = RT_CID_CC_C;
+                else if ((pHalData->EEPROMVID == 0x0846) && (pHalData->EEPROMPID == 0x9052))
+                    pHalData->CustomerID = RT_CID_NETGEAR;
+                else if ((pHalData->EEPROMVID == 0x0411) && ((pHalData->EEPROMPID == 0x0242) || (pHalData->EEPROMPID == 0x025D)))
+                    pHalData->CustomerID = RT_CID_DNI_BUFFALO;
+                else if (((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3314)) ||
+                    ((pHalData->EEPROMVID == 0x20F4) && (pHalData->EEPROMPID == 0x804B)) ||
+                    ((pHalData->EEPROMVID == 0x20F4) && (pHalData->EEPROMPID == 0x805B)) ||
+                    ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3315)) ||
+                    ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3316)))
+                    pHalData->CustomerID = RT_CID_DLINK;
+                RTW_INFO("PID= 0x%x, VID=  %x\n", pHalData->EEPROMPID, pHalData->EEPROMVID);
+                break;
+            case EEPROM_CID_WHQL:
+                /* padapter->bInHctTest = TRUE; */
+
+                /* pMgntInfo->bSupportTurboMode = FALSE; */
+                /* pMgntInfo->bAutoTurboBy8186 = FALSE; */
+
+                /* pMgntInfo->PowerSaveControl.bInactivePs = FALSE; */
+                /* pMgntInfo->PowerSaveControl.bIPSModeBackup = FALSE; */
+                /* pMgntInfo->PowerSaveControl.bLeisurePs = FALSE; */
+                /* pMgntInfo->PowerSaveControl.bLeisurePsModeBackup = FALSE; */
+                /* pMgntInfo->keepAliveLevel = 0; */
+
+                /* padapter->bUnloadDriverwhenS3S4 = FALSE; */
+                break;
+            default:
+                pHalData->CustomerID = RT_CID_DEFAULT;
+                break;
+
+        }
+        RTW_INFO("Customer ID: 0x%2x\n", pHalData->CustomerID);
+
+        hal_CustomizedBehavior_8812AU(pAdapter);
+    }
+
+
+    private static void hal_ReadUsbModeSwitch_8812AU(PADAPTER    Adapter,u8			[]PROMContent, BOOLEAN     AutoloadFail)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+
+        if (AutoloadFail)
+        {
+            pHalData->EEPROMUsbSwitch = false;
+        }
+        else
+            /* check efuse 0x08 bit2 */
+        {
+            pHalData->EEPROMUsbSwitch = (PROMContent[EEPROM_USB_MODE_8812] & BIT1) >> 1;
+        }
+
+        RTW_INFO("Usb Switch: %d\n", pHalData->EEPROMUsbSwitch);
+    }
+
+
+    private static void Hal_ReadRFEType_8812A(PADAPTER    Adapter,u8			[]PROMContent, BOOLEAN     AutoloadFail)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+
+        if (!AutoloadFail)
+        {
+            if ((GetRegRFEType(Adapter) != 64) || 0xFF == PROMContent[EEPROM_RFE_OPTION_8812])
+            {
+                if (GetRegRFEType(Adapter) != 64)
+                    pHalData->rfe_type = GetRegRFEType(Adapter);
+                else
+                {
+                    if (IS_HARDWARE_TYPE_8812AU(Adapter))
+                    {
+                        pHalData->rfe_type = 0;
+                    }
+
+                }
+
+            }
+            else if (PROMContent[EEPROM_RFE_OPTION_8812] & BIT7)
+            {
+                if (pHalData->external_lna_5g)
+                {
+                    if (pHalData->external_pa_5g)
+                    {
+                        if (pHalData->ExternalLNA_2G && pHalData->ExternalPA_2G)
+                            pHalData->rfe_type = 3;
+                        else
+                            pHalData->rfe_type = 0;
+                    }
+                    else
+                        pHalData->rfe_type = 2;
+                }
+                else
+                    pHalData->rfe_type = 4;
+            }
+            else
+            {
+                pHalData->rfe_type = PROMContent[EEPROM_RFE_OPTION_8812] & 0x3F;
+
+                /* 2013/03/19 MH Due to othe customer already use incorrect EFUSE map */
+                /* to for their product. We need to add workaround to prevent to modify */
+                /* spec and notify all customer to revise the IC 0xca content. After */
+                /* discussing with Willis an YN, revise driver code to prevent. */
+                if (pHalData->rfe_type == 4 &&
+                    (pHalData->external_pa_5g == true || pHalData->ExternalPA_2G == true ||
+                     pHalData->external_lna_5g == true || pHalData->ExternalLNA_2G == true))
+                {
+                    if (IS_HARDWARE_TYPE_8812AU(Adapter))
+                    {
+                        pHalData->rfe_type = 0;
+                    }
+
+                }
+            }
+        }
+        else
+        {
+            if (GetRegRFEType(Adapter) != 64)
+                pHalData->rfe_type = GetRegRFEType(Adapter);
+            else
+            {
+                if (IS_HARDWARE_TYPE_8812AU(Adapter))
+                {
+                    pHalData->rfe_type = 0;
+                }
+
+            }
+        }
+
+        RTW_INFO("RFE Type: 0x%2x\n", pHalData->rfe_type);
+    }
+
+    static void Hal_ReadChannelPlan8812A(PADAPTER        padapter,u8				[]hwinfo,BOOLEAN         AutoLoadFail)
+    {
+        hal_com_config_channel_plan(
+            padapter
+            , hwinfo[EEPROM_COUNTRY_CODE_8812]
+            , hwinfo[EEPROM_ChannelPlan_8812]
+            , padapter->registrypriv.alpha2
+            , padapter->registrypriv.channel_plan
+            , RTW_CHPLAN_REALTEK_DEFINE
+            , AutoLoadFail
+        );
+    }
+
+    /// <summary>
+    /// Use hardware(efuse), driver parameter(registry) and default channel plan
+    /// to decide which one should be used.
+    /// </summary>
+    /// <param name="padapter"></param>
+    /// <param name="hw_alpha2">country code from HW (efuse/eeprom/mapfile)</param>
+    /// <param name="hw_chplan">
+    /// channel plan from HW (efuse/eeprom/mapfile)
+    /// BIT[7] software configure mode; 0:Enable, 1:disable
+    /// BIT[6:0] Channel Plan
+    /// </param>
+    /// <param name="sw_alpha2">country code from HW (registry/module param)</param>
+    /// <param name="sw_chplan">channel plan from SW (registry/module param)</param>
+    /// <param name="def_chplan">channel plan used when HW/SW both invalid</param>
+    /// <param name="AutoLoadFail"></param>
+    static void hal_com_config_channel_plan(
+        PADAPTER padapter,
+        string hw_alpha2,
+        u8 hw_chplan,
+        string sw_alpha2,
+        u8 sw_chplan,
+        u8 def_chplan,
+        BOOLEAN AutoLoadFail
+    )
+    {
+
+        rf_ctl_t rfctl = adapter_to_rfctl(padapter);
+        PHAL_DATA_TYPE pHalData;
+        u8 force_hw_chplan = _FALSE;
+        int chplan = -1;
+        country_chplan country_ent = null, ent;
+
+        pHalData = GET_HAL_DATA(padapter);
+
+        /* treat 0xFF as invalid value, bypass hw_chplan & force_hw_chplan parsing */
+        if (hw_chplan == 0xFF)
+            goto chk_hw_country_code;
+
+        if (AutoLoadFail == _TRUE)
+            goto chk_sw_config;
+
+//#ifndef CONFIG_FORCE_SW_CHANNEL_PLAN
+//	if (hw_chplan & EEPROM_CHANNEL_PLAN_BY_HW_MASK)
+//		force_hw_chplan = _TRUE;
+//#endif
+
+        hw_chplan &= (~EEPROM_CHANNEL_PLAN_BY_HW_MASK);
+
+        chk_hw_country_code:
+        if (hw_alpha2 && !IS_ALPHA2_NO_SPECIFIED(hw_alpha2))
+        {
+            ent = rtw_get_chplan_from_country(hw_alpha2);
+            if (ent)
+            {
+                /* get chplan from hw country code, by pass hw chplan setting */
+                country_ent = ent;
+                chplan = ent->chplan;
+                goto chk_sw_config;
+            }
+            else
+                RTW_PRINT("%s unsupported hw_alpha2:\"%c%c\"\n", __func__, hw_alpha2[0], hw_alpha2[1]);
+        }
+
+        if (rtw_is_channel_plan_valid(hw_chplan))
+            chplan = hw_chplan;
+        else if (force_hw_chplan == _TRUE)
+        {
+            RTW_PRINT("%s unsupported hw_chplan:0x%02X\n", __func__, hw_chplan);
+            /* hw infomaton invalid, refer to sw information */
+            force_hw_chplan = _FALSE;
+        }
+
+        chk_sw_config:
+        if (force_hw_chplan == _TRUE)
+            goto done;
+
+        if (sw_alpha2 && !IS_ALPHA2_NO_SPECIFIED(sw_alpha2))
+        {
+            ent = rtw_get_chplan_from_country(sw_alpha2);
+            if (ent)
+            {
+                /* get chplan from sw country code, by pass sw chplan setting */
+                country_ent = ent;
+                chplan = ent->chplan;
+                goto done;
+            }
+            else
+                RTW_PRINT("%s unsupported sw_alpha2:\"%c%c\"\n", __func__, sw_alpha2[0], sw_alpha2[1]);
+        }
+
+        if (rtw_is_channel_plan_valid(sw_chplan))
+        {
+            /* cancel hw_alpha2 because chplan is specified by sw_chplan*/
+            country_ent = NULL;
+            chplan = sw_chplan;
+        }
+        else if (sw_chplan != RTW_CHPLAN_UNSPECIFIED)
+            RTW_PRINT("%s unsupported sw_chplan:0x%02X\n", __func__, sw_chplan);
+
+        done:
+        if (chplan == -1)
+        {
+            RTW_PRINT("%s use def_chplan:0x%02X\n", __func__, def_chplan);
+            chplan = def_chplan;
+        }
+        else if (country_ent)
+        {
+            RTW_PRINT("%s country code:\"%c%c\" with chplan:0x%02X\n", __func__
+                , country_ent->alpha2[0], country_ent->alpha2[1], country_ent->chplan);
+        }
+        else
+            RTW_PRINT("%s chplan:0x%02X\n", __func__, chplan);
+
+        rfctl->country_ent = country_ent;
+        rfctl->ChannelPlan = chplan;
+        pHalData->bDisableSWChannelPlan = force_hw_chplan;
+    }
+
+
+    private static void Hal_ReadRemoteWakeup_8812A(PADAPTER padapter, u8[] hwinfo, BOOLEAN AutoLoadFail)
+    {
+        pwrctrl_priv pwrctl = adapter_to_pwrctl(padapter);
+
+        if (AutoLoadFail)
+        {
+            pwrctl.bHWPowerdown = false;
+            pwrctl.bSupportRemoteWakeup = false;
+        }
+        else
+        {
+            /* decide hw if support remote wakeup function */
+            /* if hw supported, 8051 (SIE) will generate WeakUP signal( D+/D- toggle) when autoresume */
+            pwrctl.bSupportRemoteWakeup = (hwinfo[EEPROM_USB_OPTIONAL_FUNCTION0] & BIT1) != 0 ? true : false;
+            RTW_INFO("%s...bSupportRemoteWakeup(%x)", pwrctl.bSupportRemoteWakeup);
+        }
+    }
+
+    static void Hal_ReadThermalMeter_8812A(PADAPTER    Adapter,u8			[]PROMContent, BOOLEAN AutoloadFail)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        /* u8	tempval; */
+
+        /*  */
+        /* ThermalMeter from EEPROM */
+        /*  */
+        if (!AutoloadFail)
+        {
+            pHalData.eeprom_thermal_meter = PROMContent[EEPROM_THERMAL_METER_8812];
+        }
+        else
+            pHalData.eeprom_thermal_meter = EEPROM_Default_ThermalMeter_8812;
+        /* pHalData.eeprom_thermal_meter = (tempval&0x1f);	 */ /* [4:0] */
+
+        if (pHalData.eeprom_thermal_meter == 0xff || AutoloadFail)
+        {
+            pHalData.odmpriv.rf_calibrate_info.is_apk_thermal_meter_ignore = true;
+            pHalData.eeprom_thermal_meter = 0xFF;
+        }
+
+        /* pHalData.ThermalMeter[0] = pHalData.eeprom_thermal_meter;	 */
+        RTW_INFO("ThermalMeter = 0x%x\n", pHalData.eeprom_thermal_meter);
+    }
+
+    static void Hal_EfuseParseBTCoexistInfo8812A(PADAPTER         Adapter,u8				[]hwinfo, BOOLEAN          AutoLoadFail)
+    {
+
+        registry_priv regsty = Adapter.registrypriv;
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        u8 tmp_u8;
+        u32 tmp_u32;
+
+            pHalData.EEPROMBluetoothType = BT_RTL8812A;
+
+            if (!AutoLoadFail)
+            {
+                tmp_u8 = hwinfo[EEPROM_RF_BOARD_OPTION_8812];
+                if (((tmp_u8 & 0xe0) >> 5) == 0x1) /* [7:5] */
+                    pHalData.EEPROMBluetoothCoexist = true;
+                else
+                    pHalData.EEPROMBluetoothCoexist = false;
+
+                tmp_u8 = hwinfo[EEPROM_RF_BT_SETTING_8812];
+                pHalData.EEPROMBluetoothAntNum = (byte)(tmp_u8 & 0x1); /* bit [0] */
+            }
+            else
+            {
+                pHalData.EEPROMBluetoothCoexist = false;
+                pHalData.EEPROMBluetoothAntNum = 1; //Ant_x1;
+            }
+    }
+
+    static void Hal_ReadBoardType8812A(PADAPTER    Adapter, u8[]PROMContent, BOOLEAN     AutoloadFail)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+
+        if (!AutoloadFail)
+        {
+            pHalData.InterfaceSel = (byte)((PROMContent[EEPROM_RF_BOARD_OPTION_8812] & 0xE0) >> 5);
+            if (PROMContent[EEPROM_RF_BOARD_OPTION_8812] == 0xFF)
+            {
+                pHalData.InterfaceSel = (EEPROM_DEFAULT_BOARD_OPTION & 0xE0) >> 5;
+            }
+        }
+        else
+        {
+            pHalData.InterfaceSel = 0;
+        }
+        RTW_INFO("Board Type: 0x%2x", pHalData.InterfaceSel);
+
     }
 
     private static void Hal_ReadTxPowerInfo8812A(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoLoadFail)

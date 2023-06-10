@@ -41,4 +41,9 @@ public static class CommonConsts
     public const byte PG_TXPWR_SRC_NUM = 3;
     public const sbyte PG_TXPWR_INVALID_DIFF = 8;
     public const byte PG_TXPWR_INVALID_BASE = 255;
+    public const byte BT_RTL8812A = 11;
+    public const byte EEPROM_RF_BT_SETTING_8812 = 0xC3;
+    public const byte EEPROM_THERMAL_METER_8812 = 0xBA;
+    public const byte EEPROM_Default_ThermalMeter_8812 = 0x18;
+    public const byte EEPROM_USB_OPTIONAL_FUNCTION0 = 0xD4;
 }
