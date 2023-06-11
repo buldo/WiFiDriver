@@ -49,7 +49,7 @@ public class dvobj_priv
     /* In /Out Pipe information */
     public int[] RtInPipe = new int[2];
     public int[] RtOutPipe = new int[4];
-    //byte Queue2Pipe[HW_QUEUE_ENTRY]; /* for out pipe mapping */
+    public int[] Queue2Pipe = new int[HW_QUEUE_ENTRY]; /* for out pipe mapping */
 
     byte irq_alloc;
     bool continual_io_error;

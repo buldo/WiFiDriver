@@ -22,6 +22,7 @@ public class Rtl8812aDevice
     public Rtl8812aDevice(UsbDevice usbDevice)
     {
         _usbDevice = usbDevice;
+        _usbDevice.Open();
         adapter = usb_intf.rtw_drv_init(_usbDevice);
     }
 
