@@ -155,7 +155,7 @@ public char[] alpha2 = new char[2];
 //#endif
 //    u8 RegEnableTxPowerByRate;
 
-//    u8 target_tx_pwr_valid;
+public bool target_tx_pwr_valid;
 //    s8 target_tx_pwr_2g[RF_PATH_MAX][RATE_SECTION_NUM];
 //#ifdef CONFIG_IEEE80211_BAND_5GHZ
 //	s8 target_tx_pwr_5g[RF_PATH_MAX][RATE_SECTION_NUM - 1];

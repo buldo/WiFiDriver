@@ -123,6 +123,444 @@ public static class usb_intf
         return padapter;
     }
 
+    static u8 rtw_init_drv_sw(_adapter padapter)
+    {
+        u8 ret8 = _SUCCESS;
+
+//# ifdef CONFIG_RTW_CFGVENDOR_RANDOM_MAC_OUI
+//    struct rtw_wdev_priv *pwdev_priv = adapter_wdev_data(padapter);
+//#endif
+
+//#if defined(CONFIG_AP_MODE) && defined(CONFIG_SUPPORT_MULTI_BCN)
+//	_rtw_init_listhead(&padapter.list);
+//# ifdef CONFIG_FW_HANDLE_TXBCN
+//	padapter.vap_id = CONFIG_LIMITED_AP_NUM;
+//	if (is_primary_adapter(padapter))
+//		adapter_to_dvobj(padapter).vap_tbtt_rpt_map = adapter_to_regsty(padapter).fw_tbtt_rpt;
+//#endif
+//#endif
+
+//# ifdef CONFIG_CLIENT_PORT_CFG
+//    padapter.client_id = MAX_CLIENT_PORT_NUM;
+//	padapter.client_port = CLT_PORT_INVALID;
+//	#endif
+
+        //ret8 = rtw_init_default_value(padapter);
+
+        //if ((rtw_init_cmd_priv(padapter.cmdpriv)) == _FAIL)
+        //{
+        //    ret8 = _FAIL;
+        //    goto exit;
+        //}
+
+        //padapter.cmdpriv.padapter = padapter;
+
+        //if ((rtw_init_evt_priv(padapter.evtpriv)) == _FAIL)
+        //{
+        //    ret8 = _FAIL;
+        //    goto exit;
+        //}
+
+        //if (is_primary_adapter(padapter))
+        //    rtw_rfctl_init(padapter);
+
+        //if (rtw_init_mlme_priv(padapter) == _FAIL)
+        //{
+        //    ret8 = _FAIL;
+        //    goto exit;
+        //}
+
+//# ifdef CONFIG_P2P
+//rtw_init_wifidirect_timers(padapter);
+//init_wifidirect_info(padapter, P2P_ROLE_DISABLE);
+//reset_global_wifidirect_info(padapter);
+//# ifdef CONFIG_IOCTL_CFG80211
+//rtw_init_cfg80211_wifidirect_info(padapter);
+//#endif
+//# ifdef CONFIG_WFD
+//if (rtw_init_wifi_display_info(padapter) == _FAIL)
+//    RTW_ERR("Can't init init_wifi_display_info\n");
+//#endif
+//#endif /* CONFIG_P2P */
+
+        //if (init_mlme_ext_priv(padapter) == _FAIL)
+        //{
+        //    ret8 = _FAIL;
+        //    goto exit;
+        //}
+
+//# ifdef CONFIG_TDLS
+//if (rtw_init_tdls_info(padapter) == _FAIL)
+//{
+//    RTW_INFO("Can't rtw_init_tdls_info\n");
+//    ret8 = _FAIL;
+//    goto exit;
+//}
+//#endif /* CONFIG_TDLS */
+
+//# ifdef CONFIG_RTW_MESH
+//rtw_mesh_cfg_init(padapter);
+//#endif
+
+        //if (_rtw_init_xmit_priv(&padapter.xmitpriv, padapter) == _FAIL)
+        //{
+        //    RTW_INFO("Can't _rtw_init_xmit_priv\n");
+        //    ret8 = _FAIL;
+        //    goto exit;
+        //}
+
+        //if (_rtw_init_recv_priv(&padapter.recvpriv, padapter) == _FAIL)
+        //{
+        //    RTW_INFO("Can't _rtw_init_recv_priv\n");
+        //    ret8 = _FAIL;
+        //    goto exit;
+        //}
+
+/* add for CONFIG_IEEE80211W, none 11w also can use */
+        //_rtw_spinlock_init(&padapter.security_key_mutex);
+
+/* We don't need to memset padapter.XXX to zero, because adapter is allocated by rtw_zvmalloc(). */
+/* _rtw_memset((unsigned char *)&padapter.securitypriv, 0, sizeof (struct security_priv)); */
+
+//        if (_rtw_init_sta_priv(&padapter.stapriv) == _FAIL)
+//        {
+//            RTW_INFO("Can't _rtw_init_sta_priv\n");
+//            ret8 = _FAIL;
+//            goto exit;
+//        }
+
+//        padapter.setband = WIFI_FREQUENCY_BAND_AUTO;
+//        padapter.fix_rate = 0xFF;
+//        padapter.power_offset = 0;
+//        padapter.rsvd_page_offset = 0;
+//        padapter.rsvd_page_num = 0;
+
+//        padapter.data_fb = 0;
+//        padapter.fix_rx_ampdu_accept = RX_AMPDU_ACCEPT_INVALID;
+//        padapter.fix_rx_ampdu_size = RX_AMPDU_SIZE_INVALID;
+////# ifdef DBG_RX_COUNTER_DUMP
+//padapter.dump_rx_cnt_mode = 0;
+//padapter.drv_rx_cnt_ok = 0;
+//padapter.drv_rx_cnt_crcerror = 0;
+//padapter.drv_rx_cnt_drop = 0;
+//#endif
+        //rtw_init_bcmc_stainfo(padapter);
+
+        //rtw_init_pwrctrl_priv(padapter);
+
+/* _rtw_memset((u8 *)&padapter.qospriv, 0, sizeof (struct qos_priv)); */ /* move to mlme_priv */
+
+//# ifdef CONFIG_MP_INCLUDED
+//if (init_mp_priv(padapter) == _FAIL)
+//    RTW_INFO("%s: initialize MP private data Fail!\n", __func__);
+//#endif
+
+        rtw_hal_dm_init(padapter);
+//# ifdef CONFIG_RTW_SW_LED
+//rtw_hal_sw_led_init(padapter);
+//#endif
+//# ifdef DBG_CONFIG_ERROR_DETECT
+//rtw_hal_sreset_init(padapter);
+//#endif
+
+//# ifdef CONFIG_INTEL_WIDI
+//if (rtw_init_intel_widi(padapter) == _FAIL)
+//{
+//    RTW_INFO("Can't rtw_init_intel_widi\n");
+//    ret8 = _FAIL;
+//    goto exit;
+//}
+//#endif /* CONFIG_INTEL_WIDI */
+
+//# ifdef CONFIG_WAPI_SUPPORT
+//padapter.WapiSupport = true; /* set true temp, will revise according to Efuse or Registry value later. */
+//rtw_wapi_init(padapter);
+//#endif
+
+//# ifdef CONFIG_BR_EXT
+//_rtw_spinlock_init(&padapter.br_ext_lock);
+//#endif /* CONFIG_BR_EXT */
+
+//# ifdef CONFIG_BEAMFORMING
+//# ifdef RTW_BEAMFORMING_VERSION_2
+//rtw_bf_init(padapter);
+//#endif /* RTW_BEAMFORMING_VERSION_2 */
+//#endif /* CONFIG_BEAMFORMING */
+
+//# ifdef CONFIG_RTW_REPEATER_SON
+//init_rtw_rson_data(adapter_to_dvobj(padapter));
+//#endif
+
+//# ifdef CONFIG_RTW_80211K
+//rtw_init_rm(padapter);
+//#endif
+
+//# ifdef CONFIG_RTW_CFGVENDOR_RANDOM_MAC_OUI
+//memset(pwdev_priv.pno_mac_addr, 0xFF, ETH_ALEN);
+//#endif
+
+        exit:
+
+        return ret8;
+    }
+
+    static void rtw_hal_dm_init(_adapter padapter)
+    {
+        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
+        //padapter.hal_func.dm_init(padapter);
+        phy_load_tx_power_ext_info(padapter, 1);
+    }
+
+    static void phy_load_tx_power_ext_info(_adapter adapter, u8 chk_file)
+    {
+
+        registry_priv regsty = adapter_to_regsty(adapter);
+
+        /* check registy target tx power */
+        regsty.target_tx_pwr_valid = rtw_regsty_chk_target_tx_power_valid(adapter);
+
+        /* power by rate and limit */
+        //if (phy_is_tx_power_by_rate_needed(adapter)
+        //    || (phy_is_tx_power_limit_needed(adapter) && regsty.target_tx_pwr_valid != _TRUE)
+        //   )
+        //{
+        //    phy_load_tx_power_by_rate(adapter, chk_file);
+        //}
+
+//#if CONFIG_TXPWR_LIMIT
+//	if (phy_is_tx_power_limit_needed(adapter))
+//		phy_load_tx_power_limit(adapter, chk_file);
+//#endif
+    }
+
+    static bool rtw_regsty_chk_target_tx_power_valid(_adapter adapter)
+    {
+        // TODO: CHECK!!!!!!
+        //hal_spec_t hal_spec = GET_HAL_SPEC(adapter);
+        //HAL_DATA_TYPE hal_data = GET_HAL_DATA(adapter);
+        //int path, tx_num, rs;
+        //BAND_TYPE band;
+        //s8 target;
+
+        //for (band = BAND_TYPE.BAND_ON_2_4G; band <= BAND_TYPE.BAND_ON_5G; band++)
+        //{
+        //    if (!hal_is_band_support(adapter, band))
+        //    {
+        //        continue;
+        //    }
+
+        //    for (path = 0; path < RF_PATH_MAX; path++)
+        //    {
+        //        if (!HAL_SPEC_CHK_RF_PATH(hal_spec, band, path))
+        //        {
+        //            break;
+        //        }
+
+        //        for (rs = 0; rs < RATE_SECTION_NUM; rs++)
+        //        {
+        //            tx_num = rate_section_to_tx_num(rs);
+        //            if (tx_num >= hal_spec.tx_nss_num)
+        //                continue;
+
+        //            if (band == BAND_ON_5G && IS_CCK_RATE_SECTION(rs))
+        //                continue;
+
+        //            if (IS_VHT_RATE_SECTION(rs) && !IS_HARDWARE_TYPE_JAGUAR_AND_JAGUAR2(adapter))
+        //            {
+        //                continue;
+        //            }
+
+        //            target = rtw_regsty_get_target_tx_power(adapter, band, path, rs);
+        //            if (target == -1)
+        //            {
+        //                RTW_PRINT("%s return _FALSE for band:%d, path:%d, rs:%d, t:%d\n", __func__, band, path, rs,
+        //                    target);
+        //                return false;
+        //            }
+        //        }
+        //    }
+        //}
+
+        return true;
+    }
+
+    static bool hal_is_band_support(_adapter adapter, u8 band)
+    {
+        return (GET_HAL_SPEC(adapter).band_cap & band_to_band_cap(band)) != 0;
+    }
+
+    static u8[] _band_to_band_cap = {
+        BAND_CAP_2G,
+        BAND_CAP_5G,
+        0,
+        0,
+    };
+
+    static byte band_to_band_cap(u8 band) =>
+        (((band) >= (u8)BAND_TYPE.BAND_MAX) ? _band_to_band_cap[(int)BAND_TYPE.BAND_MAX] : _band_to_band_cap[(band)]);
+
+    static void rtw_update_registrypriv_dev_network(_adapter adapter)
+    {
+        int sz = 0;
+
+//        registry_priv pregistrypriv = adapter.registrypriv;
+//        WLAN_BSSID_EX pdev_network = pregistrypriv.dev_network;
+//        security_priv psecuritypriv = adapter.securitypriv;
+//        wlan_network cur_network = adapter.mlmepriv.cur_network;
+//        /* struct	xmit_priv	*pxmitpriv = &adapter.xmitpriv; */
+//        mlme_ext_priv pmlmeext = adapter.mlmeextpriv;
+
+
+//        pdev_network.Privacy = (psecuritypriv.dot11PrivacyAlgrthm > 0 ? 1 : 0); /* adhoc no 802.1x */
+
+//        pdev_network.Rssi = 0;
+
+//        switch (pregistrypriv.wireless_mode)
+//        {
+//            case WIRELESS_11B:
+//                pdev_network.NetworkTypeInUse = (Ndis802_11DS);
+//                break;
+//            case WIRELESS_11G:
+//            case WIRELESS_11BG:
+//            case WIRELESS_11_24N:
+//            case WIRELESS_11G_24N:
+//            case WIRELESS_11BG_24N:
+//                pdev_network.NetworkTypeInUse = (Ndis802_11OFDM24);
+//                break;
+//            case WIRELESS_11A:
+//            case WIRELESS_11A_5N:
+//                pdev_network.NetworkTypeInUse = (Ndis802_11OFDM5);
+//                break;
+//            case WIRELESS_11ABGN:
+//                if (pregistrypriv.channel > 14)
+//                    pdev_network.NetworkTypeInUse = (Ndis802_11OFDM5);
+//                else
+//                    pdev_network.NetworkTypeInUse = (Ndis802_11OFDM24);
+//                break;
+//            default:
+//                /* TODO */
+//                break;
+//        }
+
+//        pdev_network.Configuration.DSConfig = (pregistrypriv.channel);
+
+//        if (cur_network.network.InfrastructureMode == Ndis802_11IBSS)
+//        {
+//            pdev_network.Configuration.ATIMWindow = (0);
+
+//            if (pmlmeext.cur_channel != 0)
+//                pdev_network.Configuration.DSConfig = pmlmeext.cur_channel;
+//            else
+//                pdev_network.Configuration.DSConfig = 1;
+//        }
+
+//        pdev_network.InfrastructureMode = (cur_network.network.InfrastructureMode);
+
+///* 1. Supported rates */
+///* 2. IE */
+
+///* rtw_set_supported_rate(pdev_network.SupportedRates, pregistrypriv.wireless_mode) ; */
+//        /* will be called in rtw_generate_ie */
+//        sz = rtw_generate_ie(pregistrypriv);
+
+//        pdev_network.IELength = sz;
+
+//        pdev_network.Length = get_WLAN_BSSID_EX_sz((WLAN_BSSID_EX*)pdev_network);
+
+//        /* notes: translate IELength & Length after assign the Length to cmdsz in createbss_cmd(); */
+//        /* pdev_network.IELength = cpu_to_le32(sz); */
+
+    }
+
+    static int rtw_generate_ie(registry_priv pregistrypriv)
+{
+	u8 wireless_mode;
+    int sz = 0, rateLen;
+//    WLAN_BSSID_EX pdev_network = &pregistrypriv.dev_network;
+//    u8* ie = pdev_network.IEs;
+
+
+//    /* timestamp will be inserted by hardware */
+//    sz += 8;
+//	ie += sz;
+
+//	/* beacon interval : 2bytes */
+//	*(u16*) ie = cpu_to_le16((u16)pdev_network.Configuration.BeaconPeriod); /* BCN_INTERVAL; */
+//    sz += 2;
+//	ie += 2;
+
+//	/* capability info */
+//	*(u16*) ie = 0;
+
+//	*(u16*) ie |= cpu_to_le16(cap_IBSS);
+
+//	if (pregistrypriv.preamble == PREAMBLE_SHORT)
+//		*(u16*) ie |= cpu_to_le16(cap_ShortPremble);
+
+//	if (pdev_network.Privacy)
+//		*(u16*) ie |= cpu_to_le16(cap_Privacy);
+
+//    sz += 2;
+//	ie += 2;
+
+//	/* SSID */
+//	ie = rtw_set_ie(ie, _SSID_IE_, pdev_network.Ssid.SsidLength, pdev_network.Ssid.Ssid, &sz);
+
+//	/* supported rates */
+//	if (pregistrypriv.wireless_mode == WIRELESS_11ABGN) {
+//		if (pdev_network.Configuration.DSConfig > 14)
+//			wireless_mode = WIRELESS_11A_5N;
+//		else
+//			wireless_mode = WIRELESS_11BG_24N;
+//	} else if (pregistrypriv.wireless_mode == WIRELESS_MODE_MAX) { /* WIRELESS_11ABGN | WIRELESS_11AC */
+//		if (pdev_network.Configuration.DSConfig > 14)
+//			wireless_mode = WIRELESS_11_5AC;
+//		else
+//			wireless_mode = WIRELESS_11BG_24N;
+//	} else
+//    wireless_mode = pregistrypriv.wireless_mode;
+
+//rtw_set_supported_rate(pdev_network.SupportedRates, wireless_mode);
+
+//rateLen = rtw_get_rateset_len(pdev_network.SupportedRates);
+
+//if (rateLen > 8)
+//{
+//    ie = rtw_set_ie(ie, _SUPPORTEDRATES_IE_, 8, pdev_network.SupportedRates, &sz);
+//    /* ie = rtw_set_ie(ie, _EXT_SUPPORTEDRATES_IE_, (rateLen - 8), (pdev_network.SupportedRates + 8), &sz); */
+//}
+//else
+//    ie = rtw_set_ie(ie, _SUPPORTEDRATES_IE_, rateLen, pdev_network.SupportedRates, &sz);
+
+///* DS parameter set */
+//ie = rtw_set_ie(ie, _DSSET_IE_, 1, (u8*)&(pdev_network.Configuration.DSConfig), &sz);
+
+
+///* IBSS Parameter Set */
+
+//ie = rtw_set_ie(ie, _IBSS_PARA_IE_, 2, (u8*)&(pdev_network.Configuration.ATIMWindow), &sz);
+
+//if (rateLen > 8)
+//    ie = rtw_set_ie(ie, _EXT_SUPPORTEDRATES_IE_, (rateLen - 8), (pdev_network.SupportedRates + 8), &sz);
+
+//# ifdef CONFIG_80211N_HT
+///* HT Cap. */
+//if (is_supported_ht(pregistrypriv.wireless_mode)
+//    && (pregistrypriv.ht_enable == _TRUE))
+//{
+//    /* todo: */
+//}
+//#endif /* CONFIG_80211N_HT */
+
+/* pdev_network.IELength =  sz; */ /* update IELength */
+
+
+/* return _SUCCESS; */
+
+return sz;
+
+}
+
     private static u8 rtw_hal_read_chip_info(_adapter padapter)
     {
         u8 rtn = _SUCCESS;
@@ -149,8 +587,8 @@ public static class usb_intf
 
     static void rtw_hal_read_chip_version(_adapter padapter)
     {
-        padapter.hal_func.read_chip_version(padapter);
-        rtw_odm_init_ic_type(padapter);
+        //padapter.hal_func.read_chip_version(padapter);
+        //rtw_odm_init_ic_type(padapter);
     }
 
     static u8 rtw_set_hal_ops(_adapter padapter)
@@ -208,16 +646,28 @@ public static class usb_intf
         hal_spec.pg_txpwr_saddr = 0x10;
         hal_spec.pg_txgi_diff_factor = 1;
 
-        rtw_macid_ctl_init_sleep_reg(adapter_to_macidctl(adapter)
-
-            , REG_MACID_SLEEP
-
-            , REG_MACID_SLEEP_1
-
-            , REG_MACID_SLEEP_2
-
-            , REG_MACID_SLEEP_3);
+        // TODO
+        //rtw_macid_ctl_init_sleep_reg(adapter_to_macidctl(adapter)
+        //    , REG_MACID_SLEEP
+        //    , REG_MACID_SLEEP_1
+        //    , REG_MACID_SLEEP_2
+        //    , REG_MACID_SLEEP_3);
     }
+
+//    static void rtw_macid_ctl_init_sleep_reg(macid_ctl_t macid_ctl, u16 m0, u16 m1, u16 m2, u16 m3)
+//    {
+//        macid_ctl.reg_sleep_m0 = m0;
+////        MACID_NUM_SW_LIMIT 32
+////#if (MACID_NUM_SW_LIMIT > 32)
+////	macid_ctl.reg_sleep_m1 = m1;
+////#endif
+////#if (MACID_NUM_SW_LIMIT > 64)
+////	macid_ctl.reg_sleep_m2 = m2;
+////#endif
+////#if (MACID_NUM_SW_LIMIT > 96)
+////	macid_ctl.reg_sleep_m3 = m3;
+////#endif
+//    }
 
 static void rtw_hal_chip_configure(_adapter padapter)
     {

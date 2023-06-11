@@ -1158,9 +1158,37 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
         return true;
     }
 
+    //static u8 map_read8(map_t map, u16 offset)
+    //{
+    //    map_seg_t seg;
+    //    u8 val = map.init_value;
+    //    int i;
+
+    //    if (offset + 1 > map.len)
+    //    {
+    //        throw new Exception("WTF");
+    //        goto exit;
+    //    }
+
+    //    for (i = 0; i < map.seg_num; i++)
+    //    {
+    //        seg = map.segs + i;
+    //        if (seg.sa + seg.len <= offset || seg.sa >= offset + 1)
+    //        {
+    //            continue;
+    //        }
+
+    //        val = * (seg.c + offset - seg.sa);
+    //        break;
+    //    }
+
+    //    exit:
+    //    return val;
+    //}
+
     static u8 map_read8(map_t map, u16 offset)
     {
-        map_seg_t seg;
+        map_seg_t seg = map.segs[0];
         u8 val = map.init_value;
         int i;
 
@@ -1170,15 +1198,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
             goto exit;
         }
 
-        for (i = 0; i<map.seg_num; i++)
-        {
-            seg = map.segs + i;
-            if (seg.sa + seg.len <= offset || seg.sa >= offset + 1)
-                continue;
-
-            val = * (seg.c + offset - seg.sa);
-            break;
-        }
+        val = seg.c[offset - seg.sa];
 
         exit:
         return val;

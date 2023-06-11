@@ -55,4 +55,18 @@ public static class CommonConsts
     public const bool DBG_PG_TXPWR_READ = true;
     public const byte BAND_CAP_2G = 0;
     public const byte BAND_CAP_5G = 1;
+    public const byte BW_CAP_20M = BIT2;
+    public const byte BW_CAP_40M = BIT3;
+    public const byte BW_CAP_80M = BIT4;
+    public const byte PROTO_CAP_11B = BIT0;
+    public const byte PROTO_CAP_11G = BIT1;
+    public const byte PROTO_CAP_11N = BIT2;
+    public const byte PROTO_CAP_11AC = BIT3;
+    public const byte WL_FUNC_P2P = BIT0;
+    public const byte WL_FUNC_MIRACAST = BIT1;
+    public const byte WL_FUNC_TDLS = BIT2;
+    public const ushort REG_MACID_SLEEP = 0x04D4;
+    public const ushort REG_MACID_SLEEP_1 = 0x0488;
+    public const ushort REG_MACID_SLEEP_2 = 0x04D0;
+    public const ushort REG_MACID_SLEEP_3 = 0x0484;
 }
