@@ -759,7 +759,7 @@ static void rtw_hal_chip_configure(_adapter padapter)
 // 	/* Efuse related function */
 // 	pHalFunc.EfusePowerSwitch = &rtl8812_EfusePowerSwitch;
 // 	pHalFunc.ReadEFuse = &rtl8812_ReadEFuse;
-// 	pHalFunc.EFUSEGetEfuseDefinition = &rtl8812_EFUSE_GetEfuseDefinition;
+ 	pHalFunc.EFUSEGetEfuseDefinition = rtl8812_EFUSE_GetEfuseDefinition;
 // 	pHalFunc.EfuseGetCurrentSize = &rtl8812_EfuseGetCurrentSize;
 // 	pHalFunc.Efuse_PgPacketRead = &rtl8812_Efuse_PgPacketRead;
 // 	pHalFunc.Efuse_PgPacketWrite = &rtl8812_Efuse_PgPacketWrite;
@@ -787,12 +787,102 @@ static void rtw_hal_chip_configure(_adapter padapter)
 // 	pHalFunc.fw_dl = &FirmwareDownload8812;
 // 	pHalFunc.hal_get_tx_buff_rsvd_page_num = &GetTxBufferRsvdPageNum8812;
 }
+    static int rtl8812_EFUSE_GetEfuseDefinition( PADAPTER    pAdapter, u8      efuseType, EFUSE_DEF_TYPE type, BOOLEAN     bPseudoTest)
+    {
 
-static u8 rtw_hal_data_init(_adapter padapter)
+            return Hal_EFUSEGetEfuseDefinition8812A(pAdapter, efuseType, type);
+    }
+    static u8 rtw_hal_data_init(_adapter padapter)
     {
         rtw_phydm_priv_init(padapter);
 
         return _SUCCESS;
+    }
+
+    static int Hal_EFUSEGetEfuseDefinition8812A(PADAPTER    pAdapter, u8 efuseType, EFUSE_DEF_TYPE type)
+    {
+        switch (type)
+        {
+            //    case EFUSE_DEF_TYPE.TYPE_EFUSE_MAX_SECTION:
+            //    {
+            //        u8* pMax_section;
+            //        pMax_section = (u8*)pOut;
+            //        if (efuseType == EFUSE_WIFI)
+            //            *pMax_section = EFUSE_MAX_SECTION_JAGUAR;
+            //        else
+            //            *pMax_section = EFUSE_BT_MAX_SECTION;
+            //    }
+            //        break;
+            //    case EFUSE_DEF_TYPE.TYPE_EFUSE_REAL_CONTENT_LEN:
+            //    {
+            //        u16* pu2Tmp;
+            //        pu2Tmp = (u16*)pOut;
+            //        if (efuseType == EFUSE_WIFI)
+            //            *pu2Tmp = EFUSE_REAL_CONTENT_LEN_JAGUAR;
+            //        else
+            //            *pu2Tmp = EFUSE_BT_REAL_CONTENT_LEN;
+            //    }
+            //        break;
+            //    case EFUSE_DEF_TYPE.TYPE_EFUSE_CONTENT_LEN_BANK:
+            //    {
+            //        u16* pu2Tmp;
+            //        pu2Tmp = (u16*)pOut;
+            //        if (efuseType == EFUSE_WIFI)
+            //            *pu2Tmp = EFUSE_REAL_CONTENT_LEN_JAGUAR;
+            //        else
+            //            *pu2Tmp = EFUSE_BT_REAL_BANK_CONTENT_LEN;
+
+            //    }
+            //        break;
+            //    case EFUSE_DEF_TYPE.TYPE_AVAILABLE_EFUSE_BYTES_BANK:
+            //    {
+            //        u16* pu2Tmp;
+            //        pu2Tmp = (u16*)pOut;
+            //        if (efuseType == EFUSE_WIFI)
+            //            *pu2Tmp = (u16)(EFUSE_REAL_CONTENT_LEN_JAGUAR - EFUSE_OOB_PROTECT_BYTES_JAGUAR);
+            //        else
+            //            *pu2Tmp = (EFUSE_BT_REAL_BANK_CONTENT_LEN - EFUSE_PROTECT_BYTES_BANK);
+            //    }
+            //        break;
+            //    case EFUSE_DEF_TYPE.TYPE_AVAILABLE_EFUSE_BYTES_TOTAL:
+            //    {
+            //        u16* pu2Tmp;
+            //        pu2Tmp = (u16*)pOut;
+            //        if (efuseType == EFUSE_WIFI)
+            //            *pu2Tmp = (u16)(EFUSE_REAL_CONTENT_LEN_JAGUAR - EFUSE_OOB_PROTECT_BYTES_JAGUAR);
+            //        else
+            //            *pu2Tmp = (EFUSE_BT_REAL_CONTENT_LEN - (EFUSE_PROTECT_BYTES_BANK * 3));
+            //    }
+            //        break;
+            case EFUSE_DEF_TYPE.TYPE_EFUSE_MAP_LEN:
+            {
+
+                if (efuseType == EFUSE_WIFI)
+                    return EFUSE_MAP_LEN_JAGUAR;
+                else
+                    throw new NotImplementedException();
+            }
+                break;
+                //    case EFUSE_DEF_TYPE.TYPE_EFUSE_PROTECT_BYTES_BANK:
+                //    {
+                //        u8* pu1Tmp;
+                //        pu1Tmp = (u8*)pOut;
+                //        if (efuseType == EFUSE_WIFI)
+                //            *pu1Tmp = (u8)(EFUSE_OOB_PROTECT_BYTES_JAGUAR);
+                //        else
+                //            *pu1Tmp = EFUSE_PROTECT_BYTES_BANK;
+                //    }
+                //        break;
+                //    default:
+                //    {
+                //        u8* pu1Tmp;
+                //        pu1Tmp = (u8*)pOut;
+                //        *pu1Tmp = 0;
+                //    }
+                //        break;
+        }
+
+        return 0;
     }
 
     static void rtw_phydm_priv_init(_adapter adapter)

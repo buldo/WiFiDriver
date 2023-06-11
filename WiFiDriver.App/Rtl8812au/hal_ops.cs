@@ -105,7 +105,8 @@ public class hal_ops
 //	void (* EfusePowerSwitch) (_adapter* padapter, u8 bWrite, u8 PwrState);
 //	void (* BTEfusePowerSwitch) (_adapter* padapter, u8 bWrite, u8 PwrState);
 //	void (* ReadEFuse) (_adapter* padapter, u8 efuseType, u16 _offset, u16 _size_byte, u8* pbuf, BOOLEAN bPseudoTest);
-//	void (* EFUSEGetEfuseDefinition) (_adapter* padapter, u8 efuseType, u8 type, void* pOut, BOOLEAN bPseudoTest);
+public Func<_adapter, byte, EFUSE_DEF_TYPE, bool, int> EFUSEGetEfuseDefinition;
+
 //	u16(*EfuseGetCurrentSize)(_adapter* padapter, u8 efuseType, BOOLEAN bPseudoTest);
 //	int (* Efuse_PgPacketRead) (_adapter* padapter, u8 offset, u8* data, BOOLEAN bPseudoTest);
 //	int (* Efuse_PgPacketWrite) (_adapter* padapter, u8 offset, u8 word_en, u8* data, BOOLEAN bPseudoTest);

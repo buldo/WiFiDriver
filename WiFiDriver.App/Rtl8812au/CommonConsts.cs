@@ -69,4 +69,6 @@ public static class CommonConsts
     public const ushort REG_MACID_SLEEP_1 = 0x0488;
     public const ushort REG_MACID_SLEEP_2 = 0x04D0;
     public const ushort REG_MACID_SLEEP_3 = 0x0484;
+    public const byte EFUSE_WIFI = 0;
+    public const int EFUSE_MAP_LEN_JAGUAR = 512;
 }

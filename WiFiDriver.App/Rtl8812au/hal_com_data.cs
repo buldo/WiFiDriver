@@ -73,7 +73,8 @@ public bool bDisableSWChannelPlan; /* flag of disable software change channel pl
 //    u32 edca_param_mode;
 
 //    /****** EEPROM setting.******/
-    public bool bautoload_fail_flag;
+    public bool bautoload_fail_flag { get; set; }
+
 //    u8 efuse_file_status;
 //    u8 macaddr_file_status;
     public bool EepromOrEfuse;

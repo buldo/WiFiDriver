@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System.Buffers.Binary;
 using System.IO;
+using System.Text;
 using System.Xml.Linq;
 
 using WiFiDriver.App.Rtl8812au;
@@ -317,8 +318,7 @@ public static class usb_halinit
         pHalData.EepromOrEfuse = (eeValue & BOOT_FROM_EEPROM) != 0 ? true : false;
         pHalData.bautoload_fail_flag = (eeValue & EEPROM_EN) != 0 ? false : true;
 
-        RTW_INFO("Boot from %s, Autoload %s !", (pHalData.EepromOrEfuse ? "EEPROM" : "EFUSE"),
-            (pHalData.bautoload_fail_flag ? "Fail" : "OK"));
+        RTW_INFO($"Boot from {(pHalData.EepromOrEfuse ? "EEPROM" : "EFUSE")}, Autoload {(pHalData.bautoload_fail_flag ? "Fail" : "OK")} !");
 
         /* pHalData.EEType = IS_BOOT_FROM_EEPROM(Adapter) ? EEPROM_93C46 : EEPROM_BOOT_EFUSE; */
 
@@ -1319,7 +1319,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
 
         if (DBG_PG_TXPWR_READ)
         {
-            RTW_INFO("%s[%c] eaddr:0x%03x\n", rf_path_char(path), offset);
+            RTW_INFO($"{rf_path_char(path)}[hal_load_pg_txpwr_info_path_5g] eaddr:{offset}");
         }
 
         for (group = 0; group < MAX_CHNL_GROUP_5G; group++)
@@ -1334,7 +1334,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                     pwr_info.IndexBW40_Base[path,group] = tmp_base;
                     if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
                     {
-                        RTW_INFO("[%c] 5G G%02d BW40-1S base:%u from %s\n", rf_path_char(path), group, tmp_base, pg_txpwr_src_str(txpwr_src));
+                        RTW_INFO($"[{rf_path_char(path)}] 5G G{group} BW40-1S base:{tmp_base} from {pg_txpwr_src_str(txpwr_src)}");
                     }
                 }
             }
@@ -1357,7 +1357,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                         pwr_info.BW20_Diff[path, tx_idx] = tmp_diff;
                         if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
                         {
-                            RTW_INFO("[%c] 5G BW20-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                            RTW_INFO($"[{rf_path_char(path)}] 5G BW20-{tx_idx + 1} diff:{tmp_diff} from {pg_txpwr_src_str(txpwr_src)}");
                         }
                     }
 
@@ -1369,7 +1369,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                         pwr_info.OFDM_Diff[path,tx_idx] = tmp_diff;
                         if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
                         {
-                            RTW_INFO("[%c] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                            RTW_INFO($"[{rf_path_char(path)}] 5G OFDM-{tx_idx + 1} diff:{tmp_diff} from {pg_txpwr_src_str(txpwr_src)}");
                         }
                     }
                 }
@@ -1389,7 +1389,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                         pwr_info.BW40_Diff[path,tx_idx] = tmp_diff;
                         if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
                         {
-                            RTW_INFO("[%c] 5G BW40-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                            RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G BW40-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
                         }
                     }
 
@@ -1401,7 +1401,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                         pwr_info.BW20_Diff[path, tx_idx] = tmp_diff;
                         if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
                         {
-                            RTW_INFO("[%c] 5G BW20-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                            RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G BW20-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
                         }
                     }
                 }
@@ -1420,7 +1420,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                 pwr_info.OFDM_Diff[path,1] = tmp_diff;
                 if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
                 {
-                    RTW_INFO("[%c] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), 2, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                    RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), 2, tmp_diff, pg_txpwr_src_str(txpwr_src));
                 }
             }
 
@@ -1432,7 +1432,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                     pwr_info.OFDM_Diff[path, 2] = tmp_diff;
                     if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
                     {
-                        RTW_INFO("[%c] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), 3, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                        RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), 3, tmp_diff, pg_txpwr_src_str(txpwr_src));
                     }
                 }
             }
@@ -1450,7 +1450,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                 pwr_info.OFDM_Diff[path,3] = tmp_diff;
                 if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
                 {
-                    RTW_INFO("[%c] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), 4, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                    RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), 4, tmp_diff, pg_txpwr_src_str(txpwr_src));
                 }
             }
         }
@@ -1468,7 +1468,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                 {
                     pwr_info.BW80_Diff[path, tx_idx] = tmp_diff;
                     if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                        RTW_INFO("[%c] 5G BW80-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                        RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G BW80-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
                 }
 
                 tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
@@ -1478,7 +1478,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                     pwr_info.BW160_Diff[path, tx_idx] = tmp_diff;
                     if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
                     {
-                        RTW_INFO("[%c] 5G BW160-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                        RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G BW160-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
                     }
                 }
             }
@@ -1488,7 +1488,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
 
         if (offset != pg_offset + PG_TXPWR_1PATH_BYTE_NUM_5G)
         {
-            RTW_ERR("%s parse %d bytes != %d\n", offset - pg_offset, PG_TXPWR_1PATH_BYTE_NUM_5G);
+            RTW_ERR($"[hal_load_pg_txpwr_info_path_5g] parse {offset - pg_offset} bytes != {PG_TXPWR_1PATH_BYTE_NUM_5G}");
             throw new Exception("ERRR");
         }
 
@@ -1520,7 +1520,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
 
         if (DBG_PG_TXPWR_READ)
         {
-            RTW_INFO("%s [%c] offset:0x%03x\n", rf_path_char(path), offset);
+            RTW_INFO($"hal_load_pg_txpwr_info_path_2g [{rf_path_char(path)}] offset:0x{offset:H3}\n");
         }
 
         for (group = 0; group < MAX_CHNL_GROUP_24G; group++)
@@ -1534,7 +1534,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                     pwr_info.IndexCCK_Base[path,group] = tmp_base;
                     if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
                     {
-                        RTW_INFO("[%c] 2G G%02d CCK-1T base:%u from %s\n", rf_path_char(path), group, tmp_base, pg_txpwr_src_str(txpwr_src));
+                        RTW_INFO($"[{rf_path_char(path)}] 2G G{group:2} CCK-1T base:{tmp_base} from {pg_txpwr_src_str(txpwr_src)}");
                     }
                 }
             }
@@ -1554,7 +1554,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                     pwr_info.IndexBW40_Base[path,group] = tmp_base;
                     if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
                     {
-                        RTW_INFO("[%c] 2G G%02d BW40-1S base:%u from %s\n", rf_path_char(path), group, tmp_base, pg_txpwr_src_str(txpwr_src));
+                        RTW_INFO($"[{rf_path_char(path)}] 2G G{group:2} BW40-1S base:{tmp_base} from {pg_txpwr_src_str(txpwr_src)}" );
                     }
                 }
             }
@@ -1658,7 +1658,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
 
         if (offset != pg_offset + PG_TXPWR_1PATH_BYTE_NUM_2G)
         {
-            RTW_ERR("%s parse %d bytes != %d\n",  offset - pg_offset, PG_TXPWR_1PATH_BYTE_NUM_2G);
+            RTW_ERR($"hal_load_pg_txpwr_info_path_2g parse {offset - pg_offset} bytes != {PG_TXPWR_1PATH_BYTE_NUM_2G}");
             throw new Exception();
         }
 
@@ -1801,7 +1801,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
             || gp == -1
            )
         {
-            RTW_WARN("%s invalid channel:%u", "rtw_get_ch_group", ch);
+            RTW_WARN($"rtw_get_ch_group invalid channel:{ch}");
             //rtw_warn_on(1);
             goto exit;
         }
@@ -1855,10 +1855,10 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
             pHalData.TypeALNA = (ushort)(extTypeLNA_5G_B << 2 | extTypeLNA_5G_A);
         }
 
-        RTW_INFO("pHalData.TypeGPA = 0x%X", pHalData.TypeGPA);
-        RTW_INFO("pHalData.TypeAPA = 0x%X", pHalData.TypeAPA);
-        RTW_INFO("pHalData.TypeGLNA = 0x%X", pHalData.TypeGLNA);
-        RTW_INFO("pHalData.TypeALNA = 0x%X", pHalData.TypeALNA);
+        RTW_INFO($"pHalData.TypeGPA = 0x{pHalData.TypeGPA}");
+        RTW_INFO($"pHalData.TypeAPA = 0x{pHalData.TypeAPA}");
+        RTW_INFO($"pHalData.TypeGLNA = 0x{pHalData.TypeGLNA}");
+        RTW_INFO($"pHalData.TypeALNA = 0x{pHalData.TypeALNA}");
     }
 
     private const int EEPROM_PA_TYPE_8812AU = 0xBC;
@@ -1877,9 +1877,14 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                 pHalData.PAType_2G = PROMContent[EEPROM_PA_TYPE_8812AU];
                 pHalData.LNAType_2G = PROMContent[EEPROM_LNA_TYPE_2G_8812AU];
                 if (pHalData.PAType_2G == 0xFF)
+                {
                     pHalData.PAType_2G = 0;
+                }
+
                 if (pHalData.LNAType_2G == 0xFF)
+                {
                     pHalData.LNAType_2G = 0;
+                }
 
                 pHalData.ExternalPA_2G = ((pHalData.PAType_2G & BIT5) != 0 && (pHalData.PAType_2G & BIT4) != 0);
                 pHalData.ExternalLNA_2G = ((pHalData.LNAType_2G & BIT7) != 0 && (pHalData.LNAType_2G & BIT3) != 0);
@@ -1896,9 +1901,13 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                 pHalData.PAType_5G = PROMContent[EEPROM_PA_TYPE_8812AU];
                 pHalData.LNAType_5G = PROMContent[EEPROM_LNA_TYPE_5G_8812AU];
                 if (pHalData.PAType_5G == 0xFF)
+                {
                     pHalData.PAType_5G = 0;
+                }
                 if (pHalData.LNAType_5G == 0xFF)
+                {
                     pHalData.LNAType_5G = 0;
+                }
 
                 pHalData.external_pa_5g = ((pHalData.PAType_5G & BIT1) != 0 && (pHalData.PAType_5G & BIT0) != 0);
                 pHalData.external_lna_5g = ((pHalData.LNAType_5G & BIT7) != 0 && (pHalData.LNAType_5G & BIT3) != 0);
@@ -1941,13 +1950,10 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
             }
         }
 
-        RTW_INFO("pHalData.PAType_2G is 0x%x, pHalData.ExternalPA_2G = %d", pHalData.PAType_2G, pHalData.ExternalPA_2G);
-        RTW_INFO("pHalData.PAType_5G is 0x%x, pHalData.external_pa_5g = %d", pHalData.PAType_5G,
-            pHalData.external_pa_5g);
-        RTW_INFO("pHalData.LNAType_2G is 0x%x, pHalData.ExternalLNA_2G = %d", pHalData.LNAType_2G,
-            pHalData.ExternalLNA_2G);
-        RTW_INFO("pHalData.LNAType_5G is 0x%x, pHalData.external_lna_5g = %d", pHalData.LNAType_5G,
-            pHalData.external_lna_5g);
+        RTW_INFO($"pHalData.PAType_2G is 0x{pHalData.PAType_2G:X}, pHalData.ExternalPA_2G = {pHalData.ExternalPA_2G}");
+        RTW_INFO($"pHalData.PAType_5G is 0x{pHalData.PAType_5G:X}, pHalData.external_pa_5g = {pHalData.external_pa_5g}");
+        RTW_INFO($"pHalData.LNAType_2G is 0x{pHalData.LNAType_2G:X}, pHalData.ExternalLNA_2G = {pHalData.ExternalLNA_2G}");
+        RTW_INFO($"pHalData.LNAType_5G is 0x{pHalData.LNAType_5G:X}, pHalData.external_lna_5g = {pHalData.external_lna_5g}");
     }
 
     private static void Hal_EfuseParseXtal_8812A(PADAPTER pAdapter, u8[] hwinfo, bool AutoLoadFail)
@@ -2104,16 +2110,16 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
 
 
         /* Checl 0x8129 again for making sure autoload status!! */
-        EEPROMId = BinaryPrimitives.ReadUInt16LittleEndian(hwinfo);
+        EEPROMId = BinaryPrimitives.ReadUInt16LittleEndian(hwinfo.AsSpan(0, 2));
         if (EEPROMId != RTL_EEPROM_ID)
         {
-            RTW_INFO("EEPROM ID(%#x) is invalid!!\n", EEPROMId);
+            RTW_INFO($"EEPROM ID(0x{EEPROMId:X}) is invalid!!");
             pHalData.bautoload_fail_flag = true;
         }
         else
             pHalData.bautoload_fail_flag = false;
 
-        RTW_INFO("EEPROM ID=0x%04x\n", EEPROMId);
+        RTW_INFO($"EEPROM ID=0x{EEPROMId}");
     }
 
     static void hal_InitPGData_8812A(PADAPTER padapter, u8[] PROMContent)
@@ -2249,7 +2255,36 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
 
         rtw_mask_map_read(0x00, mapLen, pHalData.efuse_eeprom_data);
 
-        //rtw_dump_cur_efuse(pAdapter);
+        rtw_dump_cur_efuse(pAdapter);
+    }
+
+    static void rtw_dump_cur_efuse(PADAPTER padapter)
+    {
+        HAL_DATA_TYPE hal_data = GET_HAL_DATA(padapter);
+
+        var mapsize = EFUSE_GetEfuseDefinition(padapter, EFUSE_WIFI, EFUSE_DEF_TYPE.TYPE_EFUSE_MAP_LEN, false);
+
+        var linesCount = mapsize / (4 * 4);
+        var lineLength = 4 * 4;
+        for (int j = 0; j < linesCount; j++)
+        {
+            var startIndex = (j*lineLength);
+            var builder = new StringBuilder();
+            builder.Append($"0x{startIndex:X3}:");
+            for (int i = startIndex; i < startIndex + lineLength; i+=4)
+            {
+                builder.Append($"  {hal_data.efuse_eeprom_data[i]:X2} {hal_data.efuse_eeprom_data[i+1]:X2} {hal_data.efuse_eeprom_data[i+2]:X2} {hal_data.efuse_eeprom_data[i+3]:X2}");
+            }
+
+            Console.WriteLine(builder);
+
+        }
+
+    }
+
+    static int EFUSE_GetEfuseDefinition(PADAPTER    pAdapter, u8      efuseType, EFUSE_DEF_TYPE      type, BOOLEAN     bPseudoTest)
+    {
+        return pAdapter.hal_func.EFUSEGetEfuseDefinition(pAdapter, efuseType, type, bPseudoTest);
     }
 
     static void Efuse_ReadAllMap(_adapter adapter, byte efuseType, byte[] Efuse)
@@ -2324,7 +2359,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
         }
         else
         {
-            // TODO: RTW_INFO("EFUSE is empty efuse_Addr-%d efuse_data=%x\n", eFuse_Addr, *rtemp8);
+            RTW_INFO($"EFUSE is empty efuse_Addr-{eFuse_Addr} efuse_data={rtemp8}");
             return;
         }
 
@@ -2385,7 +2420,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                         ReadEFuseByte(adapter, eFuse_Addr, rtemp8);
                         eFuse_Addr++;
                         efuse_utilized++;
-                        eFuseWord[offset][i] = (byte)(rtemp8[0] & 0xff);
+                        eFuseWord[offset][i] = (ushort)(rtemp8[0] & 0xff);
 
 
                         if (eFuse_Addr >= EFUSE_REAL_CONTENT_LEN_JAGUAR)
@@ -2396,7 +2431,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                         eFuse_Addr++;
 
                         efuse_utilized++;
-                        eFuseWord[offset][i] |= (byte)(((rtemp8[0]) << 8) & 0xff00);
+                        eFuseWord[offset][i] |= (ushort)(((rtemp8[0]) << 8) & 0xff00);
 
                         if (eFuse_Addr >= EFUSE_REAL_CONTENT_LEN_JAGUAR)
                             break;
@@ -2409,7 +2444,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
             else
             {
                 /* deal with error offset,skip error data		 */
-                // TODO: RTW_PRINT("invalid offset:0x%02x\n", offset);
+                RTW_PRINT($"invalid offset:0x{offset}");
                 for (i = 0; i < EFUSE_MAX_WORD_UNIT; i++)
                 {
                     /* Check word enable condition in the section				 */
@@ -2464,7 +2499,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
         /*  */
         efuse_usage = (byte)((eFuse_Addr * 100) / EFUSE_REAL_CONTENT_LEN_JAGUAR);
         // TODO: SetHwReg8812AU(HW_VARIABLES.HW_VAR_EFUSE_BYTES, (u8*)&eFuse_Addr);
-        // TODO: RTW_INFO("%s: eFuse_Addr offset(%#x) !!\n", __FUNCTION__, eFuse_Addr);
+        RTW_INFO($"Hal_EfuseReadEFuse8812A: eFuse_Addr offset(0x{eFuse_Addr:X}) !!");
     }
 
     private static void rtw_mask_map_read(UInt16 addr, UInt16 cnts, byte[] data)
@@ -2698,3 +2733,14 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
         return t;
     }
 }
+
+public enum EFUSE_DEF_TYPE
+{
+    TYPE_EFUSE_MAX_SECTION = 0,
+    TYPE_EFUSE_REAL_CONTENT_LEN = 1,
+    TYPE_AVAILABLE_EFUSE_BYTES_BANK = 2,
+    TYPE_AVAILABLE_EFUSE_BYTES_TOTAL = 3,
+    TYPE_EFUSE_MAP_LEN = 4,
+    TYPE_EFUSE_PROTECT_BYTES_BANK = 5,
+    TYPE_EFUSE_CONTENT_LEN_BANK = 6,
+};

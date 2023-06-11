@@ -17,42 +17,18 @@ internal static class Logging
         Console.WriteLine(strBuilder);
     }
 
-    public static void RTW_ERR(string str, params object[] list)
+    public static void RTW_ERR(string str)
     {
-        var strBuilder = new StringBuilder();
-        strBuilder.Append(str + " ");
-        foreach (var obj in list)
-        {
-            strBuilder.Append(obj);
-            strBuilder.Append(" ");
-        }
-
-        Console.WriteLine(strBuilder);
+        Console.WriteLine(str);
     }
 
-    public static void RTW_WARN(string str, params object[] list)
+    public static void RTW_WARN(string str)
     {
-        var strBuilder = new StringBuilder();
-        strBuilder.Append(str + " ");
-        foreach (var obj in list)
-        {
-            strBuilder.Append(obj);
-            strBuilder.Append(" ");
-        }
-
-        Console.WriteLine(strBuilder);
+        Console.WriteLine(str);
     }
 
-    public static void RTW_PRINT(string str, params object[] list)
+    public static void RTW_PRINT(string str)
     {
-        var strBuilder = new StringBuilder();
-        strBuilder.Append(str + " ");
-        foreach (var obj in list)
-        {
-            strBuilder.Append(obj);
-            strBuilder.Append(" ");
-        }
-
-        Console.WriteLine(strBuilder);
+        Console.WriteLine(str);
     }
 }
