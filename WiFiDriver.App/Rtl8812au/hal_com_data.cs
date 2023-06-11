@@ -37,7 +37,7 @@ public class hal_com_data
 //    u8 nCur40MhzPrimeSC;    /* Control channel sub-carrier */
 //    u8 nCur80MhzPrimeSC;   /* used for primary 40MHz of 80MHz mode */
 //    BOOLEAN bSwChnlAndSetBWInProgress;
-//    u8 bDisableSWChannelPlan; /* flag of disable software change channel plan	 */
+public bool bDisableSWChannelPlan; /* flag of disable software change channel plan	 */
 //    u16 BasicRateSet;
 //    u32 ReceiveConfig;
 //    u32 rcr_backup; /* used for switching back from monitor mode */
@@ -58,7 +58,8 @@ public class hal_com_data
 
 //    /****** rf_ctrl *****/
     public RF_CHIP_E rf_chip;
-//    u8 rf_type; /*enum rf_type*/
+
+    public rf_type rf_type; /*enum rf_type*/
 //    u8 PackageType;
 //    u8 NumTotalRFPath;
 //    u8 antenna_test;
@@ -84,7 +85,7 @@ public class hal_com_data
 //    u16 EEPROMVID;
 //    u16 EEPROMSVID;
 //# ifdef CONFIG_USB_HCI
-//    u8 EEPROMUsbSwitch;
+    public bool EEPROMUsbSwitch;
 //    u16 EEPROMPID;
 //    u16 EEPROMSDID;
 //#endif
@@ -186,7 +187,7 @@ public u16 TypeGPA;
     public u16 TypeALNA;
 
     public u16 TypeAPA;
-//    u16 rfe_type;
+public    u16 rfe_type;
 
 //    u8 bLedOpenDrain; /* Support Open-drain arrangement for controlling the LED. Added by Roger, 2009.10.16. */
 //    u32 ac_param_be; /* Original parameter for BE, use for EDCA turbo.	*/

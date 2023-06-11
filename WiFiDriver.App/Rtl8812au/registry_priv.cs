@@ -98,7 +98,7 @@ public class registry_priv
 
     public bool wifi_spec;/* !turbo_mode */
 //    u8 special_rf_path; /* 0: 2T2R ,1: only turn on path A 1T1R */
-//    char alpha2[2];
+public char[] alpha2 = new char[2];
 //    u8 channel_plan;
 //    u8 excl_chs[MAX_CHANNEL_NUM];
 //    u8 full_ch_in_p2p_handshake; /* 0: reply only softap channel, 1: reply full channel list*/
@@ -169,7 +169,7 @@ public class registry_priv
     public u8 AmplifierType_2G;
     public u8 AmplifierType_5G;
 //    u8 bEn_RFE;
-//    u8 RFE_Type;
+public u8 RFE_Type;
 //    u8 PowerTracking_Type;
 //    u8 GLNA_Type;
 //    u8 check_fw_ps;

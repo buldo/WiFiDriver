@@ -361,7 +361,7 @@ static u8 rtw_hal_data_init(_adapter padapter)
 //    struct io_priv  *piopriv = &padapter.iopriv;
 //    struct intf_hdl *pintf = &piopriv.intf;
 
-//    if (set_intf_ops == NULL)
+//    if (set_intf_ops == null)
 //        return _FAIL;
 
 //    piopriv.padapter = padapter;
@@ -578,7 +578,10 @@ registry_par.wifi_spec = rtw_wifi_spec;
 //registry_par.TxBBSwing_2G = (s8)rtw_TxBBSwing_2G;
 //registry_par.TxBBSwing_5G = (s8)rtw_TxBBSwing_5G;
 //registry_par.bEn_RFE = 1;
-//registry_par.RFE_Type = (u8)rtw_RFE_type;
+
+        //registry_par.RFE_Type = (u8)rtw_RFE_type;
+        registry_par.RFE_Type = 64;
+
 //registry_par.PowerTracking_Type = (u8)rtw_powertracking_type;
 registry_par.AmplifierType_2G = 0;
 registry_par.AmplifierType_5G = 0;

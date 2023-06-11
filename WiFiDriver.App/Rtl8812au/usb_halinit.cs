@@ -301,10 +301,27 @@ public static class usb_halinit
     {
             rtw_btcoex_wifionly_AntInfoSetting(padapter);
     }
-
-    static void hal_ReadUsbType_8812AU(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
+    static void rtw_btcoex_wifionly_AntInfoSetting(PADAPTER padapter)
     {
-        /* if (IS_HARDWARE_TYPE_8812AU(Adapter) && Adapter->UsbModeMechanism.RegForcedUsbMode == 5) */
+        hal_btcoex_wifionly_AntInfoSetting(padapter);
+    }
+
+    static void hal_btcoex_wifionly_AntInfoSetting(PADAPTER padapter)
+    {
+        //wifi_only_cfg        pwifionlycfg = GLBtCoexistWifiOnly;
+        //wifi_only_haldata    pwifionly_haldata = pwifionlycfg.haldata_info;
+        //HAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
+
+        //pwifionly_haldata.efuse_pg_antnum = pHalData.EEPROMBluetoothAntNum;
+        //pwifionly_haldata.efuse_pg_antpath = pHalData.ant_path;
+        //pwifionly_haldata.rfe_type = pHalData.rfe_type;
+        //pwifionly_haldata.ant_div_cfg = pHalData.AntDivCfg;
+    }
+
+
+static void hal_ReadUsbType_8812AU(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
+    {
+        /* if (IS_HARDWARE_TYPE_8812AU(Adapter) && Adapter.UsbModeMechanism.RegForcedUsbMode == 5) */
         {
             PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
@@ -317,19 +334,19 @@ public static class usb_halinit
                   Check efuse address 1019
                   Check efuse address 1018
                 */
-                efuse_OneByteRead(Adapter, 1019 - i, reg_tmp);
+                efuse_OneByteRead(Adapter, (ushort)(1019 - i), out reg_tmp);
                 /*
                   CHeck bit 7-5
                   Check bit 3-1
                 */
                 if (((reg_tmp >> 5) & 0x7) != 0)
                 {
-                    antenna = ((reg_tmp >> 5) & 0x7);
+                    antenna = (byte)((reg_tmp >> 5) & 0x7);
                     break;
                 }
                 else if ((reg_tmp >> 1 & 0x07) != 0)
                 {
-                    antenna = ((reg_tmp >> 1) & 0x07);
+                    antenna = (byte)((reg_tmp >> 1) & 0x07);
                     break;
                 }
 
@@ -343,24 +360,24 @@ public static class usb_halinit
                   Check efuse address 1021
                   Check efuse address 1020
                 */
-                efuse_OneByteRead(Adapter, 1021 - i, reg_tmp);
+                efuse_OneByteRead(Adapter, (ushort)(1021 - i), out reg_tmp);
 
                 /* CHeck bit 3-2 */
                 if (((reg_tmp >> 2) & 0x3) != 0)
                 {
-                    wmode = ((reg_tmp >> 2) & 0x3);
+                    wmode = (byte)((reg_tmp >> 2) & 0x3);
                     break;
                 }
             }
 
-            RTW_INFO("%s: antenna=%d, wmode=%d\n", antenna, wmode);
+            RTW_INFO("%s: antenna=%d, wmode=%d", antenna, wmode);
 /* Antenna == 1 WMODE = 3 RTL8812AU-VL 11AC + USB2.0 Mode */
             if (antenna == 1)
             {
                 /* Config 8812AU as 1*1 mode AC mode. */
-                pHalData->rf_type = RF_1T1R;
+                pHalData.rf_type = rf_type.RF_1T1R;
                 /* UsbModeSwitch_SetUsbModeMechOn(Adapter, FALSE); */
-                /* pHalData->EFUSEHidden = EFUSE_HIDDEN_812AU_VL; */
+                /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU_VL; */
                 RTW_INFO("%s(): EFUSE_HIDDEN_812AU_VL\n");
             }
             else if (antenna == 2)
@@ -370,7 +387,7 @@ public static class usb_halinit
                     if (PROMContent[EEPROM_USB_MODE_8812] == 0x2)
                     {
                         /* RTL8812AU Normal Mode. No further action. */
-                        /* pHalData->EFUSEHidden = EFUSE_HIDDEN_812AU; */
+                        /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU; */
                         RTW_INFO("%s(): EFUSE_HIDDEN_812AU");
                     }
                     else
@@ -378,7 +395,7 @@ public static class usb_halinit
                         /* Antenna == 2 WMODE = 3 RTL8812AU-VS 11AC + USB2.0 Mode */
                         /* Driver will not support USB automatic switch */
                         /* UsbModeSwitch_SetUsbModeMechOn(Adapter, FALSE); */
-                        /* pHalData->EFUSEHidden = EFUSE_HIDDEN_812AU_VS; */
+                        /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU_VS; */
                         RTW_INFO("%s(): EFUSE_HIDDEN_8812AU_VS");
                     }
                 }
@@ -386,9 +403,12 @@ public static class usb_halinit
                 {
                     /* Antenna == 2 WMODE = 2 RTL8812AU-VN 11N only + USB2.0 Mode */
                     /* UsbModeSwitch_SetUsbModeMechOn(Adapter, FALSE); */
-                    /* pHalData->EFUSEHidden = EFUSE_HIDDEN_812AU_VN; */
+                    /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU_VN; */
                     RTW_INFO("%s(): EFUSE_HIDDEN_8812AU_VN");
-                    hal_spc->proto_cap &= ~PROTO_CAP_11AC;
+
+                    var PROTO_CAP_11AC = BIT3;
+                    //hal_spc.proto_cap &= ~PROTO_CAP_11AC;
+                    hal_spc.proto_cap = (byte)(hal_spc.proto_cap & ~PROTO_CAP_11AC);
                 }
             }
         }
@@ -400,88 +420,89 @@ public static class usb_halinit
 //        struct led_priv *pledpriv = adapter_to_led(Adapter);
 
 //# ifdef CONFIG_RTW_SW_LED
-//        pledpriv->bRegUseLed = _TRUE;
+//        pledpriv.bRegUseLed = _TRUE;
 //#else /* HW LED */
-//        pledpriv->LedStrategy = HW_LED;
+//        pledpriv.LedStrategy = HW_LED;
 //#endif /* CONFIG_RTW_SW_LED */
 //#endif
     }
 
 static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapter);
+        // Looks like all this need for led
+        //HAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapter);
 
-        /* For customized behavior. */
-        if ((pHalData->EEPROMVID == 0x103C) && (pHalData->EEPROMPID == 0x1629)) /* HP Lite-On for RTL8188CUS Slim Combo. */
-            pHalData->CustomerID = RT_CID_819x_HP;
-        else if ((pHalData->EEPROMVID == 0x9846) && (pHalData->EEPROMPID == 0x9041))
-            pHalData->CustomerID = RT_CID_NETGEAR;
-        else if ((pHalData->EEPROMVID == 0x2019) && (pHalData->EEPROMPID == 0x1201))
-            pHalData->CustomerID = RT_CID_PLANEX;
-        else if ((pHalData->EEPROMVID == 0x0BDA) && (pHalData->EEPROMPID == 0x5088))
-            pHalData->CustomerID = RT_CID_CC_C;
-        else if ((pHalData->EEPROMVID == 0x0411) && ((pHalData->EEPROMPID == 0x0242) || (pHalData->EEPROMPID == 0x025D)))
-            pHalData->CustomerID = RT_CID_DNI_BUFFALO;
-        else if (((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3314)) ||
-            ((pHalData->EEPROMVID == 0x20F4) && (pHalData->EEPROMPID == 0x804B)) ||
-            ((pHalData->EEPROMVID == 0x20F4) && (pHalData->EEPROMPID == 0x805B)) ||
-            ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3315)) ||
-            ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3316)))
-            pHalData->CustomerID = RT_CID_DLINK;
+        ///* For customized behavior. */
+        //if ((pHalData.EEPROMVID == 0x103C) && (pHalData.EEPROMPID == 0x1629)) /* HP Lite-On for RTL8188CUS Slim Combo. */
+        //    pHalData.CustomerID = RT_CID_819x_HP;
+        //else if ((pHalData.EEPROMVID == 0x9846) && (pHalData.EEPROMPID == 0x9041))
+        //    pHalData.CustomerID = RT_CID_NETGEAR;
+        //else if ((pHalData.EEPROMVID == 0x2019) && (pHalData.EEPROMPID == 0x1201))
+        //    pHalData.CustomerID = RT_CID_PLANEX;
+        //else if ((pHalData.EEPROMVID == 0x0BDA) && (pHalData.EEPROMPID == 0x5088))
+        //    pHalData.CustomerID = RT_CID_CC_C;
+        //else if ((pHalData.EEPROMVID == 0x0411) && ((pHalData.EEPROMPID == 0x0242) || (pHalData.EEPROMPID == 0x025D)))
+        //    pHalData.CustomerID = RT_CID_DNI_BUFFALO;
+        //else if (((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3314)) ||
+        //    ((pHalData.EEPROMVID == 0x20F4) && (pHalData.EEPROMPID == 0x804B)) ||
+        //    ((pHalData.EEPROMVID == 0x20F4) && (pHalData.EEPROMPID == 0x805B)) ||
+        //    ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3315)) ||
+        //    ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3316)))
+        //    pHalData.CustomerID = RT_CID_DLINK;
 
-        RTW_INFO("PID= 0x%x, VID=  %x\n", pHalData->EEPROMPID, pHalData->EEPROMVID);
+        //RTW_INFO("PID= 0x%x, VID=  %x\n", pHalData.EEPROMPID, pHalData.EEPROMVID);
 
-        /*	Decide CustomerID according to VID/DID or EEPROM */
-        switch (pHalData->EEPROMCustomerID)
-        {
-            case EEPROM_CID_DEFAULT:
-                if ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3308))
-                    pHalData->CustomerID = RT_CID_DLINK;
-                else if ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3309))
-                    pHalData->CustomerID = RT_CID_DLINK;
-                else if ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x330a))
-                    pHalData->CustomerID = RT_CID_DLINK;
-                else if ((pHalData->EEPROMVID == 0x0BFF) && (pHalData->EEPROMPID == 0x8160))
-                {
-                    /* pHalData->bAutoConnectEnable = _FALSE; */
-                    pHalData->CustomerID = RT_CID_CHINA_MOBILE;
-                }
-                else if ((pHalData->EEPROMVID == 0x0BDA) && (pHalData->EEPROMPID == 0x5088))
-                    pHalData->CustomerID = RT_CID_CC_C;
-                else if ((pHalData->EEPROMVID == 0x0846) && (pHalData->EEPROMPID == 0x9052))
-                    pHalData->CustomerID = RT_CID_NETGEAR;
-                else if ((pHalData->EEPROMVID == 0x0411) && ((pHalData->EEPROMPID == 0x0242) || (pHalData->EEPROMPID == 0x025D)))
-                    pHalData->CustomerID = RT_CID_DNI_BUFFALO;
-                else if (((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3314)) ||
-                    ((pHalData->EEPROMVID == 0x20F4) && (pHalData->EEPROMPID == 0x804B)) ||
-                    ((pHalData->EEPROMVID == 0x20F4) && (pHalData->EEPROMPID == 0x805B)) ||
-                    ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3315)) ||
-                    ((pHalData->EEPROMVID == 0x2001) && (pHalData->EEPROMPID == 0x3316)))
-                    pHalData->CustomerID = RT_CID_DLINK;
-                RTW_INFO("PID= 0x%x, VID=  %x\n", pHalData->EEPROMPID, pHalData->EEPROMVID);
-                break;
-            case EEPROM_CID_WHQL:
-                /* padapter->bInHctTest = TRUE; */
+        ///*	Decide CustomerID according to VID/DID or EEPROM */
+        //switch (pHalData.EEPROMCustomerID)
+        //{
+        //    case EEPROM_CID_DEFAULT:
+        //        if ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3308))
+        //            pHalData.CustomerID = RT_CID_DLINK;
+        //        else if ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3309))
+        //            pHalData.CustomerID = RT_CID_DLINK;
+        //        else if ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x330a))
+        //            pHalData.CustomerID = RT_CID_DLINK;
+        //        else if ((pHalData.EEPROMVID == 0x0BFF) && (pHalData.EEPROMPID == 0x8160))
+        //        {
+        //            /* pHalData.bAutoConnectEnable = _FALSE; */
+        //            pHalData.CustomerID = RT_CID_CHINA_MOBILE;
+        //        }
+        //        else if ((pHalData.EEPROMVID == 0x0BDA) && (pHalData.EEPROMPID == 0x5088))
+        //            pHalData.CustomerID = RT_CID_CC_C;
+        //        else if ((pHalData.EEPROMVID == 0x0846) && (pHalData.EEPROMPID == 0x9052))
+        //            pHalData.CustomerID = RT_CID_NETGEAR;
+        //        else if ((pHalData.EEPROMVID == 0x0411) && ((pHalData.EEPROMPID == 0x0242) || (pHalData.EEPROMPID == 0x025D)))
+        //            pHalData.CustomerID = RT_CID_DNI_BUFFALO;
+        //        else if (((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3314)) ||
+        //            ((pHalData.EEPROMVID == 0x20F4) && (pHalData.EEPROMPID == 0x804B)) ||
+        //            ((pHalData.EEPROMVID == 0x20F4) && (pHalData.EEPROMPID == 0x805B)) ||
+        //            ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3315)) ||
+        //            ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3316)))
+        //            pHalData.CustomerID = RT_CID_DLINK;
+        //        RTW_INFO("PID= 0x%x, VID=  %x\n", pHalData.EEPROMPID, pHalData.EEPROMVID);
+        //        break;
+        //    case EEPROM_CID_WHQL:
+        //        /* padapter.bInHctTest = TRUE; */
 
-                /* pMgntInfo->bSupportTurboMode = FALSE; */
-                /* pMgntInfo->bAutoTurboBy8186 = FALSE; */
+        //        /* pMgntInfo.bSupportTurboMode = FALSE; */
+        //        /* pMgntInfo.bAutoTurboBy8186 = FALSE; */
 
-                /* pMgntInfo->PowerSaveControl.bInactivePs = FALSE; */
-                /* pMgntInfo->PowerSaveControl.bIPSModeBackup = FALSE; */
-                /* pMgntInfo->PowerSaveControl.bLeisurePs = FALSE; */
-                /* pMgntInfo->PowerSaveControl.bLeisurePsModeBackup = FALSE; */
-                /* pMgntInfo->keepAliveLevel = 0; */
+        //        /* pMgntInfo.PowerSaveControl.bInactivePs = FALSE; */
+        //        /* pMgntInfo.PowerSaveControl.bIPSModeBackup = FALSE; */
+        //        /* pMgntInfo.PowerSaveControl.bLeisurePs = FALSE; */
+        //        /* pMgntInfo.PowerSaveControl.bLeisurePsModeBackup = FALSE; */
+        //        /* pMgntInfo.keepAliveLevel = 0; */
 
-                /* padapter->bUnloadDriverwhenS3S4 = FALSE; */
-                break;
-            default:
-                pHalData->CustomerID = RT_CID_DEFAULT;
-                break;
+        //        /* padapter.bUnloadDriverwhenS3S4 = FALSE; */
+        //        break;
+        //    default:
+        //        pHalData.CustomerID = RT_CID_DEFAULT;
+        //        break;
 
-        }
-        RTW_INFO("Customer ID: 0x%2x\n", pHalData->CustomerID);
+        //}
+        //RTW_INFO("Customer ID: 0x%2x\n", pHalData.CustomerID);
 
-        hal_CustomizedBehavior_8812AU(pAdapter);
+        //hal_CustomizedBehavior_8812AU(pAdapter);
     }
 
 
@@ -491,15 +512,15 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
 
         if (AutoloadFail)
         {
-            pHalData->EEPROMUsbSwitch = false;
+            pHalData.EEPROMUsbSwitch = false;
         }
         else
             /* check efuse 0x08 bit2 */
         {
-            pHalData->EEPROMUsbSwitch = (PROMContent[EEPROM_USB_MODE_8812] & BIT1) >> 1;
+            pHalData.EEPROMUsbSwitch = ((PROMContent[EEPROM_USB_MODE_8812] & BIT1) >> 1) != 0;
         }
 
-        RTW_INFO("Usb Switch: %d\n", pHalData->EEPROMUsbSwitch);
+        RTW_INFO("Usb Switch: %d", pHalData.EEPROMUsbSwitch);
     }
 
 
@@ -512,49 +533,49 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
             if ((GetRegRFEType(Adapter) != 64) || 0xFF == PROMContent[EEPROM_RFE_OPTION_8812])
             {
                 if (GetRegRFEType(Adapter) != 64)
-                    pHalData->rfe_type = GetRegRFEType(Adapter);
+                    pHalData.rfe_type = GetRegRFEType(Adapter);
                 else
                 {
                     if (IS_HARDWARE_TYPE_8812AU(Adapter))
                     {
-                        pHalData->rfe_type = 0;
+                        pHalData.rfe_type = 0;
                     }
 
                 }
 
             }
-            else if (PROMContent[EEPROM_RFE_OPTION_8812] & BIT7)
+            else if ((PROMContent[EEPROM_RFE_OPTION_8812] & BIT7) != 0)
             {
-                if (pHalData->external_lna_5g)
+                if (pHalData.external_lna_5g == true || pHalData.external_lna_5g == null)
                 {
-                    if (pHalData->external_pa_5g)
+                    if (pHalData.external_pa_5g == true || pHalData.external_pa_5g == null)
                     {
-                        if (pHalData->ExternalLNA_2G && pHalData->ExternalPA_2G)
-                            pHalData->rfe_type = 3;
+                        if (pHalData.ExternalLNA_2G && pHalData.ExternalPA_2G)
+                            pHalData.rfe_type = 3;
                         else
-                            pHalData->rfe_type = 0;
+                            pHalData.rfe_type = 0;
                     }
                     else
-                        pHalData->rfe_type = 2;
+                        pHalData.rfe_type = 2;
                 }
                 else
-                    pHalData->rfe_type = 4;
+                    pHalData.rfe_type = 4;
             }
             else
             {
-                pHalData->rfe_type = PROMContent[EEPROM_RFE_OPTION_8812] & 0x3F;
+                pHalData.rfe_type = (ushort)(PROMContent[EEPROM_RFE_OPTION_8812] & 0x3F);
 
                 /* 2013/03/19 MH Due to othe customer already use incorrect EFUSE map */
                 /* to for their product. We need to add workaround to prevent to modify */
                 /* spec and notify all customer to revise the IC 0xca content. After */
                 /* discussing with Willis an YN, revise driver code to prevent. */
-                if (pHalData->rfe_type == 4 &&
-                    (pHalData->external_pa_5g == true || pHalData->ExternalPA_2G == true ||
-                     pHalData->external_lna_5g == true || pHalData->ExternalLNA_2G == true))
+                if (pHalData.rfe_type == 4 &&
+                    (pHalData.external_pa_5g == true || pHalData.ExternalPA_2G == true ||
+                     pHalData.external_lna_5g == true || pHalData.ExternalLNA_2G == true))
                 {
                     if (IS_HARDWARE_TYPE_8812AU(Adapter))
                     {
-                        pHalData->rfe_type = 0;
+                        pHalData.rfe_type = 0;
                     }
 
                 }
@@ -563,31 +584,31 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
         else
         {
             if (GetRegRFEType(Adapter) != 64)
-                pHalData->rfe_type = GetRegRFEType(Adapter);
+                pHalData.rfe_type = GetRegRFEType(Adapter);
             else
             {
                 if (IS_HARDWARE_TYPE_8812AU(Adapter))
                 {
-                    pHalData->rfe_type = 0;
+                    pHalData.rfe_type = 0;
                 }
 
             }
         }
 
-        RTW_INFO("RFE Type: 0x%2x\n", pHalData->rfe_type);
+        RTW_INFO("RFE Type: 0x%2x\n", pHalData.rfe_type);
     }
 
     static void Hal_ReadChannelPlan8812A(PADAPTER        padapter,u8				[]hwinfo,BOOLEAN         AutoLoadFail)
     {
-        hal_com_config_channel_plan(
-            padapter
-            , hwinfo[EEPROM_COUNTRY_CODE_8812]
-            , hwinfo[EEPROM_ChannelPlan_8812]
-            , padapter->registrypriv.alpha2
-            , padapter->registrypriv.channel_plan
-            , RTW_CHPLAN_REALTEK_DEFINE
-            , AutoLoadFail
-        );
+        //hal_com_config_channel_plan(
+        //    padapter
+        //    , hwinfo[EEPROM_COUNTRY_CODE_8812]
+        //    , hwinfo[EEPROM_ChannelPlan_8812]
+        //    , padapter.registrypriv.alpha2
+        //    , padapter.registrypriv.channel_plan
+        //    , RTW_CHPLAN_REALTEK_DEFINE
+        //    , AutoLoadFail
+        //);
     }
 
     /// <summary>
@@ -616,96 +637,105 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
     )
     {
 
-        rf_ctl_t rfctl = adapter_to_rfctl(padapter);
-        PHAL_DATA_TYPE pHalData;
-        u8 force_hw_chplan = _FALSE;
-        int chplan = -1;
-        country_chplan country_ent = null, ent;
+//        rf_ctl_t rfctl = adapter_to_rfctl(padapter);
+//        PHAL_DATA_TYPE pHalData;
+//        bool force_hw_chplan = false;
+//        int chplan = -1;
+//        country_chplan country_ent = null, ent;
 
-        pHalData = GET_HAL_DATA(padapter);
+//        pHalData = GET_HAL_DATA(padapter);
 
-        /* treat 0xFF as invalid value, bypass hw_chplan & force_hw_chplan parsing */
-        if (hw_chplan == 0xFF)
-            goto chk_hw_country_code;
+//        /* treat 0xFF as invalid value, bypass hw_chplan & force_hw_chplan parsing */
+//        if (hw_chplan == 0xFF)
+//            goto chk_hw_country_code;
 
-        if (AutoLoadFail == _TRUE)
-            goto chk_sw_config;
+//        if (AutoLoadFail == true)
+//        {
+//            goto chk_sw_config;
+//        }
 
-//#ifndef CONFIG_FORCE_SW_CHANNEL_PLAN
-//	if (hw_chplan & EEPROM_CHANNEL_PLAN_BY_HW_MASK)
-//		force_hw_chplan = _TRUE;
-//#endif
+////#ifndef CONFIG_FORCE_SW_CHANNEL_PLAN
+////	if (hw_chplan & EEPROM_CHANNEL_PLAN_BY_HW_MASK)
+////		force_hw_chplan = _TRUE;
+////#endif
 
-        hw_chplan &= (~EEPROM_CHANNEL_PLAN_BY_HW_MASK);
+//        hw_chplan &= (~EEPROM_CHANNEL_PLAN_BY_HW_MASK);
 
-        chk_hw_country_code:
-        if (hw_alpha2 && !IS_ALPHA2_NO_SPECIFIED(hw_alpha2))
-        {
-            ent = rtw_get_chplan_from_country(hw_alpha2);
-            if (ent)
-            {
-                /* get chplan from hw country code, by pass hw chplan setting */
-                country_ent = ent;
-                chplan = ent->chplan;
-                goto chk_sw_config;
-            }
-            else
-                RTW_PRINT("%s unsupported hw_alpha2:\"%c%c\"\n", __func__, hw_alpha2[0], hw_alpha2[1]);
-        }
+//        chk_hw_country_code:
+//        if (hw_alpha2 && !IS_ALPHA2_NO_SPECIFIED(hw_alpha2))
+//        {
+//            ent = rtw_get_chplan_from_country(hw_alpha2);
+//            if (ent)
+//            {
+//                /* get chplan from hw country code, by pass hw chplan setting */
+//                country_ent = ent;
+//                chplan = ent.chplan;
+//                goto chk_sw_config;
+//            }
+//            else
+//            {
+//                RTW_PRINT("%s unsupported hw_alpha2:\"%c%c\"\n", __func__, hw_alpha2[0], hw_alpha2[1]);
+//            }
+//        }
 
-        if (rtw_is_channel_plan_valid(hw_chplan))
-            chplan = hw_chplan;
-        else if (force_hw_chplan == _TRUE)
-        {
-            RTW_PRINT("%s unsupported hw_chplan:0x%02X\n", __func__, hw_chplan);
-            /* hw infomaton invalid, refer to sw information */
-            force_hw_chplan = _FALSE;
-        }
+//        if (rtw_is_channel_plan_valid(hw_chplan))
+//            chplan = hw_chplan;
+//        else if (force_hw_chplan == true)
+//        {
+//            RTW_PRINT("%s unsupported hw_chplan:0x%02X\n", hw_chplan);
+//            /* hw infomaton invalid, refer to sw information */
+//            force_hw_chplan = false;
+//        }
 
-        chk_sw_config:
-        if (force_hw_chplan == _TRUE)
-            goto done;
+//        chk_sw_config:
+//        if (force_hw_chplan == true)
+//        {
+//            goto done;
+//        }
 
-        if (sw_alpha2 && !IS_ALPHA2_NO_SPECIFIED(sw_alpha2))
-        {
-            ent = rtw_get_chplan_from_country(sw_alpha2);
-            if (ent)
-            {
-                /* get chplan from sw country code, by pass sw chplan setting */
-                country_ent = ent;
-                chplan = ent->chplan;
-                goto done;
-            }
-            else
-                RTW_PRINT("%s unsupported sw_alpha2:\"%c%c\"\n", __func__, sw_alpha2[0], sw_alpha2[1]);
-        }
+//        if (!string.IsNullOrWhiteSpace(sw_alpha2))
+//        {
+//            ent = rtw_get_chplan_from_country(sw_alpha2);
+//            if (ent !=null)
+//            {
+//                /* get chplan from sw country code, by pass sw chplan setting */
+//                country_ent = ent;
+//                chplan = ent.chplan;
+//                goto done;
+//            }
+//            else
+//            {
+//                RTW_PRINT("%s unsupported sw_alpha2:\"%c%c\"\n",  sw_alpha2[0], sw_alpha2[1]);
+//            }
+//        }
 
-        if (rtw_is_channel_plan_valid(sw_chplan))
-        {
-            /* cancel hw_alpha2 because chplan is specified by sw_chplan*/
-            country_ent = NULL;
-            chplan = sw_chplan;
-        }
-        else if (sw_chplan != RTW_CHPLAN_UNSPECIFIED)
-            RTW_PRINT("%s unsupported sw_chplan:0x%02X\n", __func__, sw_chplan);
+//        if (rtw_is_channel_plan_valid(sw_chplan))
+//        {
+//            /* cancel hw_alpha2 because chplan is specified by sw_chplan*/
+//            country_ent = null;
+//            chplan = sw_chplan;
+//        }
+//        else if (sw_chplan != RTW_CHPLAN_UNSPECIFIED)
+//        {
+//            RTW_PRINT("%s unsupported sw_chplan:0x%02X", sw_chplan);
+//        }
 
-        done:
-        if (chplan == -1)
-        {
-            RTW_PRINT("%s use def_chplan:0x%02X\n", __func__, def_chplan);
-            chplan = def_chplan;
-        }
-        else if (country_ent)
-        {
-            RTW_PRINT("%s country code:\"%c%c\" with chplan:0x%02X\n", __func__
-                , country_ent->alpha2[0], country_ent->alpha2[1], country_ent->chplan);
-        }
-        else
-            RTW_PRINT("%s chplan:0x%02X\n", __func__, chplan);
+//        done:
+//        if (chplan == -1)
+//        {
+//            RTW_PRINT("%s use def_chplan:0x%02X\n", def_chplan);
+//            chplan = def_chplan;
+//        }
+//        else if (country_ent != null)
+//        {
+//            RTW_PRINT("%s country code:\"%c%c\" with chplan:0x%02X\n",country_ent.alpha2[0], country_ent.alpha2[1], country_ent.chplan);
+//        }
+//        else
+//            RTW_PRINT("%s chplan:0x%02X\n", chplan);
 
-        rfctl->country_ent = country_ent;
-        rfctl->ChannelPlan = chplan;
-        pHalData->bDisableSWChannelPlan = force_hw_chplan;
+//        rfctl.country_ent = country_ent;
+//        rfctl.ChannelPlan = chplan;
+//        pHalData.bDisableSWChannelPlan = force_hw_chplan;
     }
 
 
@@ -925,6 +955,31 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
         }
     }
 
+    static map_t hal_pg_txpwr_def_info(_adapter adapter)
+    {
+        u8 interface_type = 0;
+        map_t map = null;
+
+        map = MAP_ENT(0xB8, 1, 0xFF, new map_seg_t()
+            {
+                sa = 0x10,
+                len = 82,
+                c = new byte[]
+                {
+                    0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x02, 0xEE, 0xEE, 0xFF, 0xFF,
+                    0xFF, 0xFF, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A,
+                    0x02, 0xEE, 0xFF, 0xFF, 0xEE, 0xFF, 0x00, 0xEE, 0xFF, 0xFF, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D,
+                    0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x02, 0xEE, 0xEE, 0xFF, 0xFF, 0xFF, 0xFF, 0x2A, 0x2A, 0x2A, 0x2A,
+                    0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x02, 0xEE, 0xFF, 0xFF, 0xEE, 0xFF,
+                    0x00, 0xEE
+                }
+            }
+
+        );
+
+        return map;
+    }
+
     private static void hal_load_pg_txpwr_info(_adapter adapter, TxPowerInfo24G pwr_info_2g, TxPowerInfo5G pwr_info_5g, u8[] pg_data, BOOLEAN AutoLoadFail)
     {
 
@@ -952,14 +1007,32 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
                 break;
             case PG_TXPWR_SRC_DEF:
             default:
-                txpwr_map = pg_txpwr_def_info;
+                txpwr_map = MAP_ENT(0xB8, 1, 0xFF, new map_seg_t()
+                {
+                    len = 168,
+                    sa = 0x88,
+                    c = new byte[]
+                    {
+                        0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x24, 0xEE, 0xEE, 0xEE, 0xEE,
+                        0xEE, 0xEE, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A,
+                        0x04, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D,
+                        0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x24, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0x2A, 0x2A, 0x2A, 0x2A,
+                        0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x04, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE,
+                        0xEE, 0xEE, 0xEE, 0xEE, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x24,
+                        0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A,
+                        0x2A, 0x2A, 0x2A, 0x2A, 0x04, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0x2D, 0x2D,
+                        0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x24, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE,
+                        0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x2A, 0x04, 0xEE,
+                        0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE, 0xEE
+                    }
+                });
                 break;
         }
 
-        ;
-
         if (txpwr_map == null)
+        {
             goto end_parse;
+        }
 
         for (path = 0; path < MAX_RF_PATH; path++)
         {
@@ -969,15 +1042,18 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
             pg_offset = hal_load_pg_txpwr_info_path_5g(adapter, pwr_info_5g, path, txpwr_src, txpwr_map, pg_offset);
         }
 
-        if (hal_chk_pg_txpwr_info_2g(adapter, pwr_info_2g) == _SUCCESS && hal_chk_pg_txpwr_info_5g(adapter, pwr_info_5g) == _SUCCESS)
+        if (hal_chk_pg_txpwr_info_2g(adapter, pwr_info_2g)&&
+            hal_chk_pg_txpwr_info_5g(adapter, pwr_info_5g))
+        {
             goto exit;
+        }
 
         end_parse:
         txpwr_src++;
         if (txpwr_src < PG_TXPWR_SRC_NUM)
             goto select_src;
 
-        if (hal_chk_pg_txpwr_info_2g(adapter, pwr_info_2g) != _SUCCESS || hal_chk_pg_txpwr_info_5g(adapter, pwr_info_5g) != _SUCCESS)
+        if (hal_chk_pg_txpwr_info_2g(adapter, pwr_info_2g)|| hal_chk_pg_txpwr_info_5g(adapter, pwr_info_5g))
         {
             throw new Exception();
         }
@@ -985,6 +1061,517 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
         exit:
 
         return;
+    }
+
+    static bool hal_chk_band_cap(_adapter adapter, u8 cap)
+    {
+        return (GET_HAL_SPEC(adapter).band_cap & cap) != 0;
+    }
+
+    static bool IS_PG_TXPWR_BASE_INVALID(hal_spec_t hal_spec, byte _base) => ((_base) > hal_spec.txgi_max);
+
+    static bool hal_chk_pg_txpwr_info_2g(_adapter adapter, TxPowerInfo24G pwr_info)
+    {
+        u8 BAND_CAP_2G = 0;
+
+        hal_spec_t hal_spec = GET_HAL_SPEC(adapter);
+        u8 path, group, tx_idx;
+
+        if (pwr_info == null || !hal_chk_band_cap(adapter, BAND_CAP_2G))
+            return true;
+
+        for (path = 0; path < MAX_RF_PATH; path++)
+        {
+            if (!HAL_SPEC_CHK_RF_PATH_2G(hal_spec, path))
+            {
+                continue;
+            }
+
+            for (group = 0; group < MAX_CHNL_GROUP_24G; group++)
+            {
+                if (IS_PG_TXPWR_BASE_INVALID(hal_spec, pwr_info.IndexCCK_Base[path, group]) ||
+                    IS_PG_TXPWR_BASE_INVALID(hal_spec, pwr_info.IndexBW40_Base[path, group]))
+                {
+                    return false;
+                }
+            }
+
+            for (tx_idx = 0; tx_idx < MAX_TX_COUNT; tx_idx++)
+            {
+                if (!HAL_SPEC_CHK_TX_CNT(hal_spec, tx_idx))
+                {
+                    continue;
+                }
+
+                if (IS_PG_TXPWR_DIFF_INVALID(pwr_info.CCK_Diff[path, tx_idx])
+                    || IS_PG_TXPWR_DIFF_INVALID(pwr_info.OFDM_Diff[path, tx_idx])
+                    || IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW20_Diff[path, tx_idx])
+                    || IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW40_Diff[path, tx_idx]))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    static bool IS_PG_TXPWR_DIFF_INVALID(sbyte _diff) => ((_diff) > 7 || (_diff) < -8);
+
+    static bool HAL_SPEC_CHK_TX_CNT(hal_spec_t _spec, byte _cnt_idx) => ((_spec).max_tx_cnt > (_cnt_idx));
+
+    static bool hal_chk_pg_txpwr_info_5g(_adapter adapter, TxPowerInfo5G pwr_info)
+    {
+        u8 BAND_CAP_5G = 1;
+        hal_spec_t hal_spec = GET_HAL_SPEC(adapter);
+        u8 path, group, tx_idx;
+
+        if (pwr_info == null || !hal_chk_band_cap(adapter, BAND_CAP_5G))
+        {
+            return true;
+        }
+
+        for (path = 0; path<MAX_RF_PATH; path++) {
+            if (!HAL_SPEC_CHK_RF_PATH_5G(hal_spec, path))
+                continue;
+            for (group = 0; group<MAX_CHNL_GROUP_5G; group++)
+                if (IS_PG_TXPWR_BASE_INVALID(hal_spec, pwr_info.IndexBW40_Base[path,group]))
+                {
+                    return false;
+                }
+            for (tx_idx = 0; tx_idx<MAX_TX_COUNT; tx_idx++) {
+                if (!HAL_SPEC_CHK_TX_CNT(hal_spec, tx_idx))
+                {
+                    continue;
+                }
+                if (IS_PG_TXPWR_DIFF_INVALID(pwr_info.OFDM_Diff[path, tx_idx])
+                    || IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW20_Diff[path, tx_idx])
+                    || IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW40_Diff[path, tx_idx])
+                    || IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW80_Diff[path, tx_idx])
+                    || IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW160_Diff[path, tx_idx]))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    static u8 map_read8(map_t map, u16 offset)
+    {
+        map_seg_t seg;
+        u8 val = map.init_value;
+        int i;
+
+        if (offset + 1 > map.len)
+        {
+            throw new Exception("WTF");
+            goto exit;
+        }
+
+        for (i = 0; i<map.seg_num; i++)
+        {
+            seg = map.segs + i;
+            if (seg.sa + seg.len <= offset || seg.sa >= offset + 1)
+                continue;
+
+            val = * (seg.c + offset - seg.sa);
+            break;
+        }
+
+        exit:
+        return val;
+    }
+
+    static string rf_path_char(uint path) => (((path) >= RF_PATH_MAX) ? "X" : "A" + (path));
+
+    static u8 PG_TXPWR_MSB_DIFF_S4BIT(u8 _pg_v) => (byte)(((_pg_v) & 0xf0) >> 4);
+    static u8 PG_TXPWR_LSB_DIFF_S4BIT(u8 _pg_v) => (byte)((_pg_v) & 0x0f);
+
+    static s8 PG_TXPWR_MSB_DIFF_TO_S8BIT(u8 _pg_v) => (sbyte)((PG_TXPWR_MSB_DIFF_S4BIT(_pg_v) & BIT3) != 0
+        ? (PG_TXPWR_MSB_DIFF_S4BIT(_pg_v) | 0xF0)
+        : PG_TXPWR_MSB_DIFF_S4BIT(_pg_v));
+
+    static s8 PG_TXPWR_LSB_DIFF_TO_S8BIT(u8 _pg_v) => (sbyte)((PG_TXPWR_LSB_DIFF_S4BIT(_pg_v) & BIT3) != 0
+        ? (PG_TXPWR_LSB_DIFF_S4BIT(_pg_v) | 0xF0)
+        : PG_TXPWR_LSB_DIFF_S4BIT(_pg_v));
+    static string[] _pg_txpwr_src_str = {
+        "PG_DATA",
+        "IC_DEF",
+        "DEF",
+        "UNKNOWN"
+    };
+
+    static string pg_txpwr_src_str(int src) =>
+        (((src) >= PG_TXPWR_SRC_NUM) ? _pg_txpwr_src_str[PG_TXPWR_SRC_NUM] : _pg_txpwr_src_str[(src)]);
+
+    static u16 hal_load_pg_txpwr_info_path_5g(_adapter adapter, TxPowerInfo5G pwr_info, byte path, u8 txpwr_src,
+        map_t txpwr_map, u16 pg_offset)
+    {
+
+        hal_spec_t hal_spec = GET_HAL_SPEC(adapter);
+        u16 offset = pg_offset;
+        u8 group, tx_idx;
+        u8 val;
+        u8 tmp_base;
+        s8 tmp_diff;
+
+        if (pwr_info == null || !hal_chk_band_cap(adapter, BAND_CAP_5G))
+
+        {
+            offset += PG_TXPWR_1PATH_BYTE_NUM_5G;
+            goto exit;
+        }
+
+
+        if (DBG_PG_TXPWR_READ)
+        {
+            RTW_INFO("%s[%c] eaddr:0x%03x\n", rf_path_char(path), offset);
+        }
+
+        for (group = 0; group < MAX_CHNL_GROUP_5G; group++)
+        {
+            if (HAL_SPEC_CHK_RF_PATH_5G(hal_spec, path))
+            {
+                tmp_base = map_read8(txpwr_map, offset);
+                if (!IS_PG_TXPWR_BASE_INVALID(hal_spec, tmp_base)
+                    && IS_PG_TXPWR_BASE_INVALID(hal_spec, pwr_info.IndexBW40_Base[path,group])
+                   )
+                {
+                    pwr_info.IndexBW40_Base[path,group] = tmp_base;
+                    if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                    {
+                        RTW_INFO("[%c] 5G G%02d BW40-1S base:%u from %s\n", rf_path_char(path), group, tmp_base, pg_txpwr_src_str(txpwr_src));
+                    }
+                }
+            }
+
+            offset++;
+        }
+
+        for (tx_idx = 0; tx_idx < MAX_TX_COUNT; tx_idx++)
+        {
+            if (tx_idx == 0)
+            {
+                if (HAL_SPEC_CHK_RF_PATH_5G(hal_spec, path) && HAL_SPEC_CHK_TX_CNT(hal_spec, tx_idx))
+                {
+                    val = map_read8(txpwr_map, offset);
+                    tmp_diff = PG_TXPWR_MSB_DIFF_TO_S8BIT(val);
+                    if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff)
+                        && IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW20_Diff[path,tx_idx])
+                       )
+                    {
+                        pwr_info.BW20_Diff[path, tx_idx] = tmp_diff;
+                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                        {
+                            RTW_INFO("[%c] 5G BW20-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                        }
+                    }
+
+                    tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
+                    if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff)
+                        && IS_PG_TXPWR_DIFF_INVALID(pwr_info.OFDM_Diff[path,tx_idx])
+                       )
+                    {
+                        pwr_info.OFDM_Diff[path,tx_idx] = tmp_diff;
+                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                        {
+                            RTW_INFO("[%c] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                        }
+                    }
+                }
+
+                offset++;
+            }
+            else
+            {
+                if (HAL_SPEC_CHK_RF_PATH_5G(hal_spec, path) && HAL_SPEC_CHK_TX_CNT(hal_spec, tx_idx))
+                {
+                    val = map_read8(txpwr_map, offset);
+                    tmp_diff = PG_TXPWR_MSB_DIFF_TO_S8BIT(val);
+                    if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff)
+                        && IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW40_Diff[path,tx_idx])
+                       )
+                    {
+                        pwr_info.BW40_Diff[path,tx_idx] = tmp_diff;
+                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                        {
+                            RTW_INFO("[%c] 5G BW40-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                        }
+                    }
+
+                    tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
+                    if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff)
+                        && IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW20_Diff[path,tx_idx])
+                       )
+                    {
+                        pwr_info.BW20_Diff[path, tx_idx] = tmp_diff;
+                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                        {
+                            RTW_INFO("[%c] 5G BW20-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                        }
+                    }
+                }
+
+                offset++;
+            }
+        }
+
+/* OFDM diff 2T ~ 3T */
+        if (HAL_SPEC_CHK_RF_PATH_5G(hal_spec, path) && HAL_SPEC_CHK_TX_CNT(hal_spec, 1))
+        {
+            val = map_read8(txpwr_map, offset);
+            tmp_diff = PG_TXPWR_MSB_DIFF_TO_S8BIT(val);
+            if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff) && IS_PG_TXPWR_DIFF_INVALID(pwr_info.OFDM_Diff[path, 1]))
+            {
+                pwr_info.OFDM_Diff[path,1] = tmp_diff;
+                if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                {
+                    RTW_INFO("[%c] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), 2, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                }
+            }
+
+            if (HAL_SPEC_CHK_TX_CNT(hal_spec, 2))
+            {
+                tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
+                if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff) && IS_PG_TXPWR_DIFF_INVALID(pwr_info.OFDM_Diff[path,2]))
+                {
+                    pwr_info.OFDM_Diff[path, 2] = tmp_diff;
+                    if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                    {
+                        RTW_INFO("[%c] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), 3, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                    }
+                }
+            }
+        }
+
+        offset++;
+
+/* OFDM diff 4T */
+        if (HAL_SPEC_CHK_RF_PATH_5G(hal_spec, path) && HAL_SPEC_CHK_TX_CNT(hal_spec, 3))
+        {
+            val = map_read8(txpwr_map, offset);
+            tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
+            if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff) && IS_PG_TXPWR_DIFF_INVALID(pwr_info.OFDM_Diff[path, 3]))
+            {
+                pwr_info.OFDM_Diff[path,3] = tmp_diff;
+                if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                {
+                    RTW_INFO("[%c] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), 4, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                }
+            }
+        }
+
+        offset++;
+
+        for (tx_idx = 0; tx_idx < MAX_TX_COUNT; tx_idx++)
+        {
+            if (HAL_SPEC_CHK_RF_PATH_5G(hal_spec, path) && HAL_SPEC_CHK_TX_CNT(hal_spec, tx_idx))
+            {
+                val = map_read8(txpwr_map, offset);
+                tmp_diff = PG_TXPWR_MSB_DIFF_TO_S8BIT(val);
+                if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff) && IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW80_Diff[path, tx_idx])
+                   )
+                {
+                    pwr_info.BW80_Diff[path, tx_idx] = tmp_diff;
+                    if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                        RTW_INFO("[%c] 5G BW80-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                }
+
+                tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
+                if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff) && IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW160_Diff[path, tx_idx])
+                   )
+                {
+                    pwr_info.BW160_Diff[path, tx_idx] = tmp_diff;
+                    if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                    {
+                        RTW_INFO("[%c] 5G BW160-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                    }
+                }
+            }
+
+            offset++;
+        }
+
+        if (offset != pg_offset + PG_TXPWR_1PATH_BYTE_NUM_5G)
+        {
+            RTW_ERR("%s parse %d bytes != %d\n", offset - pg_offset, PG_TXPWR_1PATH_BYTE_NUM_5G);
+            throw new Exception("ERRR");
+        }
+
+        exit:
+        return offset;
+    }
+
+    private static bool LOAD_PG_TXPWR_WARN_COND(byte txpwrSrc)
+    {
+        return true; // Because DBG_PG_TXPWR_READ
+    }
+
+    private static ushort hal_load_pg_txpwr_info_path_2g(_adapter adapter, TxPowerInfo24G pwr_info, byte path,
+        u8 txpwr_src, map_t txpwr_map, u16 pg_offset)
+    {
+
+        hal_spec_t hal_spec = GET_HAL_SPEC(adapter);
+        u16 offset = pg_offset;
+        u8 group, tx_idx;
+        u8 val;
+        u8 tmp_base;
+        s8 tmp_diff;
+
+        if (pwr_info == null || !hal_chk_band_cap(adapter, BAND_CAP_2G))
+        {
+            offset += PG_TXPWR_1PATH_BYTE_NUM_2G;
+            goto exit;
+        }
+
+        if (DBG_PG_TXPWR_READ)
+        {
+            RTW_INFO("%s [%c] offset:0x%03x\n", rf_path_char(path), offset);
+        }
+
+        for (group = 0; group < MAX_CHNL_GROUP_24G; group++)
+        {
+            if (HAL_SPEC_CHK_RF_PATH_2G(hal_spec, path))
+            {
+                tmp_base = map_read8(txpwr_map, offset);
+                if (!IS_PG_TXPWR_BASE_INVALID(hal_spec, tmp_base) && IS_PG_TXPWR_BASE_INVALID(hal_spec, pwr_info.IndexCCK_Base[path,group])
+                   )
+                {
+                    pwr_info.IndexCCK_Base[path,group] = tmp_base;
+                    if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                    {
+                        RTW_INFO("[%c] 2G G%02d CCK-1T base:%u from %s\n", rf_path_char(path), group, tmp_base, pg_txpwr_src_str(txpwr_src));
+                    }
+                }
+            }
+
+            offset++;
+        }
+
+        for (group = 0; group < MAX_CHNL_GROUP_24G - 1; group++)
+        {
+            if (HAL_SPEC_CHK_RF_PATH_2G(hal_spec, path))
+            {
+                tmp_base = map_read8(txpwr_map, offset);
+                if (!IS_PG_TXPWR_BASE_INVALID(hal_spec, tmp_base)
+                    && IS_PG_TXPWR_BASE_INVALID(hal_spec, pwr_info.IndexBW40_Base[path, group])
+                   )
+                {
+                    pwr_info.IndexBW40_Base[path,group] = tmp_base;
+                    if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                    {
+                        RTW_INFO("[%c] 2G G%02d BW40-1S base:%u from %s\n", rf_path_char(path), group, tmp_base, pg_txpwr_src_str(txpwr_src));
+                    }
+                }
+            }
+
+            offset++;
+        }
+
+        for (tx_idx = 0; tx_idx < MAX_TX_COUNT; tx_idx++)
+        {
+            if (tx_idx == 0)
+            {
+                if (HAL_SPEC_CHK_RF_PATH_2G(hal_spec, path) && HAL_SPEC_CHK_TX_CNT(hal_spec, tx_idx))
+                {
+                    val = map_read8(txpwr_map, offset);
+                    tmp_diff = PG_TXPWR_MSB_DIFF_TO_S8BIT(val);
+                    if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff) && IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW20_Diff[path, tx_idx])
+                       )
+                    {
+                        pwr_info.BW20_Diff[path,tx_idx] = tmp_diff;
+                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                        {
+                            RTW_INFO("[%c] 2G BW20-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                        }
+                    }
+
+                    tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
+                    if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff) && IS_PG_TXPWR_DIFF_INVALID(pwr_info.OFDM_Diff[path,tx_idx])
+                       )
+                    {
+                        pwr_info.OFDM_Diff[path, tx_idx] = tmp_diff;
+                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                        {
+                            RTW_INFO("[%c] 2G OFDM-%dT diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                        }
+                    }
+                }
+
+                offset++;
+            }
+            else
+            {
+                if (HAL_SPEC_CHK_RF_PATH_2G(hal_spec, path) && HAL_SPEC_CHK_TX_CNT(hal_spec, tx_idx))
+                {
+                    val = map_read8(txpwr_map, offset);
+                    tmp_diff = PG_TXPWR_MSB_DIFF_TO_S8BIT(val);
+                    if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff) && IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW40_Diff[path,tx_idx]))
+                    {
+                        pwr_info.BW40_Diff[path, tx_idx] = tmp_diff;
+                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                        {
+                            RTW_INFO("[%c] 2G BW40-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                        }
+
+                    }
+
+                    tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
+                    if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff)
+                        && IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW20_Diff[path, tx_idx])
+                       )
+                    {
+                        pwr_info.BW20_Diff[path,tx_idx] = tmp_diff;
+                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                            RTW_INFO("[%c] 2G BW20-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff,
+                                pg_txpwr_src_str(txpwr_src));
+                    }
+                }
+
+                offset++;
+
+                if (HAL_SPEC_CHK_RF_PATH_2G(hal_spec, path) && HAL_SPEC_CHK_TX_CNT(hal_spec, tx_idx))
+                {
+                    val = map_read8(txpwr_map, offset);
+                    tmp_diff = PG_TXPWR_MSB_DIFF_TO_S8BIT(val);
+                    if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff)
+                        && IS_PG_TXPWR_DIFF_INVALID(pwr_info.OFDM_Diff[path, tx_idx])
+                       )
+                    {
+                        pwr_info.OFDM_Diff[path, tx_idx] = tmp_diff;
+                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                        {
+                            RTW_INFO("[%c] 2G OFDM-%dT diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                        }
+                    }
+
+                    tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
+                    if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff)
+                        && IS_PG_TXPWR_DIFF_INVALID(pwr_info.CCK_Diff[path,tx_idx])
+                       )
+                    {
+                        pwr_info.CCK_Diff[path,tx_idx] = tmp_diff;
+                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
+                        {
+                            RTW_INFO("[%c] 2G CCK-%dT diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
+                        }
+                    }
+                }
+
+                offset++;
+            }
+        }
+
+        if (offset != pg_offset + PG_TXPWR_1PATH_BYTE_NUM_2G)
+        {
+            RTW_ERR("%s parse %d bytes != %d\n",  offset - pg_offset, PG_TXPWR_1PATH_BYTE_NUM_2G);
+            throw new Exception();
+        }
+
+        exit:
+        return offset;
     }
 
     static void hal_init_pg_txpwr_info_2g(_adapter adapter, TxPowerInfo24G pwr_info)
@@ -1297,7 +1884,7 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
 //         HAL_DATA_TYPE* hal_data = GET_HAL_DATA(adapter);
 //         u8 addr[ETH_ALEN];
 //         int addr_offset = hal_efuse_macaddr_offset(adapter);
-//         u8* hw_addr = NULL;
+//         u8* hw_addr = null;
 //         int ret = _SUCCESS;
 //
 //         if (autoload_fail)
@@ -1307,9 +1894,9 @@ static void hal_CustomizeByCustomerID_8812AU(PADAPTER        pAdapter)
 //             hw_addr = &hal_data.efuse_eeprom_data[addr_offset];
 //
 // #ifdef CONFIG_EFUSE_CONFIG_FILE
-//         /* if the hw_addr is written by efuse file, set to NULL */
+//         /* if the hw_addr is written by efuse file, set to null */
 //         if (hal_data.efuse_file_status == EFUSE_FILE_LOADED)
-//             hw_addr = NULL;
+//             hw_addr = null;
 // #endif
 //
 //         if (!hw_addr) {

@@ -46,4 +46,13 @@ public static class CommonConsts
     public const byte EEPROM_THERMAL_METER_8812 = 0xBA;
     public const byte EEPROM_Default_ThermalMeter_8812 = 0x18;
     public const byte EEPROM_USB_OPTIONAL_FUNCTION0 = 0xD4;
+    public const byte EEPROM_USB_MODE_8812 = 0x08;
+    public const byte EEPROM_RFE_OPTION_8812 = 0xCA;
+    public const byte EEPROM_COUNTRY_CODE_8812 = 0xCB;
+    public const byte EEPROM_ChannelPlan_8812 = 0xB8;
+    public const byte PG_TXPWR_1PATH_BYTE_NUM_2G = 18;
+    public const byte PG_TXPWR_1PATH_BYTE_NUM_5G = 24;
+    public const bool DBG_PG_TXPWR_READ = true;
+    public const byte BAND_CAP_2G = 0;
+    public const byte BAND_CAP_5G = 1;
 }
