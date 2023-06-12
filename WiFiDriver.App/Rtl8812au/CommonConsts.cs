@@ -257,10 +257,10 @@ public static class CommonConsts
     public const uint rA_LSSIWrite_Jaguar = 0xc90; /* RF write addr */
     public const uint rB_LSSIWrite_Jaguar = 0xe90; /* RF write addr */
     public const uint rHSSIRead_Jaguar = 0x8b0;  /* RF read addr */
-    public const uint rA_SIRead_Jaguar = 0xd08;/* RF readback with SI */
-    public const uint rB_SIRead_Jaguar = 0xd48;/* RF readback with SI */
-    public const uint rA_PIRead_Jaguar = 0xd04;/* RF readback with PI */
-    public const uint rB_PIRead_Jaguar = 0xd44; /* RF readback with PI */
+    public const ushort rA_SIRead_Jaguar = 0xd08;/* RF readback with SI */
+    public const ushort rB_SIRead_Jaguar = 0xd48;/* RF readback with SI */
+    public const ushort rA_PIRead_Jaguar = 0xd04;/* RF readback with PI */
+    public const ushort rB_PIRead_Jaguar = 0xd44; /* RF readback with PI */
 
     public const uint RATE_BITMAP_ALL = 0x00_0F_FF_FF;
     public const uint NotRATE_BITMAP_ALL = 0xFF_F0_00_00;
