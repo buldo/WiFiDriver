@@ -7,12 +7,12 @@ public class dvobj_priv
     /*-------- below is common data --------*/
     public const CHIP_TYPE chip_type = CHIP_TYPE.RTL8812;
     public HARDWARE_TYPE HardwareType;
-    public byte interface_type; /*USB,SDIO,SPI,PCI*/
+    public byte interface_type = RTL871X_HCI_TYPE.RTW_USB; /*USB,SDIO,SPI,PCI*/
 
     bool bSurpriseRemoved;
     public bool bDriverStopped;
 
-    int processing_dev_remove;
+    public bool processing_dev_remove;
 
     //debug_priv drv_dbg;
 
@@ -22,13 +22,15 @@ public class dvobj_priv
     //   _mutex setbw_mutex;
     //   _mutex rf_read_reg_mutex;
 
-    byte oper_channel; /* saved channel info when call set_channel_bw */
-    byte oper_bwmode;
+    public byte oper_channel; /* saved channel info when call set_channel_bw */
+    public channel_width oper_bwmode;
 
-    byte oper_ch_offset; /* PRIME_CHNL_OFFSET */
+    public byte oper_ch_offset; /* PRIME_CHNL_OFFSET */
     //systime on_oper_ch_time;
 
     public _adapter[] padapters { get; } =new _adapter[CONFIG_IFACE_NUMBER]; /*IFACE_ID_MAX*/
+    public DateTime on_oper_ch_time { get; set; }
+
     public byte iface_nums; /* total number of ifaces used runtime */
     //mi_state iface_state;
 

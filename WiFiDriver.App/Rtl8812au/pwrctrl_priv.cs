@@ -31,7 +31,7 @@
     u8 bpower_saving; /* for LPS/IPS */
 
     u8 b_hw_radio_off;
-    u8 reg_rfoff;
+    public bool reg_rfoff;
     u8 reg_pdnmode; /* powerdown mode */
     u32 rfoff_reason;
 
@@ -47,7 +47,8 @@
     u8 ips_mode;
     u8 ips_org_mode;
     u8 ips_mode_req; /* used to accept the mode setting request, will update to ipsmode later */
-    uint bips_processing;
+
+    public bool bips_processing;
     //systime ips_deny_time; /* will deny IPS when system time is smaller than this */
     u8 pre_ips_type;/* 0: default flow, 1: carddisbale flow */
 
@@ -55,7 +56,7 @@
     /* Use PS_DENY_REASON to decide reason. */
     /* Don't access this variable directly without control function, */
     /* and this variable should be protected by lock. */
-    u32 ps_deny;
+    bool ps_deny => true;
 
     u8 ps_processing; /* temporarily used to mark whether in rtw_ps_processor */
 
@@ -64,7 +65,8 @@
     u8 LpsIdleCount;
     u8 power_mgnt;
     u8 org_power_mgnt;
-    u8 bFwCurrentInPSMode;
+
+    public bool bFwCurrentInPSMode;
 //    systime DelayLPSLastTimeStamp;
     s32 pnp_current_pwr_state;
     u8 pnp_bstop_trx;
@@ -72,7 +74,7 @@
     int ps_flag; /* used by autosuspend */
     u8 bInternalAutoSuspend;
 
-    u8 bInSuspend;
+    public bool bInSuspend;
     public bool bSupportRemoteWakeup;
     u8 wowlan_wake_reason;
     u8 wowlan_last_wake_reason;
@@ -107,13 +109,13 @@
     u8 pwr_state_check_cnts;
 
 
-    rt_rf_power_state rf_pwrstate;/* cur power state, only for IPS */
+    public rt_rf_power_state rf_pwrstate;/* cur power state, only for IPS */
     /* rt_rf_power_state	current_rfpwrstate; */
     rt_rf_power_state change_rfpwrstate;
 
     public bool bHWPowerdown; /* power down mode selection. 0:radio off, 1:power down */
     u8 bHWPwrPindetect; /* come from registrypriv.hwpwrp_detect. enable power down function. 0:disable, 1:enable */
-    u8 bkeepfwalive;
+    public bool bkeepfwalive;
     u8 brfoffbyhw;
 //    unsigned long PS_BBRegBackup[PSBBREG_TOTALCNT];
 

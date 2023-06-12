@@ -1,35 +1,34 @@
 ﻿namespace WiFiDriver.App.Rtl8812au;
 
-public static class hal_com_data_defs
-{
-    public static hal_com_data GET_HAL_DATA(_adapter a) => a.HalData;
-}
-
 public class hal_com_data
 {
-//    HAL_VERSION version_id;
+    public HAL_VERSION version_id;
 //    RT_MULTI_FUNC MultiFunc; /* For multi-function consideration. */
 //    RT_POLARITY_CTL PolarityCtl; /* For Wifi PDn Polarity control. */
 //    RT_REGULATOR_MODE RegulatorMode; /* switching regulator or LDO */
-//    u8 hw_init_completed;
+public bool hw_init_completed;
 //    /****** FW related ******/
 //    u32 firmware_size;
-//    u16 firmware_version;
-//    u16 FirmwareVersionRev;
-//    u16 firmware_sub_version;
-//    u16 FirmwareSignature;
+public u16 firmware_version;
+    u16 FirmwareVersionRev;
+    public u16 firmware_sub_version;
+
+    public u16 FirmwareSignature;
 //    u8 RegFWOffload;
-//    u8 bFWReady;
+    public bool bFWReady;
+
 //    u8 bBTFWReady;
-//    u8 fw_ractrl;
-//    u8 LastHMEBoxNum;   /* H2C - for host message to fw */
+    public bool fw_ractrl;
+public    u8 LastHMEBoxNum;   /* H2C - for host message to fw */
 
 //    /****** current WIFI_PHY values ******/
 //    WIRELESS_MODE CurrentWirelessMode;
 //    enum channel_width current_channel_bw;
 //	BAND_TYPE current_band_type;    /* 0:2.4G, 1:5G */
     public BAND_TYPE BandSet;
-//    u8 current_channel;
+
+    public u8 current_channel;
+
 //    u8 cch_20;
 //    u8 cch_40;
 //    u8 cch_80;
@@ -37,7 +36,7 @@ public class hal_com_data
 //    u8 nCur40MhzPrimeSC;    /* Control channel sub-carrier */
 //    u8 nCur80MhzPrimeSC;   /* used for primary 40MHz of 80MHz mode */
 //    BOOLEAN bSwChnlAndSetBWInProgress;
-public bool bDisableSWChannelPlan; /* flag of disable software change channel plan	 */
+    public bool bDisableSWChannelPlan; /* flag of disable software change channel plan	 */
 //    u16 BasicRateSet;
 //    u32 ReceiveConfig;
 //    u32 rcr_backup; /* used for switching back from monitor mode */
@@ -61,7 +60,7 @@ public bool bDisableSWChannelPlan; /* flag of disable software change channel pl
 
     public rf_type rf_type; /*enum rf_type*/
 //    u8 PackageType;
-//    u8 NumTotalRFPath;
+public     u8 NumTotalRFPath;
 //    u8 antenna_test;
 
 //    /****** Debug ******/
@@ -74,8 +73,23 @@ public bool bDisableSWChannelPlan; /* flag of disable software change channel pl
 
 //    /****** EEPROM setting.******/
     public bool bautoload_fail_flag { get; set; }
+    public RT_MULTI_FUNC MultiFunc { get; set; }
+    public RT_POLARITY_CTL PolarityCtl { get; set; }
+    public phydm_bb_op_mode phydm_op_mode { get; set; }
+    public uint ReceiveConfig { get; set; }
+    public channel_width current_channel_bw { get; set; }
+    public byte cch_80 { get; set; }
+    public byte cch_40 { get; set; }
+    public byte cch_20 { get; set; }
+    public bool bSwChnl { get; set; }
+    public bool bChnlBWInitialized { get; set; }
+    public byte nCur40MhzPrimeSC { get; set; }
+    public byte nCur80MhzPrimeSC { get; set; }
+    public bool bSetChnlBW { get; set; }
+    public byte CurrentCenterFrequencyIndex1 { get; set; }
+    public bool bNeedIQK { get; set; }
 
-//    u8 efuse_file_status;
+    //    u8 efuse_file_status;
 //    u8 macaddr_file_status;
     public bool EepromOrEfuse;
     public u8[] efuse_eeprom_data = new u8[1024]; /*92C:256bytes, 88E:512bytes, we use union set (512bytes)*/
@@ -98,11 +112,12 @@ public bool bDisableSWChannelPlan; /* flag of disable software change channel pl
 //    u8 EEPROMCustomerID;
 //    u8 EEPROMSubCustomerID;
     public u8 EEPROMVersion;
-public     u8 EEPROMRegulatory;
-    public    u8 eeprom_thermal_meter;
-    public     bool EEPROMBluetoothCoexist;
-    public    u8 EEPROMBluetoothType;
-        public u8 EEPROMBluetoothAntNum;
+    public u8 EEPROMRegulatory;
+    public u8 eeprom_thermal_meter;
+    public bool EEPROMBluetoothCoexist;
+    public u8 EEPROMBluetoothType;
+
+    public u8 EEPROMBluetoothAntNum;
     //    u8 EEPROMBluetoothAntIsolation;
     //    u8 EEPROMBluetoothRadioShared;
     //    u8 EEPROMMACAddr[ETH_ALEN];
@@ -133,19 +148,20 @@ public     u8 EEPROMRegulatory;
     //    /* 2.4G TX power info for target TX power*/
     public u8[,] Index24G_CCK_Base = new byte[MAX_RF_PATH, CENTER_CH_2G_NUM];
     public u8[,] Index24G_BW40_Base = new byte[MAX_RF_PATH, CENTER_CH_2G_NUM];
-    public u8[,] CCK_24G_Diff = new byte[MAX_RF_PATH,MAX_TX_COUNT];
-    public s8[,] OFDM_24G_Diff = new s8[MAX_RF_PATH,MAX_TX_COUNT];
-    public s8[,] BW20_24G_Diff = new s8[MAX_RF_PATH,MAX_TX_COUNT];
-    public s8[,] BW40_24G_Diff = new s8[MAX_RF_PATH,MAX_TX_COUNT];
+    public u8[,] CCK_24G_Diff = new byte[MAX_RF_PATH, MAX_TX_COUNT];
+    public s8[,] OFDM_24G_Diff = new s8[MAX_RF_PATH, MAX_TX_COUNT];
+    public s8[,] BW20_24G_Diff = new s8[MAX_RF_PATH, MAX_TX_COUNT];
+    public s8[,] BW40_24G_Diff = new s8[MAX_RF_PATH, MAX_TX_COUNT];
 
     //	/* 5G TX power info for target TX power*/
     //#ifdef CONFIG_IEEE80211_BAND_5GHZ
-    public u8[,] Index5G_BW40_Base = new byte[MAX_RF_PATH,CENTER_CH_5G_ALL_NUM];
-public u8[,] Index5G_BW80_Base = new byte[MAX_RF_PATH,CENTER_CH_5G_80M_NUM];
+    public u8[,] Index5G_BW40_Base = new byte[MAX_RF_PATH, CENTER_CH_5G_ALL_NUM];
+    public u8[,] Index5G_BW80_Base = new byte[MAX_RF_PATH, CENTER_CH_5G_80M_NUM];
     public s8[,] OFDM_5G_Diff = new s8[MAX_RF_PATH, MAX_TX_COUNT];
-    public s8[,] BW20_5G_Diff = new s8[MAX_RF_PATH,MAX_TX_COUNT];
-    public s8[,] BW40_5G_Diff = new s8[MAX_RF_PATH,MAX_TX_COUNT];
-    public s8[,] BW80_5G_Diff = new s8[MAX_RF_PATH,MAX_TX_COUNT];
+    public s8[,] BW20_5G_Diff = new s8[MAX_RF_PATH, MAX_TX_COUNT];
+    public s8[,] BW40_5G_Diff = new s8[MAX_RF_PATH, MAX_TX_COUNT];
+
+    public s8[,] BW80_5G_Diff = new s8[MAX_RF_PATH, MAX_TX_COUNT];
 //#endif
 
 //	u8 txpwr_by_rate_undefined_band_path[TX_PWR_BY_RATE_NUM_BAND]
@@ -170,7 +186,7 @@ public u8[,] Index5G_BW80_Base = new byte[MAX_RF_PATH,CENTER_CH_5G_80M_NUM];
 //    u8 txpwr_limit_loaded:1;
 //    u8 txpwr_limit_from_file:1;
 //    u8 rf_power_tracking_type;
-//    u8 CurrentTxPwrIdx;
+public u8 CurrentTxPwrIdx;
 
 //    /* Read/write are allow for following hardware information variables	 */
     public u8 crystal_cap;
@@ -179,16 +195,16 @@ public u8[,] Index5G_BW80_Base = new byte[MAX_RF_PATH,CENTER_CH_5G_80M_NUM];
     public u8 PAType_5G;
     public u8 LNAType_2G;
     public u8 LNAType_5G;
-public    bool ExternalPA_2G;
+    public bool ExternalPA_2G;
     public bool ExternalLNA_2G;
-public     bool? external_pa_5g;
-    public bool? external_lna_5g;
-public u16 TypeGLNA;
-public u16 TypeGPA;
+    public bool external_pa_5g;
+    public bool external_lna_5g;
+    public u16 TypeGLNA;
+    public u16 TypeGPA;
     public u16 TypeALNA;
 
     public u16 TypeAPA;
-public    u16 rfe_type;
+    public u16 rfe_type;
 
 //    u8 bLedOpenDrain; /* Support Open-drain arrangement for controlling the LED. Added by Roger, 2009.10.16. */
 //    u32 ac_param_be; /* Original parameter for BE, use for EDCA turbo.	*/
@@ -217,7 +233,7 @@ public    u16 rfe_type;
 //    _lock IQKSpinLock;
 //    u8 INIDATA_RATE[MACID_NUM_SW_LIMIT];
 
-    public dm_struct     odmpriv = new dm_struct();
+    public dm_struct odmpriv = new dm_struct();
 //	u64 bk_rf_ability;
 //    u8 bIQKInitialized;
 //    u8 bNeedIQK;
@@ -242,7 +258,7 @@ public    u16 rfe_type;
 //#endif
 //#endif
 //    /* Auto FSM to Turn On, include clock, isolation, power control for MAC only */
-//    u8 bMacPwrCtrlOn;
+public    bool bMacPwrCtrlOn;
 //    u8 hci_sus_state;
 
 //    u8 RegIQKFWOffload;
@@ -423,8 +439,12 @@ public    u16 rfe_type;
 //    struct noise_monitor nm;
 //#endif
 
- public hal_spec_t hal_spec = new();
-//#ifdef CONFIG_PHY_CAPABILITY_QUERY
+    public hal_spec_t hal_spec = new();
+
+    public uint rcr_backup;
+
+    public BAND_TYPE current_band_type;
+    //#ifdef CONFIG_PHY_CAPABILITY_QUERY
 //	struct phy_spec_t phy_spec;
 //#endif
 //	u8 RfKFreeEnable;
@@ -459,14 +479,4 @@ public    u16 rfe_type;
 //# ifdef CONFIG_RTW_LED
 //    struct led_priv led;
 //#endif
-}
-
-public class dm_struct
-{
-    public dm_rf_calibration_struct rf_calibrate_info = new dm_rf_calibration_struct();
-}
-
-public class dm_rf_calibration_struct
-{
-    public bool is_apk_thermal_meter_ignore;
 }

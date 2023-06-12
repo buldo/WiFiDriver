@@ -16,11 +16,12 @@ public class Rtl8812aDevice
 
     public void Init()
     {
-        // Look at rtw_hal_ops_check in hal_init.c
-        // 11 in  0xC0(REALTEK_USB_VENQT_READ)  0x00FC
-        // 13 in  0xC0(REALTEK_USB_VENQT_READ)  0x00F0
-        // 15 in  0xC0(REALTEK_USB_VENQT_READ)  0x000A
-        // 17 out 0x40(REALTEK_USB_VENQT_WRITE) 0x0000
-        // 19 in  0xC0(REALTEK_USB_VENQT_READ)  0x0032
+
+        ioctl_cfg80211.cfg80211_rtw_change_iface(_adapter, new InitChannel()
+        {
+            cur_bwmode = channel_width.CHANNEL_WIDTH_40,
+            cur_ch_offset = 0,
+            cur_channel = 46
+        });
     }
 }

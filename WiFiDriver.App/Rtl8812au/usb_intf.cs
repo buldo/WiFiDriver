@@ -14,7 +14,7 @@ public static class usb_intf
     private const byte USB_ENDPOINT_NUMBER_MASK = 0x0f;
     static readonly int rtw_rfintfs = (int)RFINTFS.HWPI;
     static readonly int rtw_chip_version = 0x00;
-    static readonly int rtw_lbkmode = 0;/* RTL8712_AIR_TRX; */
+    static readonly int rtw_lbkmode = 0; /* RTL8712_AIR_TRX; */
     static readonly bool rtw_wifi_spec = false;
 
 
@@ -36,7 +36,7 @@ public static class usb_intf
             throw new Exception("rtw_usb_primary_adapter_init Failed!");
         }
 
-        //if (usb_reprobe_switch_usb_mode(padapter) == _TRUE)
+        //if (usb_reprobe_switch_usb_mode(padapter) == true)
         //{
         //    //goto free_if_prim;
         //}
@@ -81,7 +81,7 @@ public static class usb_intf
         /* set adapter_type/iface type for primary padapter */
         padapter.isprimary = true;
         padapter.adapter_type = ADAPTER_TYPE.PRIMARY_ADAPTER;
-        //padapter.hw_port = HW_PORT0;
+        padapter.hw_port = hw_port.HW_PORT0;
 
         /* step init_io_priv */
         // TODO: this is adapter USB read write delegates
@@ -307,7 +307,7 @@ public static class usb_intf
     static void rtw_hal_dm_init(_adapter padapter)
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
-        //padapter.hal_func.dm_init(padapter);
+        padapter.hal_func.dm_init(padapter);
         phy_load_tx_power_ext_info(padapter, 1);
     }
 
@@ -321,7 +321,7 @@ public static class usb_intf
 
         /* power by rate and limit */
         //if (phy_is_tx_power_by_rate_needed(adapter)
-        //    || (phy_is_tx_power_limit_needed(adapter) && regsty.target_tx_pwr_valid != _TRUE)
+        //    || (phy_is_tx_power_limit_needed(adapter) && regsty.target_tx_pwr_valid != true)
         //   )
         //{
         //    phy_load_tx_power_by_rate(adapter, chk_file);
@@ -373,7 +373,7 @@ public static class usb_intf
         //            target = rtw_regsty_get_target_tx_power(adapter, band, path, rs);
         //            if (target == -1)
         //            {
-        //                RTW_PRINT("%s return _FALSE for band:%d, path:%d, rs:%d, t:%d\n", __func__, band, path, rs,
+        //                RTW_PRINT("%s return false for band:%d, path:%d, rs:%d, t:%d\n", __func__, band, path, rs,
         //                    target);
         //                return false;
         //            }
@@ -389,7 +389,8 @@ public static class usb_intf
         return (GET_HAL_SPEC(adapter).band_cap & band_to_band_cap(band)) != 0;
     }
 
-    static u8[] _band_to_band_cap = {
+    static u8[] _band_to_band_cap =
+    {
         BAND_CAP_2G,
         BAND_CAP_5G,
         0,
@@ -456,10 +457,10 @@ public static class usb_intf
 
 //        pdev_network.InfrastructureMode = (cur_network.network.InfrastructureMode);
 
-///* 1. Supported rates */
-///* 2. IE */
+        ///* 1. Supported rates */
+        ///* 2. IE */
 
-///* rtw_set_supported_rate(pdev_network.SupportedRates, pregistrypriv.wireless_mode) ; */
+        ///* rtw_set_supported_rate(pdev_network.SupportedRates, pregistrypriv.wireless_mode) ; */
 //        /* will be called in rtw_generate_ie */
 //        sz = rtw_generate_ie(pregistrypriv);
 
@@ -473,9 +474,9 @@ public static class usb_intf
     }
 
     static int rtw_generate_ie(registry_priv pregistrypriv)
-{
-	u8 wireless_mode;
-    int sz = 0, rateLen;
+    {
+        u8 wireless_mode;
+        int sz = 0, rateLen;
 //    WLAN_BSSID_EX pdev_network = &pregistrypriv.dev_network;
 //    u8* ie = pdev_network.IEs;
 
@@ -532,11 +533,11 @@ public static class usb_intf
 //else
 //    ie = rtw_set_ie(ie, _SUPPORTEDRATES_IE_, rateLen, pdev_network.SupportedRates, &sz);
 
-///* DS parameter set */
+        ///* DS parameter set */
 //ie = rtw_set_ie(ie, _DSSET_IE_, 1, (u8*)&(pdev_network.Configuration.DSConfig), &sz);
 
 
-///* IBSS Parameter Set */
+        ///* IBSS Parameter Set */
 
 //ie = rtw_set_ie(ie, _IBSS_PARA_IE_, 2, (u8*)&(pdev_network.Configuration.ATIMWindow), &sz);
 
@@ -544,9 +545,9 @@ public static class usb_intf
 //    ie = rtw_set_ie(ie, _EXT_SUPPORTEDRATES_IE_, (rateLen - 8), (pdev_network.SupportedRates + 8), &sz);
 
 //# ifdef CONFIG_80211N_HT
-///* HT Cap. */
+        ///* HT Cap. */
 //if (is_supported_ht(pregistrypriv.wireless_mode)
-//    && (pregistrypriv.ht_enable == _TRUE))
+//    && (pregistrypriv.ht_enable == true))
 //{
 //    /* todo: */
 //}
@@ -557,9 +558,9 @@ public static class usb_intf
 
 /* return _SUCCESS; */
 
-return sz;
+        return sz;
 
-}
+    }
 
     private static u8 rtw_hal_read_chip_info(_adapter padapter)
     {
@@ -587,8 +588,8 @@ return sz;
 
     static void rtw_hal_read_chip_version(_adapter padapter)
     {
-        //padapter.hal_func.read_chip_version(padapter);
-        //rtw_odm_init_ic_type(padapter);
+        padapter.hal_func.read_chip_version(padapter);
+        rtw_odm_init_ic_type(padapter);
     }
 
     static u8 rtw_set_hal_ops(_adapter padapter)
@@ -638,9 +639,9 @@ return sz;
         hal_spec.proto_cap = PROTO_CAP_11B | PROTO_CAP_11G | PROTO_CAP_11N | PROTO_CAP_11AC;
 
         hal_spec.wl_func = 0
-                            | WL_FUNC_P2P
-                            | WL_FUNC_MIRACAST
-                            | WL_FUNC_TDLS
+                           | WL_FUNC_P2P
+                           | WL_FUNC_MIRACAST
+                           | WL_FUNC_TDLS
             ;
 
         hal_spec.pg_txpwr_saddr = 0x10;
@@ -669,7 +670,7 @@ return sz;
 ////#endif
 //    }
 
-static void rtw_hal_chip_configure(_adapter padapter)
+    static void rtw_hal_chip_configure(_adapter padapter)
     {
         padapter.hal_func.intf_chip_configure(padapter);
     }
@@ -680,10 +681,10 @@ static void rtw_hal_chip_configure(_adapter padapter)
         var pHalFunc = padapter.hal_func;
 
 
-        //pHalFunc.hal_power_on = _InitPowerOn_8812AU;
+        pHalFunc.hal_power_on = usb_halinit._InitPowerOn_8812AU;
         //pHalFunc.hal_power_off = hal_poweroff_8812au;
 
-        //pHalFunc.hal_init = &rtl8812au_hal_init;
+        pHalFunc.hal_init = usb_halinit.rtl8812au_hal_init;
         //pHalFunc.hal_deinit = &rtl8812au_hal_deinit;
 
         //pHalFunc.inirp_init = &rtl8812au_inirp_init;
@@ -728,15 +729,15 @@ static void rtw_hal_chip_configure(_adapter padapter)
     }
 
     static void rtl8812_set_hal_ops(hal_ops pHalFunc)
-{
-// 	pHalFunc.dm_init = &rtl8812_init_dm_priv;
+    {
+        pHalFunc.dm_init = rtl8812_init_dm_priv;
 // 	pHalFunc.dm_deinit = &rtl8812_deinit_dm_priv;
 //
 // 	pHalFunc.SetBeaconRelatedRegistersHandler = &SetBeaconRelatedRegisters8812A;
 //
-// 	pHalFunc.read_chip_version = read_chip_version_8812a;
+pHalFunc.read_chip_version = usb_halinit.read_chip_version_8812a;
 //
-// 	pHalFunc.set_chnl_bw_handler = &PHY_SetSwChnlBWMode8812;
+pHalFunc.set_chnl_bw_handler = PHY_SetSwChnlBWMode8812;
 //
 // 	pHalFunc.set_tx_power_level_handler = &PHY_SetTxPowerLevel8812;
 // 	pHalFunc.get_tx_power_level_handler = &PHY_GetTxPowerLevel8812;
@@ -759,7 +760,7 @@ static void rtw_hal_chip_configure(_adapter padapter)
 // 	/* Efuse related function */
 // 	pHalFunc.EfusePowerSwitch = &rtl8812_EfusePowerSwitch;
 // 	pHalFunc.ReadEFuse = &rtl8812_ReadEFuse;
- 	pHalFunc.EFUSEGetEfuseDefinition = rtl8812_EFUSE_GetEfuseDefinition;
+        pHalFunc.EFUSEGetEfuseDefinition = rtl8812_EFUSE_GetEfuseDefinition;
 // 	pHalFunc.EfuseGetCurrentSize = &rtl8812_EfuseGetCurrentSize;
 // 	pHalFunc.Efuse_PgPacketRead = &rtl8812_Efuse_PgPacketRead;
 // 	pHalFunc.Efuse_PgPacketWrite = &rtl8812_Efuse_PgPacketWrite;
@@ -786,12 +787,15 @@ static void rtw_hal_chip_configure(_adapter padapter)
 // 	pHalFunc.fill_fake_txdesc = &rtl8812a_fill_fake_txdesc;
 // 	pHalFunc.fw_dl = &FirmwareDownload8812;
 // 	pHalFunc.hal_get_tx_buff_rsvd_page_num = &GetTxBufferRsvdPageNum8812;
-}
-    static int rtl8812_EFUSE_GetEfuseDefinition( PADAPTER    pAdapter, u8      efuseType, EFUSE_DEF_TYPE type, BOOLEAN     bPseudoTest)
+    }
+
+    static int rtl8812_EFUSE_GetEfuseDefinition(PADAPTER pAdapter, u8 efuseType, EFUSE_DEF_TYPE type,
+        BOOLEAN bPseudoTest)
     {
 
-            return Hal_EFUSEGetEfuseDefinition8812A(pAdapter, efuseType, type);
+        return Hal_EFUSEGetEfuseDefinition8812A(pAdapter, efuseType, type);
     }
+
     static u8 rtw_hal_data_init(_adapter padapter)
     {
         rtw_phydm_priv_init(padapter);
@@ -799,7 +803,7 @@ static void rtw_hal_chip_configure(_adapter padapter)
         return _SUCCESS;
     }
 
-    static int Hal_EFUSEGetEfuseDefinition8812A(PADAPTER    pAdapter, u8 efuseType, EFUSE_DEF_TYPE type)
+    static int Hal_EFUSEGetEfuseDefinition8812A(PADAPTER pAdapter, u8 efuseType, EFUSE_DEF_TYPE type)
     {
         switch (type)
         {
@@ -863,23 +867,23 @@ static void rtw_hal_chip_configure(_adapter padapter)
                     throw new NotImplementedException();
             }
                 break;
-                //    case EFUSE_DEF_TYPE.TYPE_EFUSE_PROTECT_BYTES_BANK:
-                //    {
-                //        u8* pu1Tmp;
-                //        pu1Tmp = (u8*)pOut;
-                //        if (efuseType == EFUSE_WIFI)
-                //            *pu1Tmp = (u8)(EFUSE_OOB_PROTECT_BYTES_JAGUAR);
-                //        else
-                //            *pu1Tmp = EFUSE_PROTECT_BYTES_BANK;
-                //    }
-                //        break;
-                //    default:
-                //    {
-                //        u8* pu1Tmp;
-                //        pu1Tmp = (u8*)pOut;
-                //        *pu1Tmp = 0;
-                //    }
-                //        break;
+            //    case EFUSE_DEF_TYPE.TYPE_EFUSE_PROTECT_BYTES_BANK:
+            //    {
+            //        u8* pu1Tmp;
+            //        pu1Tmp = (u8*)pOut;
+            //        if (efuseType == EFUSE_WIFI)
+            //            *pu1Tmp = (u8)(EFUSE_OOB_PROTECT_BYTES_JAGUAR);
+            //        else
+            //            *pu1Tmp = EFUSE_PROTECT_BYTES_BANK;
+            //    }
+            //        break;
+            //    default:
+            //    {
+            //        u8* pu1Tmp;
+            //        pu1Tmp = (u8*)pOut;
+            //        *pu1Tmp = 0;
+            //    }
+            //        break;
         }
 
         return 0;
@@ -913,7 +917,7 @@ static void rtw_hal_chip_configure(_adapter padapter)
 //    return _SUCCESS;
 //}
 
-static void rtw_set_drv_stopped(_adapter padapter)
+    static void rtw_set_drv_stopped(_adapter padapter)
     {
         dev_set_drv_stopped(adapter_to_dvobj(padapter));
     }
@@ -923,29 +927,29 @@ static void rtw_set_drv_stopped(_adapter padapter)
         dvobj.bDriverStopped = true;
     }
 
-static uint loadparam(_adapter padapter)
+    static uint loadparam(_adapter padapter)
     {
         uint status = _SUCCESS;
 
-    var registry_par = padapter.registrypriv;
+        var registry_par = padapter.registrypriv;
 
-	registry_par.chip_version = (u8) rtw_chip_version;
-    registry_par.rfintfs = (u8) rtw_rfintfs;
-    registry_par.lbkmode = (u8) rtw_lbkmode;
-    /* registry_par.hci = (u8)hci; */
-    //registry_par.network_mode  = (u8) rtw_network_mode;
+        registry_par.chip_version = (u8)rtw_chip_version;
+        registry_par.rfintfs = (u8)rtw_rfintfs;
+        registry_par.lbkmode = (u8)rtw_lbkmode;
+        /* registry_par.hci = (u8)hci; */
+        //registry_par.network_mode  = (u8) rtw_network_mode;
 
-    //_rtw_memcpy(registry_par.ssid.Ssid, "ANY", 3);
-    //registry_par.ssid.SsidLength = 3;
+        //_rtw_memcpy(registry_par.ssid.Ssid, "ANY", 3);
+        //registry_par.ssid.SsidLength = 3;
 
-	//registry_par.channel = (u8) rtw_channel;
-    //registry_par.wireless_mode = (u8) rtw_wireless_mode;
+        //registry_par.channel = (u8) rtw_channel;
+        //registry_par.wireless_mode = (u8) rtw_wireless_mode;
 
-	//if (IsSupported24G(registry_par.wireless_mode) && (!is_supported_5g(registry_par.wireless_mode))
-	//    && (registry_par.channel > 14))
-	//	registry_par.channel = 1;
-	//else if (is_supported_5g(registry_par.wireless_mode) && (!IsSupported24G(registry_par.wireless_mode)) && (registry_par.channel <= 14))
-    registry_par.channel = 36;
+        //if (IsSupported24G(registry_par.wireless_mode) && (!is_supported_5g(registry_par.wireless_mode))
+        //    && (registry_par.channel > 14))
+        //	registry_par.channel = 1;
+        //else if (is_supported_5g(registry_par.wireless_mode) && (!IsSupported24G(registry_par.wireless_mode)) && (registry_par.channel <= 14))
+        registry_par.channel = 36;
 
 //	registry_par.vrtl_carrier_sense = (u8) rtw_vrtl_carrier_sense;
 //    registry_par.vcs_type = (u8) rtw_vcs_type;
@@ -967,7 +971,7 @@ static uint loadparam(_adapter padapter)
 //    registry_par.max_bss_cnt = (u16) rtw_max_bss_cnt;
 //    /* registry_par.qos_enable = (u8)rtw_qos_enable; */
 //    registry_par.ack_policy = (u8) rtw_ack_policy;
-//    registry_par.mp_mode = (u8) rtw_mp_mode;
+    registry_par.mp_mode = 0;
 
 //    registry_par.software_encrypt = (u8) rtw_software_encrypt;
 //    registry_par.software_decrypt = (u8) rtw_software_decrypt;
@@ -1029,7 +1033,7 @@ static uint loadparam(_adapter padapter)
 
 //registry_par.check_hw_status = (u8) rtw_check_hw_status;
 
-registry_par.wifi_spec = rtw_wifi_spec;
+        registry_par.wifi_spec = rtw_wifi_spec;
 
 //	if (strlen(rtw_country_code) != 2
 //		|| is_alpha(rtw_country_code[0]) == false
@@ -1044,7 +1048,7 @@ registry_par.wifi_spec = rtw_wifi_spec;
 //registry_par.channel_plan = (u8)rtw_channel_plan;
 //rtw_regsty_load_excl_chs(registry_par);
 
-//registry_par.special_rf_path = (u8)rtw_special_rf_path;
+registry_par.special_rf_path = (u8)0;
 
 //registry_par.full_ch_in_p2p_handshake = (u8)rtw_full_ch_in_p2p_handshake;
 //# ifdef CONFIG_BT_COEXIST
@@ -1123,8 +1127,8 @@ registry_par.wifi_spec = rtw_wifi_spec;
         registry_par.RFE_Type = 64;
 
 //registry_par.PowerTracking_Type = (u8)rtw_powertracking_type;
-registry_par.AmplifierType_2G = 0;
-registry_par.AmplifierType_5G = 0;
+        registry_par.AmplifierType_2G = 0;
+        registry_par.AmplifierType_5G = 0;
 //registry_par.GLNA_Type = (u8)rtw_GLNA_type;
 //# ifdef CONFIG_LOAD_PHY_PARA_FROM_FILE
 //registry_par.load_phy_file = (u8)rtw_load_phy_file;
@@ -1233,8 +1237,8 @@ registry_par.AmplifierType_5G = 0;
 //registry_par.monitor_retransmit = (u8)rtw_monitor_retransmit;
 //registry_par.monitor_disable_1m = (u8)rtw_monitor_disable_1m;
 
-return status;
-}
+        return status;
+    }
 
     private static dvobj_priv usb_dvobj_init(UsbDevice usb_intf)
     {
@@ -1269,12 +1273,13 @@ return status;
             if (type == EndpointType.Bulk && direction == EndpointDirection.In)
             {
                 RTW_INFO("RT_usb_endpoint_is_bulk_in = %x", RT_usb_endpoint_num(endpoint));
-                pdvobjpriv.RtInPipe[pdvobjpriv.RtNumInPipes] =  RT_usb_endpoint_num(endpoint);
+                pdvobjpriv.RtInPipe[pdvobjpriv.RtNumInPipes] = RT_usb_endpoint_num(endpoint);
                 pdvobjpriv.RtNumInPipes++;
             }
             else if (direction == EndpointDirection.In)
             {
-                RTW_INFO("RT_usb_endpoint_is_int_in = %x, Interval = %x\n", RT_usb_endpoint_num(endpoint), endpoint.Interval);
+                RTW_INFO("RT_usb_endpoint_is_int_in = %x, Interval = %x\n", RT_usb_endpoint_num(endpoint),
+                    endpoint.Interval);
                 pdvobjpriv.RtInPipe[pdvobjpriv.RtNumInPipes] = RT_usb_endpoint_num(endpoint);
                 pdvobjpriv.RtNumInPipes++;
             }
@@ -1288,7 +1293,8 @@ return status;
             pdvobjpriv.ep_num[i] = RT_usb_endpoint_num(endpoint);
         }
 
-        RTW_INFO("nr_endpoint=%d, in_num=%d, out_num=%d\n\n", pdvobjpriv.nr_endpoint, pdvobjpriv.RtNumInPipes, pdvobjpriv.RtNumOutPipes);
+        RTW_INFO("nr_endpoint=%d, in_num=%d, out_num=%d\n\n", pdvobjpriv.nr_endpoint, pdvobjpriv.RtNumInPipes,
+            pdvobjpriv.RtNumOutPipes);
 
         switch (pusbd.Speed)
         {
@@ -1343,5 +1349,53 @@ return status;
     {
         return epd.EndpointAddress & USB_ENDPOINT_NUMBER_MASK;
     }
-}
 
+    public static bool rtw_hal_init(_adapter padapter, InitChannel initChannel)
+    {
+        bool status = true;
+
+        dvobj_priv dvobj = adapter_to_dvobj(padapter);
+        int i;
+
+        status = padapter.hal_func.hal_init(padapter);
+
+        if (status == true)
+        {
+            padapter.HalData.hw_init_completed = true;
+
+            // TODO: Need or not???
+            //rtw_mi_set_mac_addr(padapter); /*set mac addr of all ifaces*/
+
+            // notch_filter 1 by default
+            //if (padapter.registrypriv.notch_filter == 1)
+            //{
+            //    rtw_hal_notch_filter(padapter, 1);
+            //}
+
+            // TODO: Need or not???
+            //for (i = 0; i < dvobj.iface_nums; i++)
+            //{
+            //    rtw_sec_restore_wep_key(dvobj.padapters[i]);
+            //}
+
+            //rtw_led_control(padapter, LED_CTL_POWER_ON);
+
+            init_hw_mlme_ext(padapter, initChannel);
+
+            rtw_hal_init_opmode(padapter);
+
+        }
+        else
+        {
+            padapter.HalData.hw_init_completed =  false;
+            RTW_ERR("rtw_hal_init: fail");
+        }
+
+        return status;
+    }
+
+    private static void rtw_hal_init_opmode(_adapter padapter)
+    {
+        rtw_setopmode_cmd(padapter, RTW_CMDF.RTW_CMDF_DIRECTLY);
+    }
+}

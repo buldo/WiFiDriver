@@ -31,7 +31,7 @@ public class registry_priv
     u16 busy_thresh;
     u16 max_bss_cnt;
     u8 ack_policy;
-    u8 mp_mode;
+    public u8 mp_mode;
     u8 mp_dm;
     u8 software_encrypt;
     u8 software_decrypt;
@@ -97,7 +97,7 @@ public class registry_priv
 //    u8 low_power;
 
     public bool wifi_spec;/* !turbo_mode */
-//    u8 special_rf_path; /* 0: 2T2R ,1: only turn on path A 1T1R */
+public     u8 special_rf_path; /* 0: 2T2R ,1: only turn on path A 1T1R */
 public char[] alpha2 = new char[2];
 //    u8 channel_plan;
 //    u8 excl_chs[MAX_CHANNEL_NUM];

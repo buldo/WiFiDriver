@@ -13,6 +13,11 @@ public static class rtw_io
         return ReadBytes(adapter, addr, 1)[0];
     }
 
+    public static byte Read8(_adapter adapter, ushort addr)
+    {
+        return rtw_read8(adapter, addr);
+    }
+
     public static UInt32 rtw_read32(_adapter adapter, ushort address)
     {
         var data = ReadBytes(adapter, address, 4);
@@ -25,7 +30,7 @@ public static class rtw_io
         return BinaryPrimitives.ReadUInt16LittleEndian(data);
     }
 
-    private static void rtw_write32(_adapter adapter, ushort address, UInt32 value)
+    public static void rtw_write32(_adapter adapter, ushort address, UInt32 value)
     {
         var data = new byte[4];
         BinaryPrimitives.WriteUInt32LittleEndian(data, value);
@@ -45,6 +50,11 @@ public static class rtw_io
         WriteBytes(adapter, address, data);
     }
 
+    public static void Write8(_adapter adapter, ushort address, byte value)
+    {
+        rtw_write8(adapter, address, value);
+    }
+
     private static ReadOnlySpan<byte> ReadBytes(_adapter adapter, ushort register, ushort bytesCount)
     {
         var packet = new UsbSetupPacket
@@ -61,7 +71,7 @@ public static class rtw_io
         return buffer.AsSpan(0, bytesReceived);
     }
 
-    private static void WriteBytes(_adapter adapter, ushort register, Span<byte> data)
+    public static void WriteBytes(_adapter adapter, ushort register, Span<byte> data)
     {
         var packet = new UsbSetupPacket
         {

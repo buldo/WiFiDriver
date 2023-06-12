@@ -3,15 +3,15 @@
 public class hal_ops
 {
     //    /*** initialize section ***/
-    //    void (* read_chip_version) (_adapter* padapter);
+    public Action<_adapter> read_chip_version;
     //	void (* init_default_value) (_adapter* padapter);
     public Action<_adapter> intf_chip_configure;
     public Func<_adapter, u8> read_adapter_info;
-//	u32(*hal_power_on)(_adapter* padapter);
+    public Func<_adapter, bool> hal_power_on;
 //	void (* hal_power_off) (_adapter* padapter);
-//	u32(*hal_init)(_adapter* padapter);
+    public Func<_adapter, bool> hal_init;
 //	u32(*hal_deinit)(_adapter* padapter);
-//	void (* dm_init) (_adapter* padapter);
+    public Action<_adapter> dm_init;
 //	void (* dm_deinit) (_adapter* padapter);
 
 //	/*** xmit section ***/
@@ -62,6 +62,7 @@ public class hal_ops
 //	void (* DeInitSwLeds) (_adapter* padapter);
 //#endif
 //	void (* set_chnl_bw_handler) (_adapter* padapter, u8 channel, enum channel_width Bandwidth, u8 Offset40, u8 Offset80);
+    public Action<_adapter, u8, channel_width, u8, u8> set_chnl_bw_handler;
 
 //	void (* set_tx_power_level_handler) (_adapter* padapter, u8 channel);
 //	void (* get_tx_power_level_handler) (_adapter* padapter, s32* powerlevel);
