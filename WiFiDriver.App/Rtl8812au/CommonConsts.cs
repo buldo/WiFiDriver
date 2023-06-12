@@ -200,22 +200,16 @@ public static class CommonConsts
     public const ushort REG_OPT_CTRL_8812 = 0x0074;
     public const ushort REG_WMAC_TRXPTCL_CTL = 0x0668;
     public const ushort REG_GPIO_MUXCFG = 0x0040;
+    public const ushort REG_RXDMA_STATUS = 0x0288;
+    public const ushort REG_AMPDU_MAX_TIME_8812 = 0x0456;
+    public const ushort REG_AMPDU_MAX_LENGTH_8812 = 0x0458;
+    public const ushort REG_RXDMA_PRO_8812 = 0x0290;
+    public const ushort REG_HT_SINGLE_AMPDU_8812 = 0x04C7;
+    public const ushort REG_RX_PKT_LIMIT = 0x060C;
+    public const ushort REG_PIFS = 0x0512;
+    public const ushort REG_MAX_AGGR_NUM = 0x04CA;
+    public const ushort REG_AMPDU_BURST_MODE_8812 = 0x04BC;
 
     public const byte bMaskByte0 = 0xff;
     public const uint bCCK_System_Jaguar = 0x10;
-}
-
-public enum VHT_DATA_SC :byte
-{
-    VHT_DATA_SC_DONOT_CARE = 0,
-    VHT_DATA_SC_20_UPPER_OF_80MHZ = 1,
-    VHT_DATA_SC_20_LOWER_OF_80MHZ = 2,
-    VHT_DATA_SC_20_UPPERST_OF_80MHZ = 3,
-    VHT_DATA_SC_20_LOWEST_OF_80MHZ = 4,
-    VHT_DATA_SC_20_RECV1 = 5,
-    VHT_DATA_SC_20_RECV2 = 6,
-    VHT_DATA_SC_20_RECV3 = 7,
-    VHT_DATA_SC_20_RECV4 = 8,
-    VHT_DATA_SC_40_UPPER_OF_80MHZ = 9,
-    VHT_DATA_SC_40_LOWER_OF_80MHZ = 10,
 }
