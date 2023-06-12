@@ -2923,23 +2923,11 @@ public static class usb_halinit
         value8 = rtw_read8(Adapter, REG_CR);
         rtw_write8(Adapter, REG_CR, (byte)(value8 | MACTXEN | MACRXEN));
 
-
-
-//# ifdef CONFIG_RTW_LED
-//        _InitHWLed(Adapter);
-//#endif /* CONFIG_RTW_LED */
-
-/*  */
-/* d. Initialize BB related configurations. */
-/*  */
-
-
         status = PHY_BBConfig8812(Adapter);
         if (status == false)
         {
             goto exit;
         }
-
 
 /* 92CU use 3-wire to r/w RF */
 /* pHalData.Rf_Mode = RF_OP_By_SW_3wire; */
@@ -3064,11 +3052,576 @@ public static class usb_halinit
         ///* ack for xmit mgmt frames. */
         rtw_write32(Adapter, REG_FWHW_TXQ_CTRL, rtw_read32(Adapter, REG_FWHW_TXQ_CTRL) | BIT12);
 
-
-
         exit:
 
         return status;
+    }
+
+    static void rtl8812_InitHalDm( PADAPTER    Adapter)
+    {
+        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+
+        dm_struct        pDM_Odm = &(pHalData.odmpriv);
+        dm_InitGPIOSetting(Adapter);
+        rtw_phydm_init(Adapter);
+        /* Adapter.fix_rate = 0xFF; */
+    }
+
+static void invalidate_cam_all(_adapter padapter)
+    {
+
+        dvobj_priv dvobj = adapter_to_dvobj(padapter);
+        cam_ctl_t *cam_ctl = &dvobj.cam_ctl;
+        _irqL irqL;
+        u8 val8 = 0;
+
+        rtw_hal_set_hwreg(padapter, HW_VAR_CAM_INVALID_ALL, &val8);
+
+        _enter_critical_bh(&cam_ctl.lock, &irqL);
+        rtw_sec_cam_map_clr_all(&cam_ctl.used);
+        _rtw_memset(dvobj.cam_cache, 0, sizeof(struct sec_cam_ent) * SEC_CAM_ENT_NUM_SW_LIMIT);
+        _exit_critical_bh(&cam_ctl.lock, &irqL);
+    }
+
+static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        u8 currentBand = pHalData.current_band_type;
+        u8 current_bw = pHalData.current_channel_bw;
+        u8 rf_type = pHalData.rf_type;
+        u8 eLNA_2g = pHalData.ExternalLNA_2G;
+
+        /* RTW_INFO("==>PHY_SwitchWirelessBand8812() %s\n", ((Band==0)?"2.4G":"5G")); */
+
+        pHalData.current_band_type = (BAND_TYPE)Band;
+
+        if (Band == BAND_ON_2_4G)
+        {
+            /* 2.4G band */
+
+            phy_set_bb_reg(Adapter, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
+
+            if (IS_HARDWARE_TYPE_8821(Adapter))
+                phy_SetRFEReg8821(Adapter, Band);
+
+            if (IS_HARDWARE_TYPE_8812(Adapter))
+            {
+                /* <20131128, VincentL> Remove 0x830[3:1] setting when switching 2G/5G, requested by Yn. */
+                phy_set_bb_reg(Adapter, rBWIndication_Jaguar, 0x3, 0x1);        /* 0x834[1:0] = 0x1 */
+                /* set PD_TH_20M for BB Yn user guide R27 */
+                phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17, 0x17);      /* 0x830[17:13]=5'b10111 */
+            }
+
+            /* set PWED_TH for BB Yn user guide R29 */
+            if (IS_HARDWARE_TYPE_8812(Adapter))
+            {
+                if (current_bw == CHANNEL_WIDTH_20
+                    && pHalData.rf_type == RF_1T1R
+                    && eLNA_2g == 0)
+                {
+                    /* 0x830[3:1]=3'b010 */
+                    phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x02);
+                }
+                else
+                    /* 0x830[3:1]=3'b100 */
+                    phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
+            }
+
+            /* AGC table select */
+            if (IS_VENDOR_8821A_MP_CHIP(Adapter))
+                phy_set_bb_reg(Adapter, rA_TxScale_Jaguar, 0xF00, 0);       /* 0xC1C[11:8] = 0 */
+            else
+                phy_set_bb_reg(Adapter, rAGC_table_Jaguar, 0x3, 0);         /* 0x82C[1:0] = 2b'00 */
+
+            if (IS_HARDWARE_TYPE_8812(Adapter))
+                phy_SetRFEReg8812(Adapter, Band);
+
+            /* <20131106, Kordan> Workaround to fix CCK FA for scan issue. */
+            /* if( pHalData.bMPMode == FALSE) */
+            if (Adapter.registrypriv.mp_mode == 0)
+            {
+                phy_set_bb_reg(Adapter, rTxPath_Jaguar, 0xf0, 0x1);
+                phy_set_bb_reg(Adapter, rCCK_RX_Jaguar, 0x0f000000, 0x1);
+            }
+
+            update_tx_basic_rate(Adapter, WIRELESS_11BG);
+
+            /* CCK_CHECK_en */
+            rtw_write8(Adapter, REG_CCK_CHECK_8812, rtw_read8(Adapter, REG_CCK_CHECK_8812) & (~BIT(7)));
+        }
+        else
+        {   /* 5G band */
+            u16 count = 0, reg41A = 0;
+
+
+            /* CCK_CHECK_en */
+            rtw_write8(Adapter, REG_CCK_CHECK_8812, rtw_read8(Adapter, REG_CCK_CHECK_8812) | BIT(7));
+
+            count = 0;
+            reg41A = rtw_read16(Adapter, REG_TXPKT_EMPTY);
+            /* RTW_INFO("Reg41A value %d", reg41A); */
+            reg41A &= 0x30;
+            while ((reg41A != 0x30) && (count < 50))
+            {
+                rtw_udelay_os(50);
+                /* RTW_INFO("Delay 50us\n"); */
+
+                reg41A = rtw_read16(Adapter, REG_TXPKT_EMPTY);
+                reg41A &= 0x30;
+                count++;
+                /* RTW_INFO("Reg41A value %d", reg41A); */
+            }
+            if (count != 0)
+                RTW_INFO("PHY_SwitchWirelessBand8812(): Switch to 5G Band. Count = %d reg41A=0x%x\n", count, reg41A);
+
+            /* 2012/02/01, Sinda add registry to switch workaround without long-run verification for scan issue. */
+            if (Adapter.registrypriv.mp_mode == 0)
+                phy_set_bb_reg(Adapter, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
+
+            if (IS_HARDWARE_TYPE_8812(Adapter))
+            {
+                /* <20131128, VincentL> Remove 0x830[3:1] setting when switching 2G/5G, requested by Yn. */
+                phy_set_bb_reg(Adapter, rBWIndication_Jaguar, 0x3, 0x2); /* 0x834[1:0] = 0x2 */
+                /* set PD_TH_20M for BB Yn user guide R27 */
+                phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17, 0x15);      /* 0x830[17:13]=5'b10101 */
+            }
+
+            /* set PWED_TH for BB Yn user guide R29 */
+            if (IS_HARDWARE_TYPE_8812(Adapter))
+                /* 0x830[3:1]=3'b100 */
+                phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
+
+            /* AGC table select */
+            if (IS_VENDOR_8821A_MP_CHIP(Adapter))
+                phy_set_bb_reg(Adapter, rA_TxScale_Jaguar, 0xF00, 1);   /* 0xC1C[11:8] = 1 */
+            else
+                phy_set_bb_reg(Adapter, rAGC_table_Jaguar, 0x3, 1);     /* 0x82C[1:0] = 2'b00 */
+
+            if (IS_HARDWARE_TYPE_8812(Adapter))
+                phy_SetRFEReg8812(Adapter, Band);
+
+            /* <20131106, Kordan> Workaround to fix CCK FA for scan issue. */
+            /* if( pHalData.bMPMode == FALSE) */
+            if (Adapter.registrypriv.mp_mode == 0)
+            {
+                phy_set_bb_reg(Adapter, rTxPath_Jaguar, 0xf0, 0x0);
+                phy_set_bb_reg(Adapter, rCCK_RX_Jaguar, 0x0f000000, 0xF);
+            }
+            else
+            {
+                /* cck_enable */
+                phy_set_bb_reg(Adapter, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x02);
+            }
+
+            /* avoid using cck rate in 5G band */
+            /* Set RRSR rate table. */
+            update_tx_basic_rate(Adapter, WIRELESS_11A);
+
+
+            /* RTW_INFO("==>PHY_SwitchWirelessBand8812() BAND_ON_5G settings OFDM index 0x%x\n", pHalData.OFDM_index[RF_PATH_A]); */
+        }
+
+        phy_SetBBSwingByBand_8812A(Adapter, Band, currentBand);
+        /* RTW_INFO("<==PHY_SwitchWirelessBand8812():Switch Band OK.\n"); */
+        return _SUCCESS;
+    }
+
+    static void PHY_BB8812_Config_1T( PADAPTER Adapter)
+    {
+        /* BB OFDM RX Path_A */
+        phy_set_bb_reg(Adapter, rRxPath_Jaguar, bRxPath_Jaguar, 0x11);
+        /* BB OFDM TX Path_A */
+        phy_set_bb_reg(Adapter, rTxPath_Jaguar, bMaskLWord, 0x1111);
+        /* BB CCK R/Rx Path_A */
+        phy_set_bb_reg(Adapter, rCCK_RX_Jaguar, bCCK_RX_Jaguar, 0x0);
+        /* MCS support */
+        phy_set_bb_reg(Adapter, 0x8bc, 0xc0000060, 0x4);
+        /* RF Path_B HSSI OFF */
+        phy_set_bb_reg(Adapter, 0xe00, 0xf, 0x4);
+        /* RF Path_B Power Down */
+        phy_set_bb_reg(Adapter, 0xe90, bMaskDWord, 0);
+        /* ADDA Path_B OFF */
+        phy_set_bb_reg(Adapter, 0xe60, bMaskDWord, 0);
+        phy_set_bb_reg(Adapter, 0xe64, bMaskDWord, 0);
+    }
+
+    static int PHY_RFConfig8812( PADAPTER    Adapter)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        int rtStatus = _SUCCESS;
+
+        if (RTW_CANNOT_RUN(Adapter))
+            return _FAIL;
+
+        switch (pHalData.rf_chip)
+        {
+            case RF_PSEUDO_11N:
+                RTW_INFO("%s(): RF_PSEUDO_11N\n", __FUNCTION__);
+                break;
+            default:
+                rtStatus = PHY_RF6052_Config_8812(Adapter);
+                break;
+        }
+
+        return rtStatus;
+    }
+
+    static int PHY_BBConfig8812(PADAPTER    Adapter)
+    {
+        int rtStatus = _SUCCESS;
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        u8 TmpU1B = 0;
+
+        phy_InitBBRFRegisterDefinition(Adapter);
+
+        /* tangw check start 20120412 */
+        /* . APLL_EN,,APLL_320_GATEB,APLL_320BIAS,  auto config by hw fsm after pfsm_go (0x4 bit 8) set */
+        TmpU1B = rtw_read8(Adapter, REG_SYS_FUNC_EN);
+
+        TmpU1B |= FEN_USBA;
+
+        rtw_write8(Adapter, REG_SYS_FUNC_EN, TmpU1B);
+
+        rtw_write8(Adapter, REG_SYS_FUNC_EN, (TmpU1B | FEN_BB_GLB_RSTn | FEN_BBRSTB)); /* same with 8812 */
+        /* 6. 0x1f[7:0] = 0x07 PathA RF Power On */
+        rtw_write8(Adapter, REG_RF_CTRL, 0x07);/* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
+        /* 7.  PathB RF Power On */
+        rtw_write8(Adapter, REG_OPT_CTRL_8812 + 2, 0x7); /* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
+        /* tangw check end 20120412 */
+
+
+        /*  */
+        /* Config BB and AGC */
+        /*  */
+        rtStatus = phy_BB8812_Config_ParaFile(Adapter);
+
+        hal_set_crystal_cap(Adapter, pHalData.crystal_cap);
+
+        return rtStatus;
+    }
+
+    static void _InitBurstPktLen( PADAPTER Adapter)
+    {
+        u8 speedvalue, provalue, temp;
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+
+
+        /* rtw_write16(Adapter, REG_TRXDMA_CTRL_8195, 0xf5b0); */
+        /* rtw_write16(Adapter, REG_TRXDMA_CTRL_8812, 0xf5b4); */
+        rtw_write8(Adapter, 0xf050, 0x01);  /* usb3 rx interval */
+        rtw_write16(Adapter, REG_RXDMA_STATUS, 0x7400);  /* burset lenght=4, set 0x3400 for burset length=2 */
+        rtw_write8(Adapter, 0x289, 0xf5);               /* for rxdma control */
+        /* rtw_write8(Adapter, 0x3a, 0x46); */
+
+        /* 0x456 = 0x70, sugguested by Zhilin */
+        rtw_write8(Adapter, REG_AMPDU_MAX_TIME_8812, 0x70);
+
+        rtw_write32(Adapter, REG_AMPDU_MAX_LENGTH_8812, 0xffffffff);
+        rtw_write8(Adapter, REG_USTIME_TSF, 0x50);
+        rtw_write8(Adapter, REG_USTIME_EDCA, 0x50);
+
+        speedvalue = rtw_read8(Adapter, 0xff); /* check device operation speed: SS 0xff bit7 */
+
+        if (speedvalue & BIT7)
+        { /* USB2/1.1 Mode */
+            temp = rtw_read8(Adapter, 0xfe17);
+            if (((temp >> 4) & 0x03) == 0)
+            {
+                pHalData.UsbBulkOutSize = USB_HIGH_SPEED_BULK_SIZE;
+                provalue = rtw_read8(Adapter, REG_RXDMA_PRO_8812);
+                rtw_write8(Adapter, REG_RXDMA_PRO_8812, ((provalue | BIT(4) | BIT(3) | BIT(2) | BIT(1)) & (~BIT(5)))); /* set burst pkt len=512B */
+            }
+            else
+            {
+                pHalData.UsbBulkOutSize = 64;
+                provalue = rtw_read8(Adapter, REG_RXDMA_PRO_8812);
+                rtw_write8(Adapter, REG_RXDMA_PRO_8812, ((provalue | BIT(5) | BIT(3) | BIT(2) | BIT(1)) & (~BIT(4)))); /* set burst pkt len=64B */
+            }
+
+            /* rtw_write8(Adapter, 0x10c, 0xb4); */
+            /* hal_UphyUpdate8812AU(Adapter); */
+
+            pHalData.bSupportUSB3 = _FALSE;
+        }
+        else
+        { /* USB3 Mode */
+            pHalData.UsbBulkOutSize = USB_SUPER_SPEED_BULK_SIZE;
+            provalue = rtw_read8(Adapter, REG_RXDMA_PRO_8812);
+            rtw_write8(Adapter, REG_RXDMA_PRO_8812, ((provalue | BIT(3) | BIT(2) | BIT(1)) & (~(BIT5 | BIT4)))); /* set burst pkt len=1k */
+            /* PlatformEFIOWrite2Byte(Adapter, REG_RXDMA_AGG_PG_TH,0x0a05); */ /* dmc agg th 20K */
+            pHalData.bSupportUSB3 = _TRUE;
+
+            /* set Reg 0xf008[3:4] to 2'00 to disable U1/U2 Mode to avoid 2.5G spur in USB3.0. added by page, 20120712 */
+            rtw_write8(Adapter, 0xf008, rtw_read8(Adapter, 0xf008) & 0xE7);
+        }
+
+        rtw_write8(Adapter, REG_TDECTRL, 0x10);
+
+        temp = rtw_read8(Adapter, REG_SYS_FUNC_EN);
+        rtw_write8(Adapter, REG_SYS_FUNC_EN, temp & (~BIT(10))); /* reset 8051 */
+
+        rtw_write8(Adapter, REG_HT_SINGLE_AMPDU_8812, rtw_read8(Adapter, REG_HT_SINGLE_AMPDU_8812) | BIT(7)); /* enable single pkt ampdu */
+        rtw_write8(Adapter, REG_RX_PKT_LIMIT, 0x18);        /* for VHT packet length 11K */
+
+        rtw_write8(Adapter, REG_PIFS, 0x00);
+
+        if (IS_HARDWARE_TYPE_8821U(Adapter) && (Adapter.registrypriv.wifi_spec == _FALSE))
+        {
+            /* 0x0a0a too small , it can't pass AC logo. change to 0x1f1f */
+            rtw_write16(Adapter, REG_MAX_AGGR_NUM, 0x1f1f);
+            rtw_write8(Adapter, REG_FWHW_TXQ_CTRL, 0x80);
+            rtw_write32(Adapter, REG_FAST_EDCA_CTRL, 0x03087777);
+        }
+        else
+        {
+            rtw_write16(Adapter, REG_MAX_AGGR_NUM, 0x1f1f);
+            rtw_write8(Adapter, REG_FWHW_TXQ_CTRL, rtw_read8(Adapter, REG_FWHW_TXQ_CTRL) & (~BIT(7)));
+        }
+
+        if (pHalData.AMPDUBurstMode)
+            rtw_write8(Adapter, REG_AMPDU_BURST_MODE_8812, 0x5F);
+
+        rtw_write8(Adapter, 0x1c, rtw_read8(Adapter, 0x1c) | BIT(5) | BIT(6)); /* to prevent mac is reseted by bus. 20111208, by Page */
+
+        /* ARFB table 9 for 11ac 5G 2SS */
+        rtw_write32(Adapter, REG_ARFR0_8812, 0x00000010);
+        rtw_write32(Adapter, REG_ARFR0_8812 + 4, 0xfffff000);
+
+        /* ARFB table 10 for 11ac 5G 1SS */
+        rtw_write32(Adapter, REG_ARFR1_8812, 0x00000010);
+        rtw_write32(Adapter, REG_ARFR1_8812 + 4, 0x003ff000);
+
+        /* ARFB table 11 for 11ac 24G 1SS */
+        rtw_write32(Adapter, REG_ARFR2_8812, 0x00000015);
+        rtw_write32(Adapter, REG_ARFR2_8812 + 4, 0x003ff000);
+        /* ARFB table 12 for 11ac 24G 2SS */
+        rtw_write32(Adapter, REG_ARFR3_8812, 0x00000015);
+        rtw_write32(Adapter, REG_ARFR3_8812 + 4, 0xffcff000);
+    }
+
+    static void _InitBeaconMaxError_8812A(PADAPTER    Adapter,BOOLEAN     InfraMode)
+    {
+        rtw_write8(Adapter, REG_BCN_MAX_ERR, 0xFF);
+    }
+
+    static void _InitBeaconParameters_8812A(PADAPTER Adapter)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        u16 val16;
+        u8 val8;
+
+        val8 = DIS_TSF_UDT;
+        val16 = val8 | (val8 << 8); /* port0 and port1 */
+
+        rtw_write16(Adapter, REG_BCN_CTRL, val16);
+
+        /* TBTT setup time */
+        rtw_write8(Adapter, REG_TBTT_PROHIBIT, TBTT_PROHIBIT_SETUP_TIME);
+
+        /* TBTT hold time: 0x540[19:8] */
+        rtw_write8(Adapter, REG_TBTT_PROHIBIT + 1, TBTT_PROHIBIT_HOLD_TIME_STOP_BCN & 0xFF);
+        rtw_write8(Adapter, REG_TBTT_PROHIBIT + 2,
+            (rtw_read8(Adapter, REG_TBTT_PROHIBIT + 2) & 0xF0) | (TBTT_PROHIBIT_HOLD_TIME_STOP_BCN >> 8));
+
+        rtw_write8(Adapter, REG_DRVERLYINT, DRIVER_EARLY_INT_TIME_8812);/* 5ms */
+        rtw_write8(Adapter, REG_BCNDMATIM, BCN_DMA_ATIME_INT_TIME_8812); /* 2ms */
+
+        /* Suggested by designer timchen. Change beacon AIFS to the largest number */
+        /* beacause test chip does not contension before sending beacon. by tynli. 2009.11.03 */
+        rtw_write16(Adapter, REG_BCNTCFG, 0x4413);
+
+    }
+
+    static void init_UsbAggregationSetting_8812A( PADAPTER Adapter)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+
+        /* Tx aggregation setting */
+        usb_AggSettingTxUpdate_8812A(Adapter);
+
+        /* Rx aggregation setting */
+        usb_AggSettingRxUpdate_8812A(Adapter);
+
+        /* 201/12/10 MH Add for USB agg mode dynamic switch. */
+        pHalData.UsbRxHighSpeedMode = false;
+    }
+
+    static void _InitRetryFunction_8812A(PADAPTER Adapter)
+    {
+        u8 value8;
+
+        value8 = rtw_read8(Adapter, REG_FWHW_TXQ_CTRL);
+        value8 |= EN_AMPDU_RTY_NEW;
+        rtw_write8(Adapter, REG_FWHW_TXQ_CTRL, value8);
+
+        /* Set ACK timeout */
+        /* rtw_write8(Adapter, REG_ACKTO, 0x40);  */ /* masked by page for BCM IOT issue temporally */
+        rtw_write8(Adapter, REG_ACKTO, 0x80);
+    }
+
+    static void _InitEDCA_8812AUsb( PADAPTER Adapter)
+    {
+        /* Set Spec SIFS (used in NAV) */
+        rtw_write16(Adapter, REG_SPEC_SIFS, 0x100a);
+        rtw_write16(Adapter, REG_MAC_SPEC_SIFS, 0x100a);
+
+        /* Set SIFS for CCK */
+        rtw_write16(Adapter, REG_SIFS_CTX, 0x100a);
+
+        /* Set SIFS for OFDM */
+        rtw_write16(Adapter, REG_SIFS_TRX, 0x100a);
+
+        /* TXOP */
+        rtw_write32(Adapter, REG_EDCA_BE_PARAM, 0x005EA42B);
+        rtw_write32(Adapter, REG_EDCA_BK_PARAM, 0x0000A44F);
+        rtw_write32(Adapter, REG_EDCA_VI_PARAM, 0x005EA324);
+        rtw_write32(Adapter, REG_EDCA_VO_PARAM, 0x002FA226);
+
+        /* 0x50 for 80MHz clock */
+        rtw_write8(Adapter, REG_USTIME_TSF, 0x50);
+        rtw_write8(Adapter, REG_USTIME_EDCA, 0x50);
+    }
+
+    static void _InitAdaptiveCtrl_8812AUsb(PADAPTER Adapter)
+    {
+        u16 value16;
+        u32 value32;
+
+        /* Response Rate Set */
+        value32 = rtw_read32(Adapter, REG_RRSR);
+        value32 &= ~RATE_BITMAP_ALL;
+
+        if (Adapter.registrypriv.wireless_mode & WIRELESS_11B)
+            value32 |= RATE_RRSR_CCK_ONLY_1M;
+        else
+            value32 |= RATE_RRSR_WITHOUT_CCK;
+
+        value32 |= RATE_RRSR_CCK_ONLY_1M;
+        rtw_write32(Adapter, REG_RRSR, value32);
+
+        /* CF-END Threshold */
+        /* m_spIoBase.rtw_write8(REG_CFEND_TH, 0x1); */
+
+        /* SIFS (used in NAV) */
+        value16 = _SPEC_SIFS_CCK(0x10) | _SPEC_SIFS_OFDM(0x10);
+        rtw_write16(Adapter, REG_SPEC_SIFS, value16);
+
+        /* Retry Limit */
+        value16 = BIT_LRL(RL_VAL_STA) | BIT_SRL(RL_VAL_STA);
+        rtw_write16(Adapter, REG_RETRY_LIMIT, value16);
+
+    }
+
+    static void _InitWMACSetting_8812A(PADAPTER Adapter)
+    {
+        /* rcr = AAP | APM | AM | AB | APP_ICV | ADF | AMF | APP_FCS | HTC_LOC_CTRL | APP_MIC | APP_PHYSTS; */
+        u32 rcr = RCR_APM |
+                  RCR_AM |
+                  RCR_AB |
+                  RCR_CBSSID_DATA |
+                  RCR_CBSSID_BCN |
+                  RCR_APP_ICV |
+                  RCR_AMF |
+                  RCR_HTC_LOC_CTRL |
+                  RCR_APP_MIC |
+                  RCR_APP_PHYST_RXFF |
+                  RCR_APPFCS |
+                  FORCEACK;
+
+        hw_var_rcr_config(Adapter, rcr);
+
+        /* Accept all multicast address */
+        rtw_write32(Adapter, REG_MAR, 0xFFFFFFFF);
+        rtw_write32(Adapter, REG_MAR + 4, 0xFFFFFFFF);
+
+        u16 value16 = BIT10 | BIT5;
+        rtw_write16(Adapter, REG_RXFLTMAP1, value16);
+    }
+
+    static void _InitNetworkType_8812A(PADAPTER Adapter)
+    {
+        u32 value32;
+
+        value32 = rtw_read32(Adapter, REG_CR);
+        /* TODO: use the other function to set network type */
+        value32 = (value32 & ~MASK_NETTYPE) | _NETTYPE(NT_LINK_AP);
+
+        rtw_write32(Adapter, REG_CR, value32);
+    }
+
+    static void _InitInterrupt_8812AU(PADAPTER Adapter)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        u8 usb_opt;
+
+        /* HIMR */
+        rtw_write32(Adapter, REG_HIMR0_8812, pHalData.IntrMask[0] & 0xFFFFFFFF);
+        rtw_write32(Adapter, REG_HIMR1_8812, pHalData.IntrMask[1] & 0xFFFFFFFF);
+    }
+
+static void _InitDriverInfoSize_8812A(PADAPTER    Adapter, u8      drvInfoSize)
+    {
+        rtw_write8(Adapter, REG_RX_DRVINFO_SZ, drvInfoSize);
+    }
+
+    static void _InitTransferPageSize_8812AUsb(PADAPTER Adapter)
+    {
+
+        u8 value8;
+        value8 = _PSTX(PBP_512);
+
+        PlatformEFIOWrite1Byte(Adapter, REG_PBP, value8);
+    }
+
+    static void _InitPageBoundary_8812AUsb(PADAPTER Adapter)
+    {
+        /* u2Byte 			rxff_bndy; */
+        /* u2Byte			Offset; */
+        /* BOOLEAN			bSupportRemoteWakeUp; */
+
+        /* Adapter.HalFunc.get_hal_def_var_handler(Adapter, HAL_DEF_WOWLAN , &bSupportRemoteWakeUp); */
+        /* RX Page Boundary */
+        /* srand(static_cast<unsigned int>(time(NULL)) ); */
+
+        /*	Offset = MAX_RX_DMA_BUFFER_SIZE_8812/256;
+         *	rxff_bndy = (Offset*256)-1; */
+
+        rtw_write16(Adapter, (REG_TRXFF_BNDY + 2), RX_DMA_BOUNDARY_8812);
+    }
+
+    static void _InitQueuePriority_8812AUsb( PADAPTER Adapter)
+    {
+        var pHalData = GET_HAL_DATA(Adapter);
+
+        switch (pHalData.OutEpNumber)
+        {
+            case 2:
+                _InitNormalChipTwoOutEpPriority_8812AUsb(Adapter);
+                break;
+            case 3:
+                _InitNormalChipThreeOutEpPriority_8812AUsb(Adapter);
+                break;
+            case 4:
+                _InitNormalChipFourOutEpPriority_8812AUsb(Adapter);
+                break;
+            default:
+                RTW_INFO("_InitQueuePriority_8812AUsb(): Shall not reach here!\n");
+                break;
+        }
+    }
+    static void _InitTxBufferBoundary_8812AUsb(PADAPTER Adapter)
+    {
+        var pregistrypriv = Adapter.registrypriv;
+        u8 txpktbuf_bndy;
+
+        txpktbuf_bndy = TX_PAGE_BOUNDARY_8812;
+
+        rtw_write8(Adapter, REG_BCNQ_BDNY, txpktbuf_bndy);
+        rtw_write8(Adapter, REG_MGQ_BDNY, txpktbuf_bndy);
+        rtw_write8(Adapter, REG_WMAC_LBK_BF_HD, txpktbuf_bndy);
+        rtw_write8(Adapter, REG_TRXFF_BNDY, txpktbuf_bndy);
+        rtw_write8(Adapter, REG_TDECTRL + 1, txpktbuf_bndy);
+
     }
 
     static bool PHY_MACConfig8812(PADAPTER Adapter)

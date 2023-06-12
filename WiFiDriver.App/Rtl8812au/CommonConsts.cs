@@ -138,4 +138,20 @@ public static class CommonConsts
     public const byte HAL_PRIME_CHNL_OFFSET_LOWER = 1;
     public const byte HAL_PRIME_CHNL_OFFSET_UPPER = 2;
     public const byte RF_CHNLBW_Jaguar = 0x18; /* RF channel and BW switch */
+    public const ushort REG_MGQ_BDNY = 0x0425;
+    public const ushort REG_BCNQ_BDNY = 0x0424;
+    public const ushort REG_WMAC_LBK_BF_HD = 0x045D;
+    public const ushort REG_TRXFF_BNDY = 0x0114;
+    public const ushort REG_TDECTRL = 0x0208;
+
+    /* for 8812
+ * TX 128K, RX 16K, Page size 512B for TX, 128B for RX */
+    public const ushort MAX_RX_DMA_BUFFER_SIZE_8812 = 0x3E80;/* RX 16K */
+    public const ushort RX_DMA_BOUNDARY_8812 = (MAX_RX_DMA_BUFFER_SIZE_8812 - RX_DMA_RESERVED_SIZE_8812 - 1);
+    public const ushort RX_DMA_RESERVED_SIZE_8812 = 0x0; /* 0B */
+    public const ushort REG_MAR = 0x0620;
+    public const ushort REG_HIMR0_8812 = 0x00B0;
+    public const ushort REG_HIMR1_8812 = 0x00B8;
+    public const ushort REG_RX_DRVINFO_SZ = 0x060F;
+    public const ushort REG_PBP = 0x0104;
 }
