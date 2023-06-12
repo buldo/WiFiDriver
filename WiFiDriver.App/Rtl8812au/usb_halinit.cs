@@ -1,13 +1,6 @@
-﻿using Microsoft.Win32;
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using System.Diagnostics;
-using System.IO;
-using System.Net.NetworkInformation;
-using System.Security.Cryptography;
 using System.Text;
-using System.Xml.Linq;
-
-using WiFiDriver.App.Rtl8812au;
 
 namespace WiFiDriver.App.Rtl8812au;
 
@@ -316,8 +309,7 @@ public static class usb_halinit
 
     }
 
-    static void Hal_ReadPROMContent_8812A(PADAPTER Adapter
-    )
+    static void Hal_ReadPROMContent_8812A(PADAPTER Adapter)
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
         u8 eeValue;
@@ -400,7 +392,6 @@ public static class usb_halinit
         //pwifionly_haldata.rfe_type = pHalData.rfe_type;
         //pwifionly_haldata.ant_div_cfg = pHalData.AntDivCfg;
     }
-
 
     static void hal_ReadUsbType_8812AU(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
@@ -588,7 +579,6 @@ public static class usb_halinit
         //hal_CustomizedBehavior_8812AU(pAdapter);
     }
 
-
     private static void hal_ReadUsbModeSwitch_8812AU(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
@@ -605,7 +595,6 @@ public static class usb_halinit
 
         RTW_INFO("Usb Switch: %d", pHalData.EEPROMUsbSwitch);
     }
-
 
     private static void Hal_ReadRFEType_8812A(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
@@ -821,7 +810,6 @@ public static class usb_halinit
 //        pHalData.bDisableSWChannelPlan = force_hw_chplan;
     }
 
-
     private static void Hal_ReadRemoteWakeup_8812A(PADAPTER padapter, u8[] hwinfo, BOOLEAN AutoLoadFail)
     {
         pwrctrl_priv pwrctl = adapter_to_pwrctl(padapter);
@@ -946,8 +934,7 @@ public static class usb_halinit
 
     }
 
-    private static void hal_load_txpwr_info(_adapter adapter, TxPowerInfo24G pwr_info_2g, TxPowerInfo5G pwr_info_5g,
-        u8[] pg_data)
+    private static void hal_load_txpwr_info(_adapter adapter, TxPowerInfo24G pwr_info_2g, TxPowerInfo5G pwr_info_5g, u8[] pg_data)
     {
         HAL_DATA_TYPE hal_data = GET_HAL_DATA(adapter);
 
@@ -2872,15 +2859,15 @@ public static class usb_halinit
             pwrctrlpriv.rf_pwrstate = rt_rf_power_state.rf_off;
         }
 
-/* 2010/08/09 MH We need to check if we need to turnon or off RF after detecting */
-/* HW GPIO pin. Before PHY_RFConfig8192C. */
-/* HalDetectPwrDownMode(Adapter); */
-/* 2010/08/26 MH If Efuse does not support sective suspend then disable the function. */
-/* HalDetectSelectiveSuspendMode(Adapter); */
+        // 2010/08/09 MH We need to check if we need to turnon or off RF after detecting
+        // HW GPIO pin. Before PHY_RFConfig8192C.
+        // HalDetectPwrDownMode(Adapter);
+        // 2010/08/26 MH If Efuse does not support sective suspend then disable the function.
+        // HalDetectSelectiveSuspendMode(Adapter);
 
-/* Save target channel */
-/* <Roger_Notes> Current Channel will be updated again later. */
-        pHalData.current_channel = 0; /* set 0 to trigger switch correct channel */
+        // Save target channel
+        // <Roger_Notes> Current Channel will be updated again later.
+        pHalData.current_channel = 0; // set 0 to trigger switch correct channel
 
 
         status = PHY_MACConfig8812(Adapter);
@@ -2898,7 +2885,7 @@ public static class usb_halinit
 
         _InitTransferPageSize_8812AUsb(Adapter);
 
-/* Get Rx PHY status in order to report RSSI and others. */
+        // Get Rx PHY status in order to report RSSI and others.
         _InitDriverInfoSize_8812A(Adapter, DRVINFO_SZ);
 
         _InitInterrupt_8812AU(Adapter);
@@ -2913,13 +2900,11 @@ public static class usb_halinit
         _InitBeaconParameters_8812A(Adapter);
         _InitBeaconMaxError_8812A(Adapter, true);
 
-        _InitBurstPktLen(Adapter); /* added by page. 20110919 */
+        _InitBurstPktLen(Adapter); // added by page. 20110919
 
-/*  */
-/* Init CR MACTXEN, MACRXEN after setting RxFF boundary REG_TRXFF_BNDY to patch */
-/* Hw bug which Hw initials RxFF boundry size to a value which is larger than the real Rx buffer size in 88E. */
-/* 2011.08.05. by tynli. */
-/*  */
+        // Init CR MACTXEN, MACRXEN after setting RxFF boundary REG_TRXFF_BNDY to patch
+        // Hw bug which Hw initials RxFF boundry size to a value which is larger than the real Rx buffer size in 88E.
+        // 2011.08.05. by tynli.
         value8 = rtw_read8(Adapter, REG_CR);
         rtw_write8(Adapter, REG_CR, (byte)(value8 | MACTXEN | MACRXEN));
 
@@ -2951,42 +2936,38 @@ public static class usb_halinit
 
         if (Adapter.registrypriv.channel <= 14)
         {
-            PHY_SwitchWirelessBand8812(Adapter, BAND_ON_2_4G);
+            PHY_SwitchWirelessBand8812(Adapter, BAND_TYPE.BAND_ON_2_4G);
         }
         else
         {
-            PHY_SwitchWirelessBand8812(Adapter, BAND_ON_5G);
+            PHY_SwitchWirelessBand8812(Adapter, BAND_TYPE.BAND_ON_5G);
         }
 
-        rtw_hal_set_chnl_bw(Adapter, Adapter.registrypriv.channel, CHANNEL_WIDTH_20, HAL_PRIME_CHNL_OFFSET_DONT_CARE,
+        rtw_hal_set_chnl_bw(Adapter, Adapter.registrypriv.channel, channel_width.CHANNEL_WIDTH_20, HAL_PRIME_CHNL_OFFSET_DONT_CARE,
             HAL_PRIME_CHNL_OFFSET_DONT_CARE);
 
 
         invalidate_cam_all(Adapter);
 
-/* HW SEQ CTRL */
-/* set 0x0 to 0xFF by tynli. Default enable HW SEQ NUM. */
+        // HW SEQ CTRL
+        // set 0x0 to 0xFF by tynli. Default enable HW SEQ NUM.
         rtw_write8(Adapter, REG_HWSEQ_CTRL, 0xFF);
 
-/*  */
-/* Disable BAR, suggested by Scott */
-/* 2010.04.09 add by hpfan */
-/*  */
+
+        // Disable BAR, suggested by Scott
+        // 2010.04.09 add by hpfan
         rtw_write32(Adapter, REG_BAR_MODE_CTRL, 0x0201ffff);
 
         if (pregistrypriv.wifi_spec)
         {
             rtw_write16(Adapter, REG_FAST_EDCA_CTRL, 0);
         }
-/* adjust EDCCA to avoid collision */
 
-
-/* Nav limit , suggest by scott */
+        // Nav limit , suggest by scott
         rtw_write8(Adapter, 0x652, 0x0);
 
         rtl8812_InitHalDm(Adapter);
 
-//#if (MP_DRIVER == 1)
         if (Adapter.registrypriv.mp_mode == 1)
         {
             throw new NotImplementedException("mp_mode == 1");
@@ -2994,7 +2975,6 @@ public static class usb_halinit
             //MPT_InitializeAdapter(Adapter, Adapter.mppriv.channel);
         }
         else
-//#endif /* #if (MP_DRIVER == 1) */
         {
             /*  */
             /* 2010/08/11 MH Merge from 8192SE for Minicard init. We need to confirm current radio status */
@@ -3051,90 +3031,85 @@ public static class usb_halinit
         // TODO:
         ///* ack for xmit mgmt frames. */
         rtw_write32(Adapter, REG_FWHW_TXQ_CTRL, rtw_read32(Adapter, REG_FWHW_TXQ_CTRL) | BIT12);
-
-        exit:
+    exit:
 
         return status;
     }
 
-    static void rtl8812_InitHalDm( PADAPTER    Adapter)
+    public static void phy_set_bb_reg(_adapter Adapter, u16 RegAddr, u32 BitMask, u32 Data) =>
+        rtw_hal_write_bbreg((Adapter), (RegAddr), (BitMask), (Data));
+
+    static void rtw_hal_write_bbreg(_adapter padapter, u16 RegAddr, u32 BitMask, u32 Data)
+    {
+        if (padapter.hal_func.write_bbreg !=null)
+        {
+            padapter.hal_func.write_bbreg(padapter, RegAddr, BitMask, Data);
+        }
+    }
+
+    static void rtl8812_InitHalDm(PADAPTER Adapter)
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
-        dm_struct        pDM_Odm = &(pHalData.odmpriv);
+        dm_struct pDM_Odm = (pHalData.odmpriv);
         dm_InitGPIOSetting(Adapter);
         rtw_phydm_init(Adapter);
         /* Adapter.fix_rate = 0xFF; */
     }
 
-static void invalidate_cam_all(_adapter padapter)
+    static void invalidate_cam_all(_adapter padapter)
     {
-
         dvobj_priv dvobj = adapter_to_dvobj(padapter);
-        cam_ctl_t *cam_ctl = &dvobj.cam_ctl;
-        _irqL irqL;
+        cam_ctl_t cam_ctl = dvobj.cam_ctl;
         u8 val8 = 0;
-
-        rtw_hal_set_hwreg(padapter, HW_VAR_CAM_INVALID_ALL, &val8);
-
-        _enter_critical_bh(&cam_ctl.lock, &irqL);
-        rtw_sec_cam_map_clr_all(&cam_ctl.used);
-        _rtw_memset(dvobj.cam_cache, 0, sizeof(struct sec_cam_ent) * SEC_CAM_ENT_NUM_SW_LIMIT);
-        _exit_critical_bh(&cam_ctl.lock, &irqL);
+        rtw_hal_set_hwreg(padapter, HW_VAR_CAM_INVALID_ALL, val8);
+        rtw_sec_cam_map_clr_all(cam_ctl.used);
     }
 
-static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
+    public static s32 PHY_SwitchWirelessBand8812(PADAPTER Adapter, BAND_TYPE Band)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        u8 currentBand = pHalData.current_band_type;
-        u8 current_bw = pHalData.current_channel_bw;
-        u8 rf_type = pHalData.rf_type;
-        u8 eLNA_2g = pHalData.ExternalLNA_2G;
+        BAND_TYPE currentBand = pHalData.current_band_type;
+        channel_width current_bw = pHalData.current_channel_bw;
+        rf_type rf_type = pHalData.rf_type;
+        bool eLNA_2g = pHalData.ExternalLNA_2G;
 
         /* RTW_INFO("==>PHY_SwitchWirelessBand8812() %s\n", ((Band==0)?"2.4G":"5G")); */
 
         pHalData.current_band_type = (BAND_TYPE)Band;
 
-        if (Band == BAND_ON_2_4G)
+        if (Band == BAND_TYPE.BAND_ON_2_4G)
         {
             /* 2.4G band */
 
             phy_set_bb_reg(Adapter, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
 
-            if (IS_HARDWARE_TYPE_8821(Adapter))
-                phy_SetRFEReg8821(Adapter, Band);
+            /* <20131128, VincentL> Remove 0x830[3:1] setting when switching 2G/5G, requested by Yn. */
+            phy_set_bb_reg(Adapter, rBWIndication_Jaguar, 0x3, 0x1); /* 0x834[1:0] = 0x1 */
+            /* set PD_TH_20M for BB Yn user guide R27 */
+            phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17, 0x17); /* 0x830[17:13]=5'b10111 */
 
-            if (IS_HARDWARE_TYPE_8812(Adapter))
-            {
-                /* <20131128, VincentL> Remove 0x830[3:1] setting when switching 2G/5G, requested by Yn. */
-                phy_set_bb_reg(Adapter, rBWIndication_Jaguar, 0x3, 0x1);        /* 0x834[1:0] = 0x1 */
-                /* set PD_TH_20M for BB Yn user guide R27 */
-                phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17, 0x17);      /* 0x830[17:13]=5'b10111 */
-            }
 
             /* set PWED_TH for BB Yn user guide R29 */
-            if (IS_HARDWARE_TYPE_8812(Adapter))
-            {
-                if (current_bw == CHANNEL_WIDTH_20
+
+                if (current_bw == channel_width.CHANNEL_WIDTH_20
                     && pHalData.rf_type == RF_1T1R
-                    && eLNA_2g == 0)
+                    && eLNA_2g == false)
                 {
                     /* 0x830[3:1]=3'b010 */
                     phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x02);
                 }
                 else
+                {
                     /* 0x830[3:1]=3'b100 */
-                    phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
-            }
+                phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
+                }
+
 
             /* AGC table select */
-            if (IS_VENDOR_8821A_MP_CHIP(Adapter))
-                phy_set_bb_reg(Adapter, rA_TxScale_Jaguar, 0xF00, 0);       /* 0xC1C[11:8] = 0 */
-            else
-                phy_set_bb_reg(Adapter, rAGC_table_Jaguar, 0x3, 0);         /* 0x82C[1:0] = 2b'00 */
+            phy_set_bb_reg(Adapter, rAGC_table_Jaguar, 0x3, 0); /* 0x82C[1:0] = 2b'00 */
 
-            if (IS_HARDWARE_TYPE_8812(Adapter))
-                phy_SetRFEReg8812(Adapter, Band);
+            phy_SetRFEReg8812(Adapter, Band);
 
             /* <20131106, Kordan> Workaround to fix CCK FA for scan issue. */
             /* if( pHalData.bMPMode == FALSE) */
@@ -3150,7 +3125,8 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
             rtw_write8(Adapter, REG_CCK_CHECK_8812, rtw_read8(Adapter, REG_CCK_CHECK_8812) & (~BIT(7)));
         }
         else
-        {   /* 5G band */
+        {
+            /* 5G band */
             u16 count = 0, reg41A = 0;
 
 
@@ -3163,7 +3139,7 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
             reg41A &= 0x30;
             while ((reg41A != 0x30) && (count < 50))
             {
-                rtw_udelay_os(50);
+                Thread.Sleep(50);
                 /* RTW_INFO("Delay 50us\n"); */
 
                 reg41A = rtw_read16(Adapter, REG_TXPKT_EMPTY);
@@ -3171,6 +3147,7 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
                 count++;
                 /* RTW_INFO("Reg41A value %d", reg41A); */
             }
+
             if (count != 0)
                 RTW_INFO("PHY_SwitchWirelessBand8812(): Switch to 5G Band. Count = %d reg41A=0x%x\n", count, reg41A);
 
@@ -3178,27 +3155,22 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
             if (Adapter.registrypriv.mp_mode == 0)
                 phy_set_bb_reg(Adapter, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
 
-            if (IS_HARDWARE_TYPE_8812(Adapter))
-            {
-                /* <20131128, VincentL> Remove 0x830[3:1] setting when switching 2G/5G, requested by Yn. */
-                phy_set_bb_reg(Adapter, rBWIndication_Jaguar, 0x3, 0x2); /* 0x834[1:0] = 0x2 */
-                /* set PD_TH_20M for BB Yn user guide R27 */
-                phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17, 0x15);      /* 0x830[17:13]=5'b10101 */
-            }
+
+            /* <20131128, VincentL> Remove 0x830[3:1] setting when switching 2G/5G, requested by Yn. */
+            phy_set_bb_reg(Adapter, rBWIndication_Jaguar, 0x3, 0x2); /* 0x834[1:0] = 0x2 */
+            /* set PD_TH_20M for BB Yn user guide R27 */
+            phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17,
+                0x15); /* 0x830[17:13]=5'b10101 */
+
 
             /* set PWED_TH for BB Yn user guide R29 */
-            if (IS_HARDWARE_TYPE_8812(Adapter))
-                /* 0x830[3:1]=3'b100 */
-                phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
+            /* 0x830[3:1]=3'b100 */
+            phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
 
             /* AGC table select */
-            if (IS_VENDOR_8821A_MP_CHIP(Adapter))
-                phy_set_bb_reg(Adapter, rA_TxScale_Jaguar, 0xF00, 1);   /* 0xC1C[11:8] = 1 */
-            else
-                phy_set_bb_reg(Adapter, rAGC_table_Jaguar, 0x3, 1);     /* 0x82C[1:0] = 2'b00 */
+            phy_set_bb_reg(Adapter, rAGC_table_Jaguar, 0x3, 1); /* 0x82C[1:0] = 2'b00 */
 
-            if (IS_HARDWARE_TYPE_8812(Adapter))
-                phy_SetRFEReg8812(Adapter, Band);
+            phy_SetRFEReg8812(Adapter, Band);
 
             /* <20131106, Kordan> Workaround to fix CCK FA for scan issue. */
             /* if( pHalData.bMPMode == FALSE) */
@@ -3226,7 +3198,45 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
         return _SUCCESS;
     }
 
-    static void PHY_BB8812_Config_1T( PADAPTER Adapter)
+    /* Update RRSR and Rate for USERATE */
+    static void update_tx_basic_rate(_adapter padapter, u8 wirelessmode)
+    {
+        NDIS_802_11_RATES_EX supported_rates;
+
+        mlme_ext_priv    pmlmeext = padapter.mlmeextpriv;
+
+        _rtw_memset(supported_rates, 0, NDIS_802_11_LENGTH_RATES_EX);
+
+        /* clear B mod if current channel is in 5G band, avoid tx cck rate in 5G band. */
+        if (pmlmeext.cur_channel > 14)
+            wirelessmode &= ~(WIRELESS_11B);
+
+        if ((wirelessmode & WIRELESS_11B) && (wirelessmode == WIRELESS_11B))
+        {
+            _rtw_memcpy(supported_rates, rtw_basic_rate_cck, 4);
+        }
+        else if (wirelessmode & WIRELESS_11B)
+        {
+            _rtw_memcpy(supported_rates, rtw_basic_rate_mix, 7);
+        }
+        else
+        {
+            _rtw_memcpy(supported_rates, rtw_basic_rate_ofdm, 3);
+        }
+
+        if (wirelessmode & WIRELESS_11B)
+        {
+            update_mgnt_tx_rate(padapter, IEEE80211_CCK_RATE_1MB);
+        }
+        else
+        {
+            update_mgnt_tx_rate(padapter, IEEE80211_OFDM_RATE_6MB);
+        }
+
+        rtw_hal_set_hwreg(padapter, HW_VAR_BASIC_RATE, supported_rates);
+    }
+
+static void PHY_BB8812_Config_1T(PADAPTER Adapter)
     {
         /* BB OFDM RX Path_A */
         phy_set_bb_reg(Adapter, rRxPath_Jaguar, bRxPath_Jaguar, 0x11);
@@ -3245,30 +3255,91 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
         phy_set_bb_reg(Adapter, 0xe64, bMaskDWord, 0);
     }
 
-    static int PHY_RFConfig8812( PADAPTER    Adapter)
+    static bool PHY_RFConfig8812(PADAPTER Adapter)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        int rtStatus = _SUCCESS;
+        bool rtStatus = true;
+        rtStatus = PHY_RF6052_Config_8812(Adapter);
+        return rtStatus;
+    }
 
-        if (RTW_CANNOT_RUN(Adapter))
-            return _FAIL;
+    static bool PHY_RF6052_Config_8812(PADAPTER Adapter)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        bool rtStatus = true;
 
-        switch (pHalData.rf_chip)
+        /* Initialize general global value */
+        if (pHalData.rf_type == RF_1T1R)
         {
-            case RF_PSEUDO_11N:
-                RTW_INFO("%s(): RF_PSEUDO_11N\n", __FUNCTION__);
-                break;
-            default:
-                rtStatus = PHY_RF6052_Config_8812(Adapter);
-                break;
+            pHalData.NumTotalRFPath = 1;
         }
+        else
+        {
+            pHalData.NumTotalRFPath = 2;
+        }
+
+        /*  */
+        /* Config BB and RF */
+        /*  */
+        rtStatus = phy_RF6052_Config_ParaFile_8812(Adapter);
 
         return rtStatus;
     }
 
-    static int PHY_BBConfig8812(PADAPTER    Adapter)
+    static bool phy_RF6052_Config_ParaFile_8812(PADAPTER Adapter)
     {
-        int rtStatus = _SUCCESS;
+        rf_path eRFPath;
+        bool rtStatus = true;
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+
+        /* 3 */ /* ----------------------------------------------------------------- */
+        /* 3 */ /* <2> Initialize RF */
+        /* 3 */ /* ----------------------------------------------------------------- */
+        /* for(eRFPath = RF_PATH_A; eRFPath <pHalData.NumTotalRFPath; eRFPath++) */
+        for (eRFPath = 0; (byte)eRFPath < pHalData.NumTotalRFPath; eRFPath++)
+        {
+            /*----Initialize RF fom connfiguration file----*/
+            switch (eRFPath)
+            {
+                case rf_path.RF_PATH_A:
+                {
+                    if (odm_config_rf_with_header_file(pHalData.odmpriv, CONFIG_RF_RADIO, eRFPath) ==
+                        HAL_STATUS_FAILURE)
+                    {
+                        rtStatus = false;
+                    }
+                }
+                    break;
+                case rf_path.RF_PATH_B:
+                {
+                    if (odm_config_rf_with_header_file(pHalData.odmpriv, CONFIG_RF_RADIO, eRFPath) ==
+                        HAL_STATUS_FAILURE)
+                    {
+                        rtStatus = false;
+                    }
+                }
+                    break;
+                default:
+                    break;
+            }
+
+            if (rtStatus != true)
+            {
+                throw new Exception();
+            }
+
+        }
+
+        odm_config_rf_with_tx_pwr_track_header_file(pHalData.odmpriv);
+
+
+        return rtStatus;
+    }
+
+
+    static bool PHY_BBConfig8812(PADAPTER Adapter)
+    {
+        bool rtStatus = true;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
         u8 TmpU1B = 0;
 
@@ -3284,7 +3355,7 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
 
         rtw_write8(Adapter, REG_SYS_FUNC_EN, (TmpU1B | FEN_BB_GLB_RSTn | FEN_BBRSTB)); /* same with 8812 */
         /* 6. 0x1f[7:0] = 0x07 PathA RF Power On */
-        rtw_write8(Adapter, REG_RF_CTRL, 0x07);/* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
+        rtw_write8(Adapter, REG_RF_CTRL, 0x07); /* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
         /* 7.  PathB RF Power On */
         rtw_write8(Adapter, REG_OPT_CTRL_8812 + 2, 0x7); /* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
         /* tangw check end 20120412 */
@@ -3300,7 +3371,44 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
         return rtStatus;
     }
 
-    static void _InitBurstPktLen( PADAPTER Adapter)
+    static void hal_set_crystal_cap(_adapter adapter, u8 crystal_cap)
+    {
+        crystal_cap = crystal_cap & 0x3F;
+
+        /* write 0x2C[30:25] = 0x2C[24:19] = CrystalCap */
+        phy_set_bb_reg(adapter, REG_MAC_PHY_CTRL, 0x7FF80000, (crystal_cap | (crystal_cap << 6)));
+    }
+
+    static void phy_InitBBRFRegisterDefinition(PADAPTER  Adapter)
+    {
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+
+        /* RF Interface Sowrtware Control */
+        pHalData.PHYRegDef[RF_PATH_A].rfintfs = rFPGA0_XAB_RFInterfaceSW; /* 16 LSBs if read 32-bit from 0x870 */
+        pHalData.PHYRegDef[RF_PATH_B].rfintfs = rFPGA0_XAB_RFInterfaceSW; /* 16 MSBs if read 32-bit from 0x870 (16-bit for 0x872) */
+
+        /* RF Interface Output (and Enable) */
+        pHalData.PHYRegDef[RF_PATH_A].rfintfo = rFPGA0_XA_RFInterfaceOE; /* 16 LSBs if read 32-bit from 0x860 */
+        pHalData.PHYRegDef[RF_PATH_B].rfintfo = rFPGA0_XB_RFInterfaceOE; /* 16 LSBs if read 32-bit from 0x864 */
+
+        /* RF Interface (Output and)  Enable */
+        pHalData.PHYRegDef[RF_PATH_A].rfintfe = rFPGA0_XA_RFInterfaceOE; /* 16 MSBs if read 32-bit from 0x860 (16-bit for 0x862) */
+        pHalData.PHYRegDef[RF_PATH_B].rfintfe = rFPGA0_XB_RFInterfaceOE; /* 16 MSBs if read 32-bit from 0x864 (16-bit for 0x866) */
+
+        pHalData.PHYRegDef[RF_PATH_A].rf3wireOffset = rA_LSSIWrite_Jaguar; /* LSSI Parameter */
+        pHalData.PHYRegDef[RF_PATH_B].rf3wireOffset = rB_LSSIWrite_Jaguar;
+
+        pHalData.PHYRegDef[RF_PATH_A].rfHSSIPara2 = rHSSIRead_Jaguar;  /* wire control parameter2 */
+        pHalData.PHYRegDef[RF_PATH_B].rfHSSIPara2 = rHSSIRead_Jaguar;  /* wire control parameter2 */
+
+        /* Tranceiver Readback LSSI/HSPI mode */
+        pHalData.PHYRegDef[RF_PATH_A].rfLSSIReadBack = rA_SIRead_Jaguar;
+        pHalData.PHYRegDef[RF_PATH_B].rfLSSIReadBack = rB_SIRead_Jaguar;
+        pHalData.PHYRegDef[RF_PATH_A].rfLSSIReadBackPi = rA_PIRead_Jaguar;
+        pHalData.PHYRegDef[RF_PATH_B].rfLSSIReadBackPi = rB_PIRead_Jaguar;
+    }
+
+    static void _InitBurstPktLen(PADAPTER Adapter)
     {
         u8 speedvalue, provalue, temp;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
@@ -3308,9 +3416,9 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
 
         /* rtw_write16(Adapter, REG_TRXDMA_CTRL_8195, 0xf5b0); */
         /* rtw_write16(Adapter, REG_TRXDMA_CTRL_8812, 0xf5b4); */
-        rtw_write8(Adapter, 0xf050, 0x01);  /* usb3 rx interval */
-        rtw_write16(Adapter, REG_RXDMA_STATUS, 0x7400);  /* burset lenght=4, set 0x3400 for burset length=2 */
-        rtw_write8(Adapter, 0x289, 0xf5);               /* for rxdma control */
+        rtw_write8(Adapter, 0xf050, 0x01); /* usb3 rx interval */
+        rtw_write16(Adapter, REG_RXDMA_STATUS, 0x7400); /* burset lenght=4, set 0x3400 for burset length=2 */
+        rtw_write8(Adapter, 0x289, 0xf5); /* for rxdma control */
         /* rtw_write8(Adapter, 0x3a, 0x46); */
 
         /* 0x456 = 0x70, sugguested by Zhilin */
@@ -3322,34 +3430,39 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
 
         speedvalue = rtw_read8(Adapter, 0xff); /* check device operation speed: SS 0xff bit7 */
 
-        if (speedvalue & BIT7)
-        { /* USB2/1.1 Mode */
+        if ((speedvalue & BIT7) != 0)
+        {
+            /* USB2/1.1 Mode */
             temp = rtw_read8(Adapter, 0xfe17);
             if (((temp >> 4) & 0x03) == 0)
             {
                 pHalData.UsbBulkOutSize = USB_HIGH_SPEED_BULK_SIZE;
                 provalue = rtw_read8(Adapter, REG_RXDMA_PRO_8812);
-                rtw_write8(Adapter, REG_RXDMA_PRO_8812, ((provalue | BIT(4) | BIT(3) | BIT(2) | BIT(1)) & (~BIT(5)))); /* set burst pkt len=512B */
+                rtw_write8(Adapter, REG_RXDMA_PRO_8812,
+                    ((provalue | BIT(4) | BIT(3) | BIT(2) | BIT(1)) & (~BIT(5)))); /* set burst pkt len=512B */
             }
             else
             {
                 pHalData.UsbBulkOutSize = 64;
                 provalue = rtw_read8(Adapter, REG_RXDMA_PRO_8812);
-                rtw_write8(Adapter, REG_RXDMA_PRO_8812, ((provalue | BIT(5) | BIT(3) | BIT(2) | BIT(1)) & (~BIT(4)))); /* set burst pkt len=64B */
+                rtw_write8(Adapter, REG_RXDMA_PRO_8812,
+                    ((provalue | BIT(5) | BIT(3) | BIT(2) | BIT(1)) & (~BIT(4)))); /* set burst pkt len=64B */
             }
 
             /* rtw_write8(Adapter, 0x10c, 0xb4); */
             /* hal_UphyUpdate8812AU(Adapter); */
 
-            pHalData.bSupportUSB3 = _FALSE;
+            pHalData.bSupportUSB3 = false;
         }
         else
-        { /* USB3 Mode */
+        {
+            /* USB3 Mode */
             pHalData.UsbBulkOutSize = USB_SUPER_SPEED_BULK_SIZE;
             provalue = rtw_read8(Adapter, REG_RXDMA_PRO_8812);
-            rtw_write8(Adapter, REG_RXDMA_PRO_8812, ((provalue | BIT(3) | BIT(2) | BIT(1)) & (~(BIT5 | BIT4)))); /* set burst pkt len=1k */
+            rtw_write8(Adapter, REG_RXDMA_PRO_8812,
+                ((provalue | BIT(3) | BIT(2) | BIT(1)) & (~(BIT5 | BIT4)))); /* set burst pkt len=1k */
             /* PlatformEFIOWrite2Byte(Adapter, REG_RXDMA_AGG_PG_TH,0x0a05); */ /* dmc agg th 20K */
-            pHalData.bSupportUSB3 = _TRUE;
+            pHalData.bSupportUSB3 = true;
 
             /* set Reg 0xf008[3:4] to 2'00 to disable U1/U2 Mode to avoid 2.5G spur in USB3.0. added by page, 20120712 */
             rtw_write8(Adapter, 0xf008, rtw_read8(Adapter, 0xf008) & 0xE7);
@@ -3360,28 +3473,22 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
         temp = rtw_read8(Adapter, REG_SYS_FUNC_EN);
         rtw_write8(Adapter, REG_SYS_FUNC_EN, temp & (~BIT(10))); /* reset 8051 */
 
-        rtw_write8(Adapter, REG_HT_SINGLE_AMPDU_8812, rtw_read8(Adapter, REG_HT_SINGLE_AMPDU_8812) | BIT(7)); /* enable single pkt ampdu */
-        rtw_write8(Adapter, REG_RX_PKT_LIMIT, 0x18);        /* for VHT packet length 11K */
+        rtw_write8(Adapter, REG_HT_SINGLE_AMPDU_8812,
+            rtw_read8(Adapter, REG_HT_SINGLE_AMPDU_8812) | BIT(7)); /* enable single pkt ampdu */
+        rtw_write8(Adapter, REG_RX_PKT_LIMIT, 0x18); /* for VHT packet length 11K */
 
         rtw_write8(Adapter, REG_PIFS, 0x00);
 
-        if (IS_HARDWARE_TYPE_8821U(Adapter) && (Adapter.registrypriv.wifi_spec == _FALSE))
-        {
-            /* 0x0a0a too small , it can't pass AC logo. change to 0x1f1f */
-            rtw_write16(Adapter, REG_MAX_AGGR_NUM, 0x1f1f);
-            rtw_write8(Adapter, REG_FWHW_TXQ_CTRL, 0x80);
-            rtw_write32(Adapter, REG_FAST_EDCA_CTRL, 0x03087777);
-        }
-        else
-        {
-            rtw_write16(Adapter, REG_MAX_AGGR_NUM, 0x1f1f);
-            rtw_write8(Adapter, REG_FWHW_TXQ_CTRL, rtw_read8(Adapter, REG_FWHW_TXQ_CTRL) & (~BIT(7)));
-        }
+        rtw_write16(Adapter, REG_MAX_AGGR_NUM, 0x1f1f);
+        rtw_write8(Adapter, REG_FWHW_TXQ_CTRL, rtw_read8(Adapter, REG_FWHW_TXQ_CTRL) & (~BIT(7)));
 
         if (pHalData.AMPDUBurstMode)
+        {
             rtw_write8(Adapter, REG_AMPDU_BURST_MODE_8812, 0x5F);
+        }
 
-        rtw_write8(Adapter, 0x1c, rtw_read8(Adapter, 0x1c) | BIT(5) | BIT(6)); /* to prevent mac is reseted by bus. 20111208, by Page */
+        rtw_write8(Adapter, 0x1c,
+            rtw_read8(Adapter, 0x1c) | BIT(5) | BIT(6)); /* to prevent mac is reseted by bus. 20111208, by Page */
 
         /* ARFB table 9 for 11ac 5G 2SS */
         rtw_write32(Adapter, REG_ARFR0_8812, 0x00000010);
@@ -3399,7 +3506,7 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
         rtw_write32(Adapter, REG_ARFR3_8812 + 4, 0xffcff000);
     }
 
-    static void _InitBeaconMaxError_8812A(PADAPTER    Adapter,BOOLEAN     InfraMode)
+    static void _InitBeaconMaxError_8812A(PADAPTER Adapter, BOOLEAN InfraMode)
     {
         rtw_write8(Adapter, REG_BCN_MAX_ERR, 0xFF);
     }
@@ -3423,7 +3530,7 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
         rtw_write8(Adapter, REG_TBTT_PROHIBIT + 2,
             (rtw_read8(Adapter, REG_TBTT_PROHIBIT + 2) & 0xF0) | (TBTT_PROHIBIT_HOLD_TIME_STOP_BCN >> 8));
 
-        rtw_write8(Adapter, REG_DRVERLYINT, DRIVER_EARLY_INT_TIME_8812);/* 5ms */
+        rtw_write8(Adapter, REG_DRVERLYINT, DRIVER_EARLY_INT_TIME_8812); /* 5ms */
         rtw_write8(Adapter, REG_BCNDMATIM, BCN_DMA_ATIME_INT_TIME_8812); /* 2ms */
 
         /* Suggested by designer timchen. Change beacon AIFS to the largest number */
@@ -3432,7 +3539,7 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
 
     }
 
-    static void init_UsbAggregationSetting_8812A( PADAPTER Adapter)
+    static void init_UsbAggregationSetting_8812A(PADAPTER Adapter)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
@@ -3459,7 +3566,7 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
         rtw_write8(Adapter, REG_ACKTO, 0x80);
     }
 
-    static void _InitEDCA_8812AUsb( PADAPTER Adapter)
+    static void _InitEDCA_8812AUsb(PADAPTER Adapter)
     {
         /* Set Spec SIFS (used in NAV) */
         rtw_write16(Adapter, REG_SPEC_SIFS, 0x100a);
@@ -3559,7 +3666,7 @@ static s32 PHY_SwitchWirelessBand8812( PADAPTER Adapter, u8           Band)
         rtw_write32(Adapter, REG_HIMR1_8812, pHalData.IntrMask[1] & 0xFFFFFFFF);
     }
 
-static void _InitDriverInfoSize_8812A(PADAPTER    Adapter, u8      drvInfoSize)
+    static void _InitDriverInfoSize_8812A(PADAPTER Adapter, u8 drvInfoSize)
     {
         rtw_write8(Adapter, REG_RX_DRVINFO_SZ, drvInfoSize);
     }
@@ -3589,7 +3696,7 @@ static void _InitDriverInfoSize_8812A(PADAPTER    Adapter, u8      drvInfoSize)
         rtw_write16(Adapter, (REG_TRXFF_BNDY + 2), RX_DMA_BOUNDARY_8812);
     }
 
-    static void _InitQueuePriority_8812AUsb( PADAPTER Adapter)
+    static void _InitQueuePriority_8812AUsb(PADAPTER Adapter)
     {
         var pHalData = GET_HAL_DATA(Adapter);
 
@@ -3609,6 +3716,7 @@ static void _InitDriverInfoSize_8812A(PADAPTER    Adapter, u8      drvInfoSize)
                 break;
         }
     }
+
     static void _InitTxBufferBoundary_8812AUsb(PADAPTER Adapter)
     {
         var pregistrypriv = Adapter.registrypriv;
@@ -3652,7 +3760,7 @@ static void _InitDriverInfoSize_8812A(PADAPTER    Adapter, u8      drvInfoSize)
 
 /* @1 AP doesn't use PHYDM initialization in these ICs */
 
-        odm_read_and_config_mp_8812a_mac_reg(adapter,dm);
+        odm_read_and_config_mp_8812a_mac_reg(adapter, dm);
 
         if (dm.fw_offload_ability & PHYDM_PHY_PARAM_OFFLOAD)
         {
@@ -3662,7 +3770,7 @@ static void _InitDriverInfoSize_8812A(PADAPTER    Adapter, u8      drvInfoSize)
                 0,
                 0,
                 (rf_path)0,
-            0);
+                0);
             //PHYDM_DBG(dm, ODM_COMP_INIT,
             //    "mac param offload end!result = %d", result);
         }
@@ -4057,7 +4165,8 @@ static void _InitDriverInfoSize_8812A(PADAPTER    Adapter, u8      drvInfoSize)
         pHalData.firmware_sub_version = (u16)GET_FIRMWARE_HDR_SUB_VER_8812(pFwHdr);
         pHalData.FirmwareSignature = (u16)GET_FIRMWARE_HDR_SIGNATURE_8812(pFwHdr);
 
-        RTW_INFO($"FirmwareDownload8812: fw_ver={pHalData.firmware_version} fw_subver={pHalData.firmware_sub_version} sig=0x{pHalData.FirmwareSignature:X}");
+        RTW_INFO(
+            $"FirmwareDownload8812: fw_ver={pHalData.firmware_version} fw_subver={pHalData.firmware_sub_version} sig=0x{pHalData.FirmwareSignature:X}");
 
         if (Firmware.IS_FW_HEADER_EXIST_8812(pFwHdr))
         {
@@ -4130,7 +4239,7 @@ static void _InitDriverInfoSize_8812A(PADAPTER    Adapter, u8      drvInfoSize)
         pHalData.LastHMEBoxNum = 0;
     }
 
-static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
+    static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
     {
         bool ret = false;
         u32 value32;
@@ -4149,7 +4258,7 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
         {
             cnt++;
             value32 = rtw_read32(adapter, REG_MCUFWDL);
-            if ((value32 & WINTINI_RDY) !=0)
+            if ((value32 & WINTINI_RDY) != 0)
             {
                 break;
             }
@@ -4174,7 +4283,7 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
         return ret;
     }
 
-    static bool polling_fwdl_chksum(_adapter adapter,uint min_cnt, uint timeout_ms)
+    static bool polling_fwdl_chksum(_adapter adapter, uint min_cnt, uint timeout_ms)
     {
         bool ret = false;
         uint value32;
@@ -4185,7 +4294,7 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
         do
         {
             cnt++;
-            value32 = rtw_read32(adapter,REG_MCUFWDL);
+            value32 = rtw_read32(adapter, REG_MCUFWDL);
             if ((value32 & Firmware.FWDL_ChkSum_rpt) != 0)
             {
                 break;
@@ -4227,7 +4336,7 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
         for (page = 0; page < pageNums; page++)
         {
             offset = page * MAX_DLFW_PAGE_SIZE;
-            ret = _PageWrite_8812(adapter,page, bufferPtr.Slice(offset), MAX_DLFW_PAGE_SIZE);
+            ret = _PageWrite_8812(adapter, page, bufferPtr.Slice(offset), MAX_DLFW_PAGE_SIZE);
 
             if (ret == false)
             {
@@ -4239,7 +4348,7 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
         {
             offset = pageNums * MAX_DLFW_PAGE_SIZE;
             page = pageNums;
-            ret = _PageWrite_8812(adapter,page, bufferPtr.Slice(offset), remainSize);
+            ret = _PageWrite_8812(adapter, page, bufferPtr.Slice(offset), remainSize);
 
             if (ret == false)
             {
@@ -4252,18 +4361,18 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
         return ret;
     }
 
-    static bool _PageWrite_8812(_adapter adapter,int page, Span<byte> buffer, int size)
+    static bool _PageWrite_8812(_adapter adapter, int page, Span<byte> buffer, int size)
     {
         byte value8;
         byte u8Page = (byte)(page & 0x07);
 
-        value8 = (byte)((Read8(adapter,(REG_MCUFWDL + 2)) & 0xF8) | u8Page);
-        Write8(adapter,(REG_MCUFWDL+ 2), value8);
+        value8 = (byte)((Read8(adapter, (REG_MCUFWDL + 2)) & 0xF8) | u8Page);
+        Write8(adapter, (REG_MCUFWDL + 2), value8);
 
-        return _BlockWrite_8812(adapter,buffer, size);
+        return _BlockWrite_8812(adapter, buffer, size);
     }
 
-    static bool _BlockWrite_8812(_adapter adapter,Span<byte> buffer, int buffSize)
+    static bool _BlockWrite_8812(_adapter adapter, Span<byte> buffer, int buffSize)
     {
         const int MAX_REG_BOLCK_SIZE = 196;
 
@@ -4286,7 +4395,8 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
 
         for (i = 0; i < blockCount_p1; i++)
         {
-            WriteBytes(adapter,(ushort)(FW_START_ADDRESS + i * blockSize_p1), buffer.Slice((int)(i * blockSize_p1), (int)blockSize_p1));
+            WriteBytes(adapter, (ushort)(FW_START_ADDRESS + i * blockSize_p1),
+                buffer.Slice((int)(i * blockSize_p1), (int)blockSize_p1));
         }
 
         /* 3 Phase #2 */
@@ -4299,7 +4409,8 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
 
             for (i = 0; i < blockCount_p2; i++)
             {
-                WriteBytes(adapter,(ushort)(FW_START_ADDRESS + offset + i * blockSize_p2), buffer.Slice((int)(offset + i * blockSize_p2), (int)blockSize_p2));
+                WriteBytes(adapter, (ushort)(FW_START_ADDRESS + offset + i * blockSize_p2),
+                    buffer.Slice((int)(offset + i * blockSize_p2), (int)blockSize_p2));
             }
 
         }
@@ -4314,7 +4425,7 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
 
             for (i = 0; i < blockCount_p3; i++)
             {
-                Write8(adapter,(ushort)(FW_START_ADDRESS + offset + i), buffer[(int)(offset + i)]);
+                Write8(adapter, (ushort)(FW_START_ADDRESS + offset + i), buffer[(int)(offset + i)]);
             }
         }
 
@@ -4322,7 +4433,7 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
     }
 
 
-    static void _FWDownloadEnable_8812(PADAPTER        padapter, BOOLEAN         enable)
+    static void _FWDownloadEnable_8812(PADAPTER padapter, BOOLEAN enable)
     {
         u8 tmp;
 
@@ -4347,13 +4458,13 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
 
     private static UInt32 GET_FIRMWARE_HDR_SIGNATURE_8812(byte[] __FwHdr)
     {
-        return LE_BITS_TO_4BYTE(__FwHdr.AsSpan(0,4), 0, 16);
+        return LE_BITS_TO_4BYTE(__FwHdr.AsSpan(0, 4), 0, 16);
         /* 92C0: test chip; 92C, 88C0: test chip; 88C1: MP A-cut; 92C1: MP A-cut */
     }
 
     private static UInt32 GET_FIRMWARE_HDR_VERSION_8812(byte[] __FwHdr)
     {
-        return LE_BITS_TO_4BYTE(__FwHdr.AsSpan(4,4), 0, 16); /* FW Version */
+        return LE_BITS_TO_4BYTE(__FwHdr.AsSpan(4, 4), 0, 16); /* FW Version */
     }
 
     private static UInt32 GET_FIRMWARE_HDR_SUB_VER_8812(byte[] __FwHdr)
@@ -4361,7 +4472,7 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
         return LE_BITS_TO_4BYTE(__FwHdr.AsSpan(4, 4), 16, 8); /* FW Subversion, default 0x00 */
     }
 
-    private static UInt32 LE_BITS_TO_4BYTE(Span<byte> __pStart, int __BitOffset,int __BitLen)
+    private static UInt32 LE_BITS_TO_4BYTE(Span<byte> __pStart, int __BitOffset, int __BitLen)
     {
         return ((LE_P4BYTE_TO_HOST_4BYTE(__pStart) >> (__BitOffset)) & BIT_LEN_MASK_32(__BitLen));
     }
@@ -4384,27 +4495,32 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
 
         pHalData.version_id.ICType = HAL_IC_TYPE_E.CHIP_8812;
 
-        pHalData.version_id.ChipType = ((value32 & RTL_ID) !=0 ? HAL_CHIP_TYPE_E.TEST_CHIP : HAL_CHIP_TYPE_E.NORMAL_CHIP);
+        pHalData.version_id.ChipType =
+            ((value32 & RTL_ID) != 0 ? HAL_CHIP_TYPE_E.TEST_CHIP : HAL_CHIP_TYPE_E.NORMAL_CHIP);
 
         pHalData.version_id.RFType = HAL_RF_TYPE_E.RF_TYPE_2T2R; /* RF_2T2R; */
 
         if (Adapter.registrypriv.special_rf_path == 1)
             pHalData.version_id.RFType = HAL_RF_TYPE_E.RF_TYPE_1T1R; /* RF_1T1R; */
 
-        pHalData.version_id.VendorType = ((value32 & VENDOR_ID) !=0 ? HAL_VENDOR_E.CHIP_VENDOR_UMC : HAL_VENDOR_E.CHIP_VENDOR_TSMC);
+        pHalData.version_id.VendorType =
+            ((value32 & VENDOR_ID) != 0 ? HAL_VENDOR_E.CHIP_VENDOR_UMC : HAL_VENDOR_E.CHIP_VENDOR_TSMC);
 
-        pHalData.version_id.CUTVersion = (HAL_CUT_VERSION_E)((value32 & CHIP_VER_RTL_MASK) >> CHIP_VER_RTL_SHIFT); /* IC version (CUT) */
+        pHalData.version_id.CUTVersion =
+            (HAL_CUT_VERSION_E)((value32 & CHIP_VER_RTL_MASK) >> CHIP_VER_RTL_SHIFT); /* IC version (CUT) */
         pHalData.version_id.CUTVersion += 1;
 
         /* value32 = rtw_read32(Adapter, REG_GPIO_OUTSTS); */
-        pHalData.version_id.ROMVer = 0;    /* ROM code version. */
+        pHalData.version_id.ROMVer = 0; /* ROM code version. */
 
         /* For multi-function consideration. Added by Roger, 2010.10.06. */
         pHalData.MultiFunc = RT_MULTI_FUNC.RT_MULTI_FUNC_NONE;
         value32 = rtw_read32(Adapter, REG_MULTI_FUNC_CTRL);
         pHalData.MultiFunc |= ((value32 & WL_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_WIFI : 0);
         pHalData.MultiFunc |= ((value32 & BT_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_BT : 0);
-        pHalData.PolarityCtl = ((value32 & WL_HWPDN_SL) != 0 ? RT_POLARITY_CTL.RT_POLARITY_HIGH_ACT : RT_POLARITY_CTL.RT_POLARITY_LOW_ACT);
+        pHalData.PolarityCtl = ((value32 & WL_HWPDN_SL) != 0
+            ? RT_POLARITY_CTL.RT_POLARITY_HIGH_ACT
+            : RT_POLARITY_CTL.RT_POLARITY_LOW_ACT);
 
         rtw_hal_config_rftype(Adapter);
 
@@ -4453,7 +4569,7 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
-        registry_priv    pregistrypriv = Adapter.registrypriv;
+        registry_priv pregistrypriv = Adapter.registrypriv;
         u32 numHQ = 0;
         u32 numLQ = 0;
         u32 numNQ = 0;
@@ -4462,7 +4578,8 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
         u8 value8;
         BOOLEAN bWiFiConfig = pregistrypriv.wifi_spec;
 
-        if (!bWiFiConfig) {
+        if (!bWiFiConfig)
+        {
             if (pHalData.OutEpQueueSel.HasFlag(TxSele.TX_SELE_HQ))
             {
                 numHQ = NORMAL_PAGE_NUM_HPQ_8812;
@@ -4478,7 +4595,9 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
             {
                 numNQ = NORMAL_PAGE_NUM_NPQ_8812;
             }
-        } else {
+        }
+        else
+        {
             /* WMM		 */
             if (pHalData.OutEpQueueSel.HasFlag(TxSele.TX_SELE_HQ))
             {
@@ -4508,8 +4627,8 @@ static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
     }
 
     static u32 _NPQ(u32 x) => ((x) & 0xFF);
-    static u32 _HPQ(u32 x)=> ((x) & 0xFF);
-    static u32 _LPQ(u32 x) =>(((x) & 0xFF) << 8);
-    static u32 _PUBQ(u32 x) =>(((x) & 0xFF) << 16);
+    static u32 _HPQ(u32 x) => ((x) & 0xFF);
+    static u32 _LPQ(u32 x) => (((x) & 0xFF) << 8);
+    static u32 _PUBQ(u32 x) => (((x) & 0xFF) << 16);
     static u32 LD_RQPN() => BIT31;
 }
