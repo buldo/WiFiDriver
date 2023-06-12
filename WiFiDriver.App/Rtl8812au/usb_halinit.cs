@@ -3057,6 +3057,96 @@ public static class usb_halinit
         /* Adapter.fix_rate = 0xFF; */
     }
 
+    static void rtw_phydm_init(_adapter adapter)
+    {
+        PHAL_DATA_TYPE hal_data = GET_HAL_DATA(adapter);
+
+        dm_struct phydm = (hal_data.odmpriv);
+
+        init_phydm_info(adapter);
+        odm_dm_init(phydm);
+    }
+
+    static void odm_dm_init(dm_struct dm)
+    {
+        halrf_init(dm);
+        phydm_supportability_init(dm);
+        phydm_rfe_init(dm);
+        phydm_common_info_self_init(dm);
+        phydm_rx_phy_status_init(dm);
+#ifdef PHYDM_AUTO_DEGBUG
+        phydm_auto_dbg_engine_init(dm);
+#endif
+        phydm_dig_init(dm);
+#ifdef PHYDM_SUPPORT_CCKPD
+        phydm_cck_pd_init(dm);
+#endif
+        phydm_env_monitor_init(dm);
+        phydm_adaptivity_init(dm);
+        phydm_ra_info_init(dm);
+        phydm_rssi_monitor_init(dm);
+        phydm_cfo_tracking_init(dm);
+        phydm_rf_init(dm);
+        phydm_dc_cancellation(dm);
+#ifdef PHYDM_TXA_CALIBRATION
+        phydm_txcurrentcalibration(dm);
+        phydm_get_pa_bias_offset(dm);
+#endif
+# ifdef CONFIG_PHYDM_ANTENNA_DIVERSITY
+        odm_antenna_diversity_init(dm);
+#endif
+# ifdef CONFIG_ADAPTIVE_SOML
+        phydm_adaptive_soml_init(dm);
+#endif
+# ifdef CONFIG_PATH_DIVERSITY
+        phydm_tx_path_diversity_init(dm);
+#endif
+# ifdef CONFIG_DYNAMIC_TX_TWR
+        phydm_dynamic_tx_power_init(dm);
+#endif
+#if (PHYDM_LA_MODE_SUPPORT == 1)
+        adc_smp_init(dm);
+#endif
+# ifdef PHYDM_BEAMFORMING_VERSION1
+        phydm_beamforming_init(dm);
+#endif
+# ifdef PHYDM_PRIMARY_CCA
+        phydm_primary_cca_init(dm);
+#endif
+# ifdef CONFIG_PSD_TOOL
+        phydm_psd_init(dm);
+#endif
+
+# ifdef CONFIG_SMART_ANTENNA
+        phydm_smt_ant_init(dm);
+#endif
+# ifdef PHYDM_LNA_SAT_CHK_SUPPORT
+        phydm_lna_sat_check_init(dm);
+#endif
+    }
+
+static void init_phydm_info(_adapter adapter)
+    {
+        PHAL_DATA_TYPE hal_data = GET_HAL_DATA(adapter);
+
+        dm_struct phydm = (hal_data.odmpriv);
+
+        odm_cmn_info_init(phydm, ODM_CMNINFO_FW_VER, hal_data->firmware_version);
+        odm_cmn_info_init(phydm, ODM_CMNINFO_FW_SUB_VER, hal_data->firmware_sub_version);
+    }
+
+    static void dm_InitGPIOSetting(PADAPTER    Adapter)
+    {
+        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+
+        u8 tmp1byte;
+
+        tmp1byte = rtw_read8(Adapter, REG_GPIO_MUXCFG);
+        tmp1byte &= (GPIOSEL_GPIO | ~GPIOSEL_ENBT);
+
+        rtw_write8(Adapter, REG_GPIO_MUXCFG, tmp1byte);
+    }
+
     static void invalidate_cam_all(_adapter padapter)
     {
         dvobj_priv dvobj = adapter_to_dvobj(padapter);

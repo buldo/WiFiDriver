@@ -198,6 +198,24 @@ public static class CommonConsts
     public const ushort rAGC_table_Jaguar = 0x82c;/* AGC tabel select */
     public const ushort REG_MAC_PHY_CTRL = 0x002c;/* for 92d, DMDP, SMSP, DMSP contrl */
     public const ushort REG_OPT_CTRL_8812 = 0x0074;
+    public const ushort REG_WMAC_TRXPTCL_CTL = 0x0668;
+    public const ushort REG_GPIO_MUXCFG = 0x0040;
 
     public const byte bMaskByte0 = 0xff;
+    public const uint bCCK_System_Jaguar = 0x10;
+}
+
+public enum VHT_DATA_SC :byte
+{
+    VHT_DATA_SC_DONOT_CARE = 0,
+    VHT_DATA_SC_20_UPPER_OF_80MHZ = 1,
+    VHT_DATA_SC_20_LOWER_OF_80MHZ = 2,
+    VHT_DATA_SC_20_UPPERST_OF_80MHZ = 3,
+    VHT_DATA_SC_20_LOWEST_OF_80MHZ = 4,
+    VHT_DATA_SC_20_RECV1 = 5,
+    VHT_DATA_SC_20_RECV2 = 6,
+    VHT_DATA_SC_20_RECV3 = 7,
+    VHT_DATA_SC_20_RECV4 = 8,
+    VHT_DATA_SC_40_UPPER_OF_80MHZ = 9,
+    VHT_DATA_SC_40_LOWER_OF_80MHZ = 10,
 }
