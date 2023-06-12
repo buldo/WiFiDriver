@@ -209,7 +209,102 @@ public static class CommonConsts
     public const ushort REG_PIFS = 0x0512;
     public const ushort REG_MAX_AGGR_NUM = 0x04CA;
     public const ushort REG_AMPDU_BURST_MODE_8812 = 0x04BC;
+    public const ushort rA_TxScale_Jaguar = 0xc1c;/* Pah_A TX scaling factor */
+    public const ushort rB_TxScale_Jaguar = 0xe1c;/* Path_B TX scaling factor */
+    public const ushort rA_RFE_Pinmux_Jaguar = 0xcb0; /* Path_A RFE cotrol pinmux */
+    public const ushort rB_RFE_Pinmux_Jaguar = 0xeb0;/* Path_B RFE control pinmux */
+    public const ushort rA_RFE_Inv_Jaguar = 0xcb4;/* Path_A RFE cotrol   */
+    public const ushort rB_RFE_Inv_Jaguar = 0xeb4;/* Path_B RFE control */
+    public const ushort r_ANTSEL_SW_Jaguar = 0x900;/* ANTSEL SW Control */
+    public const ushort REG_TRXDMA_CTRL = 0x010C;
+    public const ushort REG_HIQ_NO_LMT_EN = 0x05A7;
 
-    public const byte bMaskByte0 = 0xff;
+
+
+    public const uint bMaskByte0 = 0xff;
+    public const uint bMaskByte1 = 0xff00;
+    public const uint bMaskByte2 = 0xff0000;
+    public const uint bMaskByte3 = 0xff000000;
+
     public const uint bCCK_System_Jaguar = 0x10;
+    public const uint bOFDMEN_Jaguar = 0x20000000;
+    public const uint bCCKEN_Jaguar = 0x10000000;
+    public const uint bRxPath_Jaguar = 0xff;
+    public const uint bCCK_RX_Jaguar = 0x0c000000;
+    public const uint bMask_RFEInv_Jaguar = 0x3ff00000;
+
+    public const byte PBP_512 = 0x3;
+    public const byte TBTT_PROHIBIT_SETUP_TIME = 0x04; /* 128us, unit is 32us */
+    public const byte TBTT_PROHIBIT_HOLD_TIME_STOP_BCN = 0x64; /* 3.2ms unit is 32us*/
+    public const byte DRIVER_EARLY_INT_TIME_8812 = 0x05;
+    public const byte BCN_DMA_ATIME_INT_TIME_8812 = 0x02;
+    public const byte DIS_TSF_UDT = BIT4;
+    public const byte EN_AMPDU_RTY_NEW = BIT7;
+    public const byte EEPROM_TX_BBSWING_2G_8812 = 0xC6;
+    public const byte EEPROM_TX_BBSWING_5G_8812 = 0xC7;
+    public const byte FEN_USBA = BIT2;
+    public const byte FEN_BB_GLB_RSTn = BIT1;
+    public const byte FEN_BBRSTB = BIT0;
+
+    public const u16 QUEUE_LOW = 1;
+    public const u16 QUEUE_NORMAL = 2;
+    public const u16 QUEUE_HIGH = 3;
+    public const u16 QUEUE_EXTRA = 0;
+
+    public const uint rFPGA0_XAB_RFInterfaceSW = 0x870;/* RF Interface Software Control */
+    public const uint rFPGA0_XA_RFInterfaceOE = 0x860;/* RF Channel switch */
+    public const uint rFPGA0_XB_RFInterfaceOE = 0x864;
+    public const uint rA_LSSIWrite_Jaguar = 0xc90; /* RF write addr */
+    public const uint rB_LSSIWrite_Jaguar = 0xe90; /* RF write addr */
+    public const uint rHSSIRead_Jaguar = 0x8b0;  /* RF read addr */
+    public const uint rA_SIRead_Jaguar = 0xd08;/* RF readback with SI */
+    public const uint rB_SIRead_Jaguar = 0xd48;/* RF readback with SI */
+    public const uint rA_PIRead_Jaguar = 0xd04;/* RF readback with PI */
+    public const uint rB_PIRead_Jaguar = 0xd44; /* RF readback with PI */
+
+    public const uint RATE_BITMAP_ALL = 0x00_0F_FF_FF;
+    public const uint NotRATE_BITMAP_ALL = 0xFF_F0_00_00;
+    public const uint RATE_RRSR_CCK_ONLY_1M = 0xFFFF1;
+    public const uint RATE_RRSR_WITHOUT_CCK = 0xFFFF0;
+    public const uint MASK_NETTYPE = 0x30000;
+
+    public const byte RL_VAL_STA = 0x30;
+
+    public const int BIT_SHIFT_SRL = 8;
+    public const u16 BIT_MASK_SRL = 0x3f;
+    public const int BIT_SHIFT_LRL = 0;
+    public const u16 BIT_MASK_LRL = 0x3f;
+
+    public const byte NT_LINK_AP = 0x2;
+
+    public const ushort rTxAGC_A_CCK11_CCK1_JAguar = 0xc20;
+    public const ushort rTxAGC_A_Ofdm18_Ofdm6_JAguar = 0xc24;
+    public const ushort rTxAGC_A_Ofdm54_Ofdm24_JAguar = 0xc28;
+    public const ushort rTxAGC_A_MCS3_MCS0_JAguar = 0xc2c;
+    public const ushort rTxAGC_A_MCS7_MCS4_JAguar = 0xc30;
+    public const ushort rTxAGC_A_MCS11_MCS8_JAguar = 0xc34;
+    public const ushort rTxAGC_A_MCS15_MCS12_JAguar = 0xc38;
+    public const ushort rTxAGC_A_Nss1Index3_Nss1Index0_JAguar = 0xc3c;
+    public const ushort rTxAGC_A_Nss1Index7_Nss1Index4_JAguar = 0xc40;
+    public const ushort rTxAGC_A_Nss2Index1_Nss1Index8_JAguar = 0xc44;
+    public const ushort rTxAGC_A_Nss2Index5_Nss2Index2_JAguar = 0xc48;
+    public const ushort rTxAGC_A_Nss2Index9_Nss2Index6_JAguar = 0xc4c;
+    public const ushort rTxAGC_B_CCK11_CCK1_JAguar = 0xe20;
+    public const ushort rTxAGC_B_Ofdm18_Ofdm6_JAguar = 0xe24;
+    public const ushort rTxAGC_B_Ofdm54_Ofdm24_JAguar = 0xe28;
+    public const ushort rTxAGC_B_MCS3_MCS0_JAguar = 0xe2c;
+    public const ushort rTxAGC_B_MCS7_MCS4_JAguar = 0xe30;
+    public const ushort rTxAGC_B_MCS11_MCS8_JAguar = 0xe34;
+    public const ushort rTxAGC_B_MCS15_MCS12_JAguar = 0xe38;
+    public const ushort rTxAGC_B_Nss1Index3_Nss1Index0_JAguar = 0xe3c;
+    public const ushort rTxAGC_B_Nss1Index7_Nss1Index4_JAguar = 0xe40;
+    public const ushort rTxAGC_B_Nss2Index1_Nss1Index8_JAguar = 0xe44;
+    public const ushort rTxAGC_B_Nss2Index5_Nss2Index2_JAguar = 0xe48;
+    public const ushort rTxAGC_B_Nss2Index9_Nss2Index6_JAguar = 0xe4c;
+
+    public const uint bLSSIWrite_data_Jaguar = 0x000fffff;
+    public const uint bHSSIRead_addr_Jaguar = 0xff;
+    public const uint rRead_data_Jaguar = 0xfffff;
+    public const byte transmit_power_boost = 2;
+    public const byte transmit_power_override = 0;
 }
