@@ -39,4 +39,33 @@ public static class hal_com
         GET_HAL_DATA(adapter).ReceiveConfig = v32;
         return v32;
     }
+
+    public static RF_TX_NUM phy_get_current_tx_num(PADAPTER        pAdapter, MGN_RATE Rate)
+    {
+        RF_TX_NUM tx_num = RF_TX_NUM.RF_1TX;
+
+        if (IS_2T_RATE(Rate))
+        {
+            tx_num = RF_TX_NUM.RF_2TX;
+        }
+        else if (IS_3T_RATE(Rate))
+        {
+            tx_num = RF_TX_NUM.RF_3TX;
+        }
+        else
+        {
+            throw new Exception();
+        }
+
+        return tx_num;
+    }
+
+    static bool IS_2T_RATE(MGN_RATE _rate)   =>(IS_HT2SS_RATE((_rate)) || IS_VHT2SS_RATE((_rate)));
+    static bool IS_3T_RATE(MGN_RATE _rate) =>  (IS_HT3SS_RATE((_rate)) || IS_VHT3SS_RATE((_rate)));
+
+    static bool IS_HT3SS_RATE(MGN_RATE _rate) => ((_rate) >= MGN_RATE.MGN_MCS16 && (_rate) <= MGN_RATE.MGN_MCS23);
+    static bool IS_HT2SS_RATE(MGN_RATE _rate) => ((_rate) >= MGN_RATE.MGN_MCS8 && (_rate) <= MGN_RATE.MGN_MCS15);
+
+    static bool IS_VHT2SS_RATE(MGN_RATE _rate) => (_rate) >= MGN_RATE.MGN_VHT2SS_MCS0 && (_rate <= MGN_RATE.MGN_VHT2SS_MCS9);
+    static bool IS_VHT3SS_RATE(MGN_RATE _rate) => (_rate) >= MGN_RATE.MGN_VHT3SS_MCS0 && (_rate <= MGN_RATE.MGN_VHT3SS_MCS9);
 }

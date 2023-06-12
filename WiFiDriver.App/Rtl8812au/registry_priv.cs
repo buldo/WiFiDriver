@@ -9,7 +9,7 @@ public class registry_priv
     //NDIS_802_11_SSID ssid;
     u8 network_mode;    /* infra, ad-hoc, auto */
     public u8 channel;/* ad-hoc support requirement */
-    public u8 wireless_mode;/* A, B, G, auto */
+    public NETWORK_TYPE wireless_mode;/* A, B, G, auto */
     u8 scan_mode;/* active, passive */
     u8 radio_enable;
     u8 preamble;/* long, short, auto */
@@ -93,7 +93,7 @@ public class registry_priv
 
 //    u8 lowrate_two_xmit;
 
-//    u8 rf_config;
+    public rf_type rf_config;
 //    u8 low_power;
 
     public bool wifi_spec;/* !turbo_mode */
@@ -164,8 +164,8 @@ public bool target_tx_pwr_valid;
 //	u8 tsf_update_pause_factor;
 //    u8 tsf_update_restore_factor;
 
-//    s8 TxBBSwing_2G;
-//    s8 TxBBSwing_5G;
+public     s8 TxBBSwing_2G;
+public     s8 TxBBSwing_5G;
     public u8 AmplifierType_2G;
     public u8 AmplifierType_5G;
 //    u8 bEn_RFE;

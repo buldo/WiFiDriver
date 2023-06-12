@@ -681,10 +681,10 @@ public static class usb_intf
         var pHalFunc = padapter.hal_func;
 
 
-        pHalFunc.hal_power_on = usb_halinit._InitPowerOn_8812AU;
+        pHalFunc.hal_power_on = UsbHalInit._InitPowerOn_8812AU;
         //pHalFunc.hal_power_off = hal_poweroff_8812au;
 
-        pHalFunc.hal_init = usb_halinit.rtl8812au_hal_init;
+        pHalFunc.hal_init = UsbHalInit.rtl8812au_hal_init;
         //pHalFunc.hal_deinit = &rtl8812au_hal_deinit;
 
         //pHalFunc.inirp_init = &rtl8812au_inirp_init;
@@ -701,8 +701,8 @@ public static class usb_intf
 //#endif/* CONFIG_RTW_SW_LED */
 
 //        pHalFunc.init_default_value = &rtl8812au_init_default_value;
-        pHalFunc.intf_chip_configure = usb_halinit.rtl8812au_interface_configure;
-        pHalFunc.read_adapter_info = usb_halinit.ReadAdapterInfo8812AU;
+        pHalFunc.intf_chip_configure = UsbHalInit.rtl8812au_interface_configure;
+        pHalFunc.read_adapter_info = UsbHalInit.ReadAdapterInfo8812AU;
 
 //        pHalFunc.set_hw_reg_handler = &SetHwReg8812AU;
 //        pHalFunc.GetHwRegHandler = &GetHwReg8812AU;
@@ -735,25 +735,25 @@ public static class usb_intf
 //
 // 	pHalFunc.SetBeaconRelatedRegistersHandler = &SetBeaconRelatedRegisters8812A;
 //
-pHalFunc.read_chip_version = usb_halinit.read_chip_version_8812a;
+        pHalFunc.read_chip_version = UsbHalInit.read_chip_version_8812a;
 //
-pHalFunc.set_chnl_bw_handler = PHY_SetSwChnlBWMode8812;
+        pHalFunc.set_chnl_bw_handler = PHY_SetSwChnlBWMode8812;
 //
 // 	pHalFunc.set_tx_power_level_handler = &PHY_SetTxPowerLevel8812;
 // 	pHalFunc.get_tx_power_level_handler = &PHY_GetTxPowerLevel8812;
 //
-// 	pHalFunc.set_tx_power_index_handler = PHY_SetTxPowerIndex_8812A;
-// 	pHalFunc.get_tx_power_index_handler = PHY_GetTxPowerIndex_8812A;
+ 	pHalFunc.set_tx_power_index_handler = PHY_SetTxPowerIndex_8812A;
+    pHalFunc.get_tx_power_index_handler = PHY_GetTxPowerIndex_8812A;
 //
 // 	pHalFunc.hal_dm_watchdog = &rtl8812_HalDmWatchDog;
 //
 // 	pHalFunc.run_thread = &rtl8812_start_thread;
 // 	pHalFunc.cancel_thread = &rtl8812_stop_thread;
 //
-// 	pHalFunc.read_bbreg = &PHY_QueryBBReg8812;
-// 	pHalFunc.write_bbreg = &PHY_SetBBReg8812;
+    pHalFunc.read_bbreg = PHY_QueryBBReg8812;
+        pHalFunc.write_bbreg = PHY_SetBBReg8812;
 // 	pHalFunc.read_rfreg = &PHY_QueryRFReg8812;
-// 	pHalFunc.write_rfreg = &PHY_SetRFReg8812;
+ 	pHalFunc.write_rfreg = PHY_SetRFReg8812;
 //
 // 	pHalFunc.read_wmmedca_reg = &rtl8812a_read_wmmedca_reg;
 //
@@ -1028,7 +1028,7 @@ pHalFunc.set_chnl_bw_handler = PHY_SetSwChnlBWMode8812;
 //registry_par.led_ctrl = (u8) rtw_led_ctrl;
 //#endif
 //registry_par.lowrate_two_xmit = (u8) rtw_lowrate_two_xmit;
-//registry_par.rf_config = (u8) rtw_rf_config;
+registry_par.rf_config = rf_type.RF_TYPE_MAX;
 //registry_par.low_power = (u8) rtw_low_power;
 
 //registry_par.check_hw_status = (u8) rtw_check_hw_status;
@@ -1119,8 +1119,8 @@ registry_par.special_rf_path = (u8)0;
 //registry_par.tsf_update_pause_factor = (u8)rtw_tsf_update_pause_factor;
 //registry_par.tsf_update_restore_factor = (u8)rtw_tsf_update_restore_factor;
 
-//registry_par.TxBBSwing_2G = (s8)rtw_TxBBSwing_2G;
-//registry_par.TxBBSwing_5G = (s8)rtw_TxBBSwing_5G;
+registry_par.TxBBSwing_2G = -1;
+registry_par.TxBBSwing_5G = -1;
 //registry_par.bEn_RFE = 1;
 
         //registry_par.RFE_Type = (u8)rtw_RFE_type;

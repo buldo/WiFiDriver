@@ -88,6 +88,8 @@ public     u8 NumTotalRFPath;
     public bool bSetChnlBW { get; set; }
     public byte CurrentCenterFrequencyIndex1 { get; set; }
     public bool bNeedIQK { get; set; }
+    public bool UsbRxHighSpeedMode { get; set; }
+    public bool AMPDUBurstMode { get; set; }
 
     //    u8 efuse_file_status;
 //    u8 macaddr_file_status;
@@ -210,7 +212,11 @@ public u8 CurrentTxPwrIdx;
 //    u32 ac_param_be; /* Original parameter for BE, use for EDCA turbo.	*/
 //    u8 is_turbo_edca;
 //    u8 prv_traffic_idx;
-//    BB_REGISTER_DEFINITION_T PHYRegDef[MAX_RF_PATH];    /* Radio A/B/C/D */
+public Dictionary<rf_path, BB_REGISTER_DEFINITION_T> PHYRegDef = new()
+    {
+        {rf_path.RF_PATH_A , new BB_REGISTER_DEFINITION_T()},
+        {rf_path.RF_PATH_B , new BB_REGISTER_DEFINITION_T()}
+    };    /* Radio A/B/C/D */
 
 //    u32 RfRegChnlVal[MAX_RF_PATH];
 
@@ -350,7 +356,7 @@ public    bool bMacPwrCtrlOn;
 
 //    /* Interrupt relatd register information. */
 //    u32 IntArray[3];/* HISR0,HISR1,HSISR */
-//    u32 IntrMask[3];
+    public u32[] IntrMask =new u32[3];
 //# ifdef CONFIG_USB_TX_AGGREGATION
 //    u8 UsbTxAggMode;
 //    u8 UsbTxAggDescNum;
@@ -444,6 +450,8 @@ public    bool bMacPwrCtrlOn;
     public uint rcr_backup;
 
     public BAND_TYPE current_band_type;
+
+    public bool bSupportUSB3;
     //#ifdef CONFIG_PHY_CAPABILITY_QUERY
 //	struct phy_spec_t phy_spec;
 //#endif

@@ -11,7 +11,9 @@ public static class Bits
     public const byte NotBIT6 = 0b1011_1111;
     public const byte NotBIT7 = 0b0111_1111;
 
-    public const ushort NotBIT8 = 0b1111_1110_1111_1111;
+    public const ushort NotBIT8  = 0b1111_1110_1111_1111;
+    public const ushort NotBIT9  = 0b1111_1101_1111_1111;
+    public const ushort NotBIT10 = 0b1111_1011_1111_1111;
 
     public const byte BIT0 = 1 << 0;
     public const byte BIT1 = 1 << 1;

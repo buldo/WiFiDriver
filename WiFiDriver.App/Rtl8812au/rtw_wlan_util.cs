@@ -111,7 +111,7 @@ public static class rtw_wlan_util
         return center_ch;
     }
 
-   private static void rtw_hal_set_chnl_bw(_adapter padapter, u8 channel, channel_width Bandwidth, u8 Offset40, u8 Offset80)
+   public static void rtw_hal_set_chnl_bw(_adapter padapter, u8 channel, channel_width Bandwidth, u8 Offset40, u8 Offset80)
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
         u8 cch_160 = Bandwidth == channel_width.CHANNEL_WIDTH_160 ? channel : (u8)0;

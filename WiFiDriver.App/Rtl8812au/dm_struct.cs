@@ -20,6 +20,7 @@ public class dm_struct
     public bool is_init_hw_info_by_rfe { get; set; }
     public u64 rssi_trsw_h { get; set; }
     public u64 rssi_trsw_iso { get; set; }
+    public byte channel { get; set; }
 
     public u16 type_glna;
     public u16 type_gpa;

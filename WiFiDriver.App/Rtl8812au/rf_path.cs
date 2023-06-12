@@ -1,6 +1,6 @@
 ﻿namespace WiFiDriver.App.Rtl8812au;
 
-public enum rf_path
+public enum rf_path:byte
 {
     RF_PATH_A = 0,
     RF_PATH_B = 1,

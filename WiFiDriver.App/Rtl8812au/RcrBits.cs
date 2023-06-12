@@ -23,5 +23,11 @@ public static class RcrBits
 
     public static uint RCR_APP_PHYST_RXFF = BIT28;	/* PHY Status is appended before RX packet in RXFF */
     public static uint RCR_APPFCS = BIT31; /* WMAC append FCS after pauload */
+    public static uint RCR_CBSSID_DATA = BIT6; /* Accept BSSID match packet (Data) */
+    public static uint RCR_CBSSID_BCN = BIT7; /* Accept BSSID match packet (Rx beacon, probe rsp) */
+    public static uint RCR_APP_ICV = BIT29; /* MACRX will retain the ICV at the bottom of the packet. */
+    public static uint RCR_HTC_LOC_CTRL = BIT14; /* MFC<--HTC = 1 MFC-.HTC = 0 */
+    public static uint RCR_APP_MIC = BIT30; /* MACRX will retain the MIC at the bottom of the packet. */
+    public static uint FORCEACK = BIT26;
 
 }
