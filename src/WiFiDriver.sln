@@ -3,7 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.33711.374
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WiFiDriver.App", "WiFiDriver.App\WiFiDriver.App.csproj", "{E1BF46D4-DBB1-465A-AD30-515B55918513}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WiFiDriver.App", "WiFiDriver.App\WiFiDriver.App.csproj", "{E1BF46D4-DBB1-465A-AD30-515B55918513}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "logs", "logs", "{989D3E23-1FFC-44F6-8D2B-42813D55040D}"
+	ProjectSection(SolutionItems) = preProject
+		..\dumps\plug-in.txt = ..\dumps\plug-in.txt
+		..\dumps\to-mon.txt = ..\dumps\to-mon.txt
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsbDumpParser", "UsbDumpParser\UsbDumpParser.csproj", "{C216600C-9964-47B4-B9AB-D36590C4A290}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +23,10 @@ Global
 		{E1BF46D4-DBB1-465A-AD30-515B55918513}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1BF46D4-DBB1-465A-AD30-515B55918513}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1BF46D4-DBB1-465A-AD30-515B55918513}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C216600C-9964-47B4-B9AB-D36590C4A290}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C216600C-9964-47B4-B9AB-D36590C4A290}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C216600C-9964-47B4-B9AB-D36590C4A290}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C216600C-9964-47B4-B9AB-D36590C4A290}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
