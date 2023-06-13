@@ -49,41 +49,52 @@ public static class phydm_hwconfig
     {
         bool result = true;
 
-/* @1 AP doesn't use PHYDM initialization in these ICs */
+        /* @1 AP doesn't use PHYDM initialization in these ICs */
 
-        //if (dm.support_ic_type == ODM_RTL8812) {
-        //    if (config_type == CONFIG_BB_PHY_REG)
-        //        READ_AND_CONFIG_MP(8812a, _phy_reg);
-        //    else if (config_type == CONFIG_BB_AGC_TAB)
-        //        READ_AND_CONFIG_MP(8812a, _agc_tab);
-        //    else if (config_type == CONFIG_BB_PHY_REG_PG) {
-        //        READ_AND_CONFIG_MP(8812a, _phy_reg_pg);
-        //    } else if (config_type == CONFIG_BB_PHY_REG_MP)
-        //        READ_AND_CONFIG_MP(8812a, _phy_reg_mp);
-        //    else if (config_type == CONFIG_BB_AGC_TAB_DIFF) {
-        //        dm.fw_offload_ability &= ~PHYDM_PHY_PARAM_OFFLOAD;
-        //        /*@AGC_TAB DIFF dont support FW offload*/
-        //        if ((* dm.channel >= 36) && (* dm.channel <= 64))
-        //            AGC_DIFF_CONFIG_MP(8812a, lb);
-        //        else if (* dm.channel >= 100)
-        //            AGC_DIFF_CONFIG_MP(8812a, hb);
-        //    }
-        //}
+        if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG)
+        {
+            //READ_AND_CONFIG_MP(8812a, _phy_reg);
+            odm_read_and_config_mp_8812a_phy_reg(dm);
+        }
+        else if (config_type == odm_bb_config_type.CONFIG_BB_AGC_TAB)
+        {
+            //READ_AND_CONFIG_MP(8812a, _agc_tab);
+            odm_read_and_config_mp_8812a_agc_tab(dm);
+        }
+        else if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG_PG)
+        {
+            throw new NotImplementedException("odm_bb_config_type.CONFIG_BB_PHY_REG_PG");
+            // READ_AND_CONFIG_MP(8812a, _phy_reg_pg);
+        }
+        else if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG_MP)
+        {
+            //READ_AND_CONFIG_MP(8812a, _phy_reg_mp);
+            odm_read_and_config_mp_8812a_phy_reg_mp(dm);
+        }
+        else if (config_type == odm_bb_config_type.CONFIG_BB_AGC_TAB_DIFF)
+        {
+            throw new NotImplementedException("odm_bb_config_type.CONFIG_BB_AGC_TAB_DIFF");
+            //dm.fw_offload_ability &= ~PHYDM_PHY_PARAM_OFFLOAD;
+            ///*@AGC_TAB DIFF dont support FW offload*/
+            //if ((dm.channel >= 36) && (dm.channel <= 64))
+            //{
+            //    AGC_DIFF_CONFIG_MP(8812a, lb);
+            //}
+            //else if (*dm.channel >= 100)
+            //{
+            //    AGC_DIFF_CONFIG_MP(8812a, hb);
+            //}
+        }
 
-        //if (config_type == CONFIG_BB_PHY_REG ||
-        //    config_type == CONFIG_BB_AGC_TAB)
+        // TODO:
+        //if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG || config_type == odm_bb_config_type.CONFIG_BB_AGC_TAB)
+        //{
         //    if (dm.fw_offload_ability & PHYDM_PHY_PARAM_OFFLOAD)
         //    {
-        //        result = phydm_set_reg_by_fw(dm,
-        //            PHYDM_HALMAC_CMD_END,
-        //            0,
-        //            0,
-        //            0,
-        //            (enum rf_path)0,
-        //        0);
-        //        PHYDM_DBG(dm, ODM_COMP_INIT,
-        //            "phy param offload end!result = %d", result);
+        //        result = phydm_set_reg_by_fw(dm, PHYDM_HALMAC_CMD_END, 0, 0, 0, (rf_path)0,0);
+        //        PHYDM_DBG(dm, ODM_COMP_INIT, "phy param offload end!result = %d", result);
         //    }
+        //}
 
         return result;
     }
