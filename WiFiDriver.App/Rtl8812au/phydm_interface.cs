@@ -6,4 +6,9 @@ public static class phydm_interface
     {
         rtw_write8(adapter, reg_addr, data);
     }
+
+    public static void odm_set_bb_reg(_adapter dm, u32 reg_addr, u32 bit_mask, u32 data)
+    {
+        phy_set_bb_reg(dm, (u16)reg_addr, bit_mask, data);
+    }
 }

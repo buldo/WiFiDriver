@@ -3805,14 +3805,9 @@ public static class UsbHalInit
     static bool phy_BB8812_Config_ParaFile(PADAPTER    Adapter)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        bool rtStatus = true;
+        bool rtStatus =  odm_config_bb_with_header_file(Adapter, odm_bb_config_type.CONFIG_BB_PHY_REG);
 
         /* Read PHY_REG.TXT BB INIT!! */
-
-        if (true != odm_config_bb_with_header_file(pHalData.odmpriv, odm_bb_config_type.CONFIG_BB_PHY_REG))
-        {
-            rtStatus = false;
-        }
 
         if (rtStatus != true)
         {
@@ -3824,7 +3819,7 @@ public static class UsbHalInit
 
         if (Adapter.registrypriv.mp_mode == 1)
         {
-            if (true != odm_config_bb_with_header_file(pHalData.odmpriv, odm_bb_config_type.CONFIG_BB_PHY_REG_MP))
+            if (true != odm_config_bb_with_header_file(Adapter, odm_bb_config_type.CONFIG_BB_PHY_REG_MP))
             {
                 rtStatus = false;
             }
@@ -3838,10 +3833,7 @@ public static class UsbHalInit
 
         /* BB AGC table Initialization */
 
-        if (true != odm_config_bb_with_header_file(pHalData.odmpriv, odm_bb_config_type.CONFIG_BB_AGC_TAB))
-        {
-            rtStatus = false;
-        }
+        rtStatus = odm_config_bb_with_header_file(Adapter, odm_bb_config_type.CONFIG_BB_AGC_TAB);
 
         if (rtStatus != true)
         {

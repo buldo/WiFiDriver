@@ -307,4 +307,5 @@ public static class CommonConsts
     public const uint rRead_data_Jaguar = 0xfffff;
     public const byte transmit_power_boost = 2;
     public const byte transmit_power_override = 0;
+    public const uint MASKDWORD = 0xffffffff;
 }
