@@ -31,4 +31,5 @@ public class dm_struct
     public u8 ext_pa;          /*@with 2G external PNA  NO/Yes = 0/1*/
     public u8 ext_pa_5g;		/*@with 5G external PNA  NO/Yes = 0/1*/
     public u64 rssi_trsw_l;
+    public byte ext_trsw;
 }

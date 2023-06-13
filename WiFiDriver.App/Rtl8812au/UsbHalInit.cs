@@ -2667,29 +2667,28 @@ public static class UsbHalInit
         return bResult;
     }
 
-    static void ReadEFuseByte(_adapter adapter, UInt16 _offset, byte[] pbuf)
+    static void ReadEFuseByte(_adapter Adapter, UInt16 _offset, byte[] pbuf)
     {
-        UInt32 value32;
-        byte readbyte;
-        UInt16 retry;
-        /* systime start=rtw_get_current_time(); */
+        u32 value32;
+        u8 readbyte;
+        u16 retry;
 
         /* Write Address */
-        rtw_write8(adapter, EFUSE_CTRL + 1, (byte)(_offset & 0xff));
-        readbyte = rtw_read8(adapter, EFUSE_CTRL + (2));
-        rtw_write8(adapter, EFUSE_CTRL + (2), (byte)(((_offset >> 8) & 0x03) | (readbyte & 0xfc)));
+        rtw_write8(Adapter, EFUSE_CTRL + 1, (byte)(_offset & 0xff));
+        readbyte = rtw_read8(Adapter, EFUSE_CTRL + 2);
+        rtw_write8(Adapter, EFUSE_CTRL + 2, (byte)(((_offset >> 8) & 0x03) | (readbyte & 0xfc)));
 
         /* Write bit 32 0 */
-        readbyte = rtw_read8(adapter, EFUSE_CTRL + (3));
-        rtw_write8(adapter, EFUSE_CTRL + (3), (byte)(readbyte & 0x7f));
+        readbyte = rtw_read8(Adapter, EFUSE_CTRL + 3);
+        rtw_write8(Adapter, EFUSE_CTRL + 3, (byte)(readbyte & 0x7f));
 
         /* Check bit 32 read-ready */
         retry = 0;
-        value32 = rtw_read32(adapter, EFUSE_CTRL + (0));
+        value32 = rtw_read32(Adapter, EFUSE_CTRL);
         /* while(!(((value32 >> 24) & 0xff) & 0x80)  && (retry<10)) */
-        while (!((((value32 >> 24) & 0xff) & 0x80) == 0x80) && (retry < 10000))
+        while ((((value32 >> 24) & 0xff) & 0x80) ==0 && (retry < 10000))
         {
-            value32 = rtw_read32(adapter, EFUSE_CTRL + (0));
+            value32 = rtw_read32(Adapter, EFUSE_CTRL);
             retry++;
         }
 
@@ -2698,10 +2697,9 @@ public static class UsbHalInit
         /* Designer says that there shall be some delay after ready bit is set, or the */
         /* result will always stay on last data we read. */
         Thread.Sleep(50);
-        value32 = rtw_read32(adapter, EFUSE_CTRL + (0));
+        value32 = rtw_read32(Adapter, EFUSE_CTRL);
 
-        pbuf[0] = (byte)(value32 & 0xff);
-        /* RTW_INFO("ReadEFuseByte _offset:%08u, in %d ms\n",_offset ,rtw_get_passing_time_ms(start)); */
+        pbuf[0] = (u8)(value32 & 0xff);
 
     }
 

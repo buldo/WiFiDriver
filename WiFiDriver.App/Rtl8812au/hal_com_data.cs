@@ -2,7 +2,7 @@
 
 public class hal_com_data
 {
-    public HAL_VERSION version_id;
+    public HAL_VERSION version_id = new HAL_VERSION();
 //    RT_MULTI_FUNC MultiFunc; /* For multi-function consideration. */
 //    RT_POLARITY_CTL PolarityCtl; /* For Wifi PDn Polarity control. */
 //    RT_REGULATOR_MODE RegulatorMode; /* switching regulator or LDO */

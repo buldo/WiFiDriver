@@ -21,7 +21,7 @@ public static class rtw_rf
 
         if (offset == HAL_PRIME_CHNL_OFFSET_DONT_CARE)
         {
-            throw new Exception();
+            Console.WriteLine("WARN OFFSET 0");
             goto exit;
         }
 
