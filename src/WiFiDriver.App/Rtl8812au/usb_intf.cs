@@ -123,27 +123,30 @@ public static class usb_intf
         return padapter;
     }
 
+    /// <summary>
+    /// By design here Read queue is initialised
+    /// </summary>
     static u8 rtw_init_drv_sw(_adapter padapter)
     {
         u8 ret8 = _SUCCESS;
 
-//# ifdef CONFIG_RTW_CFGVENDOR_RANDOM_MAC_OUI
-//    struct rtw_wdev_priv *pwdev_priv = adapter_wdev_data(padapter);
-//#endif
+        //# ifdef CONFIG_RTW_CFGVENDOR_RANDOM_MAC_OUI
+        //    struct rtw_wdev_priv *pwdev_priv = adapter_wdev_data(padapter);
+        //#endif
 
-//#if defined(CONFIG_AP_MODE) && defined(CONFIG_SUPPORT_MULTI_BCN)
-//	_rtw_init_listhead(&padapter.list);
-//# ifdef CONFIG_FW_HANDLE_TXBCN
-//	padapter.vap_id = CONFIG_LIMITED_AP_NUM;
-//	if (is_primary_adapter(padapter))
-//		adapter_to_dvobj(padapter).vap_tbtt_rpt_map = adapter_to_regsty(padapter).fw_tbtt_rpt;
-//#endif
-//#endif
+        //#if defined(CONFIG_AP_MODE) && defined(CONFIG_SUPPORT_MULTI_BCN)
+        //	_rtw_init_listhead(&padapter.list);
+        //# ifdef CONFIG_FW_HANDLE_TXBCN
+        //	padapter.vap_id = CONFIG_LIMITED_AP_NUM;
+        //	if (is_primary_adapter(padapter))
+        //		adapter_to_dvobj(padapter).vap_tbtt_rpt_map = adapter_to_regsty(padapter).fw_tbtt_rpt;
+        //#endif
+        //#endif
 
-//# ifdef CONFIG_CLIENT_PORT_CFG
-//    padapter.client_id = MAX_CLIENT_PORT_NUM;
-//	padapter.client_port = CLT_PORT_INVALID;
-//	#endif
+        //# ifdef CONFIG_CLIENT_PORT_CFG
+        //    padapter.client_id = MAX_CLIENT_PORT_NUM;
+        //	padapter.client_port = CLT_PORT_INVALID;
+        //	#endif
 
         //ret8 = rtw_init_default_value(padapter);
 
@@ -170,18 +173,18 @@ public static class usb_intf
         //    goto exit;
         //}
 
-//# ifdef CONFIG_P2P
-//rtw_init_wifidirect_timers(padapter);
-//init_wifidirect_info(padapter, P2P_ROLE_DISABLE);
-//reset_global_wifidirect_info(padapter);
-//# ifdef CONFIG_IOCTL_CFG80211
-//rtw_init_cfg80211_wifidirect_info(padapter);
-//#endif
-//# ifdef CONFIG_WFD
-//if (rtw_init_wifi_display_info(padapter) == _FAIL)
-//    RTW_ERR("Can't init init_wifi_display_info\n");
-//#endif
-//#endif /* CONFIG_P2P */
+        //# ifdef CONFIG_P2P
+        //rtw_init_wifidirect_timers(padapter);
+        //init_wifidirect_info(padapter, P2P_ROLE_DISABLE);
+        //reset_global_wifidirect_info(padapter);
+        //# ifdef CONFIG_IOCTL_CFG80211
+        //rtw_init_cfg80211_wifidirect_info(padapter);
+        //#endif
+        //# ifdef CONFIG_WFD
+        //if (rtw_init_wifi_display_info(padapter) == _FAIL)
+        //    RTW_ERR("Can't init init_wifi_display_info\n");
+        //#endif
+        //#endif /* CONFIG_P2P */
 
         //if (init_mlme_ext_priv(padapter) == _FAIL)
         //{
@@ -189,71 +192,71 @@ public static class usb_intf
         //    goto exit;
         //}
 
-//# ifdef CONFIG_TDLS
-//if (rtw_init_tdls_info(padapter) == _FAIL)
-//{
-//    RTW_INFO("Can't rtw_init_tdls_info\n");
-//    ret8 = _FAIL;
-//    goto exit;
-//}
-//#endif /* CONFIG_TDLS */
+        //# ifdef CONFIG_TDLS
+        //if (rtw_init_tdls_info(padapter) == _FAIL)
+        //{
+        //    RTW_INFO("Can't rtw_init_tdls_info\n");
+        //    ret8 = _FAIL;
+        //    goto exit;
+        //}
+        //#endif /* CONFIG_TDLS */
 
-//# ifdef CONFIG_RTW_MESH
-//rtw_mesh_cfg_init(padapter);
-//#endif
+        //# ifdef CONFIG_RTW_MESH
+        //rtw_mesh_cfg_init(padapter);
+        //#endif
 
-        //if (_rtw_init_xmit_priv(&padapter.xmitpriv, padapter) == _FAIL)
+        //if (_rtw_init_xmit_priv(padapter.xmitpriv, padapter) == _FAIL)
         //{
         //    RTW_INFO("Can't _rtw_init_xmit_priv\n");
         //    ret8 = _FAIL;
         //    goto exit;
         //}
 
-        //if (_rtw_init_recv_priv(&padapter.recvpriv, padapter) == _FAIL)
-        //{
-        //    RTW_INFO("Can't _rtw_init_recv_priv\n");
-        //    ret8 = _FAIL;
-        //    goto exit;
-        //}
+        if (_rtw_init_recv_priv(padapter.recvpriv, padapter) == _FAIL)
+        {
+            RTW_INFO("Can't _rtw_init_recv_priv\n");
+            ret8 = _FAIL;
+            goto exit;
+        }
 
-/* add for CONFIG_IEEE80211W, none 11w also can use */
+        /* add for CONFIG_IEEE80211W, none 11w also can use */
         //_rtw_spinlock_init(&padapter.security_key_mutex);
 
-/* We don't need to memset padapter.XXX to zero, because adapter is allocated by rtw_zvmalloc(). */
-/* _rtw_memset((unsigned char *)&padapter.securitypriv, 0, sizeof (struct security_priv)); */
+        /* We don't need to memset padapter.XXX to zero, because adapter is allocated by rtw_zvmalloc(). */
+        /* _rtw_memset((unsigned char *)&padapter.securitypriv, 0, sizeof (struct security_priv)); */
 
-//        if (_rtw_init_sta_priv(&padapter.stapriv) == _FAIL)
-//        {
-//            RTW_INFO("Can't _rtw_init_sta_priv\n");
-//            ret8 = _FAIL;
-//            goto exit;
-//        }
+        //        if (_rtw_init_sta_priv(&padapter.stapriv) == _FAIL)
+        //        {
+        //            RTW_INFO("Can't _rtw_init_sta_priv\n");
+        //            ret8 = _FAIL;
+        //            goto exit;
+        //        }
 
-//        padapter.setband = WIFI_FREQUENCY_BAND_AUTO;
-//        padapter.fix_rate = 0xFF;
-//        padapter.power_offset = 0;
-//        padapter.rsvd_page_offset = 0;
-//        padapter.rsvd_page_num = 0;
+        //        padapter.setband = WIFI_FREQUENCY_BAND_AUTO;
+        //        padapter.fix_rate = 0xFF;
+        //        padapter.power_offset = 0;
+        //        padapter.rsvd_page_offset = 0;
+        //        padapter.rsvd_page_num = 0;
 
-//        padapter.data_fb = 0;
-//        padapter.fix_rx_ampdu_accept = RX_AMPDU_ACCEPT_INVALID;
-//        padapter.fix_rx_ampdu_size = RX_AMPDU_SIZE_INVALID;
-////# ifdef DBG_RX_COUNTER_DUMP
-//padapter.dump_rx_cnt_mode = 0;
-//padapter.drv_rx_cnt_ok = 0;
-//padapter.drv_rx_cnt_crcerror = 0;
-//padapter.drv_rx_cnt_drop = 0;
-//#endif
+        //        padapter.data_fb = 0;
+        //        padapter.fix_rx_ampdu_accept = RX_AMPDU_ACCEPT_INVALID;
+        //        padapter.fix_rx_ampdu_size = RX_AMPDU_SIZE_INVALID;
+        ////# ifdef DBG_RX_COUNTER_DUMP
+        //padapter.dump_rx_cnt_mode = 0;
+        //padapter.drv_rx_cnt_ok = 0;
+        //padapter.drv_rx_cnt_crcerror = 0;
+        //padapter.drv_rx_cnt_drop = 0;
+        //#endif
         //rtw_init_bcmc_stainfo(padapter);
 
         //rtw_init_pwrctrl_priv(padapter);
 
-/* _rtw_memset((u8 *)&padapter.qospriv, 0, sizeof (struct qos_priv)); */ /* move to mlme_priv */
+        /* _rtw_memset((u8 *)&padapter.qospriv, 0, sizeof (struct qos_priv)); */ /* move to mlme_priv */
 
-//# ifdef CONFIG_MP_INCLUDED
-//if (init_mp_priv(padapter) == _FAIL)
-//    RTW_INFO("%s: initialize MP private data Fail!\n", __func__);
-//#endif
+        //# ifdef CONFIG_MP_INCLUDED
+        //if (init_mp_priv(padapter) == _FAIL)
+        //    RTW_INFO("%s: initialize MP private data Fail!\n", __func__);
+        //#endif
 
         rtw_hal_dm_init(padapter);
 //# ifdef CONFIG_RTW_SW_LED

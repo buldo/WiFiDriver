@@ -20,6 +20,7 @@ public class Program
 
         rtlDevice.Init();
 
+        Console.ReadLine();
         Console.WriteLine("End");
     }
 
