@@ -19,7 +19,7 @@ public static class RcrBits
     public static uint RCR_BC_MD_EN = BIT17;/* Broadcast data packet more data bit check interrupt enable.*/
     public static uint RCR_UC_MD_EN = BIT16;/* Unicast data packet more data bit check interrupt enable. */
     public static uint RCR_RXSK_PERPKT = BIT15;/* Executing key search per MPDU */
-    public static uint RCR_HTC_LOC_CTRL = BIT14;/* MFC<--HTC = 1 MFC-->HTC = 0 */
+    public static uint RCR_HTC_LOC_CTRL = BIT14;/* MFC<--HTC = 1 MFC-.HTC = 0 */
     public static uint RCR_AMF = BIT13;/* Accept management type frame */
     public static uint RCR_ACF = BIT12;/* Accept control type frame. Control frames BA, BAR, and PS-Poll (when in AP mode) are not controlled by this bit. They are controlled by ADF. */
     public static uint RCR_ADF = BIT11;/* Accept data type frame. This bit also regulates BA, BAR, and PS-Poll (AP mode only). */

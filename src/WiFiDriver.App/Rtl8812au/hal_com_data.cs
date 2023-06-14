@@ -278,11 +278,12 @@ public    bool bMacPwrCtrlOn;
     public u8 OutEpNumber;
 
 //# ifdef RTW_RX_AGGREGATION
-//    RX_AGG_MODE rxagg_mode;
+    public RX_AGG_MODE rxagg_mode;
 
 //    /* For RX Aggregation DMA Mode */
-//    u8 rxagg_dma_size;
-//    u8 rxagg_dma_timeout;
+public    u8 rxagg_dma_size;
+
+public u8 rxagg_dma_timeout;
 //#endif /* RTW_RX_AGGREGATION */
 
 //#if defined(CONFIG_SDIO_HCI) || defined(CONFIG_GSPI_HCI)
@@ -357,17 +358,18 @@ public    bool bMacPwrCtrlOn;
 //    /* Interrupt relatd register information. */
 //    u32 IntArray[3];/* HISR0,HISR1,HSISR */
     public u32[] IntrMask =new u32[3];
-//# ifdef CONFIG_USB_TX_AGGREGATION
-//    u8 UsbTxAggMode;
-//    u8 UsbTxAggDescNum;
-//#endif /* CONFIG_USB_TX_AGGREGATION */
+
+public     u8 UsbTxAggMode;
+public     u8 UsbTxAggDescNum;
+
 
 //# ifdef CONFIG_USB_RX_AGGREGATION
 //    u16 HwRxPageSize;               /* Hardware setting */
 
 //    /* For RX Aggregation USB Mode */
-//    u8 rxagg_usb_size;
-//    u8 rxagg_usb_timeout;
+    public u8 rxagg_usb_size;
+
+    public u8 rxagg_usb_timeout;
 //#endif/* CONFIG_USB_RX_AGGREGATION */
 //#endif /* CONFIG_USB_HCI */
 

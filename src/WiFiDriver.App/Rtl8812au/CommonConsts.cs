@@ -308,4 +308,8 @@ public static class CommonConsts
     public const byte transmit_power_boost = 2;
     public const byte transmit_power_override = 0;
     public const uint MASKDWORD = 0xffffffff;
+
+    public const ushort REG_RF_B_CTRL_8812 = 0x0076;
+    public const ushort REG_RXDMA_AGG_PG_TH = 0x0280;
+    public const byte RXDMA_AGG_EN = BIT2;
 }

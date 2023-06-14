@@ -66,9 +66,9 @@ public static class UsbHalInit
 
     public static void rtl8812au_interface_configure(_adapter padapter)
     {
-        var pHalData = GET_HAL_DATA(padapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
 
-        var pdvobjpriv = adapter_to_dvobj(padapter);
+        dvobj_priv pdvobjpriv = adapter_to_dvobj(padapter);
 
         if (IS_SUPER_SPEED_USB(padapter))
         {
@@ -85,70 +85,28 @@ public static class UsbHalInit
 
         pHalData.interfaceIndex = pdvobjpriv.InterfaceNumber;
 
-//# ifdef CONFIG_USB_TX_AGGREGATION
-//        pHalData.UsbTxAggMode = 1;
-//        pHalData.UsbTxAggDescNum = 6; /* only 4 bits */
+        pHalData.UsbTxAggMode = 1;
+        pHalData.UsbTxAggDescNum = 6; /* only 4 bits */
+        pHalData.UsbTxAggDescNum = 0x01; /* adjust value for OQT  Overflow issue */ /* 0x3;	 */ /* only 4 bits */
+        pHalData.rxagg_mode = RX_AGG_MODE.RX_AGG_USB;
+        pHalData.rxagg_usb_size = 8; /* unit: 512b */
+        pHalData.rxagg_usb_timeout = 0x6;
+        pHalData.rxagg_dma_size = 16; /* uint: 128b, 0x0A = 10 = MAX_RX_DMA_BUFFER_SIZE/2/pHalData.UsbBulkOutSize */
+        pHalData.rxagg_dma_timeout = 0x6; /* 6, absolute time = 34ms/(2^6) */
 
-//        if (IS_HARDWARE_TYPE_8812AU(padapter)) /* page added for Jaguar */
-//            pHalData.UsbTxAggDescNum = 0x01; /* adjust value for OQT  Overflow issue */ /* 0x3;	 */ /* only 4 bits */
-//#endif
-
-//# ifdef CONFIG_USB_RX_AGGREGATION
-//        if (IS_HARDWARE_TYPE_8812AU(padapter))
-//            pHalData.rxagg_mode = RX_AGG_USB;
-//        else
-//            pHalData.rxagg_mode = RX_AGG_USB; /* todo: change to USB_RX_AGG_DMA */
-//        pHalData.rxagg_usb_size = 8; /* unit: 512b */
-//        pHalData.rxagg_usb_timeout = 0x6;
-//        pHalData.rxagg_dma_size = 16; /* uint: 128b, 0x0A = 10 = MAX_RX_DMA_BUFFER_SIZE/2/pHalData.UsbBulkOutSize */
-//        pHalData.rxagg_dma_timeout = 0x6; /* 6, absolute time = 34ms/(2^6) */
-
-//        if (IS_SUPER_SPEED_USB(padapter))
-//        {
-//            pHalData.rxagg_usb_size = 0x7;
-//            pHalData.rxagg_usb_timeout = 0x1a;
-//        }
-//        else
-//        {
-//            /* the setting to reduce RX FIFO overflow on USB2.0 and increase rx throughput */
-
-//# ifdef CONFIG_PREALLOC_RX_SKB_BUFFER
-//            u32 remainder = 0;
-//            u8 quotient = 0;
-
-//            remainder = MAX_RECVBUF_SZ % (4 * 1024);
-//            quotient = (u8)(MAX_RECVBUF_SZ >> 12);
-
-//            if (quotient > 5)
-//            {
-//                pHalData.rxagg_usb_size = 0x5;
-//                pHalData.rxagg_usb_timeout = 0x20;
-//            }
-//            else
-//            {
-//                if (remainder >= 2048)
-//                {
-//                    pHalData.rxagg_usb_size = quotient;
-//                    pHalData.rxagg_usb_timeout = 0x10;
-//                }
-//                else
-//                {
-//                    pHalData.rxagg_usb_size = (quotient - 1);
-//                    pHalData.rxagg_usb_timeout = 0x10;
-//                }
-//            }
-
-//#else /* !CONFIG_PREALLOC_RX_SKB_BUFFER */
-//            pHalData.rxagg_usb_size = 0x5;
-//            pHalData.rxagg_usb_timeout = 0x20;
-//#endif /* CONFIG_PREALLOC_RX_SKB_BUFFER */
-
-//        }
-
-//#endif /* CONFIG_USB_RX_AGGREGATION */
+        if (IS_SUPER_SPEED_USB(padapter))
+        {
+            pHalData.rxagg_usb_size = 0x7;
+            pHalData.rxagg_usb_timeout = 0x1a;
+        }
+        else
+        {
+            /* the setting to reduce RX FIFO overflow on USB2.0 and increase rx throughput */
+            pHalData.rxagg_usb_size = 0x5;
+            pHalData.rxagg_usb_timeout = 0x20;
+        }
 
         HalUsbSetQueuePipeMapping8812AUsb(padapter, pdvobjpriv.RtNumInPipes, pdvobjpriv.RtNumOutPipes);
-
     }
 
     static bool HalUsbSetQueuePipeMapping8812AUsb(PADAPTER pAdapter, u8 NumInPipe, u8 NumOutPipe)
@@ -2686,7 +2644,7 @@ public static class UsbHalInit
         retry = 0;
         value32 = rtw_read32(Adapter, EFUSE_CTRL);
         /* while(!(((value32 >> 24) & 0xff) & 0x80)  && (retry<10)) */
-        while ((((value32 >> 24) & 0xff) & 0x80) ==0 && (retry < 10000))
+        while ((((value32 >> 24) & 0xff) & 0x80) == 0 && (retry < 10000))
         {
             value32 = rtw_read32(Adapter, EFUSE_CTRL);
             retry++;
@@ -2796,6 +2754,11 @@ public static class UsbHalInit
             /* pHalData.FwPSState = FW_PS_STATE_ALL_ON_88E; */
             RTW_INFO(" MAC has not been powered on yet.\n");
         }
+
+        rtw_write8(Adapter, REG_RF_CTRL, 5);
+        rtw_write8(Adapter, REG_RF_CTRL, 7);
+        rtw_write8(Adapter, REG_RF_B_CTRL_8812, 5);
+        rtw_write8(Adapter, REG_RF_B_CTRL_8812, 7);
 
         // If HW didn't go through a complete de-initial procedure,
         // it probably occurs some problem for double initial procedure.
@@ -3221,7 +3184,7 @@ public static class UsbHalInit
         odm_cmn_info_init(phydm, odm_cmninfo.ODM_CMNINFO_FW_SUB_VER, hal_data.firmware_sub_version);
     }
 
-    static void dm_InitGPIOSetting(PADAPTER    Adapter)
+    static void dm_InitGPIOSetting(PADAPTER Adapter)
     {
         //PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
@@ -3263,23 +3226,24 @@ public static class UsbHalInit
             /* <20131128, VincentL> Remove 0x830[3:1] setting when switching 2G/5G, requested by Yn. */
             phy_set_bb_reg(Adapter, rBWIndication_Jaguar, 0x3, 0x1); /* 0x834[1:0] = 0x1 */
             /* set PD_TH_20M for BB Yn user guide R27 */
-            phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17, 0x17); /* 0x830[17:13]=5'b10111 */
+            phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17,
+                0x17); /* 0x830[17:13]=5'b10111 */
 
 
             /* set PWED_TH for BB Yn user guide R29 */
 
-                if (current_bw == channel_width.CHANNEL_WIDTH_20
-                    && pHalData.rf_type == rf_type.RF_1T1R
-                    && eLNA_2g == false)
-                {
-                    /* 0x830[3:1]=3'b010 */
-                    phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x02);
-                }
-                else
-                {
-                    /* 0x830[3:1]=3'b100 */
+            if (current_bw == channel_width.CHANNEL_WIDTH_20
+                && pHalData.rf_type == rf_type.RF_1T1R
+                && eLNA_2g == false)
+            {
+                /* 0x830[3:1]=3'b010 */
+                phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x02);
+            }
+            else
+            {
+                /* 0x830[3:1]=3'b100 */
                 phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
-                }
+            }
 
 
             /* AGC table select */
@@ -3374,7 +3338,7 @@ public static class UsbHalInit
         return _SUCCESS;
     }
 
-    static void phy_SetBBSwingByBand_8812A(PADAPTER     Adapter, BAND_TYPE           Band,BAND_TYPE PreviousBand)
+    static void phy_SetBBSwingByBand_8812A(PADAPTER Adapter, BAND_TYPE Band, BAND_TYPE PreviousBand)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA((Adapter));
 
@@ -3383,23 +3347,25 @@ public static class UsbHalInit
         {
             s8 BBDiffBetweenBand = 0;
 
-            dm_struct        pDM_Odm = pHalData.odmpriv;
+            dm_struct pDM_Odm = pHalData.odmpriv;
             dm_rf_calibration_struct pRFCalibrateInfo = (pDM_Odm.rf_calibrate_info);
             rf_path path = rf_path.RF_PATH_A;
 
             phy_set_bb_reg(Adapter, rA_TxScale_Jaguar, 0xFFE00000,
-                phy_get_tx_bb_swing_8812a(Adapter, (BAND_TYPE) Band, rf_path.RF_PATH_A)); /* 0xC1C[31:21] */
+                phy_get_tx_bb_swing_8812a(Adapter, (BAND_TYPE)Band, rf_path.RF_PATH_A)); /* 0xC1C[31:21] */
             phy_set_bb_reg(Adapter, rB_TxScale_Jaguar, 0xFFE00000,
-                phy_get_tx_bb_swing_8812a(Adapter, (BAND_TYPE) Band, rf_path.RF_PATH_B)); /* 0xE1C[31:21] */
+                phy_get_tx_bb_swing_8812a(Adapter, (BAND_TYPE)Band, rf_path.RF_PATH_B)); /* 0xE1C[31:21] */
 
             /* <20121005, Kordan> When TxPowerTrack is ON, we should take care of the change of BB swing. */
             /* That is, reset all info to trigger Tx power tracking. */
             {
 
-                if (Band != PreviousBand) {
+                if (Band != PreviousBand)
+                {
                     BBDiffBetweenBand = (sbyte)(pRFCalibrateInfo.bb_swing_diff_2g - pRFCalibrateInfo.bb_swing_diff_5g);
-                    BBDiffBetweenBand = (sbyte)((Band == BAND_TYPE.BAND_ON_2_4G) ? BBDiffBetweenBand : (-1 * BBDiffBetweenBand));
-                    pRFCalibrateInfo.default_ofdm_index += BBDiffBetweenBand* 2;
+                    BBDiffBetweenBand =
+                        (sbyte)((Band == BAND_TYPE.BAND_ON_2_4G) ? BBDiffBetweenBand : (-1 * BBDiffBetweenBand));
+                    pRFCalibrateInfo.default_ofdm_index += BBDiffBetweenBand * 2;
                 }
 
                 odm_clear_txpowertracking_state(pDM_Odm);
@@ -3560,7 +3526,7 @@ public static class UsbHalInit
         return _out;
     }
 
-    static void phy_SetRFEReg8812(PADAPTER     Adapter, BAND_TYPE Band)
+    static void phy_SetRFEReg8812(PADAPTER Adapter, BAND_TYPE Band)
     {
         u8 u1tmp = 0;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
@@ -3577,12 +3543,12 @@ public static class UsbHalInit
                     phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
                     break;
                 case 1:
-                    {
-                        phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                        phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                        phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
-                        phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
-                    }
+                {
+                    phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                }
                     break;
                 case 3:
                     phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337770);
@@ -3627,12 +3593,12 @@ public static class UsbHalInit
                     phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
                     break;
                 case 1:
-                    {
-                        phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
-                        phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
-                        phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
-                        phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
-                    }
+                {
+                    phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
+                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
+                    phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                }
                     break;
                 case 2:
                 case 4:
@@ -3772,7 +3738,8 @@ public static class UsbHalInit
             {
                 case rf_path.RF_PATH_A:
                 {
-                    if (odm_config_rf_with_header_file(pHalData.odmpriv, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath) == false)
+                    if (odm_config_rf_with_header_file(pHalData.odmpriv, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath) ==
+                        false)
                     {
                         rtStatus = false;
                     }
@@ -3780,7 +3747,8 @@ public static class UsbHalInit
                     break;
                 case rf_path.RF_PATH_B:
                 {
-                    if (odm_config_rf_with_header_file(pHalData.odmpriv, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath) == false)
+                    if (odm_config_rf_with_header_file(pHalData.odmpriv, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath) ==
+                        false)
                     {
                         rtStatus = false;
                     }
@@ -3802,10 +3770,10 @@ public static class UsbHalInit
         return rtStatus;
     }
 
-    static bool phy_BB8812_Config_ParaFile(PADAPTER    Adapter)
+    static bool phy_BB8812_Config_ParaFile(PADAPTER Adapter)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        bool rtStatus =  odm_config_bb_with_header_file(Adapter, odm_bb_config_type.CONFIG_BB_PHY_REG);
+        bool rtStatus = odm_config_bb_with_header_file(Adapter, odm_bb_config_type.CONFIG_BB_PHY_REG);
 
         /* Read PHY_REG.TXT BB INIT!! */
 
@@ -3888,27 +3856,31 @@ public static class UsbHalInit
         phy_set_bb_reg(adapter, REG_MAC_PHY_CTRL, 0x7FF80000, (byte)(crystal_cap | (crystal_cap << 6)));
     }
 
-    static void phy_InitBBRFRegisterDefinition(PADAPTER  Adapter)
+    static void phy_InitBBRFRegisterDefinition(PADAPTER Adapter)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
         /* RF Interface Sowrtware Control */
-        pHalData.PHYRegDef[rf_path.RF_PATH_A].rfintfs = rFPGA0_XAB_RFInterfaceSW; /* 16 LSBs if read 32-bit from 0x870 */
-        pHalData.PHYRegDef[rf_path.RF_PATH_B].rfintfs = rFPGA0_XAB_RFInterfaceSW; /* 16 MSBs if read 32-bit from 0x870 (16-bit for 0x872) */
+        pHalData.PHYRegDef[rf_path.RF_PATH_A].rfintfs =
+            rFPGA0_XAB_RFInterfaceSW; /* 16 LSBs if read 32-bit from 0x870 */
+        pHalData.PHYRegDef[rf_path.RF_PATH_B].rfintfs =
+            rFPGA0_XAB_RFInterfaceSW; /* 16 MSBs if read 32-bit from 0x870 (16-bit for 0x872) */
 
         /* RF Interface Output (and Enable) */
         pHalData.PHYRegDef[rf_path.RF_PATH_A].rfintfo = rFPGA0_XA_RFInterfaceOE; /* 16 LSBs if read 32-bit from 0x860 */
         pHalData.PHYRegDef[rf_path.RF_PATH_B].rfintfo = rFPGA0_XB_RFInterfaceOE; /* 16 LSBs if read 32-bit from 0x864 */
 
         /* RF Interface (Output and)  Enable */
-        pHalData.PHYRegDef[rf_path.RF_PATH_A].rfintfe = rFPGA0_XA_RFInterfaceOE; /* 16 MSBs if read 32-bit from 0x860 (16-bit for 0x862) */
-        pHalData.PHYRegDef[rf_path.RF_PATH_B].rfintfe = rFPGA0_XB_RFInterfaceOE; /* 16 MSBs if read 32-bit from 0x864 (16-bit for 0x866) */
+        pHalData.PHYRegDef[rf_path.RF_PATH_A].rfintfe =
+            rFPGA0_XA_RFInterfaceOE; /* 16 MSBs if read 32-bit from 0x860 (16-bit for 0x862) */
+        pHalData.PHYRegDef[rf_path.RF_PATH_B].rfintfe =
+            rFPGA0_XB_RFInterfaceOE; /* 16 MSBs if read 32-bit from 0x864 (16-bit for 0x866) */
 
         pHalData.PHYRegDef[rf_path.RF_PATH_A].rf3wireOffset = rA_LSSIWrite_Jaguar; /* LSSI Parameter */
         pHalData.PHYRegDef[rf_path.RF_PATH_B].rf3wireOffset = rB_LSSIWrite_Jaguar;
 
-        pHalData.PHYRegDef[rf_path.RF_PATH_A].rfHSSIPara2 = rHSSIRead_Jaguar;  /* wire control parameter2 */
-        pHalData.PHYRegDef[rf_path.RF_PATH_B].rfHSSIPara2 = rHSSIRead_Jaguar;  /* wire control parameter2 */
+        pHalData.PHYRegDef[rf_path.RF_PATH_A].rfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
+        pHalData.PHYRegDef[rf_path.RF_PATH_B].rfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
 
         /* Tranceiver Readback LSSI/HSPI mode */
         pHalData.PHYRegDef[rf_path.RF_PATH_A].rfLSSIReadBack = rA_SIRead_Jaguar;
@@ -4057,7 +4029,7 @@ public static class UsbHalInit
         //usb_AggSettingTxUpdate_8812A(Adapter);
 
         ///* Rx aggregation setting */
-        //usb_AggSettingRxUpdate_8812A(Adapter);
+        usb_AggSettingRxUpdate_8812A(Adapter);
 
         /* 201/12/10 MH Add for USB agg mode dynamic switch. */
         pHalData.UsbRxHighSpeedMode = false;
@@ -4198,6 +4170,7 @@ public static class UsbHalInit
     }
 
     static byte _PSTX(byte x) => (byte)((x) << 4);
+
     static void _InitPageBoundary_8812AUsb(PADAPTER Adapter)
     {
         /* u2Byte 			rxff_bndy; */
@@ -4242,22 +4215,26 @@ public static class UsbHalInit
         u16 beQ, bkQ, viQ, voQ, mgtQ, hiQ;
 
         if (!pregistrypriv.wifi_spec)
-        { /* typical setting */
-            beQ		= QUEUE_LOW;
-            bkQ		= QUEUE_LOW;
-            viQ		= QUEUE_NORMAL;
-            voQ		= QUEUE_NORMAL;
-            mgtQ	= QUEUE_EXTRA;
-            hiQ		= QUEUE_HIGH;
+        {
+            /* typical setting */
+            beQ = QUEUE_LOW;
+            bkQ = QUEUE_LOW;
+            viQ = QUEUE_NORMAL;
+            voQ = QUEUE_NORMAL;
+            mgtQ = QUEUE_EXTRA;
+            hiQ = QUEUE_HIGH;
         }
-        else { /* for WMM */
-            beQ		= QUEUE_LOW;
-            bkQ		= QUEUE_NORMAL;
-            viQ		= QUEUE_NORMAL;
-            voQ		= QUEUE_HIGH;
-            mgtQ	= QUEUE_HIGH;
-            hiQ		= QUEUE_HIGH;
+        else
+        {
+            /* for WMM */
+            beQ = QUEUE_LOW;
+            bkQ = QUEUE_NORMAL;
+            viQ = QUEUE_NORMAL;
+            voQ = QUEUE_HIGH;
+            mgtQ = QUEUE_HIGH;
+            hiQ = QUEUE_HIGH;
         }
+
         _InitNormalChipRegPriority_8812AUsb(Adapter, beQ, bkQ, viQ, voQ, mgtQ, hiQ);
         init_hi_queue_config_8812a_usb(Adapter);
     }
@@ -4275,23 +4252,26 @@ public static class UsbHalInit
         u16 beQ, bkQ, viQ, voQ, mgtQ, hiQ;
 
         if (!pregistrypriv.wifi_spec)
-        { /* typical setting */
-            beQ		= QUEUE_LOW;
-            bkQ		= QUEUE_LOW;
-            viQ		= QUEUE_NORMAL;
-            voQ		= QUEUE_HIGH;
-            mgtQ	= QUEUE_HIGH;
-            hiQ		= QUEUE_HIGH;
+        {
+            /* typical setting */
+            beQ = QUEUE_LOW;
+            bkQ = QUEUE_LOW;
+            viQ = QUEUE_NORMAL;
+            voQ = QUEUE_HIGH;
+            mgtQ = QUEUE_HIGH;
+            hiQ = QUEUE_HIGH;
         }
         else
-        { /* for WMM */
-            beQ		= QUEUE_LOW;
-            bkQ		= QUEUE_NORMAL;
-            viQ		= QUEUE_NORMAL;
-            voQ		= QUEUE_HIGH;
-            mgtQ	= QUEUE_HIGH;
-            hiQ		= QUEUE_HIGH;
+        {
+            /* for WMM */
+            beQ = QUEUE_LOW;
+            bkQ = QUEUE_NORMAL;
+            viQ = QUEUE_NORMAL;
+            voQ = QUEUE_HIGH;
+            mgtQ = QUEUE_HIGH;
+            hiQ = QUEUE_HIGH;
         }
+
         _InitNormalChipRegPriority_8812AUsb(Adapter, beQ, bkQ, viQ, voQ, mgtQ, hiQ);
     }
 
@@ -4306,7 +4286,8 @@ public static class UsbHalInit
         u16 valueHi = 0;
         u16 valueLow = 0;
 
-        switch (pHalData.OutEpQueueSel) {
+        switch (pHalData.OutEpQueueSel)
+        {
             case (TxSele.TX_SELE_HQ | TxSele.TX_SELE_LQ):
                 valueHi = QUEUE_HIGH;
                 valueLow = QUEUE_LOW;
@@ -4325,15 +4306,18 @@ public static class UsbHalInit
                 break;
         }
 
-        if (!pregistrypriv.wifi_spec) {
-            beQ		= valueLow;
-            bkQ		= valueLow;
-            viQ		= valueHi;
-            voQ		= valueHi;
-            mgtQ	= valueHi;
-            hiQ		= valueHi;
-        } else
-        { /* for WMM ,CONFIG_OUT_EP_WIFI_MODE */
+        if (!pregistrypriv.wifi_spec)
+        {
+            beQ = valueLow;
+            bkQ = valueLow;
+            viQ = valueHi;
+            voQ = valueHi;
+            mgtQ = valueHi;
+            hiQ = valueHi;
+        }
+        else
+        {
+            /* for WMM ,CONFIG_OUT_EP_WIFI_MODE */
             beQ = valueLow;
             bkQ = valueHi;
             viQ = valueHi;
@@ -4358,9 +4342,9 @@ public static class UsbHalInit
         u16 value16 = (u16)(rtw_read16(Adapter, REG_TRXDMA_CTRL) & 0x7);
 
         value16 = (u16)(value16 |
-                   _TXDMA_BEQ_MAP(beQ) | _TXDMA_BKQ_MAP(bkQ) |
-                   _TXDMA_VIQ_MAP(viQ) | _TXDMA_VOQ_MAP(voQ) |
-                   _TXDMA_MGQ_MAP(mgtQ) | _TXDMA_HIQ_MAP(hiQ));
+                        _TXDMA_BEQ_MAP(beQ) | _TXDMA_BKQ_MAP(bkQ) |
+                        _TXDMA_VIQ_MAP(viQ) | _TXDMA_VOQ_MAP(voQ) |
+                        _TXDMA_MGQ_MAP(mgtQ) | _TXDMA_HIQ_MAP(hiQ));
 
         rtw_write16(Adapter, REG_TRXDMA_CTRL, value16);
     }
@@ -5285,5 +5269,46 @@ public static class UsbHalInit
     static u32 _LPQ(u32 x) => (((x) & 0xFF) << 8);
     static u32 _PUBQ(u32 x) => (((x) & 0xFF) << 16);
     static u32 LD_RQPN() => BIT31;
-}
 
+    static void usb_AggSettingRxUpdate_8812A(PADAPTER Adapter)
+    {
+
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        u8 valueDMA;
+        u8 valueUSB;
+
+        valueDMA = rtw_read8(Adapter, REG_TRXDMA_CTRL);
+        switch (pHalData.rxagg_mode)
+        {
+            case RX_AGG_MODE.RX_AGG_DMA:
+                valueDMA |= RXDMA_AGG_EN;
+                /* 2012/10/26 MH For TX through start rate temp fix. */
+            {
+                u16 temp;
+
+                /* Adjust DMA page and thresh. */
+                temp = (u16)(pHalData.rxagg_dma_size | (pHalData.rxagg_dma_timeout << 8));
+                rtw_write16(Adapter, REG_RXDMA_AGG_PG_TH, temp);
+                rtw_write8(Adapter, REG_RXDMA_AGG_PG_TH + 3, BIT7); /* for dma agg , 0x280[31]GBIT_RXDMA_AGG_OLD_MOD, set 1 */
+            }
+                break;
+            case RX_AGG_MODE.RX_AGG_USB:
+                valueDMA |= RXDMA_AGG_EN;
+            {
+                u16 temp;
+
+                /* Adjust DMA page and thresh. */
+                temp = (u16)(pHalData.rxagg_usb_size | (pHalData.rxagg_usb_timeout << 8));
+                rtw_write16(Adapter, REG_RXDMA_AGG_PG_TH, temp);
+            }
+                break;
+            case RX_AGG_MODE.RX_AGG_MIX:
+            case RX_AGG_MODE.RX_AGG_DISABLE:
+            default:
+                /* TODO: */
+                break;
+        }
+
+        rtw_write8(Adapter, REG_TRXDMA_CTRL, valueDMA);
+    }
+}
