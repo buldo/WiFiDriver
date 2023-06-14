@@ -1,4 +1,6 @@
-﻿using LibUsbDotNet;
+﻿using System.Threading.Channels;
+
+using LibUsbDotNet;
 using LibUsbDotNet.LibUsb;
 using LibUsbDotNet.Main;
 
@@ -30,7 +32,14 @@ public class Rtl8812aDevice
             cur_channel = 11
         });
 
-        //_readTask = Task.Run(() => InfinityRead());
+        ioctl_cfg80211.cfg80211_rtw_set_monitor_channel(_adapter, new InitChannel()
+        {
+            cur_bwmode = channel_width.CHANNEL_WIDTH_20,
+            cur_ch_offset = 0,
+            cur_channel = 11
+        });
+
+        _readTask = Task.Run(() => InfinityRead());
     }
 
     private ReadEndpointID GetInEp()
@@ -59,9 +68,13 @@ public class Rtl8812aDevice
                 var result = _reader.Read(readBuffer, 5000, out var len);
                 if (result != Error.Success)
                 {
-                    Console.WriteLine($"BULK read ERR {result}");
+                    //Console.WriteLine($"BULK read ERR {result}");
                 }
-                Console.WriteLine($"BULK read OK {len}");
+
+                if (len != 0)
+                {
+                    Console.WriteLine($"BULK read OK {len}");
+                }
             }
             catch (Exception e)
             {

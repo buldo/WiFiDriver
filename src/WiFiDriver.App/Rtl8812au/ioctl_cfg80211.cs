@@ -1,4 +1,7 @@
-﻿namespace WiFiDriver.App.Rtl8812au;
+﻿using System;
+using WiFiDriver.App.Rtl8812au;
+
+namespace WiFiDriver.App.Rtl8812au;
 
 public static class ioctl_cfg80211
 {
@@ -34,5 +37,11 @@ public static class ioctl_cfg80211
 
         rtw_setopmode_cmd(padapter, RTW_CMDF.RTW_CMDF_WAIT_ACK);
         RTW_INFO($"cfg80211_rtw_change_iface end");
+    }
+
+    public static int cfg80211_rtw_set_monitor_channel(_adapter padapter, InitChannel chandef)
+    {
+        set_channel_bwmode(padapter, chandef.cur_channel, chandef.cur_ch_offset, chandef.cur_bwmode);
+        return 0;
     }
 }

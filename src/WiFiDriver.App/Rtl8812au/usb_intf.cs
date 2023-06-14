@@ -212,12 +212,12 @@ public static class usb_intf
         //    goto exit;
         //}
 
-        if (_rtw_init_recv_priv(padapter.recvpriv, padapter) == _FAIL)
-        {
-            RTW_INFO("Can't _rtw_init_recv_priv\n");
-            ret8 = _FAIL;
-            goto exit;
-        }
+        //if (_rtw_init_recv_priv(padapter.recvpriv, padapter) == _FAIL)
+        //{
+        //    RTW_INFO("Can't _rtw_init_recv_priv\n");
+        //    ret8 = _FAIL;
+        //    goto exit;
+        //}
 
         /* add for CONFIG_IEEE80211W, none 11w also can use */
         //_rtw_spinlock_init(&padapter.security_key_mutex);
@@ -266,14 +266,6 @@ public static class usb_intf
 //rtw_hal_sreset_init(padapter);
 //#endif
 
-//# ifdef CONFIG_INTEL_WIDI
-//if (rtw_init_intel_widi(padapter) == _FAIL)
-//{
-//    RTW_INFO("Can't rtw_init_intel_widi\n");
-//    ret8 = _FAIL;
-//    goto exit;
-//}
-//#endif /* CONFIG_INTEL_WIDI */
 
 //# ifdef CONFIG_WAPI_SUPPORT
 //padapter.WapiSupport = true; /* set true temp, will revise according to Efuse or Registry value later. */
