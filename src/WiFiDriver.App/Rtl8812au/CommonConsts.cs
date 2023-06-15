@@ -312,4 +312,9 @@ public static class CommonConsts
     public const ushort REG_RF_B_CTRL_8812 = 0x0076;
     public const ushort REG_RXDMA_AGG_PG_TH = 0x0280;
     public const byte RXDMA_AGG_EN = BIT2;
+    public const uint BLK_DESC_NUM_MASK = 0xF;
+    public const int BLK_DESC_NUM_SHIFT = 4;
+
+    //public const ushort REG_TDECTRL = 0x0208;
+    public const ushort REG_DWBCN0_CTRL_8812 = REG_TDECTRL;
 }

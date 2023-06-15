@@ -85,7 +85,7 @@ public static class UsbHalInit
 
         pHalData.interfaceIndex = pdvobjpriv.InterfaceNumber;
 
-        pHalData.UsbTxAggMode = 1;
+        pHalData.UsbTxAggMode = true;
         pHalData.UsbTxAggDescNum = 6; /* only 4 bits */
         pHalData.UsbTxAggDescNum = 0x01; /* adjust value for OQT  Overflow issue */ /* 0x3;	 */ /* only 4 bits */
         pHalData.rxagg_mode = RX_AGG_MODE.RX_AGG_USB;
@@ -4026,7 +4026,7 @@ public static class UsbHalInit
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
         ///* Tx aggregation setting */
-        //usb_AggSettingTxUpdate_8812A(Adapter);
+        usb_AggSettingTxUpdate_8812A(Adapter);
 
         ///* Rx aggregation setting */
         usb_AggSettingRxUpdate_8812A(Adapter);
@@ -5269,6 +5269,30 @@ public static class UsbHalInit
     static u32 _LPQ(u32 x) => (((x) & 0xFF) << 8);
     static u32 _PUBQ(u32 x) => (((x) & 0xFF) << 16);
     static u32 LD_RQPN() => BIT31;
+
+    static void usb_AggSettingTxUpdate_8812A(PADAPTER            Adapter)
+    {
+
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        u32 value32;
+
+        if (Adapter.registrypriv.wifi_spec)
+        {
+            pHalData.UsbTxAggMode = false;
+        }
+
+        if (pHalData.UsbTxAggMode)
+        {
+            value32 = rtw_read32(Adapter, REG_TDECTRL);
+            value32 = value32 & ~(BLK_DESC_NUM_MASK << BLK_DESC_NUM_SHIFT);
+            value32 |= ((pHalData.UsbTxAggDescNum & BLK_DESC_NUM_MASK) << BLK_DESC_NUM_SHIFT);
+
+            rtw_write32(Adapter, REG_DWBCN0_CTRL_8812, value32);
+            //if (IS_HARDWARE_TYPE_8821U(Adapter))   /* page added for Jaguar */
+            //    rtw_write8(Adapter, REG_DWBCN1_CTRL_8812, pHalData.UsbTxAggDescNum << 1);
+        }
+    }
+
 
     static void usb_AggSettingRxUpdate_8812A(PADAPTER Adapter)
     {

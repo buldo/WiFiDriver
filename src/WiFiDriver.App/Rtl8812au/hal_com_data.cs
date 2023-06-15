@@ -359,7 +359,7 @@ public u8 rxagg_dma_timeout;
 //    u32 IntArray[3];/* HISR0,HISR1,HSISR */
     public u32[] IntrMask =new u32[3];
 
-public     u8 UsbTxAggMode;
+public     bool UsbTxAggMode;
 public     u8 UsbTxAggDescNum;
 
 
