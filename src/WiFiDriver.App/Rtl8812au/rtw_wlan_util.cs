@@ -148,7 +148,7 @@ public static class rtw_wlan_util
         //        , channel, ch_width_str(Bandwidth), Offset40, Offset80
         //        , pHalData.cch_80, pHalData.cch_40, pHalData.cch_20);
 
-        padapter.hal_func.set_chnl_bw_handler(padapter, channel, Bandwidth, Offset40, Offset80);
+        PHY_SetSwChnlBWMode8812(padapter, channel, Bandwidth, Offset40, Offset80);
     }
 
    private static bool rtw_mp_mode_check(PADAPTER pAdapter)

@@ -64,7 +64,6 @@ public class hal_ops
 //	void (* DeInitSwLeds) (_adapter* padapter);
 //#endif
 //	void (* set_chnl_bw_handler) (_adapter* padapter, u8 channel, enum channel_width Bandwidth, u8 Offset40, u8 Offset80);
-    public Action<_adapter, u8, channel_width, u8, u8> set_chnl_bw_handler;
 
     //	void (* set_tx_power_level_handler) (_adapter* padapter, u8 channel);
     //	void (* get_tx_power_level_handler) (_adapter* padapter, s32* powerlevel);
@@ -72,7 +71,6 @@ public class hal_ops
     //	void (* set_tx_power_index_handler) (_adapter* padapter, u32 powerindex, enum rf_path rfpath, u8 rate);
     public Action<_adapter, u32, rf_path, MGN_RATE> set_tx_power_index_handler;
     //    u8(*get_tx_power_index_handler)(_adapter* padapter, enum rf_path rfpath, u8 rate, u8 bandwidth, u8 channel, struct txpwr_idx_comp *tic);
-    public Func<_adapter, rf_path, MGN_RATE, channel_width, u8, txpwr_idx_comp, u8> get_tx_power_index_handler;
 
     //	void (* hal_dm_watchdog) (_adapter* padapter);
 
@@ -96,7 +94,6 @@ public class hal_ops
     //	u32(*read_bbreg)(_adapter* padapter, u32 RegAddr, u32 BitMask);
     public Func<_adapter, u16, u32, u32> read_bbreg;
     //	void (* write_bbreg) (_adapter* padapter, u32 RegAddr, u32 BitMask, u32 Data);
-    public Action<_adapter, u16, u32, u32> write_bbreg;
 
 //	u32(*read_rfreg)(_adapter* padapter, enum rf_path eRFPath, u32 RegAddr, u32 BitMask);
 //	void (* write_rfreg) (_adapter* padapter, enum rf_path eRFPath, u32 RegAddr, u32 BitMask, u32 Data);

@@ -19,7 +19,7 @@ public static class rtw_cmd
         //if (flags.HasFlag(RTW_CMDF.RTW_CMDF_DIRECTLY))
         {
             /* no need to enqueue, do the cmd hdl directly and free cmd parameter */
-            if (true != setopmode_hdl(adapter, parm))
+            if (true != setopmode_hdl(adapter))
             {
                 return false;
             }

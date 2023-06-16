@@ -27,17 +27,15 @@ public static class rtl8812a_phycfg
         PADAPTER Adapter,
         u16 RegAddr,
         u32 BitMask,
-        u32 Data
-    )
+        u32 DataOriginal)
     {
-        u32 OriginalValue, BitShift;
-
+        u32 Data = DataOriginal;
         if (BitMask != bMaskDWord)
         {
             /* if not "double word" write */
-            OriginalValue = rtw_read32(Adapter, RegAddr);
-            BitShift = PHY_CalculateBitShift(BitMask);
-            Data = ((OriginalValue) & (~BitMask)) | (((Data << (int)BitShift)) & BitMask);
+            var OriginalValue = rtw_read32(Adapter, RegAddr);
+            var BitShift = PHY_CalculateBitShift(BitMask);
+            Data = ((OriginalValue) & (~BitMask)) | (((DataOriginal << (int)BitShift)) & BitMask);
         }
 
         rtw_write32(Adapter, RegAddr, Data);
@@ -281,7 +279,7 @@ public static class rtl8812a_phycfg
         u8 channel,
         txpwr_idx_comp tic)
     {
-        return padapter.hal_func.get_tx_power_index_handler(padapter, rfpath, rate, bandwidth, channel, tic);
+        return PHY_GetTxPowerIndex_8812A(padapter, rfpath, rate, bandwidth, channel, tic);
     }
 
     public static u8 PHY_GetTxPowerIndex_8812A(
@@ -362,7 +360,7 @@ public static class rtl8812a_phycfg
         //}
 
         //return (byte)power_idx;
-        return 42;
+        return 16;
     }
 
 

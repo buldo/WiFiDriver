@@ -191,7 +191,7 @@ public     u8 NumTotalRFPath;
 public u8 CurrentTxPwrIdx;
 
 //    /* Read/write are allow for following hardware information variables	 */
-    public u8 crystal_cap;
+    public u8 crystal_cap { get; set; }
 
     public u8 PAType_2G;
     public u8 PAType_5G;

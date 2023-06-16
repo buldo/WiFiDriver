@@ -1,9 +1,9 @@
 ﻿namespace WiFiDriver.App.Rtl8812au;
 
-public static class RTL871X_HCI_TYPE
+public enum RTL871X_HCI_TYPE : uint
 {
-    public const byte RTW_PCIE = BIT0;
-    public const byte RTW_USB = BIT1;
-    public const byte RTW_SDIO = BIT2;
-    public const byte RTW_GSPI = BIT3;
+    RTW_PCIE = BIT0,
+    RTW_USB = BIT1,
+    RTW_SDIO = BIT2,
+    RTW_GSPI = BIT3
 };

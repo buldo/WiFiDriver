@@ -17,6 +17,8 @@ public class Rtl8812aDevice
     {
         _usbDevice = usbDevice;
         _usbDevice.Open();
+        _usbDevice.SetConfiguration(1);
+        _usbDevice.ClaimInterface(0);
         _adapter = usb_intf.rtw_drv_init(_usbDevice);
 
         _reader = _usbDevice.OpenEndpointReader(GetInEp());
@@ -36,7 +38,7 @@ public class Rtl8812aDevice
         {
             cur_bwmode = channel_width.CHANNEL_WIDTH_20,
             cur_ch_offset = 0,
-            cur_channel = 11
+            cur_channel = 8
         });
 
         _readTask = Task.Run(() => InfinityRead());
@@ -48,9 +50,9 @@ public class Rtl8812aDevice
         {
             var type = (EndpointType)(endpoint.Attributes & 0x3);
             var direction = (EndpointDirection)(endpoint.EndpointAddress & (0b1000_0000));
-            int num = 0;
             if (type == EndpointType.Bulk && direction == EndpointDirection.In)
             {
+
                 return (ReadEndpointID)endpoint.EndpointAddress;
             }
         }
@@ -60,15 +62,19 @@ public class Rtl8812aDevice
 
     private void InfinityRead()
     {
-        var readBuffer = new byte[1024];
+        var readBuffer = new byte[8192 + 1024];
         while (true)
         {
             try
             {
                 var result = _reader.Read(readBuffer, 5000, out var len);
-                if (result != Error.Success)
+                if (result == Error.NotFound)
                 {
-                    //Console.WriteLine($"BULK read ERR {result}");
+
+                }
+                else if (result != Error.Success)
+                {
+                    Console.WriteLine($"BULK read ERR {result}");
                 }
 
                 if (len != 0)

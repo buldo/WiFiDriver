@@ -29,7 +29,7 @@ public static class phydm
                 break;
 
             case odm_cmninfo.ODM_CMNINFO_CUT_VER:
-                dm.cut_version = (u8)value;
+                dm.cut_version = (odm_cut_version)value;
                 break;
 
             case odm_cmninfo.ODM_CMNINFO_FAB_VER:
@@ -61,7 +61,10 @@ public static class phydm
 
             case odm_cmninfo.ODM_CMNINFO_BOARD_TYPE:
                 if (!dm.is_init_hw_info_by_rfe)
+                {
                     dm.board_type = (u8)value;
+                    Console.WriteLine($"BoardType = 0x{dm.board_type:X4}");
+                }
                 break;
 
             case odm_cmninfo.ODM_CMNINFO_PACKAGE_TYPE:

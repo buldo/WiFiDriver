@@ -10,7 +10,7 @@ public class dm_struct
     public byte support_platform { get; set; }
     public byte support_interface { get; set; }
     public uint support_ic_type { get; set; }
-    public byte cut_version { get; set; }
+    public odm_cut_version cut_version { get; set; }
     public byte fab_version { get; set; }
     public byte fw_version { get; set; }
     public byte fw_sub_version { get; set; }

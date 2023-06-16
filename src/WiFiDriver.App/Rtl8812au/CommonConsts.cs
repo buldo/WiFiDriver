@@ -55,16 +55,26 @@ public static class CommonConsts
     public const bool DBG_PG_TXPWR_READ = true;
     public const byte BAND_CAP_2G = 0;
     public const byte BAND_CAP_5G = 1;
-    public const byte BW_CAP_20M = BIT2;
-    public const byte BW_CAP_40M = BIT3;
-    public const byte BW_CAP_80M = BIT4;
-    public const byte PROTO_CAP_11B = BIT0;
-    public const byte PROTO_CAP_11G = BIT1;
-    public const byte PROTO_CAP_11N = BIT2;
-    public const byte PROTO_CAP_11AC = BIT3;
-    public const byte WL_FUNC_P2P = BIT0;
-    public const byte WL_FUNC_MIRACAST = BIT1;
-    public const byte WL_FUNC_TDLS = BIT2;
+    //public const byte BW_CAP_20M = BIT2;
+    //public const byte BW_CAP_40M = BIT3;
+    //public const byte BW_CAP_80M = BIT4;
+    //public const byte PROTO_CAP_11B = BIT0;
+    //public const byte PROTO_CAP_11G = BIT1;
+    //public const byte PROTO_CAP_11N = BIT2;
+    //public const byte PROTO_CAP_11AC = BIT3;
+    //public const byte WL_FUNC_P2P = BIT0;
+    //public const byte WL_FUNC_MIRACAST = BIT1;
+    //public const byte WL_FUNC_TDLS = BIT2;
+    public const uint BW_CAP_20M = BIT2;
+    public const uint BW_CAP_40M = BIT3;
+    public const uint BW_CAP_80M = BIT4;
+    public const uint PROTO_CAP_11B = BIT0;
+    public const uint PROTO_CAP_11G = BIT1;
+    public const uint PROTO_CAP_11N = BIT2;
+    public const uint PROTO_CAP_11AC = BIT3;
+    public const uint WL_FUNC_P2P = BIT0;
+    public const uint WL_FUNC_MIRACAST = BIT1;
+    public const uint WL_FUNC_TDLS = BIT2;
     public const ushort REG_MACID_SLEEP = 0x04D4;
     public const ushort REG_MACID_SLEEP_1 = 0x0488;
     public const ushort REG_MACID_SLEEP_2 = 0x04D0;
@@ -84,8 +94,10 @@ public static class CommonConsts
     public const ushort REG_SDIO_CTRL_8812 = 0x0070;
     public const ushort REG_ACLK_MON = 0x003E;
     public const byte DRVINFO_SZ = 4; /* unit is 8bytes */
-    public const byte MACTXEN = BIT6;
-    public const byte MACRXEN = BIT7;
+    //public const byte MACTXEN = BIT6;
+    //public const byte MACRXEN = BIT7;
+    public const uint MACTXEN = BIT6;
+    public const uint MACRXEN = BIT7;
     public const ushort REG_HWSEQ_CTRL = 0x0423;
     public const ushort REG_MCUFWDL = 0x0080;
     public const ushort rFPGA0_XCD_RFPara = 0x8b4;
@@ -106,9 +118,12 @@ public static class CommonConsts
     public const ushort REG_HMETFR = 0x01CC;
     public const ushort FW_START_ADDRESS = 0x1000;
     public const ushort REG_SYS_CFG = 0x00F0;
-    public const byte FWDL_ChkSum_rpt = BIT2;
-    public const byte MCUFWDL_RDY = BIT1;
-    public const byte WINTINI_RDY = BIT6;
+    //public const byte FWDL_ChkSum_rpt = BIT2;
+    //public const byte MCUFWDL_RDY = BIT1;
+    //public const byte WINTINI_RDY = BIT6;
+    public const uint FWDL_ChkSum_rpt = BIT2;
+    public const uint MCUFWDL_RDY = BIT1;
+    public const uint WINTINI_RDY = BIT6;
     public const byte COND_ELSE = 2;
     public const byte COND_ENDIF = 3;
     public const uint RTL_ID = BIT23;
@@ -238,13 +253,18 @@ public static class CommonConsts
     public const byte TBTT_PROHIBIT_HOLD_TIME_STOP_BCN = 0x64; /* 3.2ms unit is 32us*/
     public const byte DRIVER_EARLY_INT_TIME_8812 = 0x05;
     public const byte BCN_DMA_ATIME_INT_TIME_8812 = 0x02;
-    public const byte DIS_TSF_UDT = BIT4;
-    public const byte EN_AMPDU_RTY_NEW = BIT7;
+    //public const byte DIS_TSF_UDT = BIT4;
+    //public const byte EN_AMPDU_RTY_NEW = BIT7;
+    public const uint DIS_TSF_UDT = BIT4;
+    public const uint EN_AMPDU_RTY_NEW = BIT7;
     public const byte EEPROM_TX_BBSWING_2G_8812 = 0xC6;
     public const byte EEPROM_TX_BBSWING_5G_8812 = 0xC7;
-    public const byte FEN_USBA = BIT2;
-    public const byte FEN_BB_GLB_RSTn = BIT1;
-    public const byte FEN_BBRSTB = BIT0;
+    //public const byte FEN_USBA = BIT2;
+    //public const byte FEN_BB_GLB_RSTn = BIT1;
+    //public const byte FEN_BBRSTB = BIT0;
+    public const uint FEN_USBA = BIT2;
+    public const uint FEN_BB_GLB_RSTn = BIT1;
+    public const uint FEN_BBRSTB = BIT0;
 
     public const u16 QUEUE_LOW = 1;
     public const u16 QUEUE_NORMAL = 2;
@@ -311,10 +331,14 @@ public static class CommonConsts
 
     public const ushort REG_RF_B_CTRL_8812 = 0x0076;
     public const ushort REG_RXDMA_AGG_PG_TH = 0x0280;
-    public const byte RXDMA_AGG_EN = BIT2;
+    //public const byte RXDMA_AGG_EN = BIT2;
+    public const uint RXDMA_AGG_EN = BIT2;
     public const uint BLK_DESC_NUM_MASK = 0xF;
     public const int BLK_DESC_NUM_SHIFT = 4;
 
     //public const ushort REG_TDECTRL = 0x0208;
     public const ushort REG_DWBCN0_CTRL_8812 = REG_TDECTRL;
+
+    public const ushort REG_PKT_VO_VI_LIFE_TIME = 0x04C0;
+    public const ushort REG_PKT_BE_BK_LIFE_TIME = 0x04C2;
 }

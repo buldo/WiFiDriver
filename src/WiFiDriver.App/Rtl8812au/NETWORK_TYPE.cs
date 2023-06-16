@@ -1,7 +1,7 @@
 ﻿namespace WiFiDriver.App.Rtl8812au;
 
 [Flags]
-public enum NETWORK_TYPE
+public enum NETWORK_TYPE : uint
 {
     WIRELESS_INVALID = 0,
     /* Sub-Element */

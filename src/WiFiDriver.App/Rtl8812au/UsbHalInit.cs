@@ -6,8 +6,8 @@ namespace WiFiDriver.App.Rtl8812au;
 
 public static class UsbHalInit
 {
-    private const byte BOOT_FROM_EEPROM = BIT4;
-    private const byte EEPROM_EN = BIT5;
+    private const byte BOOT_FROM_EEPROM = (byte)BIT4;
+    private const byte EEPROM_EN = (byte)BIT5;
     private const UInt32 HWSET_MAX_SIZE_JAGUAR = 512;
     private const byte EFUSE_WIFI = 0;
     private const UInt16 EEPROM_TX_PWR_INX_8812 = 0x10;
@@ -1962,7 +1962,7 @@ public static class UsbHalInit
             pHalData.crystal_cap = EEPROM_DEFAULT_CRYSTAL_CAP_8812;
         }
 
-        RTW_INFO("crystal_cap: 0x%2x", pHalData.crystal_cap);
+        RTW_INFO($"crystal_cap: 0x{pHalData.crystal_cap:X}");
     }
 
     private static bool hal_config_macaddr(_adapter adapter, bool autoload_fail)
@@ -2867,6 +2867,9 @@ public static class UsbHalInit
         value8 = rtw_read8(Adapter, REG_CR);
         rtw_write8(Adapter, REG_CR, (byte)(value8 | MACTXEN | MACRXEN));
 
+        rtw_write16(Adapter, REG_PKT_VO_VI_LIFE_TIME, 0x0400);  /* unit: 256us. 256ms */
+        rtw_write16(Adapter, REG_PKT_BE_BK_LIFE_TIME, 0x0400);	/* unit: 256us. 256ms */
+
         status = PHY_BBConfig8812(Adapter);
         if (status == false)
         {
@@ -2997,15 +3000,7 @@ public static class UsbHalInit
     }
 
     public static void phy_set_bb_reg(_adapter Adapter, u16 RegAddr, u32 BitMask, u32 Data) =>
-        rtw_hal_write_bbreg((Adapter), (RegAddr), (BitMask), (Data));
-
-    static void rtw_hal_write_bbreg(_adapter padapter, u16 RegAddr, u32 BitMask, u32 Data)
-    {
-        if (padapter.hal_func.write_bbreg != null)
-        {
-            padapter.hal_func.write_bbreg(padapter, RegAddr, BitMask, Data);
-        }
-    }
+        PHY_SetBBReg8812(Adapter, RegAddr, BitMask, Data);
 
     static void rtl8812_InitHalDm(PADAPTER Adapter)
     {
@@ -3528,7 +3523,7 @@ public static class UsbHalInit
 
     static void phy_SetRFEReg8812(PADAPTER Adapter, BAND_TYPE Band)
     {
-        u8 u1tmp = 0;
+        uint u1tmp = 0;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
         if (Band == BAND_TYPE.BAND_ON_2_4G)
@@ -3569,7 +3564,7 @@ public static class UsbHalInit
                     phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
                     u1tmp = rtw_read8(Adapter, rA_RFE_Inv_Jaguar + 3);
                     u1tmp &= NotBIT0;
-                    rtw_write8(Adapter, rA_RFE_Inv_Jaguar + 3, (u1tmp));
+                    rtw_write8(Adapter, rA_RFE_Inv_Jaguar + 3, (byte)(u1tmp));
                     phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
                     break;
                 case 6:
@@ -3618,7 +3613,7 @@ public static class UsbHalInit
                     rtw_write8(Adapter, rA_RFE_Pinmux_Jaguar + 2, 0x33);
                     phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
                     u1tmp = rtw_read8(Adapter, rA_RFE_Inv_Jaguar + 3);
-                    rtw_write8(Adapter, rA_RFE_Inv_Jaguar + 3, (u1tmp |= BIT0));
+                    rtw_write8(Adapter, rA_RFE_Inv_Jaguar + 3, (byte)(u1tmp |= BIT0));
                     phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
                     break;
                 case 6:
@@ -3818,7 +3813,7 @@ public static class UsbHalInit
     {
         bool rtStatus = true;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        u8 TmpU1B = 0;
+        uint TmpU1B = 0;
 
         phy_InitBBRFRegisterDefinition(Adapter);
 
@@ -3828,7 +3823,7 @@ public static class UsbHalInit
 
         TmpU1B |= FEN_USBA;
 
-        rtw_write8(Adapter, REG_SYS_FUNC_EN, TmpU1B);
+        rtw_write8(Adapter, REG_SYS_FUNC_EN, (byte)TmpU1B);
 
         rtw_write8(Adapter, REG_SYS_FUNC_EN, (byte)(TmpU1B | FEN_BB_GLB_RSTn | FEN_BBRSTB)); /* same with 8812 */
         /* 6. 0x1f[7:0] = 0x07 PathA RF Power On */
@@ -3853,7 +3848,7 @@ public static class UsbHalInit
         crystal_cap = (byte)(crystal_cap & 0x3F);
 
         /* write 0x2C[30:25] = 0x2C[24:19] = CrystalCap */
-        phy_set_bb_reg(adapter, REG_MAC_PHY_CTRL, 0x7FF80000, (byte)(crystal_cap | (crystal_cap << 6)));
+        phy_set_bb_reg(adapter, REG_MAC_PHY_CTRL, 0x7FF80000u, (byte)(crystal_cap | (crystal_cap << 6)));
     }
 
     static void phy_InitBBRFRegisterDefinition(PADAPTER Adapter)
@@ -3950,8 +3945,6 @@ public static class UsbHalInit
             rtw_write8(Adapter, 0xf008, (byte)(rtw_read8(Adapter, 0xf008) & 0xE7));
         }
 
-        rtw_write8(Adapter, REG_TDECTRL, 0x10);
-
         temp = rtw_read8(Adapter, REG_SYS_FUNC_EN);
         rtw_write8(Adapter, REG_SYS_FUNC_EN, (byte)(temp & (NotBIT10))); /* reset 8051 */
 
@@ -3996,11 +3989,8 @@ public static class UsbHalInit
     static void _InitBeaconParameters_8812A(PADAPTER Adapter)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        u16 val16;
-        u8 val8;
-
-        val8 = DIS_TSF_UDT;
-        val16 = (u16)(val8 | (val8 << 8)); /* port0 and port1 */
+        var val8 = DIS_TSF_UDT;
+        var val16 = (u16)(val8 | (val8 << 8)); /* port0 and port1 */
 
         rtw_write16(Adapter, REG_BCN_CTRL, val16);
 
@@ -4037,11 +4027,11 @@ public static class UsbHalInit
 
     static void _InitRetryFunction_8812A(PADAPTER Adapter)
     {
-        u8 value8;
+        uint value8;
 
         value8 = rtw_read8(Adapter, REG_FWHW_TXQ_CTRL);
         value8 |= EN_AMPDU_RTY_NEW;
-        rtw_write8(Adapter, REG_FWHW_TXQ_CTRL, value8);
+        rtw_write8(Adapter, REG_FWHW_TXQ_CTRL, (byte)value8);
 
         /* Set ACK timeout */
         /* rtw_write8(Adapter, REG_ACKTO, 0x40);  */ /* masked by page for BCM IOT issue temporally */
@@ -4128,8 +4118,8 @@ public static class UsbHalInit
         rtw_write32(Adapter, REG_MAR, 0xFFFFFFFF);
         rtw_write32(Adapter, REG_MAR + 4, 0xFFFFFFFF);
 
-        u16 value16 = BIT10 | BIT5;
-        rtw_write16(Adapter, REG_RXFLTMAP1, value16);
+        uint value16 = BIT10 | BIT5;
+        rtw_write16(Adapter, REG_RXFLTMAP1, (u16)value16);
     }
 
     static void _InitNetworkType_8812A(PADAPTER Adapter)
@@ -4577,7 +4567,7 @@ public static class UsbHalInit
 
     static void rtl8812au_hw_reset(_adapter Adapter)
     {
-        u8 reg_val = 0;
+        uint reg_val = 0;
         if ((rtw_read8(Adapter, REG_MCUFWDL) & BIT7) != 0)
         {
             _8051Reset8812(Adapter);
@@ -4588,7 +4578,7 @@ public static class UsbHalInit
             /* reset BB */
             reg_val = rtw_read8(Adapter, REG_SYS_FUNC_EN);
             reg_val = (byte)(reg_val & ~(BIT0 | BIT1));
-            rtw_write8(Adapter, REG_SYS_FUNC_EN, reg_val);
+            rtw_write8(Adapter, REG_SYS_FUNC_EN, (byte)reg_val);
             /* reset RF */
             rtw_write8(Adapter, REG_RF_CTRL, 0);
             /* reset TRX path */
@@ -4596,7 +4586,7 @@ public static class UsbHalInit
             /* reset MAC */
             reg_val = rtw_read8(Adapter, REG_APS_FSMCO + 1);
             reg_val |= BIT1;
-            rtw_write8(Adapter, REG_APS_FSMCO + 1, reg_val); /* reg0x5[1] ,auto FSM off */
+            rtw_write8(Adapter, REG_APS_FSMCO + 1, (byte)reg_val); /* reg0x5[1] ,auto FSM off */
 
             reg_val = rtw_read8(Adapter, REG_APS_FSMCO + 1);
 
@@ -4608,14 +4598,14 @@ public static class UsbHalInit
             }
 
             reg_val |= BIT0;
-            rtw_write8(Adapter, REG_APS_FSMCO + 1, reg_val); /* reg0x5[0] ,auto FSM on */
+            rtw_write8(Adapter, REG_APS_FSMCO + 1, (byte)reg_val); /* reg0x5[0] ,auto FSM on */
 
             reg_val = rtw_read8(Adapter, REG_SYS_FUNC_EN + 1);
             reg_val = (byte)(reg_val & ~(BIT4 | BIT7));
-            rtw_write8(Adapter, REG_SYS_FUNC_EN + 1, reg_val);
+            rtw_write8(Adapter, REG_SYS_FUNC_EN + 1, (byte)reg_val);
             reg_val = rtw_read8(Adapter, REG_SYS_FUNC_EN + 1);
             reg_val = (byte)(reg_val | BIT4 | BIT7);
-            rtw_write8(Adapter, REG_SYS_FUNC_EN + 1, reg_val);
+            rtw_write8(Adapter, REG_SYS_FUNC_EN + 1, (byte)reg_val);
         }
     }
 
@@ -5298,10 +5288,8 @@ public static class UsbHalInit
     {
 
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        u8 valueDMA;
-        u8 valueUSB;
 
-        valueDMA = rtw_read8(Adapter, REG_TRXDMA_CTRL);
+        uint valueDMA = rtw_read8(Adapter, REG_TRXDMA_CTRL);
         switch (pHalData.rxagg_mode)
         {
             case RX_AGG_MODE.RX_AGG_DMA:
@@ -5313,7 +5301,7 @@ public static class UsbHalInit
                 /* Adjust DMA page and thresh. */
                 temp = (u16)(pHalData.rxagg_dma_size | (pHalData.rxagg_dma_timeout << 8));
                 rtw_write16(Adapter, REG_RXDMA_AGG_PG_TH, temp);
-                rtw_write8(Adapter, REG_RXDMA_AGG_PG_TH + 3, BIT7); /* for dma agg , 0x280[31]GBIT_RXDMA_AGG_OLD_MOD, set 1 */
+                rtw_write8(Adapter, REG_RXDMA_AGG_PG_TH + 3, (byte)BIT7); /* for dma agg , 0x280[31]GBIT_RXDMA_AGG_OLD_MOD, set 1 */
             }
                 break;
             case RX_AGG_MODE.RX_AGG_USB:
@@ -5333,6 +5321,6 @@ public static class UsbHalInit
                 break;
         }
 
-        rtw_write8(Adapter, REG_TRXDMA_CTRL, valueDMA);
+        rtw_write8(Adapter, REG_TRXDMA_CTRL, (byte)valueDMA);
     }
 }

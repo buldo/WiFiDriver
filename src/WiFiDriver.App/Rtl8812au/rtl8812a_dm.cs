@@ -108,7 +108,7 @@ public static class rtl8812a_dm
         pHalData.phydm_op_mode = phydm_bb_op_mode.PHYDM_PERFORMANCE_MODE; /*Service one device*/
         rtw_odm_init_ic_type(adapter);
 
-        odm_cmn_info_init(pDM_Odm, odm_cmninfo.ODM_CMNINFO_INTERFACE, adapter.dvobj.interface_type);
+        odm_cmn_info_init(pDM_Odm, odm_cmninfo.ODM_CMNINFO_INTERFACE, (uint)adapter.dvobj.interface_type);
 
         //odm_cmn_info_init(pDM_Odm, odm_cmninfo.ODM_CMNINFO_MP_TEST_CHIP, pHalData.version_id.ChipType == HAL_CHIP_TYPE_E.NORMAL_CHIP );
 
@@ -122,7 +122,7 @@ public static class rtl8812a_dm
 
         {
             /* 1 ======= BoardType: ODM_CMNINFO_BOARD_TYPE ======= */
-            u8 odm_board_type = ODM_BOARD_DEFAULT;
+            uint odm_board_type = ODM_BOARD_DEFAULT;
 
             if (pHalData.ExternalLNA_2G)
             {

@@ -629,14 +629,14 @@ public static class usb_intf
         hal_spec.tx_nss_num = 2;
         hal_spec.rx_nss_num = 2;
         hal_spec.band_cap = BAND_CAP_2G | BAND_CAP_5G;
-        hal_spec.bw_cap = BW_CAP_20M | BW_CAP_40M | BW_CAP_80M;
+        hal_spec.bw_cap = (byte)(BW_CAP_20M | BW_CAP_40M | BW_CAP_80M);
         hal_spec.port_num = 2;
-        hal_spec.proto_cap = PROTO_CAP_11B | PROTO_CAP_11G | PROTO_CAP_11N | PROTO_CAP_11AC;
+        hal_spec.proto_cap = (byte)(PROTO_CAP_11B | PROTO_CAP_11G | PROTO_CAP_11N | PROTO_CAP_11AC);
 
-        hal_spec.wl_func = 0
-                           | WL_FUNC_P2P
-                           | WL_FUNC_MIRACAST
-                           | WL_FUNC_TDLS
+        hal_spec.wl_func = (byte)(0
+                            | WL_FUNC_P2P
+                            | WL_FUNC_MIRACAST
+                            | WL_FUNC_TDLS)
             ;
 
         hal_spec.pg_txpwr_saddr = 0x10;
@@ -731,24 +731,20 @@ public static class usb_intf
 // 	pHalFunc.SetBeaconRelatedRegistersHandler = &SetBeaconRelatedRegisters8812A;
 //
         pHalFunc.read_chip_version = UsbHalInit.read_chip_version_8812a;
-//
-        pHalFunc.set_chnl_bw_handler = PHY_SetSwChnlBWMode8812;
-//
+
 // 	pHalFunc.set_tx_power_level_handler = &PHY_SetTxPowerLevel8812;
 // 	pHalFunc.get_tx_power_level_handler = &PHY_GetTxPowerLevel8812;
 //
- 	pHalFunc.set_tx_power_index_handler = PHY_SetTxPowerIndex_8812A;
-    pHalFunc.get_tx_power_index_handler = PHY_GetTxPowerIndex_8812A;
-//
+        pHalFunc.set_tx_power_index_handler = PHY_SetTxPowerIndex_8812A;
+
 // 	pHalFunc.hal_dm_watchdog = &rtl8812_HalDmWatchDog;
 //
 // 	pHalFunc.run_thread = &rtl8812_start_thread;
 // 	pHalFunc.cancel_thread = &rtl8812_stop_thread;
 //
-    pHalFunc.read_bbreg = PHY_QueryBBReg8812;
-        pHalFunc.write_bbreg = PHY_SetBBReg8812;
+        pHalFunc.read_bbreg = PHY_QueryBBReg8812;
 // 	pHalFunc.read_rfreg = &PHY_QueryRFReg8812;
- 	pHalFunc.write_rfreg = PHY_SetRFReg8812;
+        pHalFunc.write_rfreg = PHY_SetRFReg8812;
 //
 // 	pHalFunc.read_wmmedca_reg = &rtl8812a_read_wmmedca_reg;
 //
@@ -1325,7 +1321,7 @@ registry_par.TxBBSwing_5G = -1;
 
 
         /*step 1-1., decide the chip_type via driver_info*/
-        pdvobjpriv.interface_type = RTW_USB;
+        pdvobjpriv.interface_type = RTL871X_HCI_TYPE.RTW_USB;
         rtw_decide_chip_type_by_usb_info(pdvobjpriv);
 
         return pdvobjpriv;

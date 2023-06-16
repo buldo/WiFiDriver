@@ -7,7 +7,7 @@ public class dvobj_priv
     /*-------- below is common data --------*/
     public const CHIP_TYPE chip_type = CHIP_TYPE.RTL8812;
     public HARDWARE_TYPE HardwareType;
-    public byte interface_type = RTL871X_HCI_TYPE.RTW_USB; /*USB,SDIO,SPI,PCI*/
+    public RTL871X_HCI_TYPE interface_type = RTL871X_HCI_TYPE.RTW_USB; /*USB,SDIO,SPI,PCI*/
 
     bool bSurpriseRemoved;
     public bool bDriverStopped;

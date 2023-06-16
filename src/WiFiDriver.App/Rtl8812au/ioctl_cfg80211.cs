@@ -1,7 +1,4 @@
-﻿using System;
-using WiFiDriver.App.Rtl8812au;
-
-namespace WiFiDriver.App.Rtl8812au;
+﻿namespace WiFiDriver.App.Rtl8812au;
 
 public static class ioctl_cfg80211
 {
@@ -43,5 +40,45 @@ public static class ioctl_cfg80211
     {
         set_channel_bwmode(padapter, chandef.cur_channel, chandef.cur_ch_offset, chandef.cur_bwmode);
         return 0;
+    }
+
+    public static void rtw_cfg80211_init_wiphy(_adapter padapter)
+    {
+//        u8 rf_type;
+
+//        ieee80211_supported_band band;
+//        wireless_dev pwdev = padapter.rtw_wdev;
+//        wiphy wiphy = pwdev.wiphy;
+
+//        //rtw_hal_get_hwreg(padapter, HW_VAR_RF_TYPE, (u8*)(&rf_type));
+//        rf_type = 2;
+
+//        RTW_INFO($"rtw_cfg80211_init_wiphy:rf_type={rf_type}");
+
+//        // TRUE
+//        //if (IsSupported24G(padapter->registrypriv.wireless_mode))
+//        {
+//            //band = wiphy.bands[NL80211_BAND_2GHZ];
+//            //if (band)
+//            {
+
+//                rtw_cfg80211_init_ht_capab(padapter, band.ht_cap, BAND_ON_2_4G, rf_type);
+
+//            }
+//        }
+
+//        // TRUE
+//        //if (is_supported_5g(padapter->registrypriv.wireless_mode))
+//        {
+//            //band = wiphy.bands[NL80211_BAND_5GHZ];
+//            //if (band)
+//            {
+//                rtw_cfg80211_init_ht_capab(padapter, band.ht_cap, BAND_ON_5G, rf_type);
+//                rtw_cfg80211_init_vht_capab(padapter, band.vht_cap, BAND_ON_5G, rf_type);
+//            }
+//        }
+
+///* copy mac_addr to wiphy */
+//        //_rtw_memcpy(wiphy->perm_addr, adapter_mac_addr(padapter), ETH_ALEN);
     }
 }

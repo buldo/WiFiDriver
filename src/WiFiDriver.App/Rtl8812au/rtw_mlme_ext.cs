@@ -2,19 +2,10 @@
 
 public static class rtw_mlme_ext
 {
-    public static bool setopmode_hdl(_adapter padapter, setopmode_parm psetop)
+    public static bool setopmode_hdl(_adapter padapter)
     {
-        u8 type = _HW_STATE_MONITOR_;
-
-        hw_var_set_opmode(padapter, type);
-
-        //if (rtw_port_switch_chk(padapter) == true)
-        //{
-        //    rtw_hal_set_hwreg(padapter, HW_VAR_PORT_SWITCH, NULL);
-        //}
-
+        SetMonitorMode(padapter, NDIS_802_11_NETWORK_INFRASTRUCTURE.Ndis802_11Monitor);
         return true;
-
     }
 
     public static bool init_hw_mlme_ext(_adapter padapter, InitChannel pmlmeext)
@@ -45,18 +36,18 @@ public static class rtw_mlme_ext
         if (val == true)
         {
             /* enable RX BAR */
-            u16 val16 = rtw_read16(adapter, REG_RXFLTMAP1);
+            u32 val16 = rtw_read16(adapter, REG_RXFLTMAP1);
 
             val16 |= BIT8;
-            rtw_write16(adapter, REG_RXFLTMAP1, val16);
+            rtw_write16(adapter, REG_RXFLTMAP1, (u16)val16);
         }
         else
         {
             /* disable RX BAR */
-            u16 val16 = rtw_read16(adapter, REG_RXFLTMAP1);
+            u32 val16 = rtw_read16(adapter, REG_RXFLTMAP1);
 
             val16 &= NotBIT8;
-            rtw_write16(adapter, REG_RXFLTMAP1, val16);
+            rtw_write16(adapter, REG_RXFLTMAP1, (u16)val16);
         }
         RTW_INFO($"[HW_VAR_ENABLE_RX_BAR] 0x{REG_RXFLTMAP1:X4}=0x{rtw_read16(adapter, REG_RXFLTMAP1):X4}");
     }

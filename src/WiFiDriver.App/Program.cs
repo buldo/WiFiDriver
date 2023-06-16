@@ -1,4 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
+
+using LibUsbDotNet;
 using LibUsbDotNet.LibUsb;
 using WiFiDriver.App.Rtl8812au;
 
@@ -11,7 +13,8 @@ public class Program
         Console.WriteLine("Hello, World!");
 
         using var context = new UsbContext();
-
+        context.StartHandlingEvents();
+        context.SetDebugLevel(LogLevel.Info);
         var devices = context.FindAll(SearchPredicate);
 
         var device = devices.First();

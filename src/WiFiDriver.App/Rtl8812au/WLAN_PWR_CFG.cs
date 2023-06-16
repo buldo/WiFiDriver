@@ -9,8 +9,8 @@ public class WLAN_PWR_CFG
         InterfaceMask interfaceMsk,
         PwrBaseaddr @base,
         PwrCmd cmd,
-        byte msk,
-        byte value)
+        uint msk,
+        uint value)
     {
         this.offset = offset;
         cut_msk = cutMsk;
@@ -28,6 +28,6 @@ public class WLAN_PWR_CFG
     public InterfaceMask interface_msk { get; init; }
     public PwrBaseaddr base_ { get; init; }
     public PwrCmd cmd { get; init; }
-    public byte msk { get; init; }
-    public byte value { get; init; }
+    public uint msk { get; init; }
+    public uint value { get; init; }
 }
