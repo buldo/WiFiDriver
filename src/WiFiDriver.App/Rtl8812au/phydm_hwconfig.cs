@@ -2,7 +2,7 @@
 
 public static class phydm_hwconfig
 {
-    public static bool odm_config_rf_with_header_file(dm_struct dm, odm_rf_config_type config_type, rf_path e_rf_path)
+    public static bool odm_config_rf_with_header_file(_adapter dm, odm_rf_config_type config_type, rf_path e_rf_path)
     {
         bool result = true;
 

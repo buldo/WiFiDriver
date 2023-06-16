@@ -69,7 +69,6 @@ public class hal_ops
     //	void (* get_tx_power_level_handler) (_adapter* padapter, s32* powerlevel);
 
     //	void (* set_tx_power_index_handler) (_adapter* padapter, u32 powerindex, enum rf_path rfpath, u8 rate);
-    public Action<_adapter, u32, rf_path, MGN_RATE> set_tx_power_index_handler;
     //    u8(*get_tx_power_index_handler)(_adapter* padapter, enum rf_path rfpath, u8 rate, u8 bandwidth, u8 channel, struct txpwr_idx_comp *tic);
 
     //	void (* hal_dm_watchdog) (_adapter* padapter);
@@ -97,7 +96,6 @@ public class hal_ops
 
 //	u32(*read_rfreg)(_adapter* padapter, enum rf_path eRFPath, u32 RegAddr, u32 BitMask);
 //	void (* write_rfreg) (_adapter* padapter, enum rf_path eRFPath, u32 RegAddr, u32 BitMask, u32 Data);
-    public Action<_adapter, rf_path, u32, u32, u32> write_rfreg;
 //# ifdef CONFIG_SYSON_INDIRECT_ACCESS
 //    u32(*read_syson_reg)(_adapter* padapter, u32 RegAddr, u32 BitMask);
 //	void (* write_syson_reg) (_adapter* padapter, u32 RegAddr, u32 BitMask, u32 Data);

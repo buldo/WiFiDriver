@@ -164,8 +164,7 @@ public static class usb_intf
         //    goto exit;
         //}
 
-        //if (is_primary_adapter(padapter))
-        //    rtw_rfctl_init(padapter);
+        rtw_rfctl_init(padapter);
 
         //if (rtw_init_mlme_priv(padapter) == _FAIL)
         //{
@@ -735,7 +734,7 @@ public static class usb_intf
 // 	pHalFunc.set_tx_power_level_handler = &PHY_SetTxPowerLevel8812;
 // 	pHalFunc.get_tx_power_level_handler = &PHY_GetTxPowerLevel8812;
 //
-        pHalFunc.set_tx_power_index_handler = PHY_SetTxPowerIndex_8812A;
+
 
 // 	pHalFunc.hal_dm_watchdog = &rtl8812_HalDmWatchDog;
 //
@@ -744,7 +743,7 @@ public static class usb_intf
 //
         pHalFunc.read_bbreg = PHY_QueryBBReg8812;
 // 	pHalFunc.read_rfreg = &PHY_QueryRFReg8812;
-        pHalFunc.write_rfreg = PHY_SetRFReg8812;
+
 //
 // 	pHalFunc.read_wmmedca_reg = &rtl8812a_read_wmmedca_reg;
 //

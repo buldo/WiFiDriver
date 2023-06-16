@@ -380,7 +380,7 @@ public static class rtl8812a_phycfg
 
             phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.OFDM);
 
-            if (!under_survey_ch)
+            //if (!under_survey_ch)
             {
                 phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.HT_MCS0_MCS7);
                 phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.VHT_1SSMCS0_1SSMCS9);
@@ -400,6 +400,7 @@ public static class rtl8812a_phycfg
         u8 Channel,
         RATE_SECTION RateSection)
     {
+        Console.WriteLine($"SET_TX_POWER {RFPath}; {Channel}; {RateSection}");
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapter);
 
         if (RateSection >= RATE_SECTION.RATE_SECTION_NUM)
@@ -415,8 +416,7 @@ public static class rtl8812a_phycfg
             RFPath,
             pHalData.current_channel_bw,
             Channel,
-            rates_by_sections[(int)RateSection].rates,
-            rates_by_sections[(int)RateSection].rate_num);
+            rates_by_sections[(int)RateSection].rates);
 
         exit:
         return;
@@ -427,29 +427,18 @@ public static class rtl8812a_phycfg
         rf_path RFPath,
         channel_width BandWidth,
         u8 Channel,
-        MGN_RATE[] Rates,
-        u8 RateArraySize
-    )
+        MGN_RATE[] Rates)
     {
-        u32 powerIndex = 0;
-        int i = 0;
-
-        for (i = 0; i < RateArraySize; ++i)
+        for (int i = 0; i < Rates.Length; ++i)
         {
-            powerIndex = phy_get_tx_power_index(pAdapter, RFPath, Rates[i], BandWidth, Channel);
-
+            var powerIndex = phy_get_tx_power_index(pAdapter, RFPath, Rates[i], BandWidth, Channel);
             PHY_SetTxPowerIndex(pAdapter, powerIndex, RFPath, Rates[i]);
         }
     }
 
     static void PHY_SetTxPowerIndex(PADAPTER pAdapter, u32 PowerIndex, rf_path RFPath, MGN_RATE Rate)
     {
-        rtw_hal_set_tx_power_index(pAdapter, PowerIndex, RFPath, Rate);
-    }
-
-    static void rtw_hal_set_tx_power_index(PADAPTER padapter, u32 powerindex, rf_path rfpath, MGN_RATE rate)
-    {
-        padapter.hal_func.set_tx_power_index_handler(padapter, powerindex, rfpath, rate);
+        PHY_SetTxPowerIndex_8812A(pAdapter, PowerIndex, RFPath, Rate);
     }
 
     static bool phy_check_under_survey_ch(_adapter adapter)
@@ -604,22 +593,16 @@ public static class rtl8812a_phycfg
         return ret_value;
     }
 
-    static void phy_set_rf_reg(_adapter Adapter, rf_path eRFPath, u16 RegAddr, u32 BitMask, u32 Data) =>
-        rtw_hal_write_rfreg((Adapter), (eRFPath), (RegAddr), (BitMask), (Data));
+    public static void phy_set_rf_reg(_adapter Adapter, rf_path eRFPath, u16 RegAddr, u32 BitMask, u32 Data)
+        => PHY_SetRFReg8812(Adapter, eRFPath, RegAddr, BitMask, Data);
 
-    static void rtw_hal_write_rfreg(_adapter padapter, rf_path eRFPath, u16 RegAddr, u32 BitMask, u32 Data)
+    private static void PHY_SetRFReg8812(PADAPTER Adapter, rf_path eRFPath, u32 RegAddr, u32 BitMask, u32 Data)
     {
-        if (padapter.hal_func.write_rfreg != null)
-        {
-            padapter.hal_func.write_rfreg(padapter, eRFPath, RegAddr, BitMask, Data);
-        }
-    }
-
-    public static void PHY_SetRFReg8812(PADAPTER Adapter, rf_path eRFPath, u32 RegAddr, u32 BitMask, u32 Data)
-    {
-
+        Console.WriteLine($"RFREG;{(byte)eRFPath};{RegAddr:X};{BitMask:X};{Data:X}");
         if (BitMask == 0)
+        {
             return;
+        }
 
         /* RF data is 20 bits only */
         if (BitMask != bLSSIWrite_data_Jaguar)

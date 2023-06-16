@@ -31,7 +31,7 @@ public class Rtl8812aDevice
         {
             cur_bwmode = channel_width.CHANNEL_WIDTH_20,
             cur_ch_offset = 0,
-            cur_channel = 11
+            cur_channel = 8
         });
 
         ioctl_cfg80211.cfg80211_rtw_set_monitor_channel(_adapter, new InitChannel()

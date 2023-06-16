@@ -42,7 +42,7 @@ public class dvobj_priv
     //cam_ctl_t cam_ctl;
     //sec_cam_ent cam_cache[SEC_CAM_ENT_NUM_SW_LIMIT];
 
-    //rf_ctl_t rf_ctl;
+    public rf_ctl_t rf_ctl = new rf_ctl_t();
 
     /* For 92D, DMDP have 2 interface. */
     public byte InterfaceNumber;

@@ -341,4 +341,17 @@ public static class CommonConsts
 
     public const ushort REG_PKT_VO_VI_LIFE_TIME = 0x04C0;
     public const ushort REG_PKT_BE_BK_LIFE_TIME = 0x04C2;
+
+    public const uint MAX_CHANNEL_NUM_2G = CENTER_CH_2G_NUM;
+    public const uint MAX_CHANNEL_NUM_5G = CENTER_CH_5G_20M_NUM;
+    public const uint MAX_CHANNEL_NUM = (MAX_CHANNEL_NUM_2G + MAX_CHANNEL_NUM_5G);
+
+    public const uint RFREGOFFSETMASK = 0xfffff;
+
+    public const byte TXPWR_LMT_RS_CCK = 0;
+    public const byte TXPWR_LMT_RS_OFDM = 1;
+    public const byte TXPWR_LMT_RS_HT = 2;
+    public const byte TXPWR_LMT_RS_VHT = 3;
+    public const byte TXPWR_LMT_RS_NUM = 4;
+    public const byte MAX_2_4G_BANDWIDTH_NUM = 2;
 }

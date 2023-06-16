@@ -50,3 +50,4 @@ global using static WiFiDriver.App.Rtl8812au.rtw_ieee80211;
 global using static WiFiDriver.App.Rtl8812au.hal_com_phycfg;
 global using static WiFiDriver.App.Rtl8812au.halhwimg8812a_bb_arrays;
 global using static WiFiDriver.App.Rtl8812au.ioctl_cfg80211;
+global using static WiFiDriver.App.Rtl8812au.rtw_chplan;

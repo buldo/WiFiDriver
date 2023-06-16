@@ -21,7 +21,7 @@ public static class UsbHalInit
     private const byte EEPROM_XTAL_8812 = 0xB9;
     private const byte EEPROM_DEFAULT_CRYSTAL_CAP_8812 = 0x20;
 
-    private static u8[] center_ch_5g_all = new byte[CENTER_CH_5G_ALL_NUM]
+    public static u8[] center_ch_5g_all = new byte[CENTER_CH_5G_ALL_NUM]
     {
         15, 16, 17, 18,
         20, 24, 28, 32,
@@ -2826,7 +2826,8 @@ public static class UsbHalInit
 
         // Save target channel
         // <Roger_Notes> Current Channel will be updated again later.
-        pHalData.current_channel = 0; // set 0 to trigger switch correct channel
+        // TODO:
+        //pHalData.current_channel = 0; // set 0 to trigger switch correct channel
 
 
         status = PHY_MACConfig8812(Adapter);
@@ -3733,7 +3734,7 @@ public static class UsbHalInit
             {
                 case rf_path.RF_PATH_A:
                 {
-                    if (odm_config_rf_with_header_file(pHalData.odmpriv, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath) ==
+                    if (odm_config_rf_with_header_file(Adapter, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath) ==
                         false)
                     {
                         rtStatus = false;
@@ -3742,7 +3743,7 @@ public static class UsbHalInit
                     break;
                 case rf_path.RF_PATH_B:
                 {
-                    if (odm_config_rf_with_header_file(pHalData.odmpriv, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath) ==
+                    if (odm_config_rf_with_header_file(Adapter, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath) ==
                         false)
                     {
                         rtStatus = false;

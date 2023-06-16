@@ -183,7 +183,10 @@ public static class halhwimg8812a_bb
             else
             {
                 if (is_matched)
+                {
+                    Console.WriteLine($"SEND_TO {v1:X4}");
                     odm_config_bb_phy_8812a(dm, v1, MASKDWORD, v2);
+                }
             }
             i = i + 2;
         }
@@ -347,6 +350,7 @@ public static class halhwimg8812a_bb
     {
         dm_rf_calibration_struct cali_info = (dm.rf_calibrate_info);
 
+        // TODO:
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> ODM_ReadAndConfig_MP_mp_8812a\n");
 
         //odm_move_memory(dm, cali_info.delta_swing_table_idx_2ga_p, g_delta_swing_table_idx_mp_2ga_p_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE);
