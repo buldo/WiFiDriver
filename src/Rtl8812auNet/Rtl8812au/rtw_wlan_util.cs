@@ -94,10 +94,6 @@ public static class rtw_wlan_util
             cch_20 = rtw_get_scch_by_cch_offset(cch_40, channel_width.CHANNEL_WIDTH_40, Offset40);
         }
 
-        pHalData.cch_80 = cch_80;
-        pHalData.cch_40 = cch_40;
-        pHalData.cch_20 = cch_20;
-
         PHY_SetSwChnlBWMode8812(padapter, channel, Bandwidth, Offset40, Offset80);
     }
 }

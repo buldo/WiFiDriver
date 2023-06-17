@@ -160,60 +160,25 @@ public static class rtl8812a_phycfg
             pHalData.bSetChnlBW = false;
         }
 
-        odm_clear_txpowertracking_state(pHalData.odmpriv);
         PHY_SetTxPowerLevel8812(Adapter, pHalData.current_channel);
 
-        phy_InitRssiTRSW(Adapter);
-
-        if ((pHalData.bNeedIQK == true))
+        if (pHalData.bNeedIQK)
         {
-
-            /*phy_iq_calibrate_8812a(Adapter, _FALSE);*/
             halrf_iqk_trigger(pHalData.odmpriv, false);
         }
 
         pHalData.bNeedIQK = false;
     }
 
-    /* <20130207, Kordan> The variales initialized here are used in odm_LNAPowerControl(). */
-    private static void phy_InitRssiTRSW(PADAPTER pAdapter)
-    {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapter);
-
-        var pDM_Odm = pHalData.odmpriv;
-        u8 channel = pHalData.current_channel;
-
-        if (pHalData.rfe_type == 3)
-        {
-
-            if (channel <= 14)
-            {
-                pDM_Odm.rssi_trsw_h = 70; /* Unit: percentage(%) */
-                pDM_Odm.rssi_trsw_iso = 25;
-            }
-            else
-            {
-                pDM_Odm.rssi_trsw_h = 80;
-                pDM_Odm.rssi_trsw_iso = 25;
-            }
-        }
-    }
-
     static void PHY_SetTxPowerLevel8812(PADAPTER Adapter, u8 Channel)
     {
-
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        rf_path path = 0;
 
-        /* RTW_INFO("==>PHY_SetTxPowerLevel8812()\n"); */
-
-        for (path = (u8)rf_path.RF_PATH_A; (byte)path < pHalData.NumTotalRFPath; ++path)
+        for (var path = (u8)rf_path.RF_PATH_A; (byte)path < pHalData.NumTotalRFPath; ++path)
         {
-            phy_set_tx_power_level_by_path(Adapter, Channel, path);
+            phy_set_tx_power_level_by_path(Adapter, Channel, (rf_path)path);
             PHY_TxPowerTrainingByPath_8812(Adapter, pHalData.current_channel_bw, Channel, (rf_path)path);
         }
-
-        /* RTW_INFO("<==PHY_SetTxPowerLevel8812()\n"); */
     }
 
     static void PHY_TxPowerTrainingByPath_8812(PADAPTER Adapter, channel_width BandWidth, u8 Channel, rf_path RfPath)
@@ -444,11 +409,9 @@ public static class rtl8812a_phycfg
     }
 
     public static void phy_set_rf_reg(_adapter Adapter, rf_path eRFPath, u16 RegAddr, u32 BitMask, u32 Data)
-        => PHY_SetRFReg8812(Adapter, eRFPath, RegAddr, BitMask, Data);
-
-    private static void PHY_SetRFReg8812(PADAPTER Adapter, rf_path eRFPath, u32 RegAddr, u32 BitMask, u32 Data)
     {
-        Console.WriteLine($"RFREG;{(byte)eRFPath};{RegAddr:X};{BitMask:X};{Data:X}");
+        uint data = Data;
+        Console.WriteLine($"RFREG;{(byte)eRFPath};{(uint)RegAddr:X};{BitMask:X};{data:X}");
         if (BitMask == 0)
         {
             return;
@@ -460,10 +423,10 @@ public static class rtl8812a_phycfg
             u32 Original_Value, BitShift;
             Original_Value = phy_RFSerialRead(Adapter, eRFPath, RegAddr);
             BitShift = PHY_CalculateBitShift(BitMask);
-            Data = ((Original_Value) & (~BitMask)) | (Data << (int)BitShift);
+            data = ((Original_Value) & (~BitMask)) | (data << (int)BitShift);
         }
 
-        phy_RFSerialWrite(Adapter, eRFPath, RegAddr, Data);
+        phy_RFSerialWrite(Adapter, eRFPath, RegAddr, data);
     }
 
     static u32 phy_RFSerialRead(PADAPTER Adapter, rf_path eRFPath, u32 Offset)
@@ -521,14 +484,9 @@ public static class rtl8812a_phycfg
     }
 
     private static u32 phy_query_bb_reg(_adapter Adapter, u16 RegAddr, u32 BitMask) =>
-        rtw_hal_read_bbreg((Adapter), (RegAddr), (BitMask));
+        PHY_QueryBBReg8812(Adapter, RegAddr, BitMask);
 
-    private static u32 rtw_hal_read_bbreg(_adapter padapter, u16 RegAddr, u32 BitMask)
-    {
-        return PHY_QueryBBReg8812(padapter, RegAddr, BitMask);
-    }
-
-    public static u32 PHY_QueryBBReg8812(PADAPTER    Adapter,u16         RegAddr,u32         BitMask)
+    private static u32 PHY_QueryBBReg8812(PADAPTER    Adapter,u16         RegAddr,u32         BitMask)
     {
         u32 ReturnValue = 0, OriginalValue, BitShift;
 
@@ -843,86 +801,9 @@ public static class rtl8812a_phycfg
 
     }
 
-    /*@ **********************************************************************
- * <20121113, Kordan> This function should be called when tx_agc changed.
- * Otherwise the previous compensation is gone, because we record the
- * delta of temperature between two TxPowerTracking watch dogs.
- *
- * NOTE: If Tx BB swing or Tx scaling is varified during run-time, still
- * need to call this function.
- * **********************************************************************
- */
-    public static void odm_clear_txpowertracking_state(dm_struct dm_void)
-    {
-
-//        dm_struct dm = dm_void;
-//        _hal_rf_ rf = dm.rf_table;
-//        u8 p = 0;
-//        dm_rf_calibration_struct cali_info = dm.rf_calibrate_info;
-
-//        cali_info.bb_swing_idx_cck_base = cali_info.default_cck_index;
-//        cali_info.bb_swing_idx_cck = cali_info.default_cck_index;
-//        dm.rf_calibrate_info.CCK_index = 0;
-
-//        for (p = RF_PATH_A; p < MAX_RF_PATH; ++p)
-//        {
-//            cali_info.bb_swing_idx_ofdm_base[p]
-//                = cali_info.default_ofdm_index;
-//            cali_info.bb_swing_idx_ofdm[p] = cali_info.default_ofdm_index;
-//            cali_info.OFDM_index[p] = cali_info.default_ofdm_index;
-
-//            cali_info.power_index_offset[p] = 0;
-//            cali_info.delta_power_index[p] = 0;
-//            cali_info.delta_power_index_last[p] = 0;
-
-//            /* Initial Mix mode power tracking*/
-//            cali_info.absolute_ofdm_swing_idx[p] = 0;
-//            cali_info.remnant_ofdm_swing_idx[p] = 0;
-//            cali_info.kfree_offset[p] = 0;
-//        }
-
-///* Initial Mix mode power tracking*/
-//        cali_info.modify_tx_agc_flag_path_a = false;
-//        cali_info.modify_tx_agc_flag_path_b = false;
-//        cali_info.modify_tx_agc_flag_path_c = false;
-//        cali_info.modify_tx_agc_flag_path_d = false;
-//        cali_info.remnant_cck_swing_idx = 0;
-//        cali_info.thermal_value = rf.eeprom_thermal;
-//        cali_info.modify_tx_agc_value_cck = 0;
-//        cali_info.modify_tx_agc_value_ofdm = 0;
-    }
-
     static void halrf_iqk_trigger(dm_struct dm_void, bool is_recovery)
     {
-
         dm_struct dm = dm_void;
-        //dm_iqk_info iqk_info = dm.IQK_info;
-        //dm_dpk_info dpk_info = dm.dpk_info;
-        //_hal_rf_ rf = dm.rf_table;
-        //u64 start_time;
-
-
-        //if (dm.mp_mode &&
-        //    rf.is_con_tx &&
-        //    rf.is_single_tone &&
-        //    rf.is_carrier_suppresion)
-        //    if (*dm.mp_mode &&
-        //        ((*rf.is_con_tx ||
-        //          *rf.is_single_tone ||
-        //          *rf.is_carrier_suppresion)))
-        //    {
-        //        return;
-        //    }
-
-        //if (!(rf.rf_supportability & HAL_RF_IQK))
-        //{
-        //    return;
-        //}
-
-        //if (iqk_info.rfk_forbidden)
-        //{
-        //    return;
-        //}
 
         if (!dm.rf_calibrate_info.is_iqk_in_progress)
         {

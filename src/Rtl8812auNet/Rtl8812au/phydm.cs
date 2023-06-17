@@ -6,14 +6,6 @@ public static class phydm
     {
         switch (cmn_info)
         {
-            case odm_cmninfo.ODM_CMNINFO_ABILITY:
-                dm.support_ability = (u64)value;
-                break;
-
-            case odm_cmninfo.ODM_CMNINFO_RF_TYPE:
-                dm.rf_type = (u8)value;
-                break;
-
             case odm_cmninfo.ODM_CMNINFO_PLATFORM:
                 dm.support_platform = (u8)value;
                 break;
@@ -22,25 +14,8 @@ public static class phydm
                 dm.support_interface = (u8)value;
                 break;
 
-            case odm_cmninfo.ODM_CMNINFO_IC_TYPE:
-                dm.support_ic_type = (u32)value;
-                break;
-
             case odm_cmninfo.ODM_CMNINFO_CUT_VER:
                 dm.cut_version = (odm_cut_version)value;
-                break;
-
-            case odm_cmninfo.ODM_CMNINFO_FAB_VER:
-                dm.fab_version = (u8)value;
-                break;
-            case odm_cmninfo.ODM_CMNINFO_FW_VER:
-                dm.fw_version = (u8)value;
-                break;
-            case odm_cmninfo.ODM_CMNINFO_FW_SUB_VER:
-                dm.fw_sub_version = (u8)value;
-                break;
-            case odm_cmninfo.ODM_CMNINFO_RFE_TYPE:
-                dm.rfe_type = (u8)value;
                 break;
 
             case odm_cmninfo.ODM_CMNINFO_BOARD_TYPE:

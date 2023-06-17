@@ -2216,18 +2216,7 @@ public static class UsbHalInit
 
         _InitHardwareDropIncorrectBulkOut_8812A(Adapter);
 
-        //if (pHalData.bRDGEnable)
-        //{
-        //    _InitRDGSetting_8812A(Adapter);
-        //}
-
-
         FirmwareDownload8812(Adapter, false);
-
-        if (pwrctrlpriv.reg_rfoff == true)
-        {
-            pwrctrlpriv.rf_pwrstate = rt_rf_power_state.rf_off;
-        }
 
         status = PHY_MACConfig8812(Adapter);
         if (status == false)
@@ -2711,8 +2700,6 @@ public static class UsbHalInit
             phy_get_tx_bb_swing_8812a(Adapter, (BAND_TYPE)Band, rf_path.RF_PATH_A)); /* 0xC1C[31:21] */
         phy_set_bb_reg(Adapter, rB_TxScale_Jaguar, 0xFFE00000,
             phy_get_tx_bb_swing_8812a(Adapter, (BAND_TYPE)Band, rf_path.RF_PATH_B)); /* 0xE1C[31:21] */
-
-        odm_clear_txpowertracking_state(pHalData.odmpriv);
     }
 
     static u32 phy_get_tx_bb_swing_8812a(PADAPTER Adapter, BAND_TYPE Band, rf_path RFPath)
@@ -3278,16 +3265,11 @@ public static class UsbHalInit
 
     static void init_UsbAggregationSetting_8812A(PADAPTER Adapter)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-
         ///* Tx aggregation setting */
         usb_AggSettingTxUpdate_8812A(Adapter);
 
         ///* Rx aggregation setting */
         usb_AggSettingRxUpdate_8812A(Adapter);
-
-        /* 201/12/10 MH Add for USB agg mode dynamic switch. */
-        pHalData.UsbRxHighSpeedMode = false;
     }
 
     static void _InitRetryFunction_8812A(PADAPTER Adapter)
@@ -4386,9 +4368,6 @@ public static class UsbHalInit
         value32 = rtw_read32(Adapter, REG_MULTI_FUNC_CTRL);
         pHalData.MultiFunc |= ((value32 & WL_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_WIFI : 0);
         pHalData.MultiFunc |= ((value32 & BT_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_BT : 0);
-        pHalData.PolarityCtl = ((value32 & WL_HWPDN_SL) != 0
-            ? RT_POLARITY_CTL.RT_POLARITY_HIGH_ACT
-            : RT_POLARITY_CTL.RT_POLARITY_LOW_ACT);
 
         rtw_hal_config_rftype(Adapter);
 

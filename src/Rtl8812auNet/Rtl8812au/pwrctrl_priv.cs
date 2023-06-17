@@ -2,7 +2,6 @@
 
 public class pwrctrl_priv
 {
-    public bool reg_rfoff;
-    public bool bSupportRemoteWakeup;
-    public rt_rf_power_state rf_pwrstate;/* cur power state, only for IPS */
+    public bool bSupportRemoteWakeup{ get; set; }
+    public rt_rf_power_state rf_pwrstate { get; set; }/* cur power state, only for IPS */
 }

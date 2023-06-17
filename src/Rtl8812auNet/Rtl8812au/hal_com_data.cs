@@ -12,12 +12,7 @@ public class hal_com_data
     public u8 NumTotalRFPath;
     public bool bautoload_fail_flag { get; set; }
     public RT_MULTI_FUNC MultiFunc { get; set; }
-    public RT_POLARITY_CTL PolarityCtl { get; set; }
-    public uint ReceiveConfig { get; set; }
     public channel_width current_channel_bw { get; set; }
-    public byte cch_80 { get; set; }
-    public byte cch_40 { get; set; }
-    public byte cch_20 { get; set; }
     public bool bSwChnl { get; set; }
     public bool bChnlBWInitialized { get; set; }
     public byte nCur40MhzPrimeSC { get; set; }
@@ -25,7 +20,6 @@ public class hal_com_data
     public bool bSetChnlBW { get; set; }
     public byte CurrentCenterFrequencyIndex1 { get; set; }
     public bool bNeedIQK { get; set; }
-    public bool UsbRxHighSpeedMode { get; set; }
     public bool AMPDUBurstMode { get; set; }
 
     public bool EepromOrEfuse;

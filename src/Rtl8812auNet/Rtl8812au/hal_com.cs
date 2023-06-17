@@ -28,6 +28,5 @@ public static class hal_com
     public static void hw_var_rcr_config(_adapter adapter, u32 rcr)
     {
         rtw_write32(adapter, REG_RCR, rcr);
-        GET_HAL_DATA(adapter).ReceiveConfig = rcr;
     }
 }

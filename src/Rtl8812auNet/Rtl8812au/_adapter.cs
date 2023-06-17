@@ -10,7 +10,7 @@ public class _adapter
 
     public hal_com_data HalData { get; } = new();
 
-    public IRtlUsbDevice Device { get; set; }
+    public IRtlUsbDevice Device { get; init; }
     public bool up { get; set; }
     public hw_port hw_port { get; set; }
 }
