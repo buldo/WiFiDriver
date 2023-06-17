@@ -3,9 +3,9 @@
 public static class usb_ops
 {
     public static bool IS_HIGH_SPEED_USB(AdapterState adapterState) =>
-        (adapter_to_dvobj(adapterState).UsbSpeed == RTW_USB_SPEED_2);
+        (adapterState.dvobj.UsbSpeed == RTW_USB_SPEED_2);
     public static bool IS_SUPER_SPEED_USB(AdapterState adapterState) =>
-        (adapter_to_dvobj(adapterState).UsbSpeed == RTW_USB_SPEED_3);
+        (adapterState.dvobj.UsbSpeed == RTW_USB_SPEED_3);
 
     public const uint USB_SUPER_SPEED_BULK_SIZE = 1024; /* usb 3.0 */
     public const uint USB_HIGH_SPEED_BULK_SIZE = 512; /* usb 2.0 */

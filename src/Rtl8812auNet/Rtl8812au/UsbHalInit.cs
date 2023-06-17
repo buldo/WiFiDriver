@@ -68,7 +68,7 @@ public static class UsbHalInit
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
 
-        DvObj pdvobjpriv = adapter_to_dvobj(padapter);
+        DvObj pdvobjpriv = padapter.dvobj;
 
         if (IS_SUPER_SPEED_USB(padapter))
         {
@@ -279,11 +279,11 @@ public static class UsbHalInit
 
         if (!AutoloadFail)
         {
-            if ((GetRegRFEType(adapterState) != 64) || 0xFF == PROMContent[EEPROM_RFE_OPTION_8812])
+            if ((adapterState.registrypriv.RFE_Type != 64) || 0xFF == PROMContent[EEPROM_RFE_OPTION_8812])
             {
-                if (GetRegRFEType(adapterState) != 64)
+                if (adapterState.registrypriv.RFE_Type != 64)
                 {
-                    pHalData.rfe_type = GetRegRFEType(adapterState);
+                    pHalData.rfe_type = adapterState.registrypriv.RFE_Type;
                 }
                 else
                 {
@@ -326,8 +326,8 @@ public static class UsbHalInit
         }
         else
         {
-            if (GetRegRFEType(adapterState) != 64)
-                pHalData.rfe_type = GetRegRFEType(adapterState);
+            if (adapterState.registrypriv.RFE_Type != 64)
+                pHalData.rfe_type = adapterState.registrypriv.RFE_Type;
             else
             {
                 pHalData.rfe_type = 0;
@@ -1276,7 +1276,7 @@ public static class UsbHalInit
 
         if (!AutoloadFail)
         {
-            if (GetRegAmplifierType2G(adapterState) == 0)
+            if (adapterState.registrypriv.AmplifierType_2G == 0)
             {
                 /* AUTO */
                 pHalData.PAType_2G = PROMContent[EEPROM_PA_TYPE_8812AU];
@@ -1296,11 +1296,11 @@ public static class UsbHalInit
             }
             else
             {
-                pHalData.ExternalPA_2G = (GetRegAmplifierType2G(adapterState) & ODM_BOARD_EXT_PA) != 0;
-                pHalData.ExternalLNA_2G = (GetRegAmplifierType2G(adapterState) & ODM_BOARD_EXT_LNA) != 0;
+                pHalData.ExternalPA_2G = (adapterState.registrypriv.AmplifierType_2G & ODM_BOARD_EXT_PA) != 0;
+                pHalData.ExternalLNA_2G = (adapterState.registrypriv.AmplifierType_2G & ODM_BOARD_EXT_LNA) != 0;
             }
 
-            if (GetRegAmplifierType5G(adapterState) == 0)
+            if (adapterState.registrypriv.AmplifierType_5G == 0)
             {
                 /* AUTO */
                 pHalData.PAType_5G = PROMContent[EEPROM_PA_TYPE_8812AU];
@@ -1320,8 +1320,8 @@ public static class UsbHalInit
             }
             else
             {
-                pHalData.external_pa_5g = (GetRegAmplifierType5G(adapterState) & ODM_BOARD_EXT_PA_5G) != 0;
-                pHalData.external_lna_5g = (GetRegAmplifierType5G(adapterState) & ODM_BOARD_EXT_LNA_5G) != 0;
+                pHalData.external_pa_5g = (adapterState.registrypriv.AmplifierType_5G & ODM_BOARD_EXT_PA_5G) != 0;
+                pHalData.external_lna_5g = (adapterState.registrypriv.AmplifierType_5G & ODM_BOARD_EXT_LNA_5G) != 0;
             }
         }
         else
@@ -1331,7 +1331,7 @@ public static class UsbHalInit
             pHalData.ExternalLNA_2G = false;
             pHalData.external_lna_5g = true;
 
-            if (GetRegAmplifierType2G(adapterState) == 0)
+            if (adapterState.registrypriv.AmplifierType_2G == 0)
             {
                 /* AUTO */
                 pHalData.ExternalPA_2G = false;
@@ -1339,11 +1339,11 @@ public static class UsbHalInit
             }
             else
             {
-                pHalData.ExternalPA_2G = (GetRegAmplifierType2G(adapterState) & ODM_BOARD_EXT_PA) != 0;
-                pHalData.ExternalLNA_2G = (GetRegAmplifierType2G(adapterState) & ODM_BOARD_EXT_LNA) != 0;
+                pHalData.ExternalPA_2G = (adapterState.registrypriv.AmplifierType_2G & ODM_BOARD_EXT_PA) != 0;
+                pHalData.ExternalLNA_2G = (adapterState.registrypriv.AmplifierType_2G & ODM_BOARD_EXT_LNA) != 0;
             }
 
-            if (GetRegAmplifierType5G(adapterState) == 0)
+            if (adapterState.registrypriv.AmplifierType_5G == 0)
             {
                 /* AUTO */
                 pHalData.external_pa_5g = false;
@@ -1351,8 +1351,8 @@ public static class UsbHalInit
             }
             else
             {
-                pHalData.external_pa_5g = (GetRegAmplifierType5G(adapterState) & ODM_BOARD_EXT_PA_5G) != 0;
-                pHalData.external_lna_5g = (GetRegAmplifierType5G(adapterState) & ODM_BOARD_EXT_LNA_5G) != 0;
+                pHalData.external_pa_5g = (adapterState.registrypriv.AmplifierType_5G & ODM_BOARD_EXT_PA_5G) != 0;
+                pHalData.external_lna_5g = (adapterState.registrypriv.AmplifierType_5G & ODM_BOARD_EXT_LNA_5G) != 0;
             }
         }
 
