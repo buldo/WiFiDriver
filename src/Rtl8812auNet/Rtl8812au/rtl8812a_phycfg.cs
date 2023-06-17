@@ -155,14 +155,14 @@ public static class rtl8812a_phycfg
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
-        for (var path = (u8)rf_path.RF_PATH_A; (byte)path < pHalData.NumTotalRFPath; ++path)
+        for (var path = (u8)RfPath.RF_PATH_A; (byte)path < pHalData.NumTotalRFPath; ++path)
         {
-            phy_set_tx_power_level_by_path(adapterState, Channel, (rf_path)path);
-            PHY_TxPowerTrainingByPath_8812(adapterState, pHalData.current_channel_bw, Channel, (rf_path)path);
+            phy_set_tx_power_level_by_path(adapterState, Channel, (RfPath)path);
+            PHY_TxPowerTrainingByPath_8812(adapterState, pHalData.current_channel_bw, Channel, (RfPath)path);
         }
     }
 
-    static void PHY_TxPowerTrainingByPath_8812(PADAPTER adapterState, ChannelWidth BandWidth, u8 Channel, rf_path RfPath)
+    static void PHY_TxPowerTrainingByPath_8812(PADAPTER adapterState, ChannelWidth BandWidth, u8 Channel, RfPath RfPath)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
@@ -176,14 +176,14 @@ public static class rtl8812a_phycfg
         }
 
         writeData = 0;
-        if (RfPath == rf_path.RF_PATH_A)
+        if (RfPath == RfPath.RF_PATH_A)
         {
-            PowerLevel = phy_get_tx_power_index(adapterState, rf_path.RF_PATH_A, MGN_RATE.MGN_MCS7, BandWidth, Channel);
+            PowerLevel = phy_get_tx_power_index(adapterState, RfPath.RF_PATH_A, MGN_RATE.MGN_MCS7, BandWidth, Channel);
             writeOffset = rA_TxPwrTraing_Jaguar;
         }
         else
         {
-            PowerLevel = phy_get_tx_power_index(adapterState, rf_path.RF_PATH_B, MGN_RATE.MGN_MCS7, BandWidth, Channel);
+            PowerLevel = phy_get_tx_power_index(adapterState, RfPath.RF_PATH_B, MGN_RATE.MGN_MCS7, BandWidth, Channel);
             writeOffset = rB_TxPwrTraing_Jaguar;
         }
 
@@ -201,14 +201,14 @@ public static class rtl8812a_phycfg
         phy_set_bb_reg(adapterState, writeOffset, 0xffffff, writeData);
     }
 
-    static u8 phy_get_tx_power_index(PADAPTER pAdapterState, rf_path RFPath, MGN_RATE Rate, ChannelWidth BandWidth,
+    static u8 phy_get_tx_power_index(PADAPTER pAdapterState, RfPath RFPath, MGN_RATE Rate, ChannelWidth BandWidth,
         u8 Channel)
     {
         return 16;
     }
 
 
-    static void phy_set_tx_power_level_by_path(PADAPTER adapterState, u8 channel, rf_path path)
+    static void phy_set_tx_power_level_by_path(PADAPTER adapterState, u8 channel, RfPath path)
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
         BOOLEAN bIsIn24G = (pHalData.current_band_type == BandType.BAND_ON_2_4G);
@@ -232,7 +232,7 @@ public static class rtl8812a_phycfg
 
     static void phy_set_tx_power_index_by_rate_section(
         PADAPTER pAdapterState,
-        rf_path RFPath,
+        RfPath RFPath,
         u8 Channel,
         RATE_SECTION RateSection)
     {
@@ -260,7 +260,7 @@ public static class rtl8812a_phycfg
 
     static void PHY_SetTxPowerIndexByRateArray(
         PADAPTER pAdapterState,
-        rf_path RFPath,
+        RfPath RFPath,
         ChannelWidth BandWidth,
         u8 Channel,
         MGN_RATE[] Rates)
@@ -321,7 +321,7 @@ public static class rtl8812a_phycfg
             phy_set_bb_reg(pAdapterState, rFc_area_Jaguar, 0x1ffe0000, 0x96a);
         }
 
-        for (rf_path eRFPath = 0; (byte)eRFPath < pHalData.NumTotalRFPath; eRFPath++)
+        for (RfPath eRFPath = 0; (byte)eRFPath < pHalData.NumTotalRFPath; eRFPath++)
         {
             /* RF_MOD_AG */
             if (36 <= channelToSW && channelToSW <= 80)
@@ -389,7 +389,7 @@ public static class rtl8812a_phycfg
         return ret_value;
     }
 
-    public static void phy_set_rf_reg(AdapterState adapterState, rf_path eRFPath, u16 RegAddr, u32 BitMask, u32 Data)
+    public static void phy_set_rf_reg(AdapterState adapterState, RfPath eRFPath, u16 RegAddr, u32 BitMask, u32 Data)
     {
         uint data = Data;
         Console.WriteLine($"RFREG;{(byte)eRFPath};{(uint)RegAddr:X};{BitMask:X};{data:X}");
@@ -410,7 +410,7 @@ public static class rtl8812a_phycfg
         phy_RFSerialWrite(adapterState, eRFPath, RegAddr, data);
     }
 
-    static u32 phy_RFSerialRead(PADAPTER adapterState, rf_path eRFPath, u32 Offset)
+    static u32 phy_RFSerialRead(PADAPTER adapterState, RfPath eRFPath, u32 Offset)
     {
         u32 retValue = 0;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
@@ -426,11 +426,11 @@ public static class rtl8812a_phycfg
 
         Offset &= 0xff;
 
-        if (eRFPath == rf_path.RF_PATH_A)
+        if (eRFPath == RfPath.RF_PATH_A)
         {
             bIsPIMode = phy_query_bb_reg(adapterState, 0xC00, 0x4) != 0;
         }
-        else if (eRFPath == rf_path.RF_PATH_B)
+        else if (eRFPath == RfPath.RF_PATH_B)
         {
             bIsPIMode = phy_query_bb_reg(adapterState, 0xE00, 0x4) != 0;
         }
@@ -482,7 +482,7 @@ public static class rtl8812a_phycfg
     }
 
 
-    static void phy_RFSerialWrite(PADAPTER adapterState, rf_path eRFPath, u32 Offset, u32 Data)
+    static void phy_RFSerialWrite(PADAPTER adapterState, RfPath eRFPath, u32 Offset, u32 Data)
     {
         u32 DataAndAddr = 0;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
@@ -626,7 +626,7 @@ public static class rtl8812a_phycfg
                 phy_set_bb_reg(adapterState, rRFMOD_Jaguar, 0x003003C3, 0x00300200); /* 0x8ac[21,20,9:6,1,0]=8'b11100000 */
                 phy_set_bb_reg(adapterState, rADC_Buf_Clk_Jaguar, BIT30, 0); /* 0x8c4[30] = 1'b0 */
 
-                if (pHalData.rf_type == rf_type.RF_2T2R)
+                if (pHalData.rf_type == RfType.RF_2T2R)
                 {
                     phy_set_bb_reg(adapterState, rL1PeakTH_Jaguar, 0x03C00000, 7); /* 2R 0x848[25:22] = 0x7 */
                 }
@@ -647,7 +647,7 @@ public static class rtl8812a_phycfg
                     L1pkVal = 6;
                 else
                 {
-                    if (pHalData.rf_type == rf_type.RF_2T2R)
+                    if (pHalData.rf_type == RfType.RF_2T2R)
                         L1pkVal = 7;
                     else
                         L1pkVal = 8;
@@ -676,7 +676,7 @@ public static class rtl8812a_phycfg
                     L1pkVal = 5;
                 else
                 {
-                    if (pHalData.rf_type == rf_type.RF_2T2R)
+                    if (pHalData.rf_type == RfType.RF_2T2R)
                     {
                         L1pkVal = 6;
                     }
@@ -714,20 +714,20 @@ public static class rtl8812a_phycfg
         {
             case ChannelWidth.CHANNEL_WIDTH_20:
                 /* RTW_INFO("PHY_RF6052SetBandwidth8812(), set 20MHz\n"); */
-                phy_set_rf_reg(adapterState, rf_path.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 3);
-                phy_set_rf_reg(adapterState, rf_path.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 3);
+                phy_set_rf_reg(adapterState, RfPath.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 3);
+                phy_set_rf_reg(adapterState, RfPath.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 3);
                 break;
 
             case ChannelWidth.CHANNEL_WIDTH_40:
                 /* RTW_INFO("PHY_RF6052SetBandwidth8812(), set 40MHz\n"); */
-                phy_set_rf_reg(adapterState, rf_path.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 1);
-                phy_set_rf_reg(adapterState, rf_path.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 1);
+                phy_set_rf_reg(adapterState, RfPath.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 1);
+                phy_set_rf_reg(adapterState, RfPath.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 1);
                 break;
 
             case ChannelWidth.CHANNEL_WIDTH_80:
                 /* RTW_INFO("PHY_RF6052SetBandwidth8812(), set 80MHz\n"); */
-                phy_set_rf_reg(adapterState, rf_path.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 0);
-                phy_set_rf_reg(adapterState, rf_path.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 0);
+                phy_set_rf_reg(adapterState, RfPath.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 0);
+                phy_set_rf_reg(adapterState, RfPath.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 0);
                 break;
 
             default:
@@ -782,13 +782,13 @@ public static class rtl8812a_phycfg
 
     }
 
-    public static void PHY_SetTxPowerIndex_8812A(PADAPTER adapterState, u32 PowerIndex, rf_path RFPath, MGN_RATE Rate)
+    public static void PHY_SetTxPowerIndex_8812A(PADAPTER adapterState, u32 PowerIndex, RfPath RFPath, MGN_RATE Rate)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         /* <20120928, Kordan> A workaround in 8812A/8821A testchip, to fix the bug of odd Tx power indexes. */
 
-        if (RFPath == rf_path.RF_PATH_A)
+        if (RFPath == RfPath.RF_PATH_A)
         {
             switch (Rate)
             {
@@ -953,7 +953,7 @@ public static class rtl8812a_phycfg
                     break;
             }
         }
-        else if (RFPath == rf_path.RF_PATH_B)
+        else if (RFPath == RfPath.RF_PATH_B)
         {
             switch (Rate)
             {

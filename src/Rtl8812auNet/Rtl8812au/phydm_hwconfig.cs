@@ -2,16 +2,16 @@
 
 public static class phydm_hwconfig
 {
-    public static void odm_config_rf_with_header_file(AdapterState dm, odm_rf_config_type config_type, rf_path e_rf_path)
+    public static void odm_config_rf_with_header_file(AdapterState dm, odm_rf_config_type config_type, RfPath e_rf_path)
     {
         if (config_type == odm_rf_config_type.CONFIG_RF_RADIO)
         {
-            if (e_rf_path == rf_path.RF_PATH_A)
+            if (e_rf_path == RfPath.RF_PATH_A)
             {
                 //READ_AND_CONFIG_MP(8812a, _radioa);
                 odm_read_and_config_mp_8812a_radioa(dm);
             }
-            else if (e_rf_path == rf_path.RF_PATH_B)
+            else if (e_rf_path == RfPath.RF_PATH_B)
             {
                 //READ_AND_CONFIG_MP(8812a, _radiob);
                 odm_read_and_config_mp_8812a_radiob(dm);
@@ -65,7 +65,7 @@ public static class phydm_hwconfig
         //{
         //    if (dm.fw_offload_ability & PHYDM_PHY_PARAM_OFFLOAD)
         //    {
-        //        result = phydm_set_reg_by_fw(dm, PHYDM_HALMAC_CMD_END, 0, 0, 0, (rf_path)0,0);
+        //        result = phydm_set_reg_by_fw(dm, PHYDM_HALMAC_CMD_END, 0, 0, 0, (RfPath)0,0);
         //        PHYDM_DBG(dm, ODM_COMP_INIT, "phy param offload end!result = %d", result);
         //    }
         //}

@@ -1,11 +1,9 @@
 ﻿namespace Rtl8812auNet.Rtl8812au;
 
-public enum RF_TX_NUM
+public enum RfTxNum
 {
     RF_1TX = 0,
     RF_2TX,
     RF_3TX,
-    RF_4TX,
-    RF_MAX_TX_NUM,
-    RF_TX_NUM_NONIMPLEMENT,
+    RF_4TX
 }

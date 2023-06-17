@@ -284,4 +284,8 @@ public static class CommonConsts
     public const ushort REG_PKT_BE_BK_LIFE_TIME = 0x04C2;
 
     public const uint RFREGOFFSETMASK = 0xfffff;
+
+    public const uint USB_SUPER_SPEED_BULK_SIZE = 1024; /* usb 3.0 */
+    public const uint USB_HIGH_SPEED_BULK_SIZE = 512; /* usb 2.0 */
+    public const uint USB_FULL_SPEED_BULK_SIZE = 64; /* usb 1.1 */
 }

@@ -71,7 +71,9 @@ public static class halhwimg8812a_mac
             {
                 if (is_matched)
                 {
-                    odm_config_mac_8812a(adapterState, (u16)v1, (u8)v2);
+                    ushort addr = (u16)v1;
+                    byte data = (u8)v2;
+                    odm_write_1byte(adapterState, addr, data);
                 }
             }
 

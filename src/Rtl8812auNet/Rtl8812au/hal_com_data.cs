@@ -8,7 +8,7 @@ public class hal_com_data
     public u16 FirmwareSignature { get; set; }
     public u8 current_channel { get; set; }
     public RF_CHIP_E rf_chip = RF_CHIP_E.RF_6052;
-    public rf_type rf_type { get; set; } /*enum rf_type*/
+    public RfType rf_type { get; set; } /*enum RfType*/
     public u8 NumTotalRFPath { get; set; }
     public bool bautoload_fail_flag { get; set; }
     public RT_MULTI_FUNC MultiFunc { get; set; }
@@ -70,10 +70,10 @@ public class hal_com_data
     public u16 TypeAPA { get; set; }
     public u16 rfe_type { get; set; }
 
-    public Dictionary<rf_path, BbRegisterDefinition> PHYRegDef { get; } = new()
+    public Dictionary<RfPath, BbRegisterDefinition> PHYRegDef { get; } = new()
     {
-        { rf_path.RF_PATH_A, new BbRegisterDefinition() },
-        { rf_path.RF_PATH_B, new BbRegisterDefinition() }
+        { RfPath.RF_PATH_A, new BbRegisterDefinition() },
+        { RfPath.RF_PATH_B, new BbRegisterDefinition() }
     }; /* Radio A/B/C/D */
 
     public dm_struct odmpriv { get; } = new dm_struct();

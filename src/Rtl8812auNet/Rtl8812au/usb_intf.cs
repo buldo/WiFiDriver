@@ -80,7 +80,7 @@ public static class usb_intf
         var registry_par = padapter.registrypriv;
 
         registry_par.channel = 36;
-        registry_par.rf_config = rf_type.RF_TYPE_MAX;
+        registry_par.rf_config = RfType.RF_TYPE_MAX;
         registry_par.wifi_spec = rtw_wifi_spec;
         registry_par.special_rf_path = (u8)0;
         registry_par.TxBBSwing_2G = -1;

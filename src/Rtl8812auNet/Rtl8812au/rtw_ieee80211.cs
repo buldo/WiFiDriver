@@ -128,15 +128,15 @@ public static class rtw_ieee80211
 
     public static rate_section_ent[] rates_by_sections =
     {
-        new(RF_TX_NUM.RF_1TX, 4, mgn_rates_cck),
-        new(RF_TX_NUM.RF_1TX, 8, mgn_rates_ofdm),
-        new(RF_TX_NUM.RF_1TX, 8, mgn_rates_mcs0_7),
-        new(RF_TX_NUM.RF_2TX, 8, mgn_rates_mcs8_15),
-        new(RF_TX_NUM.RF_3TX, 8, mgn_rates_mcs16_23),
-        new(RF_TX_NUM.RF_4TX, 8, mgn_rates_mcs24_31),
-        new(RF_TX_NUM.RF_1TX, 10, mgn_rates_vht1ss),
-        new(RF_TX_NUM.RF_2TX, 10, mgn_rates_vht2ss),
-        new(RF_TX_NUM.RF_3TX, 10, mgn_rates_vht3ss),
-        new(RF_TX_NUM.RF_4TX, 10, mgn_rates_vht4ss),
+        new(RfTxNum.RF_1TX, 4, mgn_rates_cck),
+        new(RfTxNum.RF_1TX, 8, mgn_rates_ofdm),
+        new(RfTxNum.RF_1TX, 8, mgn_rates_mcs0_7),
+        new(RfTxNum.RF_2TX, 8, mgn_rates_mcs8_15),
+        new(RfTxNum.RF_3TX, 8, mgn_rates_mcs16_23),
+        new(RfTxNum.RF_4TX, 8, mgn_rates_mcs24_31),
+        new(RfTxNum.RF_1TX, 10, mgn_rates_vht1ss),
+        new(RfTxNum.RF_2TX, 10, mgn_rates_vht2ss),
+        new(RfTxNum.RF_3TX, 10, mgn_rates_vht3ss),
+        new(RfTxNum.RF_4TX, 10, mgn_rates_vht4ss),
     };
 }
