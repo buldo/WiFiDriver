@@ -72,16 +72,4 @@ public static class phydm_hwconfig
 
         return result;
     }
-
-    public static bool odm_config_rf_with_tx_pwr_track_header_file(dm_struct dm)
-    {
-        //PHYDM_DBG(dm, ODM_COMP_INIT,
-        //    "support_platform: 0x%X, support_interface: 0x%X, board_type: 0x%X\n",
-        //    dm.support_platform, dm.support_interface, dm.board_type);
-
-        /* @1 AP doesn't use PHYDM power tracking table in these ICs */
-        //READ_AND_CONFIG_MP(8812a, _txpowertrack_usb);
-        odm_read_and_config_mp_8812a_txpowertrack_usb(dm);
-        return true;
-    }
 }

@@ -17,7 +17,7 @@ public static class ioctl_cfg80211
         nl80211_iftype old_type = nl80211_iftype.NL80211_IFTYPE_STATION;
         RTW_INFO("cfg80211_rtw_change_iface old_iftype=%d, new_iftype=%d", old_type, type);
 
-        rtw_setopmode_cmd(padapter, RTW_CMDF.RTW_CMDF_WAIT_ACK);
+        rtw_setopmode_cmd(padapter);
         RTW_INFO($"cfg80211_rtw_change_iface end");
     }
 

@@ -40,21 +40,6 @@ public static class halhwimg8812a_bb
             ((uint)dm.type_alna & 0xFF00) << 8 |
             ((uint)dm.type_apa & 0xFF00) << 16;
 
-        //PHYDM_DBG(dm, ODM_COMP_INIT,
-        //      "===> %s (cond1, cond2, cond3, cond4) = (0x%X 0x%X 0x%X 0x%X)\n",
-        //      __func__, cond1, cond2, cond3, cond4);
-        //PHYDM_DBG(dm, ODM_COMP_INIT,
-        //      "===> %s (driver1, driver2, driver3, driver4) = (0x%X 0x%X 0x%X 0x%X)\n",
-        //      __func__, driver1, driver2, driver3, driver4);
-
-        //PHYDM_DBG(dm, ODM_COMP_INIT,
-        //      "	(Platform, Interface) = (0x%X, 0x%X)\n",
-        //      dm.support_platform, dm.support_interface);
-        //PHYDM_DBG(dm, ODM_COMP_INIT,
-        //      "	(Board, Package) = (0x%X, 0x%X)\n", dm.board_type,
-        //      dm.package_type);
-
-
         /*============== value Defined Check ===============*/
         /*QFN type [15:12] and cut version [27:24] need to do value check*/
 
@@ -114,11 +99,6 @@ public static class halhwimg8812a_bb
         {
             return false;
         }
-    }
-
-    static bool check_negative(dm_struct dm, u32 condition1, u32 condition2)
-    {
-        return true;
     }
 
     public static void odm_read_and_config_mp_8812a_phy_reg(_adapter dm)
@@ -344,29 +324,5 @@ public static class halhwimg8812a_bb
 
             i = i + 2;
         }
-    }
-
-    public static void odm_read_and_config_mp_8812a_txpowertrack_usb(dm_struct dm)
-    {
-        dm_rf_calibration_struct cali_info = (dm.rf_calibrate_info);
-
-        // TODO:
-        //PHYDM_DBG(dm, ODM_COMP_INIT, "===> ODM_ReadAndConfig_MP_mp_8812a\n");
-
-        //odm_move_memory(dm, cali_info.delta_swing_table_idx_2ga_p, g_delta_swing_table_idx_mp_2ga_p_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE);
-        //odm_move_memory(dm, cali_info.delta_swing_table_idx_2ga_n, g_delta_swing_table_idx_mp_2ga_n_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE);
-        //odm_move_memory(dm, cali_info.delta_swing_table_idx_2gb_p, g_delta_swing_table_idx_mp_2gb_p_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE);
-        //odm_move_memory(dm, cali_info.delta_swing_table_idx_2gb_n, g_delta_swing_table_idx_mp_2gb_n_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE);
-
-        //odm_move_memory(dm, cali_info.delta_swing_table_idx_2g_cck_a_p, g_delta_swing_table_idx_mp_2g_cck_a_p_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE);
-        //odm_move_memory(dm, cali_info.delta_swing_table_idx_2g_cck_a_n, g_delta_swing_table_idx_mp_2g_cck_a_n_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE);
-        //odm_move_memory(dm, cali_info.delta_swing_table_idx_2g_cck_b_p, g_delta_swing_table_idx_mp_2g_cck_b_p_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE);
-        //odm_move_memory(dm, cali_info.delta_swing_table_idx_2g_cck_b_n, g_delta_swing_table_idx_mp_2g_cck_b_n_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE);
-
-        //odm_move_memory(dm, cali_info.delta_swing_table_idx_5ga_p, g_delta_swing_table_idx_mp_5ga_p_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE * 3);
-        //odm_move_memory(dm, cali_info.delta_swing_table_idx_5ga_n, g_delta_swing_table_idx_mp_5ga_n_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE * 3);
-        //odm_move_memory(dm, cali_info.delta_swing_table_idx_5gb_p, g_delta_swing_table_idx_mp_5gb_p_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE * 3);
-        //odm_move_memory(dm, cali_info.delta_swing_table_idx_5gb_n, g_delta_swing_table_idx_mp_5gb_n_txpowertrack_usb_8812a, DELTA_SWINGIDX_SIZE * 3);
-
     }
 }

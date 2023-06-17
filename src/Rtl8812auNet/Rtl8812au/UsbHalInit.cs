@@ -2191,7 +2191,7 @@ public static class UsbHalInit
         // Like "CONFIG_DEINIT_BEFORE_INIT" in 92du chip
         rtl8812au_hw_reset(Adapter);
 
-        status = rtw_hal_power_on(Adapter);
+        status = _InitPowerOn_8812AU(Adapter);
         if (status == false)
         {
             goto exit;
@@ -3040,8 +3040,6 @@ public static class UsbHalInit
                     break;
             }
         }
-
-        odm_config_rf_with_tx_pwr_track_header_file(pHalData.odmpriv);
     }
 
     static bool phy_BB8812_Config_ParaFile(PADAPTER Adapter)
@@ -3068,7 +3066,6 @@ public static class UsbHalInit
 
         return rtStatus;
     }
-
 
     static bool PHY_BBConfig8812(PADAPTER Adapter)
     {
@@ -3149,13 +3146,9 @@ public static class UsbHalInit
         u8 speedvalue, provalue, temp;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
-
-        /* rtw_write16(Adapter, REG_TRXDMA_CTRL_8195, 0xf5b0); */
-        /* rtw_write16(Adapter, REG_TRXDMA_CTRL_8812, 0xf5b4); */
         rtw_write8(Adapter, 0xf050, 0x01); /* usb3 rx interval */
         rtw_write16(Adapter, REG_RXDMA_STATUS, 0x7400); /* burset lenght=4, set 0x3400 for burset length=2 */
         rtw_write8(Adapter, 0x289, 0xf5); /* for rxdma control */
-        /* rtw_write8(Adapter, 0x3a, 0x46); */
 
         /* 0x456 = 0x70, sugguested by Zhilin */
         rtw_write8(Adapter, REG_AMPDU_MAX_TIME_8812, 0x70);
@@ -3586,7 +3579,6 @@ public static class UsbHalInit
         rtw_write16(Adapter, REG_TRXDMA_CTRL, value16);
     }
 
-    public static u16 _TXDMA_CMQ_MAP(u16 x) => (u16)(((x) & 0x3) << 16);
     public static u16 _TXDMA_HIQ_MAP(u16 x) => (u16)(((x) & 0x3) << 14);
     public static u16 _TXDMA_MGQ_MAP(u16 x) => (u16)(((x) & 0x3) << 12);
     public static u16 _TXDMA_BKQ_MAP(u16 x) => (u16)(((x) & 0x3) << 10);
@@ -3620,39 +3612,11 @@ public static class UsbHalInit
         //rtStatus = phy_ConfigMACWithParaFile(Adapter, PHY_FILE_MAC_REG);
         if (rtStatus == false)
         {
-            odm_config_mac_with_header_file(Adapter, pHalData.odmpriv);
+            odm_read_and_config_mp_8812a_mac_reg(Adapter, pHalData.odmpriv);
             rtStatus = true;
         }
 
         return rtStatus;
-    }
-
-    static bool odm_config_mac_with_header_file(_adapter adapter, dm_struct dm)
-    {
-        bool result = true;
-
-        //PHYDM_DBG(dm, ODM_COMP_INIT,
-        //    "support_platform: 0x%X, support_interface: 0x%X, board_type: 0x%X\n",
-        //    dm.support_platform, dm.support_interface, dm.board_type);
-
-/* @1 AP doesn't use PHYDM initialization in these ICs */
-
-        odm_read_and_config_mp_8812a_mac_reg(adapter, dm);
-
-        //if (dm.fw_offload_ability & PHYDM_PHY_PARAM_OFFLOAD)
-        //{
-        //    result = phydm_set_reg_by_fw(dm,
-        //        PHYDM_HALMAC_CMD_END,
-        //        0,
-        //        0,
-        //        0,
-        //        (rf_path)0,
-        //        0);
-        //    //PHYDM_DBG(dm, ODM_COMP_INIT,
-        //    //    "mac param offload end!result = %d", result);
-        //}
-
-        return result;
     }
 
     static void _InitHardwareDropIncorrectBulkOut_8812A(PADAPTER Adapter)
@@ -3757,12 +3721,7 @@ public static class UsbHalInit
         return status;
     }
 
-    private static bool rtw_hal_power_on(_adapter padapter)
-    {
-        return _InitPowerOn_8812AU(padapter);
-    }
-
-    public static bool _InitPowerOn_8812AU(_adapter padapter)
+    private static bool _InitPowerOn_8812AU(_adapter padapter)
     {
         u16 u2btmp = 0;
         u8 u1btmp = 0;
@@ -4167,15 +4126,6 @@ public static class UsbHalInit
         {
             return false;
         }
-
-        //if (rtw_fwdl_test_trigger_chksum_fail())
-        //{
-        //    return false;
-
-        //}
-
-        //RTW_INFO("%s: Checksum report %s! (%u, %dms), REG_MCUFWDL:0x%08x\n", __FUNCTION__
-        //    , (ret == _SUCCESS) ? "OK" : "Fail", cnt, rtw_get_passing_time_ms(start), value32);
 
         return true;
     }
