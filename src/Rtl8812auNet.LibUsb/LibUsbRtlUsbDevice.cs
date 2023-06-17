@@ -24,6 +24,11 @@ public class LibUsbRtlUsbDevice : IRtlUsbDevice
         _reader = _usbDevice.OpenEndpointReader(GetInEp());
     }
 
+    public byte GetEndpointsCount()
+    {
+        return (byte)_usbDevice.Configs[0].Interfaces[0].Endpoints.Count;
+    }
+
     public void InfinityRead()
     {
         var readBuffer = new byte[8192 + 1024];
@@ -69,6 +74,16 @@ public class LibUsbRtlUsbDevice : IRtlUsbDevice
         var buffer = new byte[bytesCount];
         var bytesReceived = _usbDevice.ControlTransfer(packet, buffer, 0, bytesCount);
         return buffer.AsSpan(0, bytesReceived);
+    }
+
+    public List<IRtlEndpoint> GetEndpoints()
+    {
+        return _usbDevice
+            .Configs[0]
+            .Interfaces[0]
+            .Endpoints
+            .Select(e => (IRtlEndpoint)(new LibUsbRtlEndpoint(e)))
+            .ToList();
     }
 
     public void WriteBytes(ushort register, Span<byte> data)

@@ -4,7 +4,6 @@ namespace Rtl8812auNet.Rtl8812au;
 
 public static class usb_intf
 {
-    private const byte USB_ENDPOINT_NUMBER_MASK = 0x0f;
     static readonly int rtw_rfintfs = (int)RFINTFS.HWPI;
     static readonly int rtw_chip_version = 0x00;
     static readonly int rtw_lbkmode = 0; /* RTL8712_AIR_TRX; */
@@ -1238,42 +1237,41 @@ registry_par.TxBBSwing_5G = -1;
 
         pdvobjpriv.NumInterfaces = 1;
         pdvobjpriv.InterfaceNumber = 0;
-        pdvobjpriv.nr_endpoint = (byte)usb_intf.Configs[0].Interfaces[0].Endpoints.Count;
+        pdvobjpriv.nr_endpoint = usb_intf.GetEndpointsCount();
 
         /* RTW_INFO("\ndump usb_endpoint_descriptor:\n"); */
         int i = 0;
-        foreach (var endpoint in usb_intf.Configs[0].Interfaces[0].Endpoints)
+        foreach (var endpoint in usb_intf.GetEndpoints())
         {
-            var type = (EndpointType)(endpoint.Attributes & 0x3);
-            var direction = (EndpointDirection)(endpoint.EndpointAddress & (0b1000_0000));
+            var type = endpoint.Type;
+            var direction = endpoint.Direction;
 
             RTW_INFO("usb_endpoint_descriptor(%d):", i);
             //RTW_INFO("bDescriptorType=%x\n", endpoint.CustomDescriptors);
-            RTW_INFO("bEndpointAddress=%x", endpoint.EndpointAddress);
-            RTW_INFO("wMaxPacketSize=%d", endpoint.MaxPacketSize);
-            RTW_INFO("bInterval=%x", endpoint.Interval);
+            //RTW_INFO("bEndpointAddress=%x", endpoint.EndpointAddress);
+            //RTW_INFO("wMaxPacketSize=%d", endpoint.MaxPacketSize);
+            //RTW_INFO("bInterval=%x", endpoint.Interval);
 
-            if (type == EndpointType.Bulk && direction == EndpointDirection.In)
+            if (type == RtlEndpointType.Bulk && direction == RtlEndpointDirection.In)
             {
-                RTW_INFO("RT_usb_endpoint_is_bulk_in = %x", RT_usb_endpoint_num(endpoint));
-                pdvobjpriv.RtInPipe[pdvobjpriv.RtNumInPipes] = RT_usb_endpoint_num(endpoint);
+                RTW_INFO("RT_usb_endpoint_is_bulk_in = %x", endpoint.GetUsbEndpointNum());
+                pdvobjpriv.RtInPipe[pdvobjpriv.RtNumInPipes] = endpoint.GetUsbEndpointNum();
                 pdvobjpriv.RtNumInPipes++;
             }
-            else if (direction == EndpointDirection.In)
+            else if (direction == RtlEndpointDirection.In)
             {
-                RTW_INFO("RT_usb_endpoint_is_int_in = %x, Interval = %x\n", RT_usb_endpoint_num(endpoint),
-                    endpoint.Interval);
-                pdvobjpriv.RtInPipe[pdvobjpriv.RtNumInPipes] = RT_usb_endpoint_num(endpoint);
+                //RTW_INFO("RT_usb_endpoint_is_int_in = %x, Interval = %x\n", RT_usb_endpoint_num(endpoint), endpoint.Interval);
+                pdvobjpriv.RtInPipe[pdvobjpriv.RtNumInPipes] = endpoint.GetUsbEndpointNum();
                 pdvobjpriv.RtNumInPipes++;
             }
-            else if (type == EndpointType.Bulk && direction == EndpointDirection.Out)
+            else if (type == RtlEndpointType.Bulk && direction == RtlEndpointDirection.Out)
             {
-                RTW_INFO("RT_usb_endpoint_is_bulk_out = %x\n", RT_usb_endpoint_num(endpoint));
-                pdvobjpriv.RtOutPipe[pdvobjpriv.RtNumOutPipes] = RT_usb_endpoint_num(endpoint);
+                RTW_INFO("RT_usb_endpoint_is_bulk_out = %x\n", endpoint.GetUsbEndpointNum());
+                pdvobjpriv.RtOutPipe[pdvobjpriv.RtNumOutPipes] = endpoint.GetUsbEndpointNum();
                 pdvobjpriv.RtNumOutPipes++;
             }
 
-            pdvobjpriv.ep_num[i] = RT_usb_endpoint_num(endpoint);
+            pdvobjpriv.ep_num[i] = endpoint.GetUsbEndpointNum();
         }
 
         RTW_INFO("nr_endpoint=%d, in_num=%d, out_num=%d\n\n", pdvobjpriv.nr_endpoint, pdvobjpriv.RtNumInPipes,
@@ -1282,25 +1280,25 @@ registry_par.TxBBSwing_5G = -1;
         switch (pusbd.Speed)
         {
             case USB_SPEED_LOW:
-                RTW_INFO("USB_SPEED_LOW\n");
+                RTW_INFO("USB_SPEED_LOW");
                 pdvobjpriv.usb_speed = RTW_USB_SPEED_1_1;
                 break;
             case USB_SPEED_FULL:
-                RTW_INFO("USB_SPEED_FULL\n");
+                RTW_INFO("USB_SPEED_FULL");
                 pdvobjpriv.usb_speed = RTW_USB_SPEED_1_1;
                 break;
             case USB_SPEED_HIGH:
-                RTW_INFO("USB_SPEED_HIGH\n");
+                RTW_INFO("USB_SPEED_HIGH");
                 pdvobjpriv.usb_speed = RTW_USB_SPEED_2;
                 break;
 
             case USB_SPEED_SUPER:
-                RTW_INFO("USB_SPEED_SUPER\n");
+                RTW_INFO("USB_SPEED_SUPER");
                 pdvobjpriv.usb_speed = RTW_USB_SPEED_3;
                 break;
 
             default:
-                RTW_INFO("USB_SPEED_UNKNOWN(%x)\n", pusbd.Speed);
+                RTW_INFO("USB_SPEED_UNKNOWN(%x)", pusbd.Speed);
                 pdvobjpriv.usb_speed = RTW_USB_SPEED_UNKNOWN;
                 break;
         }
@@ -1326,11 +1324,6 @@ registry_par.TxBBSwing_5G = -1;
             pdvobjpriv.HardwareType = HARDWARE_TYPE.HARDWARE_TYPE_RTL8812AU;
             RTW_INFO("CHIP TYPE: RTL8812\n");
         }
-    }
-
-    static int RT_usb_endpoint_num(UsbEndpointInfo epd)
-    {
-        return epd.EndpointAddress & USB_ENDPOINT_NUMBER_MASK;
     }
 
     public static bool rtw_hal_init(_adapter padapter, InitChannel initChannel)
