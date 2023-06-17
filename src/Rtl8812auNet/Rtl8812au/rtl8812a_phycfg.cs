@@ -543,13 +543,6 @@ public static class rtl8812a_phycfg
             phy_FixSpur_8812A(pAdapter, pHalData.current_channel_bw, channelToSW);
             phy_set_rf_reg(pAdapter, eRFPath, RF_CHNLBW_Jaguar, bMaskByte0, channelToSW);
         }
-
-        /*only for 8812A mp mode*/
-        if ((pHalData.LNAType_5G == 0x00) && pAdapter.registrypriv.mp_mode == 1)
-        {
-            throw new NotImplementedException();
-            //phy_SpurCalibration_8812A(pAdapter, channelToSW, bandwidthToSw);
-        }
     }
 
     static BOOLEAN phy_SwBand8812(PADAPTER pAdapter, u8 channelToSW)

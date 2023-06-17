@@ -3,7 +3,6 @@
 public class pwrctrl_priv
 {
     public bool reg_rfoff;
-    public bool bInSuspend;
     public bool bSupportRemoteWakeup;
     public rt_rf_power_state rf_pwrstate;/* cur power state, only for IPS */
 }

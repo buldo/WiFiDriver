@@ -4,7 +4,6 @@ public class registry_priv
 {
     public u8 channel;/* ad-hoc support requirement */
     public NETWORK_TYPE wireless_mode;/* A, B, G, auto */
-    public u8 mp_mode;
     public rf_type rf_config;
     public bool wifi_spec;/* !turbo_mode */
     public     u8 special_rf_path; /* 0: 2T2R ,1: only turn on path A 1T1R */

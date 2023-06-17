@@ -41,15 +41,11 @@ public static class CommonConsts
     public const byte PG_TXPWR_SRC_NUM = 3;
     public const sbyte PG_TXPWR_INVALID_DIFF = 8;
     public const byte PG_TXPWR_INVALID_BASE = 255;
-    public const byte BT_RTL8812A = 11;
-    public const byte EEPROM_RF_BT_SETTING_8812 = 0xC3;
     public const byte EEPROM_THERMAL_METER_8812 = 0xBA;
     public const byte EEPROM_Default_ThermalMeter_8812 = 0x18;
     public const byte EEPROM_USB_OPTIONAL_FUNCTION0 = 0xD4;
     public const byte EEPROM_USB_MODE_8812 = 0x08;
     public const byte EEPROM_RFE_OPTION_8812 = 0xCA;
-    public const byte EEPROM_COUNTRY_CODE_8812 = 0xCB;
-    public const byte EEPROM_ChannelPlan_8812 = 0xB8;
     public const byte PG_TXPWR_1PATH_BYTE_NUM_2G = 18;
     public const byte PG_TXPWR_1PATH_BYTE_NUM_5G = 24;
     public const bool DBG_PG_TXPWR_READ = true;
@@ -75,27 +71,19 @@ public static class CommonConsts
     public const uint WL_FUNC_P2P = BIT0;
     public const uint WL_FUNC_MIRACAST = BIT1;
     public const uint WL_FUNC_TDLS = BIT2;
-    public const ushort REG_MACID_SLEEP = 0x04D4;
-    public const ushort REG_MACID_SLEEP_1 = 0x0488;
-    public const ushort REG_MACID_SLEEP_2 = 0x04D0;
-    public const ushort REG_MACID_SLEEP_3 = 0x0484;
     public const byte EFUSE_WIFI = 0;
     public const int EFUSE_MAP_LEN_JAGUAR = 512;
-    public const uint RTW_PWR_STATE_CHK_INTERVAL = 2000;
     public const ushort REG_USB_HRPWM = 0xFE58;
     public const ushort REG_BAR_MODE_CTRL = 0x04CC;
     public const ushort REG_FAST_EDCA_CTRL = 0x0460;
     public const ushort REG_QUEUE_CTRL = 0x04C6;
     public const ushort REG_FWHW_TXQ_CTRL = 0x0420;
-    public const ushort REG_CR_EXT = 0x1100;
     public const ushort REG_CR = 0x0100;
     public const ushort REG_EARLY_MODE_CONTROL_8812 = 0x02BC;
     public const ushort REG_TX_RPT_TIME = 0x04F0; /* 2 byte */
     public const ushort REG_SDIO_CTRL_8812 = 0x0070;
     public const ushort REG_ACLK_MON = 0x003E;
     public const byte DRVINFO_SZ = 4; /* unit is 8bytes */
-    //public const byte MACTXEN = BIT6;
-    //public const byte MACRXEN = BIT7;
     public const uint MACTXEN = BIT6;
     public const uint MACRXEN = BIT7;
     public const ushort REG_HWSEQ_CTRL = 0x0423;
@@ -118,9 +106,6 @@ public static class CommonConsts
     public const ushort REG_HMETFR = 0x01CC;
     public const ushort FW_START_ADDRESS = 0x1000;
     public const ushort REG_SYS_CFG = 0x00F0;
-    //public const byte FWDL_ChkSum_rpt = BIT2;
-    //public const byte MCUFWDL_RDY = BIT1;
-    //public const byte WINTINI_RDY = BIT6;
     public const uint FWDL_ChkSum_rpt = BIT2;
     public const uint MCUFWDL_RDY = BIT1;
     public const uint WINTINI_RDY = BIT6;
@@ -142,7 +127,6 @@ public static class CommonConsts
     public const uint WMM_NORMAL_PAGE_NUM_NPQ_8812 = 0x20;
     public const ushort REG_RQPN_NPQ = 0x0214;
     public const ushort REG_RQPN = 0x0200;
-    public const byte _HW_STATE_MONITOR_ = 0x04;
     public const byte _HW_STATE_NOLINK_ = 0x00;
     public const ushort MSR = (REG_CR + 2); /* Media Status register */
     public const ushort REG_RXFLTMAP2 = 0x06A4;
@@ -214,7 +198,6 @@ public static class CommonConsts
     public const ushort REG_MAC_PHY_CTRL = 0x002c;/* for 92d, DMDP, SMSP, DMSP contrl */
     public const ushort REG_OPT_CTRL_8812 = 0x0074;
     public const ushort REG_WMAC_TRXPTCL_CTL = 0x0668;
-    public const ushort REG_GPIO_MUXCFG = 0x0040;
     public const ushort REG_RXDMA_STATUS = 0x0288;
     public const ushort REG_AMPDU_MAX_TIME_8812 = 0x0456;
     public const ushort REG_AMPDU_MAX_LENGTH_8812 = 0x0458;
@@ -234,8 +217,6 @@ public static class CommonConsts
     public const ushort REG_TRXDMA_CTRL = 0x010C;
     public const ushort REG_HIQ_NO_LMT_EN = 0x05A7;
 
-
-
     public const uint bMaskByte0 = 0xff;
     public const uint bMaskByte1 = 0xff00;
     public const uint bMaskByte2 = 0xff0000;
@@ -253,15 +234,10 @@ public static class CommonConsts
     public const byte TBTT_PROHIBIT_HOLD_TIME_STOP_BCN = 0x64; /* 3.2ms unit is 32us*/
     public const byte DRIVER_EARLY_INT_TIME_8812 = 0x05;
     public const byte BCN_DMA_ATIME_INT_TIME_8812 = 0x02;
-    //public const byte DIS_TSF_UDT = BIT4;
-    //public const byte EN_AMPDU_RTY_NEW = BIT7;
     public const uint DIS_TSF_UDT = BIT4;
     public const uint EN_AMPDU_RTY_NEW = BIT7;
     public const byte EEPROM_TX_BBSWING_2G_8812 = 0xC6;
     public const byte EEPROM_TX_BBSWING_5G_8812 = 0xC7;
-    //public const byte FEN_USBA = BIT2;
-    //public const byte FEN_BB_GLB_RSTn = BIT1;
-    //public const byte FEN_BBRSTB = BIT0;
     public const uint FEN_USBA = BIT2;
     public const uint FEN_BB_GLB_RSTn = BIT1;
     public const uint FEN_BBRSTB = BIT0;
@@ -325,8 +301,6 @@ public static class CommonConsts
     public const uint bLSSIWrite_data_Jaguar = 0x000fffff;
     public const uint bHSSIRead_addr_Jaguar = 0xff;
     public const uint rRead_data_Jaguar = 0xfffff;
-    public const byte transmit_power_boost = 2;
-    public const byte transmit_power_override = 0;
     public const uint MASKDWORD = 0xffffffff;
 
     public const ushort REG_RF_B_CTRL_8812 = 0x0076;
@@ -352,6 +326,5 @@ public static class CommonConsts
     public const byte TXPWR_LMT_RS_OFDM = 1;
     public const byte TXPWR_LMT_RS_HT = 2;
     public const byte TXPWR_LMT_RS_VHT = 3;
-    public const byte TXPWR_LMT_RS_NUM = 4;
     public const byte MAX_2_4G_BANDWIDTH_NUM = 2;
 }

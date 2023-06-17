@@ -33,23 +33,12 @@ public static class rtw_wlan_util
             }
         }
 
-            // set Channel
-            // saved channel/bw info
-            rtw_set_oper_ch(padapter, channel);
+        // set Channel
+        // saved channel/bw info
+        var dvobj = adapter_to_dvobj(padapter);
+        dvobj.oper_channel = channel;
 
-            rtw_hal_set_chnl_bw(padapter, center_ch, bwmode, channel_offset, chnl_offset80); /* set center channel */
-    }
-
-    private static void rtw_set_oper_ch(_adapter adapter, u8 ch)
-    {
-        dvobj_priv dvobj = adapter_to_dvobj(adapter);
-
-        if (dvobj.oper_channel != ch) {
-            dvobj.on_oper_ch_time = DateTime.Now;
-
-        }
-
-        dvobj.oper_channel = ch;
+        rtw_hal_set_chnl_bw(padapter, center_ch, bwmode, channel_offset, chnl_offset80); /* set center channel */
     }
 
     private static u8 rtw_get_center_ch(u8 channel, channel_width chnl_bw, u8 chnl_offset)
@@ -96,7 +85,8 @@ public static class rtw_wlan_util
         return center_ch;
     }
 
-   public static void rtw_hal_set_chnl_bw(_adapter padapter, u8 channel, channel_width Bandwidth, u8 Offset40, u8 Offset80)
+    public static void rtw_hal_set_chnl_bw(_adapter padapter, u8 channel, channel_width Bandwidth, u8 Offset40,
+        u8 Offset80)
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
         u8 cch_160 = Bandwidth == channel_width.CHANNEL_WIDTH_160 ? channel : (u8)0;
@@ -104,45 +94,20 @@ public static class rtw_wlan_util
         u8 cch_40 = Bandwidth == channel_width.CHANNEL_WIDTH_40 ? channel : (u8)0;
         u8 cch_20 = Bandwidth == channel_width.CHANNEL_WIDTH_20 ? channel : (u8)0;
 
-        //if (rtw_phydm_is_iqk_in_progress(padapter))
-        //{
-        //    RTW_ERR("rtw_hal_set_chnl_bw IQK may race condition");
-        //}
-
-
-        /* MP mode channel don't use secondary channel */
-        if (rtw_mp_mode_check(padapter) == false)
+        if (cch_80 != 0)
         {
-            if (cch_80 != 0)
-            {
-                cch_40 = rtw_get_scch_by_cch_offset(cch_80, channel_width.CHANNEL_WIDTH_80, Offset80);
-            }
+            cch_40 = rtw_get_scch_by_cch_offset(cch_80, channel_width.CHANNEL_WIDTH_80, Offset80);
+        }
 
-            if (cch_40 != 0)
-            {
-                cch_20 = rtw_get_scch_by_cch_offset(cch_40, channel_width.CHANNEL_WIDTH_40, Offset40);
-            }
+        if (cch_40 != 0)
+        {
+            cch_20 = rtw_get_scch_by_cch_offset(cch_40, channel_width.CHANNEL_WIDTH_40, Offset40);
         }
 
         pHalData.cch_80 = cch_80;
         pHalData.cch_40 = cch_40;
         pHalData.cch_20 = cch_20;
 
-        //if (0)
-        //    RTW_INFO("%s cch:%u, %s, offset40:%u, offset80:%u (%u, %u, %u)\n", __func__
-        //        , channel, ch_width_str(Bandwidth), Offset40, Offset80
-        //        , pHalData.cch_80, pHalData.cch_40, pHalData.cch_20);
-
         PHY_SetSwChnlBWMode8812(padapter, channel, Bandwidth, Offset40, Offset80);
     }
-
-   private static bool rtw_mp_mode_check(PADAPTER pAdapter)
-   {
-       PADAPTER primary_adapter = pAdapter;
-
-       if (primary_adapter.registrypriv.mp_mode == 1)
-           return true;
-       else
-           return false;
-   }
 }

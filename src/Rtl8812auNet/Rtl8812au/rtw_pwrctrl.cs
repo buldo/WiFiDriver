@@ -4,85 +4,14 @@ namespace Rtl8812auNet.Rtl8812au;
 
 public static class rtw_pwrctrl
 {
-    public static int rtw_pwr_wakeup(_adapter adapter) => _rtw_pwr_wakeup(adapter, RTW_PWR_STATE_CHK_INTERVAL);
+    public static int rtw_pwr_wakeup(_adapter adapter) => _rtw_pwr_wakeup(adapter);
 
-    static int _rtw_pwr_wakeup(_adapter padapter, u32 ips_deffer_ms)
+    static int _rtw_pwr_wakeup(_adapter padapter)
     {
-        string caller = "rtw_pwr_wakeup";
-
         dvobj_priv dvobj = adapter_to_dvobj(padapter);
-        pwrctrl_priv pwrpriv = dvobj_to_pwrctl(dvobj);
         int ret = _SUCCESS;
-        var start = Stopwatch.StartNew();
-
-        /*RTW_INFO(FUNC_ADPT_FMT "===>\n", FUNC_ADPT_ARG(padapter));*/
-        /* for LPS */
         LeaveAllPowerSaveMode(padapter);
-
-        /* IPS still bound with primary adapter */
-        //var pmlmepriv = padapter.mlmepriv;
-
-        //if (rtw_time_after(rtw_get_current_time() + rtw_ms_to_systime(ips_deffer_ms), pwrpriv.ips_deny_time))
-        //{
-        //    pwrpriv.ips_deny_time = rtw_get_current_time() + rtw_ms_to_systime(ips_deffer_ms);
-        //}
-
-        //if (pwrpriv.ps_processing)
-        //{
-        //    RTW_INFO("%s wait ps_processing...\n", __func__);
-        //    while (pwrpriv.ps_processing && rtw_get_passing_time_ms(start) <= 3000)
-        //        rtw_mdelay_os(10);
-        //    if (pwrpriv.ps_processing)
-        //        RTW_INFO("%s wait ps_processing timeout\n", __func__);
-        //    else
-        //        RTW_INFO("%s wait ps_processing done\n", __func__);
-        //}
-
-        //if (pwrpriv.bInSuspend)
-        //{
-        //    RTW_INFO("%s wait bInSuspend...\n", __func__);
-        //    while (pwrpriv.bInSuspend
-        //           && ((rtw_get_passing_time_ms(start) <= 3000 && !rtw_is_do_late_resume(pwrpriv))
-        //               || (rtw_get_passing_time_ms(start) <= 500 && rtw_is_do_late_resume(pwrpriv)))
-        //          )
-        //        rtw_mdelay_os(10);
-        //    if (pwrpriv.bInSuspend)
-        //        RTW_INFO("%s wait bInSuspend timeout\n", __func__);
-        //    else
-        //        RTW_INFO("%s wait bInSuspend done\n", __func__);
-        //}
-
-/* System suspend is not allowed to wakeup */
-        if ((true == pwrpriv.bInSuspend))
-        {
-            ret = _FAIL;
-            goto exit;
-        }
-
-
-/* TODO: the following checking need to be merged... */
-        //if (rtw_is_drv_stopped(padapter)
-        //    || !padapter.bup
-        //    || !rtw_is_hw_init_completed(padapter)
-        //   )
-        //{
-        //    RTW_INFO("%s: bDriverStopped=%s, bup=%d, hw_init_completed=%u\n"
-        //        , caller
-        //        , rtw_is_drv_stopped(padapter) ? "True" : "False"
-        //        , padapter.bup
-        //        , rtw_get_hw_init_completed(padapter));
-        //    ret = false;
-        //    goto exit;
-        //}
-
-        exit:
-        //if (rtw_time_after(rtw_get_current_time() + rtw_ms_to_systime(ips_deffer_ms), pwrpriv.ips_deny_time))
-        //{
-        //    pwrpriv.ips_deny_time = rtw_get_current_time() + rtw_ms_to_systime(ips_deffer_ms);
-        //}
-/*RTW_INFO(FUNC_ADPT_FMT "<===\n", FUNC_ADPT_ARG(padapter));*/
         return ret;
-
     }
 
     /*

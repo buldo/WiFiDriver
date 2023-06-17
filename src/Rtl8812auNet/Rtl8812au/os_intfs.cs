@@ -4,19 +4,6 @@ public static class os_intfs
 {
     public static bool netdev_open(_adapter padapter, InitChannel initChannel)
     {
-        pwrctrl_priv pwrctrlpriv = adapter_to_pwrctl(padapter);
-
-        if (pwrctrlpriv.bInSuspend)
-        {
-            RTW_INFO(" [WARN] OPEN FAILED bInSuspend = false");
-            return false;
-        }
-
-        return _netdev_open(padapter, initChannel);
-    }
-
-    static bool _netdev_open(_adapter padapter, InitChannel initChannel)
-    {
         bool status;
 
         RTW_INFO($"_netdev_open , bup={padapter.up}");
@@ -35,12 +22,6 @@ public static class os_intfs
                 goto netdev_open_error;
             }
 
-            if (padapter.napi_state == NAPI_STATE.NAPI_DISABLE)
-            {
-                padapter.napi_state = NAPI_STATE.NAPI_ENABLE;
-            }
-
-            rtw_cfg80211_init_wiphy(padapter);
             padapter.up = true;
         }
 

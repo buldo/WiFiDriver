@@ -229,15 +229,13 @@ public static class UsbHalInit
 
     }
 
-    public static u8 ReadAdapterInfo8812AU(PADAPTER Adapter)
+    public static void ReadAdapterInfo8812AU(PADAPTER Adapter)
     {
         /* Read all content in Efuse/EEPROM. */
         Hal_ReadPROMContent_8812A(Adapter);
 
         /* We need to define the RF type after all PROM value is recognized. */
         ReadRFType8812A(Adapter);
-
-        return _SUCCESS;
     }
 
     private static void ReadRFType8812A(PADAPTER padapter)
@@ -2768,8 +2766,7 @@ public static class UsbHalInit
         //    _InitRDGSetting_8812A(Adapter);
         //}
 
-        if (Adapter.registrypriv.mp_mode == 0)
-        {
+
             status = FirmwareDownload8812(Adapter, false);
             if (status != true)
             {
@@ -2784,24 +2781,11 @@ public static class UsbHalInit
                 pHalData.bFWReady = true;
                 pHalData.fw_ractrl = true;
             }
-        }
 
-        if (pwrctrlpriv.reg_rfoff == true)
+            if (pwrctrlpriv.reg_rfoff == true)
         {
             pwrctrlpriv.rf_pwrstate = rt_rf_power_state.rf_off;
         }
-
-        // 2010/08/09 MH We need to check if we need to turnon or off RF after detecting
-        // HW GPIO pin. Before PHY_RFConfig8192C.
-        // HalDetectPwrDownMode(Adapter);
-        // 2010/08/26 MH If Efuse does not support sective suspend then disable the function.
-        // HalDetectSelectiveSuspendMode(Adapter);
-
-        // Save target channel
-        // <Roger_Notes> Current Channel will be updated again later.
-        // TODO:
-        //pHalData.current_channel = 0; // set 0 to trigger switch correct channel
-
 
         status = PHY_MACConfig8812(Adapter);
         if (status == false)
@@ -2905,13 +2889,6 @@ public static class UsbHalInit
 
         rtl8812_InitHalDm(Adapter);
 
-        if (Adapter.registrypriv.mp_mode == 1)
-        {
-            throw new NotImplementedException("mp_mode == 1");
-            //Adapter.mppriv.channel = pHalData.current_channel;
-            //MPT_InitializeAdapter(Adapter, Adapter.mppriv.channel);
-        }
-        else
         {
             /*  */
             /* 2010/08/11 MH Merge from 8192SE for Minicard init. We need to confirm current radio status */
@@ -3222,11 +3199,9 @@ public static class UsbHalInit
 
             /* <20131106, Kordan> Workaround to fix CCK FA for scan issue. */
             /* if( pHalData.bMPMode == FALSE) */
-            if (Adapter.registrypriv.mp_mode == 0)
-            {
-                phy_set_bb_reg(Adapter, rTxPath_Jaguar, 0xf0, 0x1);
-                phy_set_bb_reg(Adapter, rCCK_RX_Jaguar, 0x0f000000, 0x1);
-            }
+
+            phy_set_bb_reg(Adapter, rTxPath_Jaguar, 0xf0, 0x1);
+            phy_set_bb_reg(Adapter, rCCK_RX_Jaguar, 0x0f000000, 0x1);
 
             update_tx_basic_rate(Adapter, NETWORK_TYPE.WIRELESS_11BG);
 
@@ -3261,9 +3236,7 @@ public static class UsbHalInit
                 RTW_INFO("PHY_SwitchWirelessBand8812(): Switch to 5G Band. Count = %d reg41A=0x%x\n", count, reg41A);
 
             /* 2012/02/01, Sinda add registry to switch workaround without long-run verification for scan issue. */
-            if (Adapter.registrypriv.mp_mode == 0)
-                phy_set_bb_reg(Adapter, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
-
+            phy_set_bb_reg(Adapter, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
 
             /* <20131128, VincentL> Remove 0x830[3:1] setting when switching 2G/5G, requested by Yn. */
             phy_set_bb_reg(Adapter, rBWIndication_Jaguar, 0x3, 0x2); /* 0x834[1:0] = 0x2 */
@@ -3283,16 +3256,8 @@ public static class UsbHalInit
 
             /* <20131106, Kordan> Workaround to fix CCK FA for scan issue. */
             /* if( pHalData.bMPMode == FALSE) */
-            if (Adapter.registrypriv.mp_mode == 0)
-            {
-                phy_set_bb_reg(Adapter, rTxPath_Jaguar, 0xf0, 0x0);
-                phy_set_bb_reg(Adapter, rCCK_RX_Jaguar, 0x0f000000, 0xF);
-            }
-            else
-            {
-                /* cck_enable */
-                phy_set_bb_reg(Adapter, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x02);
-            }
+            phy_set_bb_reg(Adapter, rTxPath_Jaguar, 0xf0, 0x0);
+            phy_set_bb_reg(Adapter, rCCK_RX_Jaguar, 0x0f000000, 0xF);
 
             /* avoid using cck rate in 5G band */
             /* Set RRSR rate table. */
@@ -3752,24 +3717,6 @@ public static class UsbHalInit
             goto phy_BB_Config_ParaFile_Fail;
         }
 
-        /* Read PHY_REG_MP.TXT BB INIT!! */
-
-        if (Adapter.registrypriv.mp_mode == 1)
-        {
-            if (true != odm_config_bb_with_header_file(Adapter, odm_bb_config_type.CONFIG_BB_PHY_REG_MP))
-            {
-                rtStatus = false;
-            }
-
-            if (rtStatus != true)
-            {
-                RTW_INFO("phy_BB8812_Config_ParaFile():Write BB Reg MP Fail!!\n");
-                goto phy_BB_Config_ParaFile_Fail;
-            }
-        }
-
-        /* BB AGC table Initialization */
-
         rtStatus = odm_config_bb_with_header_file(Adapter, odm_bb_config_type.CONFIG_BB_AGC_TAB);
 
         if (rtStatus != true)
@@ -3785,7 +3732,6 @@ public static class UsbHalInit
 
     static bool PHY_BBConfig8812(PADAPTER Adapter)
     {
-        bool rtStatus = true;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
         uint TmpU1B = 0;
 
@@ -3810,7 +3756,7 @@ public static class UsbHalInit
         /*  */
         /* Config BB and AGC */
         /*  */
-        rtStatus = phy_BB8812_Config_ParaFile(Adapter);
+        var rtStatus = phy_BB8812_Config_ParaFile(Adapter);
 
         hal_set_crystal_cap(Adapter, pHalData.crystal_cap);
 

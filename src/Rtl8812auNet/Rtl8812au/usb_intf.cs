@@ -60,24 +60,15 @@ public static class usb_intf
         rtw_hal_read_chip_version(padapter);
 
         /* step usb endpoint mapping */
-        rtw_hal_chip_configure(padapter);
+        rtl8812au_interface_configure(padapter);
 
         /* step read efuse/eeprom data and get mac_addr */
-        if (rtw_hal_read_chip_info(padapter) == _FAIL)
-        {
-            throw new Exception("rtw_hal_read_chip_info");
-        }
+        ReadAdapterInfo8812AU(padapter);
 
         /* step 5. */
         rtl8812_init_dm_priv(padapter);
 
         return padapter;
-    }
-
-    private static u8 rtw_hal_read_chip_info(_adapter padapter)
-    {
-        /*  before access eFuse, make sure card enable has been called */
-        return ReadAdapterInfo8812AU(padapter);
     }
 
     static void rtw_hal_read_chip_version(_adapter padapter)
@@ -117,11 +108,6 @@ public static class usb_intf
         hal_spec.pg_txgi_diff_factor = 1;
     }
 
-    static void rtw_hal_chip_configure(_adapter padapter)
-    {
-        rtl8812au_interface_configure(padapter);
-    }
-
     public static int rtl8812_EFUSE_GetEfuseDefinition(PADAPTER pAdapter, u8 efuseType, EFUSE_DEF_TYPE type)
     {
         switch (type)
@@ -145,7 +131,6 @@ public static class usb_intf
         var registry_par = padapter.registrypriv;
 
         registry_par.channel = 36;
-        registry_par.mp_mode = 0;
         registry_par.rf_config = rf_type.RF_TYPE_MAX;
         registry_par.wifi_spec = rtw_wifi_spec;
         registry_par.special_rf_path = (u8)0;

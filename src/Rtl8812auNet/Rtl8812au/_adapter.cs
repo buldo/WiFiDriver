@@ -13,5 +13,4 @@ public class _adapter
     public IRtlUsbDevice Device { get; set; }
     public bool up { get; set; }
     public hw_port hw_port { get; set; }
-    public NAPI_STATE napi_state { get; set; }
 }

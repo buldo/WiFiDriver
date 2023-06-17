@@ -6,11 +6,10 @@ public class dvobj_priv
 {
     private const int CONFIG_IFACE_NUMBER = 1;
     /*-------- below is common data --------*/
-    public const CHIP_TYPE chip_type = CHIP_TYPE.RTL8812;
+
     public RTL871X_HCI_TYPE interface_type = RTL871X_HCI_TYPE.RTW_USB; /*USB,SDIO,SPI,PCI*/
     public byte oper_channel; /* saved channel info when call set_channel_bw */
     public _adapter[] padapters { get; } =new _adapter[CONFIG_IFACE_NUMBER]; /*IFACE_ID_MAX*/
-    public DateTime on_oper_ch_time { get; set; }
 
     public byte iface_nums; /* total number of ifaces used runtime */
 
