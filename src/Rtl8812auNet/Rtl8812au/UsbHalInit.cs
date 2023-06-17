@@ -141,7 +141,6 @@ public static class UsbHalInit
 
         Hal_ReadPROMVersion8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
         hal_ReadIDs_8812AU(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        hal_config_macaddr(Adapter, pHalData.bautoload_fail_flag);
         Hal_ReadTxPowerInfo8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
         Hal_ReadBoardType8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
 
@@ -464,7 +463,7 @@ public static class UsbHalInit
         u8 rfpath, ch_idx, group = 0, tx_idx;
 
         /* load from pg data (or default value) */
-        hal_load_pg_txpwr_info(adapter, pwr_info_2g, pwr_info_5g, pg_data, false);
+        hal_load_pg_txpwr_info(adapter, pwr_info_2g, pwr_info_5g, pg_data);
 
         /* transform to hal_data */
         for (rfpath = 0; rfpath < MAX_RF_PATH; rfpath++)
@@ -548,15 +547,11 @@ public static class UsbHalInit
         }
     }
 
-    static map_t hal_pg_txpwr_def_info(_adapter adapter)
+    static map_t hal_pg_txpwr_def_info()
     {
-        u8 interface_type = 0;
-        map_t map = null;
-
-        map = MAP_ENT(0xB8, 1, 0xFF, new map_seg_t()
+        var map = MAP_ENT(0xB8, 1, 0xFF, new map_seg_t()
             {
                 sa = 0x10,
-                len = 82,
                 c = new byte[]
                 {
                     0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x2D, 0x02, 0xEE, 0xEE, 0xFF, 0xFF,
@@ -573,15 +568,14 @@ public static class UsbHalInit
         return map;
     }
 
-    private static void hal_load_pg_txpwr_info(_adapter adapter, TxPowerInfo24G pwr_info_2g, TxPowerInfo5G pwr_info_5g,
-        u8[] pg_data, BOOLEAN AutoLoadFail)
+    private static void hal_load_pg_txpwr_info(_adapter adapter, TxPowerInfo24G pwr_info_2g, TxPowerInfo5G pwr_info_5g, u8[] pg_data)
     {
 
         var hal_spec = GET_HAL_SPEC(adapter);
         u8 path;
         u16 pg_offset;
         u8 txpwr_src = PG_TXPWR_SRC_PG_DATA;
-        map_t pg_data_map = MAP_ENT(184, 1, 0xFF, MAPSEG_PTR_ENT(0x00, 184, pg_data));
+        map_t pg_data_map = MAP_ENT(184, 1, 0xFF, MAPSEG_PTR_ENT(0x00, pg_data));
         map_t txpwr_map = null;
 
         /* init with invalid value and some dummy base and diff */
@@ -597,13 +591,12 @@ public static class UsbHalInit
                 txpwr_map = pg_data_map;
                 break;
             case PG_TXPWR_SRC_IC_DEF:
-                txpwr_map = hal_pg_txpwr_def_info(adapter);
+                txpwr_map = hal_pg_txpwr_def_info();
                 break;
             case PG_TXPWR_SRC_DEF:
             default:
                 txpwr_map = MAP_ENT(0xB8, 1, 0xFF, new map_seg_t()
                 {
-                    len = 168,
                     sa = 0x88,
                     c = new byte[]
                     {
@@ -1411,59 +1404,6 @@ public static class UsbHalInit
         RTW_INFO($"crystal_cap: 0x{pHalData.crystal_cap:X}");
     }
 
-    private static bool hal_config_macaddr(_adapter adapter, bool autoload_fail)
-    {
-        // TODO: Looks like not needed
-//         var pdvobjpriv = adapter_to_dvobj(adapter);
-//
-//         HAL_DATA_TYPE* hal_data = GET_HAL_DATA(adapter);
-//         u8 addr[ETH_ALEN];
-//         int addr_offset = hal_efuse_macaddr_offset(adapter);
-//         u8* hw_addr = null;
-//         int ret = _SUCCESS;
-//
-//         if (autoload_fail)
-//             goto bypass_hw_pg;
-//
-//         if (addr_offset != -1)
-//             hw_addr = &hal_data.efuse_eeprom_data[addr_offset];
-//
-// #ifdef CONFIG_EFUSE_CONFIG_FILE
-//         /* if the hw_addr is written by efuse file, set to null */
-//         if (hal_data.efuse_file_status == EFUSE_FILE_LOADED)
-//             hw_addr = null;
-// #endif
-//
-//         if (!hw_addr) {
-//             /* try getting hw pg data */
-//             if (Hal_GetPhyEfuseMACAddr(adapter, addr) == _SUCCESS)
-//                 hw_addr = addr;
-//         }
-//
-//         /* check hw pg data */
-//         if (hw_addr && rtw_check_invalid_mac_address(hw_addr, true) == false) {
-//             _rtw_memcpy(hal_data.EEPROMMACAddr, hw_addr, ETH_ALEN);
-//             goto exit;
-//         }
-//
-//         bypass_hw_pg:
-//
-// # ifdef CONFIG_EFUSE_CONFIG_FILE
-// /* check wifi mac file */
-//         if (Hal_ReadMACAddrFromFile(adapter, addr) == _SUCCESS)
-//         {
-//             _rtw_memcpy(hal_data.EEPROMMACAddr, addr, ETH_ALEN);
-//             goto exit;
-//         }
-// #endif
-//
-//         _rtw_memset(hal_data.EEPROMMACAddr, 0, ETH_ALEN);
-//         ret = _FAIL;
-//         exit:
-//         dev_info(&udev.dev, "88XXau %pM hw_info[%02x]", hw_addr, addr_offset);
-        return true;
-    }
-
     static void Hal_ReadPROMVersion8812A(PADAPTER Adapter, u8[] PROMContent, bool AutoloadFail)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
@@ -2125,12 +2065,11 @@ public static class UsbHalInit
 
     private static bool is_boot_from_eeprom(_adapter adapter) => (GET_HAL_DATA(adapter).EepromOrEfuse);
 
-    private static map_seg_t MAPSEG_PTR_ENT(UInt16 _sa, u16 _len, u8[] _p)
+    private static map_seg_t MAPSEG_PTR_ENT(UInt16 _sa, u8[] _p)
     {
         return new map_seg_t()
         {
             sa = _sa,
-            len = _len,
             c = _p
         };
 

@@ -194,9 +194,4 @@ public static class halhwimg8812a_mac
         0x718, 0x00000040,
 
     };
-
-    static u32 odm_get_version_mp_8812a_mac_reg()
-    {
-        return 57;
-    }
 }

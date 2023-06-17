@@ -192,7 +192,7 @@ public static class usb_intf
         if (status)
         {
             init_hw_mlme_ext(padapter, initChannel);
-            rtw_setopmode_cmd(padapter);
+            setopmode_hdl(padapter);
         }
         else
         {
