@@ -42,9 +42,6 @@ public static class usb_intf
 
         padapter.HwPort = HwPort.HW_PORT0;
 
-        /* step 2. hook HalFunc, allocate HalData */
-        init_hal_spec_8812a(padapter);
-
         /* step read_chip_version */
         read_chip_version_8812a(padapter);
         rtw_odm_init_ic_type(padapter);
@@ -59,20 +56,6 @@ public static class usb_intf
         Init_ODM_ComInfo_8812(padapter);
 
         return padapter;
-    }
-
-    static void init_hal_spec_8812a(AdapterState adapterState)
-    {
-        hal_spec_t hal_spec = GET_HAL_SPEC(adapterState);
-
-        hal_spec.rfpath_num_2g = 2;
-        hal_spec.rfpath_num_5g = 2;
-        hal_spec.txgi_max = 63;
-        hal_spec.max_tx_cnt = 2;
-        hal_spec.band_cap = BAND_CAP_2G | BAND_CAP_5G;
-        hal_spec.proto_cap = (byte)(PROTO_CAP_11B | PROTO_CAP_11G | PROTO_CAP_11N | PROTO_CAP_11AC);
-        hal_spec.pg_txpwr_saddr = 0x10;
-        hal_spec.pg_txgi_diff_factor = 1;
     }
 
     static void loadparam(AdapterState padapter)

@@ -552,7 +552,6 @@ public static class UsbHalInit
 
         var hal_spec = GET_HAL_SPEC(adapterState);
         u8 path;
-        u16 pg_offset;
         u8 txpwr_src = PG_TXPWR_SRC_PG_DATA;
         map_t pg_data_map = MAP_ENT(184, 1, 0xFF, MAPSEG_PTR_ENT(0x00, pg_data));
         map_t txpwr_map = null;
@@ -562,7 +561,7 @@ public static class UsbHalInit
         hal_init_pg_txpwr_info_5g(adapterState, pwr_info_5g);
 
         select_src:
-        pg_offset = hal_spec.pg_txpwr_saddr;
+        u16 pg_offset = hal_spec.pg_txpwr_saddr;
 
         switch (txpwr_src)
         {
