@@ -2,7 +2,6 @@
 
 public class dm_struct
 {
-    public dm_rf_calibration_struct rf_calibrate_info = new dm_rf_calibration_struct();
     public u8 board_type { get; set; }
     public byte support_platform { get; set; }
     public odm_cut_version cut_version { get; set; }

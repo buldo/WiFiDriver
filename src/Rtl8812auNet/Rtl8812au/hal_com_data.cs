@@ -12,7 +12,7 @@ public class hal_com_data
     public u8 NumTotalRFPath { get; set; }
     public bool bautoload_fail_flag { get; set; }
     public RT_MULTI_FUNC MultiFunc { get; set; }
-    public channel_width current_channel_bw { get; set; }
+    public ChannelWidth current_channel_bw { get; set; }
     public bool bSwChnl { get; set; }
     public bool bChnlBWInitialized { get; set; }
     public byte nCur40MhzPrimeSC { get; set; }
@@ -70,10 +70,10 @@ public class hal_com_data
     public u16 TypeAPA { get; set; }
     public u16 rfe_type { get; set; }
 
-    public Dictionary<rf_path, BB_REGISTER_DEFINITION_T> PHYRegDef { get; } = new()
+    public Dictionary<rf_path, BbRegisterDefinition> PHYRegDef { get; } = new()
     {
-        { rf_path.RF_PATH_A, new BB_REGISTER_DEFINITION_T() },
-        { rf_path.RF_PATH_B, new BB_REGISTER_DEFINITION_T() }
+        { rf_path.RF_PATH_A, new BbRegisterDefinition() },
+        { rf_path.RF_PATH_B, new BbRegisterDefinition() }
     }; /* Radio A/B/C/D */
 
     public dm_struct odmpriv { get; } = new dm_struct();
@@ -102,5 +102,5 @@ public class hal_com_data
 
     public hal_spec_t hal_spec { get; } = new();
 
-    public BAND_TYPE current_band_type { get; set; }
+    public BandType current_band_type { get; set; }
 }

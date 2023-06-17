@@ -4,7 +4,7 @@ public static class hal_com
 {
     public static void rtw_hal_set_msr(AdapterState adapterState, u8 net_type)
     {
-        switch (adapterState.hw_port)
+        switch (adapterState.HwPort)
         {
             case hw_port.HW_PORT0:
                 /*REG_CR - BIT[17:16]-Network Type for port 0*/
@@ -12,7 +12,7 @@ public static class hal_com
                 val8 |= net_type;
                 rtw_write8(adapterState, MSR, val8);
                 break;
-            //case hw_port.HW_PORT1:
+            //case HwPort.HW_PORT1:
             //    /*REG_CR - BIT[19:18]-Network Type for port 1*/
             //    val8 = rtw_read8(adapterState, MSR) & 0x03;
             //    val8 |= net_type << 2;

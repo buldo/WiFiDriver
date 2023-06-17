@@ -21,8 +21,8 @@ public static class rtw_mlme_ext
 
         /* Modify to make sure first time change channel(band) would be done properly */
         pHalData.current_channel = 0;
-        pHalData.current_channel_bw = channel_width.CHANNEL_WIDTH_MAX;
-        pHalData.current_band_type = BAND_TYPE.BAND_MAX;
+        pHalData.current_channel_bw = ChannelWidth.CHANNEL_WIDTH_MAX;
+        pHalData.current_band_type = BandType.BAND_MAX;
 
         /* set_opmode_cmd(padapter, infra_client_with_mlme); */ /* removed */
         Set_HW_VAR_ENABLE_RX_BAR(padapter, rx_bar_enble);

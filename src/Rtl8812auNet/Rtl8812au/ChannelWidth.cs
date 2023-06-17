@@ -1,6 +1,6 @@
 ﻿namespace Rtl8812auNet.Rtl8812au;
 
-public enum channel_width
+public enum ChannelWidth
 {
     CHANNEL_WIDTH_20 = 0,
     CHANNEL_WIDTH_40 = 1,

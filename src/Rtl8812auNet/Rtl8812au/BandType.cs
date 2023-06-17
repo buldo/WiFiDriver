@@ -1,6 +1,6 @@
 ﻿namespace Rtl8812auNet.Rtl8812au;
 
-public enum BAND_TYPE
+public enum BandType
 {
     BAND_ON_2_4G = 0,
     BAND_ON_5G = 1,

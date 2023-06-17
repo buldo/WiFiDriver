@@ -6,7 +6,7 @@ public static class ioctl_cfg80211
     {
         nl80211_iftype type = nl80211_iftype.NL80211_IFTYPE_MONITOR;
 
-        RTW_INFO($"cfg80211_rtw_change_iface type={type}, hw_port:{padapter.hw_port}");
+        RTW_INFO($"cfg80211_rtw_change_iface type={type}, HwPort:{padapter.HwPort}");
 
         RTW_INFO("cfg80211_rtw_change_iface call netdev_open");
         if (netdev_open(padapter, initChannel) == false)
@@ -30,9 +30,9 @@ public static class ioctl_cfg80211
     {
         bool status;
 
-        RTW_INFO($"_netdev_open , bup={padapter.up}");
+        RTW_INFO($"_netdev_open , bup={padapter.IsUp}");
 
-        if (padapter.up == false)
+        if (padapter.IsUp == false)
         {
             status = rtw_hal_init(padapter, initChannel);
             if (status == false)
@@ -46,16 +46,16 @@ public static class ioctl_cfg80211
                 goto netdev_open_error;
             }
 
-            padapter.up = true;
+            padapter.IsUp = true;
         }
 
         return true;
 
         netdev_open_error:
 
-        padapter.up = false;
+        padapter.IsUp = false;
 
-        RTW_INFO($"-871x_drv - drv_open fail, bup={padapter.up}");
+        RTW_INFO($"-871x_drv - drv_open fail, bup={padapter.IsUp}");
 
         return false;
     }

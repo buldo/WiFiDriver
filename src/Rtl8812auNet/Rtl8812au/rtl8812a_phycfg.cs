@@ -5,7 +5,7 @@ public static class rtl8812a_phycfg
     public static void PHY_SetSwChnlBWMode8812(
         PADAPTER adapterState,
         u8 channel,
-        channel_width Bandwidth, u8 Offset40,
+        ChannelWidth Bandwidth, u8 Offset40,
         u8 Offset80)
     {
         /* RTW_INFO("%s()===>\n",__FUNCTION__); */
@@ -53,7 +53,7 @@ public static class rtl8812a_phycfg
         BOOLEAN bSwitchChannel,
         BOOLEAN bSetBandWidth,
         u8 ChannelNum,
-        channel_width ChnlWidth,
+        ChannelWidth ChnlWidth,
         u8 ChnlOffsetOf40MHz,
         u8 ChnlOffsetOf80MHz,
         u8 CenterFrequencyIndex1
@@ -62,7 +62,7 @@ public static class rtl8812a_phycfg
         PADAPTER pDefAdapterState = adapterState;
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(pDefAdapterState);
         u8 tmpChannel = pHalData.current_channel;
-        channel_width tmpBW = pHalData.current_channel_bw;
+        ChannelWidth tmpBW = pHalData.current_channel_bw;
         u8 tmpnCur40MhzPrimeSC = pHalData.nCur40MhzPrimeSC;
         u8 tmpnCur80MhzPrimeSC = pHalData.nCur80MhzPrimeSC;
         u8 tmpCenterFrequencyIndex1 = pHalData.CurrentCenterFrequencyIndex1;
@@ -132,21 +132,7 @@ public static class rtl8812a_phycfg
 
     static void phy_SwChnlAndSetBwMode8812(PADAPTER adapterState)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
-
-        /* RTW_INFO("phy_SwChnlAndSetBwMode8812(): bSwChnl %d, bSetChnlBW %d\n", pHalData.bSwChnl, pHalData.bSetChnlBW); */
-        //if (adapterState.bNotifyChannelChange) {
-        //    RTW_INFO("[%s] bSwChnl=%d, ch=%d, bSetChnlBW=%d, bw=%d\n",
-        //        __FUNCTION__,
-        //        pHalData.bSwChnl,
-        //        pHalData.current_channel,
-        //        pHalData.bSetChnlBW,
-        //        pHalData.current_channel_bw);
-        //}
-
-        //if (RTW_CANNOT_RUN(adapterState))
-        //    return;
-
+        var pHalData = GET_HAL_DATA(adapterState);
 
         if (pHalData.bSwChnl)
         {
@@ -162,11 +148,6 @@ public static class rtl8812a_phycfg
 
         PHY_SetTxPowerLevel8812(adapterState, pHalData.current_channel);
 
-        if (pHalData.bNeedIQK)
-        {
-            halrf_iqk_trigger(pHalData.odmpriv, false);
-        }
-
         pHalData.bNeedIQK = false;
     }
 
@@ -181,7 +162,7 @@ public static class rtl8812a_phycfg
         }
     }
 
-    static void PHY_TxPowerTrainingByPath_8812(PADAPTER adapterState, channel_width BandWidth, u8 Channel, rf_path RfPath)
+    static void PHY_TxPowerTrainingByPath_8812(PADAPTER adapterState, ChannelWidth BandWidth, u8 Channel, rf_path RfPath)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
@@ -220,7 +201,7 @@ public static class rtl8812a_phycfg
         phy_set_bb_reg(adapterState, writeOffset, 0xffffff, writeData);
     }
 
-    static u8 phy_get_tx_power_index(PADAPTER pAdapterState, rf_path RFPath, MGN_RATE Rate, channel_width BandWidth,
+    static u8 phy_get_tx_power_index(PADAPTER pAdapterState, rf_path RFPath, MGN_RATE Rate, ChannelWidth BandWidth,
         u8 Channel)
     {
         return 16;
@@ -230,7 +211,7 @@ public static class rtl8812a_phycfg
     static void phy_set_tx_power_level_by_path(PADAPTER adapterState, u8 channel, rf_path path)
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
-        BOOLEAN bIsIn24G = (pHalData.current_band_type == BAND_TYPE.BAND_ON_2_4G);
+        BOOLEAN bIsIn24G = (pHalData.current_band_type == BandType.BAND_ON_2_4G);
 
         if (bIsIn24G)
         {
@@ -263,7 +244,7 @@ public static class rtl8812a_phycfg
             throw new Exception("RateSection >= RATE_SECTION.RATE_SECTION_NUM");
         }
 
-        if (RateSection == RATE_SECTION.CCK && pHalData.current_band_type != BAND_TYPE.BAND_ON_2_4G)
+        if (RateSection == RATE_SECTION.CCK && pHalData.current_band_type != BandType.BAND_ON_2_4G)
             goto exit;
 
         PHY_SetTxPowerIndexByRateArray(
@@ -280,7 +261,7 @@ public static class rtl8812a_phycfg
     static void PHY_SetTxPowerIndexByRateArray(
         PADAPTER pAdapterState,
         rf_path RFPath,
-        channel_width BandWidth,
+        ChannelWidth BandWidth,
         u8 Channel,
         MGN_RATE[] Rates)
     {
@@ -379,26 +360,26 @@ public static class rtl8812a_phycfg
     {
         u8 u1Btmp;
         BOOLEAN ret_value = true;
-        BAND_TYPE Band = BAND_TYPE.BAND_ON_5G;
-        BAND_TYPE BandToSW;
+        BandType Band = BandType.BAND_ON_5G;
+        BandType BandToSW;
 
         u1Btmp = rtw_read8(pAdapterState, REG_CCK_CHECK_8812);
         if ((u1Btmp & BIT7) != 0)
         {
-            Band = BAND_TYPE.BAND_ON_5G;
+            Band = BandType.BAND_ON_5G;
         }
         else
         {
-            Band = BAND_TYPE.BAND_ON_2_4G;
+            Band = BandType.BAND_ON_2_4G;
         }
 
         /* Use current channel to judge Band Type and switch Band if need. */
         if (channelToSW > 14)
         {
-            BandToSW = BAND_TYPE.BAND_ON_5G;
+            BandToSW = BandType.BAND_ON_5G;
         }
         else
-            BandToSW = BAND_TYPE.BAND_ON_2_4G;
+            BandToSW = BandType.BAND_ON_2_4G;
 
         if (BandToSW != Band)
         {
@@ -433,7 +414,7 @@ public static class rtl8812a_phycfg
     {
         u32 retValue = 0;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
-        BB_REGISTER_DEFINITION_T pPhyReg = pHalData.PHYRegDef[eRFPath];
+        BbRegisterDefinition pPhyReg = pHalData.PHYRegDef[eRFPath];
         BOOLEAN bIsPIMode = false;
 
 
@@ -505,7 +486,7 @@ public static class rtl8812a_phycfg
     {
         u32 DataAndAddr = 0;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
-        BB_REGISTER_DEFINITION_T pPhyReg = pHalData.PHYRegDef[eRFPath];
+        BbRegisterDefinition pPhyReg = pHalData.PHYRegDef[eRFPath];
 
         Offset &= 0xff;
 
@@ -522,23 +503,23 @@ public static class rtl8812a_phycfg
 
     }
 
-    static void phy_SetRegBW_8812(PADAPTER adapterState, channel_width CurrentBW)
+    static void phy_SetRegBW_8812(PADAPTER adapterState, ChannelWidth CurrentBW)
     {
         u16 RegRfMod_BW, u2tmp = 0;
         RegRfMod_BW = rtw_read16(adapterState, REG_WMAC_TRXPTCL_CTL);
 
         switch (CurrentBW)
         {
-            case channel_width.CHANNEL_WIDTH_20:
+            case ChannelWidth.CHANNEL_WIDTH_20:
                 rtw_write16(adapterState, REG_WMAC_TRXPTCL_CTL, (ushort)(RegRfMod_BW & 0xFE7F)); /* BIT 7 = 0, BIT 8 = 0 */
                 break;
 
-            case channel_width.CHANNEL_WIDTH_40:
+            case ChannelWidth.CHANNEL_WIDTH_40:
                 u2tmp = (ushort)(RegRfMod_BW | BIT7);
                 rtw_write16(adapterState, REG_WMAC_TRXPTCL_CTL, (ushort)(u2tmp & 0xFEFF)); /* BIT 7 = 1, BIT 8 = 0 */
                 break;
 
-            case channel_width.CHANNEL_WIDTH_80:
+            case ChannelWidth.CHANNEL_WIDTH_80:
                 u2tmp = (ushort)(RegRfMod_BW | BIT8);
                 rtw_write16(adapterState, REG_WMAC_TRXPTCL_CTL, (ushort)(u2tmp & 0xFF7F)); /* BIT 7 = 0, BIT 8 = 1 */
                 break;
@@ -555,7 +536,7 @@ public static class rtl8812a_phycfg
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         /* RTW_INFO("SCMapping: Case: pHalData.current_channel_bw %d, pHalData.nCur80MhzPrimeSC %d, pHalData.nCur40MhzPrimeSC %d\n",pHalData.current_channel_bw,pHalData.nCur80MhzPrimeSC,pHalData.nCur40MhzPrimeSC); */
-        if (pHalData.current_channel_bw == channel_width.CHANNEL_WIDTH_80)
+        if (pHalData.current_channel_bw == ChannelWidth.CHANNEL_WIDTH_80)
         {
             if (pHalData.nCur80MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_LOWER)
             {
@@ -595,7 +576,7 @@ public static class rtl8812a_phycfg
                 RTW_INFO("SCMapping: DONOT CARE Mode Setting");
             }
         }
-        else if (pHalData.current_channel_bw == channel_width.CHANNEL_WIDTH_40)
+        else if (pHalData.current_channel_bw == ChannelWidth.CHANNEL_WIDTH_40)
         {
             /* RTW_INFO("SCMapping: Case: pHalData.current_channel_bw %d, pHalData.nCur40MhzPrimeSC %d\n",pHalData.current_channel_bw,pHalData.nCur40MhzPrimeSC); */
 
@@ -641,7 +622,7 @@ public static class rtl8812a_phycfg
         /* 3 Set Reg848 Reg864 Reg8AC Reg8C4 RegA00 */
         switch (pHalData.current_channel_bw)
         {
-            case channel_width.CHANNEL_WIDTH_20:
+            case ChannelWidth.CHANNEL_WIDTH_20:
                 phy_set_bb_reg(adapterState, rRFMOD_Jaguar, 0x003003C3, 0x00300200); /* 0x8ac[21,20,9:6,1,0]=8'b11100000 */
                 phy_set_bb_reg(adapterState, rADC_Buf_Clk_Jaguar, BIT30, 0); /* 0x8c4[30] = 1'b0 */
 
@@ -656,7 +637,7 @@ public static class rtl8812a_phycfg
 
                 break;
 
-            case channel_width.CHANNEL_WIDTH_40:
+            case ChannelWidth.CHANNEL_WIDTH_40:
                 phy_set_bb_reg(adapterState, rRFMOD_Jaguar, 0x003003C3, 0x00300201); /* 0x8ac[21,20,9:6,1,0]=8'b11100000		 */
                 phy_set_bb_reg(adapterState, rADC_Buf_Clk_Jaguar, BIT30, 0); /* 0x8c4[30] = 1'b0 */
                 phy_set_bb_reg(adapterState, rRFMOD_Jaguar, 0x3C, SubChnlNum);
@@ -685,7 +666,7 @@ public static class rtl8812a_phycfg
 
                 break;
 
-            case channel_width.CHANNEL_WIDTH_80:
+            case ChannelWidth.CHANNEL_WIDTH_80:
                 phy_set_bb_reg(adapterState, rRFMOD_Jaguar, 0x003003C3, 0x00300202); /* 0x8ac[21,20,9:6,1,0]=8'b11100010 */
                 phy_set_bb_reg(adapterState, rADC_Buf_Clk_Jaguar, BIT30, 1); /* 0x8c4[30] = 1 */
                 phy_set_bb_reg(adapterState, rRFMOD_Jaguar, 0x3C, SubChnlNum);
@@ -725,25 +706,25 @@ public static class rtl8812a_phycfg
         PHY_RF6052SetBandwidth8812(adapterState, pHalData.current_channel_bw);
     }
 
-    static void PHY_RF6052SetBandwidth8812(PADAPTER adapterState, channel_width Bandwidth) /* 20M or 40M */
+    static void PHY_RF6052SetBandwidth8812(PADAPTER adapterState, ChannelWidth Bandwidth) /* 20M or 40M */
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         switch (Bandwidth)
         {
-            case channel_width.CHANNEL_WIDTH_20:
+            case ChannelWidth.CHANNEL_WIDTH_20:
                 /* RTW_INFO("PHY_RF6052SetBandwidth8812(), set 20MHz\n"); */
                 phy_set_rf_reg(adapterState, rf_path.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 3);
                 phy_set_rf_reg(adapterState, rf_path.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 3);
                 break;
 
-            case channel_width.CHANNEL_WIDTH_40:
+            case ChannelWidth.CHANNEL_WIDTH_40:
                 /* RTW_INFO("PHY_RF6052SetBandwidth8812(), set 40MHz\n"); */
                 phy_set_rf_reg(adapterState, rf_path.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 1);
                 phy_set_rf_reg(adapterState, rf_path.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 1);
                 break;
 
-            case channel_width.CHANNEL_WIDTH_80:
+            case ChannelWidth.CHANNEL_WIDTH_80:
                 /* RTW_INFO("PHY_RF6052SetBandwidth8812(), set 80MHz\n"); */
                 phy_set_rf_reg(adapterState, rf_path.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 0);
                 phy_set_rf_reg(adapterState, rf_path.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 0);
@@ -755,18 +736,18 @@ public static class rtl8812a_phycfg
         }
     }
 
-    static void phy_FixSpur_8812A(PADAPTER pAdapterState, channel_width Bandwidth, u8 Channel)
+    static void phy_FixSpur_8812A(PADAPTER pAdapterState, ChannelWidth Bandwidth, u8 Channel)
     {
         /* C cut Item12 ADC FIFO CLOCK */
         if (IS_VENDOR_8812A_C_CUT(pAdapterState))
         {
-            if (Bandwidth == channel_width.CHANNEL_WIDTH_40 && Channel == 11)
+            if (Bandwidth == ChannelWidth.CHANNEL_WIDTH_40 && Channel == 11)
                 phy_set_bb_reg(pAdapterState, rRFMOD_Jaguar, 0xC00, 0x3); /* 0x8AC[11:10] = 2'b11 */
             else
                 phy_set_bb_reg(pAdapterState, rRFMOD_Jaguar, 0xC00, 0x2); /* 0x8AC[11:10] = 2'b10 */
 
             /* <20120914, Kordan> A workarould to resolve 2480Mhz spur by setting ADC clock as 160M. (Asked by Binson) */
-            if (Bandwidth == channel_width.CHANNEL_WIDTH_20 &&
+            if (Bandwidth == ChannelWidth.CHANNEL_WIDTH_20 &&
                 (Channel == 13 || Channel == 14))
             {
 
@@ -774,14 +755,14 @@ public static class rtl8812a_phycfg
                 phy_set_bb_reg(pAdapterState, rADC_Buf_Clk_Jaguar, BIT30, 1); /* 0x8C4[30] = 1 */
 
             }
-            else if (Bandwidth == channel_width.CHANNEL_WIDTH_40 &&
+            else if (Bandwidth == ChannelWidth.CHANNEL_WIDTH_40 &&
                      Channel == 11)
             {
 
                 phy_set_bb_reg(pAdapterState, rADC_Buf_Clk_Jaguar, BIT30, 1); /* 0x8C4[30] = 1 */
 
             }
-            else if (Bandwidth != channel_width.CHANNEL_WIDTH_80)
+            else if (Bandwidth != ChannelWidth.CHANNEL_WIDTH_80)
             {
 
                 phy_set_bb_reg(pAdapterState, rRFMOD_Jaguar, 0x300, 0x2); /* 0x8AC[9:8] = 2'b10	 */
@@ -792,7 +773,7 @@ public static class rtl8812a_phycfg
         else
         {
             /* <20120914, Kordan> A workarould to resolve 2480Mhz spur by setting ADC clock as 160M. (Asked by Binson) */
-            if (Bandwidth == channel_width.CHANNEL_WIDTH_20 &&
+            if (Bandwidth == ChannelWidth.CHANNEL_WIDTH_20 &&
                 (Channel == 13 || Channel == 14))
                 phy_set_bb_reg(pAdapterState, rRFMOD_Jaguar, 0x300, 0x3); /* 0x8AC[9:8] = 11 */
             else if (Channel <= 14) /* 2.4G only */
@@ -800,81 +781,6 @@ public static class rtl8812a_phycfg
         }
 
     }
-
-    static void halrf_iqk_trigger(dm_struct dm_void, bool is_recovery)
-    {
-        dm_struct dm = dm_void;
-
-        if (!dm.rf_calibrate_info.is_iqk_in_progress)
-        {
-            dm.rf_calibrate_info.is_iqk_in_progress = true;
-            //start_time = odm_get_current_time(dm);
-            //{
-                phy_iq_calibrate_8812a(dm, is_recovery);
-            //}
-
-            //dm.rf_calibrate_info.iqk_progressing_time = odm_get_progressing_time(dm, start_time);
-            dm.rf_calibrate_info.is_iqk_in_progress = false;
-        }
-        else
-        {
-            //RF_DBG(dm, DBG_RF_IQK, "== Return the IQK CMD, because RFKs in Progress ==\n");
-        }
-    }
-
-    static void phy_iq_calibrate_8812a(dm_struct dm_void, bool is_recovery)
-    {
-        dm_struct dm = dm_void;
-        dm_rf_calibration_struct cali_info = (dm.rf_calibrate_info);
-        u32 counter = 0;
-
-        //if (dm.fw_offload_ability & PHYDM_RF_IQK_OFFLOAD)
-        //{
-        //    _phy_iq_calibrate_by_fw_8812a(dm);
-        //    phydm_iqk_wait(dm, 500);
-        //    //{
-        //    //    if (dm.rf_calibrate_info.is_iqk_in_progress)
-        //    //        RF_DBG(dm, DBG_RF_IQK, "== FW IQK TIMEOUT (Still in progress after 500ms) ==\n");
-        //    //}
-        //}
-        //else
-        //{
-        //    _phy_iq_calibrate_8812a(dm, dm.channel);
-        //}
-    }
-
-    static void _phy_iq_calibrate_8812a(dm_struct dm, u8 channel)
-    {
-
-        //u32 MACBB_backup[MACBB_REG_NUM], AFE_backup[AFE_REG_NUM] = { 0 }, RFA_backup[RF_REG_NUM] = { 0 }, RFB_backup[RF_REG_NUM] = { 0 };
-        //u32 backup_macbb_reg[MACBB_REG_NUM] = { 0x520, 0x550, 0x808, 0xa04, 0x90c, 0xc00, 0xe00, 0x838, 0x82c };
-        //u32 backup_afe_reg[AFE_REG_NUM] = {0xc5c, 0xc60, 0xc64, 0xc68, 0xcb0, 0xcb4,
-        //    0xe5c, 0xe60, 0xe64, 0xe68, 0xeb0, 0xeb4};
-        //u32 reg_c1b8, reg_e1b8;
-        //u32 backup_rf_reg[RF_REG_NUM] = { 0x65, 0x8f, 0x0 };
-        //u8 chnl_idx = odm_get_right_chnl_place_for_iqk(channel);
-
-        //_iqk_backup_mac_bb_8812a(dm, MACBB_backup, backup_macbb_reg, MACBB_REG_NUM);
-        //odm_set_bb_reg(dm, R_0x82c, BIT(31), 0x1);
-        //reg_c1b8 = odm_read_4byte(dm, 0xcb8);
-        //reg_e1b8 = odm_read_4byte(dm, 0xeb8);
-        //odm_set_bb_reg(dm, R_0x82c, BIT(31), 0x0);
-        //_iqk_backup_afe_8812a(dm, AFE_backup, backup_afe_reg, AFE_REG_NUM);
-        //_iqk_backup_rf_8812a(dm, RFA_backup, RFB_backup, backup_rf_reg, RF_REG_NUM);
-
-        //_iqk_configure_mac_8812a(dm);
-        //_iqk_tx_8812a(dm, chnl_idx);
-        //_iqk_restore_rf_8812a(dm, RF_PATH_A, backup_rf_reg, RFA_backup, RF_REG_NUM);
-        //_iqk_restore_rf_8812a(dm, RF_PATH_B, backup_rf_reg, RFB_backup, RF_REG_NUM);
-
-        //_iqk_restore_afe_8812a(dm, AFE_backup, backup_afe_reg, AFE_REG_NUM);
-        //odm_set_bb_reg(dm, R_0x82c, BIT(31), 0x1);
-        //odm_write_4byte(dm, 0xcb8, reg_c1b8);
-        //odm_write_4byte(dm, 0xeb8, reg_e1b8);
-        //odm_set_bb_reg(dm, R_0x82c, BIT(31), 0x0);
-        //_iqk_restore_mac_bb_8812a(dm, MACBB_backup, backup_macbb_reg, MACBB_REG_NUM);
-    }
-
 
     public static void PHY_SetTxPowerIndex_8812A(PADAPTER adapterState, u32 PowerIndex, rf_path RFPath, MGN_RATE Rate)
     {

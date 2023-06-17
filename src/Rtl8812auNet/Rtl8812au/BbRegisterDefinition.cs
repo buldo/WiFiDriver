@@ -1,6 +1,6 @@
 ﻿namespace Rtl8812auNet.Rtl8812au;
 
-public class BB_REGISTER_DEFINITION_T
+public class BbRegisterDefinition
 {
     public u32 rfintfs;            /* set software control: */
     /*		0x870~0x877[8 bytes] */

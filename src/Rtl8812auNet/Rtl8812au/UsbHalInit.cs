@@ -456,7 +456,7 @@ public static class UsbHalInit
             {
                 u8 cck_group = 0;
 
-                if (rtw_get_ch_group((byte)(ch_idx + 1), ref group, ref cck_group) != BAND_TYPE.BAND_ON_2_4G)
+                if (rtw_get_ch_group((byte)(ch_idx + 1), ref group, ref cck_group) != BandType.BAND_ON_2_4G)
                     continue;
 
                 hal_data.Index24G_CCK_Base[rfpath, ch_idx] = pwr_info_2g.IndexCCK_Base[rfpath, cck_group];
@@ -488,7 +488,7 @@ public static class UsbHalInit
 /* 5G base */
             for (ch_idx = 0; ch_idx < CENTER_CH_5G_ALL_NUM; ch_idx++)
             {
-                if (rtw_get_ch_group(center_ch_5g_all[ch_idx], ref group, ref tmp) != BAND_TYPE.BAND_ON_5G)
+                if (rtw_get_ch_group(center_ch_5g_all[ch_idx], ref group, ref tmp) != BandType.BAND_ON_5G)
                     continue;
                 hal_data.Index5G_BW40_Base[rfpath, ch_idx] = pwr_info_5g.IndexBW40_Base[rfpath, group];
             }
@@ -497,7 +497,7 @@ public static class UsbHalInit
             {
                 u8 upper, lower;
 
-                if (rtw_get_ch_group(center_ch_5g_80m[ch_idx], ref group, ref tmp) != BAND_TYPE.BAND_ON_5G)
+                if (rtw_get_ch_group(center_ch_5g_80m[ch_idx], ref group, ref tmp) != BandType.BAND_ON_5G)
                     continue;
 
                 upper = pwr_info_5g.IndexBW40_Base[rfpath, group];
@@ -1138,14 +1138,14 @@ public static class UsbHalInit
         }
     }
 
-    private static BAND_TYPE rtw_get_ch_group(u8 ch, ref u8 group, ref u8 cck_group)
+    private static BandType rtw_get_ch_group(u8 ch, ref u8 group, ref u8 cck_group)
     {
-        BAND_TYPE band = BAND_TYPE.BAND_MAX;
+        BandType band = BandType.BAND_MAX;
         s8 gp = -1, cck_gp = -1;
 
         if (ch <= 14)
         {
-            band = BAND_TYPE.BAND_ON_2_4G;
+            band = BandType.BAND_ON_2_4G;
 
             if (1 <= ch && ch <= 2)
                 gp = 0;
@@ -1158,7 +1158,7 @@ public static class UsbHalInit
             else if (12 <= ch && ch <= 14)
                 gp = 4;
             else
-                band = BAND_TYPE.BAND_MAX;
+                band = BandType.BAND_MAX;
 
             if (ch == 14)
                 cck_gp = 5;
@@ -1167,7 +1167,7 @@ public static class UsbHalInit
         }
         else
         {
-            band = BAND_TYPE.BAND_ON_5G;
+            band = BandType.BAND_ON_5G;
 
             if (15 <= ch && ch <= 42)
                 gp = 0;
@@ -1198,11 +1198,11 @@ public static class UsbHalInit
             else if (173 <= ch && ch <= 177)
                 gp = 13;
             else
-                band = BAND_TYPE.BAND_MAX;
+                band = BandType.BAND_MAX;
         }
 
-        if (band == BAND_TYPE.BAND_MAX
-            || (band == BAND_TYPE.BAND_ON_2_4G && cck_gp == -1)
+        if (band == BandType.BAND_MAX
+            || (band == BandType.BAND_ON_2_4G && cck_gp == -1)
             || gp == -1
            )
         {
@@ -1213,7 +1213,7 @@ public static class UsbHalInit
 
         group = (byte)gp;
 
-        if (band == BAND_TYPE.BAND_ON_2_4G)
+        if (band == BandType.BAND_ON_2_4G)
         {
             if (cck_gp >= 0)
             {
@@ -2161,7 +2161,7 @@ public static class UsbHalInit
         init_UsbAggregationSetting_8812A(adapterState);
 
         _InitBeaconParameters_8812A(adapterState);
-        _InitBeaconMaxError_8812A(adapterState, true);
+        _InitBeaconMaxError_8812A(adapterState);
 
         _InitBurstPktLen(adapterState); // added by page. 20110919
 
@@ -2195,14 +2195,14 @@ public static class UsbHalInit
 
         if (adapterState.registrypriv.channel <= 14)
         {
-            PHY_SwitchWirelessBand8812(adapterState, BAND_TYPE.BAND_ON_2_4G);
+            PHY_SwitchWirelessBand8812(adapterState, BandType.BAND_ON_2_4G);
         }
         else
         {
-            PHY_SwitchWirelessBand8812(adapterState, BAND_TYPE.BAND_ON_5G);
+            PHY_SwitchWirelessBand8812(adapterState, BandType.BAND_ON_5G);
         }
 
-        rtw_hal_set_chnl_bw(adapterState, adapterState.registrypriv.channel, channel_width.CHANNEL_WIDTH_20,
+        rtw_hal_set_chnl_bw(adapterState, adapterState.registrypriv.channel, ChannelWidth.CHANNEL_WIDTH_20,
             HAL_PRIME_CHNL_OFFSET_DONT_CARE,
             HAL_PRIME_CHNL_OFFSET_DONT_CARE);
 
@@ -2457,17 +2457,17 @@ public static class UsbHalInit
         //rtw_sec_cam_map_clr_all(cam_ctl.used);
     }
 
-    public static void PHY_SwitchWirelessBand8812(AdapterState adapterState, BAND_TYPE Band)
+    public static void PHY_SwitchWirelessBand8812(AdapterState adapterState, BandType Band)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
-        channel_width current_bw = pHalData.current_channel_bw;
+        ChannelWidth current_bw = pHalData.current_channel_bw;
         bool eLNA_2g = pHalData.ExternalLNA_2G;
 
         /* RTW_INFO("==>PHY_SwitchWirelessBand8812() %s\n", ((Band==0)?"2.4G":"5G")); */
 
-        pHalData.current_band_type = (BAND_TYPE)Band;
+        pHalData.current_band_type = (BandType)Band;
 
-        if (Band == BAND_TYPE.BAND_ON_2_4G)
+        if (Band == BandType.BAND_ON_2_4G)
         {
             /* 2.4G band */
 
@@ -2482,7 +2482,7 @@ public static class UsbHalInit
 
             /* set PWED_TH for BB Yn user guide R29 */
 
-            if (current_bw == channel_width.CHANNEL_WIDTH_20
+            if (current_bw == ChannelWidth.CHANNEL_WIDTH_20
                 && pHalData.rf_type == rf_type.RF_1T1R
                 && eLNA_2g == false)
             {
@@ -2574,17 +2574,17 @@ public static class UsbHalInit
         phy_SetBBSwingByBand_8812A(adapterState, Band);
     }
 
-    static void phy_SetBBSwingByBand_8812A(AdapterState adapterState, BAND_TYPE Band)
+    static void phy_SetBBSwingByBand_8812A(AdapterState adapterState, BandType Band)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA((adapterState));
 
         phy_set_bb_reg(adapterState, rA_TxScale_Jaguar, 0xFFE00000,
-            phy_get_tx_bb_swing_8812a(adapterState, (BAND_TYPE)Band, rf_path.RF_PATH_A)); /* 0xC1C[31:21] */
+            phy_get_tx_bb_swing_8812a(adapterState, (BandType)Band, rf_path.RF_PATH_A)); /* 0xC1C[31:21] */
         phy_set_bb_reg(adapterState, rB_TxScale_Jaguar, 0xFFE00000,
-            phy_get_tx_bb_swing_8812a(adapterState, (BAND_TYPE)Band, rf_path.RF_PATH_B)); /* 0xE1C[31:21] */
+            phy_get_tx_bb_swing_8812a(adapterState, (BandType)Band, rf_path.RF_PATH_B)); /* 0xE1C[31:21] */
     }
 
-    static u32 phy_get_tx_bb_swing_8812a(AdapterState adapterState, BAND_TYPE Band, rf_path RFPath)
+    static u32 phy_get_tx_bb_swing_8812a(AdapterState adapterState, BandType Band, rf_path RFPath)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA((adapterState));
         dm_struct pDM_Odm = pHalData.odmpriv;
@@ -2597,7 +2597,7 @@ public static class UsbHalInit
 
         if (pHalData.bautoload_fail_flag)
         {
-            if (Band == BAND_TYPE.BAND_ON_2_4G)
+            if (Band == BandType.BAND_ON_2_4G)
             {
                 if (bbSwing_2G == 0)
                     _out = 0x200; /* 0 dB */
@@ -2619,7 +2619,7 @@ public static class UsbHalInit
                     }
                 }
             }
-            else if (Band == BAND_TYPE.BAND_ON_5G)
+            else if (Band == BandType.BAND_ON_5G)
             {
                 if (bbSwing_5G == 0)
                     _out = 0x200; /* 0 dB */
@@ -2648,7 +2648,7 @@ public static class UsbHalInit
             byte swing = 0;
             byte onePathSwing = 0;
 
-            if (Band == BAND_TYPE.BAND_ON_2_4G)
+            if (Band == BandType.BAND_ON_2_4G)
             {
                 if (adapterState.registrypriv.TxBBSwing_2G == AUTO)
                 {
@@ -2713,12 +2713,12 @@ public static class UsbHalInit
         return _out;
     }
 
-    static void phy_SetRFEReg8812(AdapterState adapterState, BAND_TYPE Band)
+    static void phy_SetRFEReg8812(AdapterState adapterState, BandType Band)
     {
         uint u1tmp = 0;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
-        if (Band == BAND_TYPE.BAND_ON_2_4G)
+        if (Band == BandType.BAND_ON_2_4G)
         {
             switch (pHalData.rfe_type)
             {
@@ -3108,14 +3108,13 @@ public static class UsbHalInit
         rtw_write32(adapterState, REG_ARFR3_8812 + 4, 0xffcff000);
     }
 
-    static void _InitBeaconMaxError_8812A(AdapterState adapterState, BOOLEAN InfraMode)
+    static void _InitBeaconMaxError_8812A(AdapterState adapterState)
     {
         rtw_write8(adapterState, REG_BCN_MAX_ERR, 0xFF);
     }
 
     static void _InitBeaconParameters_8812A(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
         var val8 = DIS_TSF_UDT;
         var val16 = (u16)(val8 | (val8 << 8)); /* port0 and port1 */
 
@@ -3212,11 +3211,11 @@ public static class UsbHalInit
         rtw_write16(adapterState, REG_RETRY_LIMIT, value16);
     }
 
-    public static u16 BIT_LRL(u16 x) => (u16)(((x) & BIT_MASK_LRL) << BIT_SHIFT_LRL);
-    public static u16 BIT_SRL(u16 x) => (u16)(((x) & BIT_MASK_SRL) << BIT_SHIFT_SRL);
+    private static u16 BIT_LRL(u16 x) => (u16)(((x) & BIT_MASK_LRL) << BIT_SHIFT_LRL);
+    private static u16 BIT_SRL(u16 x) => (u16)(((x) & BIT_MASK_SRL) << BIT_SHIFT_SRL);
 
-    public static u16 _SPEC_SIFS_CCK(u16 x) => (u16)((x) & 0xFF);
-    public static u16 _SPEC_SIFS_OFDM(u16 x) => (u16)(((x) & 0xFF) << 8);
+    private static u16 _SPEC_SIFS_CCK(u16 x) => (u16)((x) & 0xFF);
+    private static u16 _SPEC_SIFS_OFDM(u16 x) => (u16)(((x) & 0xFF) << 8);
 
     static void _InitWMACSetting_8812A(AdapterState adapterState)
     {
@@ -3255,12 +3254,11 @@ public static class UsbHalInit
         rtw_write32(adapterState, REG_CR, value32);
     }
 
-    public static u32 _NETTYPE(u32 x) => (((x) & 0x3) << 16);
+    private static u32 _NETTYPE(u32 x) => (((x) & 0x3) << 16);
 
     static void _InitInterrupt_8812AU(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
-        u8 usb_opt;
+        var pHalData = GET_HAL_DATA(adapterState);
 
         /* HIMR */
         rtw_write32(adapterState, REG_HIMR0_8812, pHalData.IntrMask[0] & 0xFFFFFFFF);
@@ -3274,9 +3272,7 @@ public static class UsbHalInit
 
     static void _InitTransferPageSize_8812AUsb(AdapterState adapterState)
     {
-
-        u8 value8;
-        value8 = _PSTX(PBP_512);
+        u8 value8 = _PSTX(PBP_512);
 
         rtw_write8(adapterState, REG_PBP, value8);
     }

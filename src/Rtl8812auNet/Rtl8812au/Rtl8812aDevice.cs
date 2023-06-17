@@ -19,14 +19,14 @@ public class Rtl8812aDevice
 
         ioctl_cfg80211.cfg80211_rtw_change_iface(_adapterState, new InitChannel()
         {
-            cur_bwmode = channel_width.CHANNEL_WIDTH_20,
+            cur_bwmode = ChannelWidth.CHANNEL_WIDTH_20,
             cur_ch_offset = 0,
             cur_channel = 8
         });
 
         ioctl_cfg80211.cfg80211_rtw_set_monitor_channel(_adapterState, new InitChannel()
         {
-            cur_bwmode = channel_width.CHANNEL_WIDTH_20,
+            cur_bwmode = ChannelWidth.CHANNEL_WIDTH_20,
             cur_ch_offset = 0,
             cur_channel = 8
         });

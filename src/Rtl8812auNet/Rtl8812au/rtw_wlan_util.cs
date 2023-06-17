@@ -2,7 +2,7 @@
 
 public static class rtw_wlan_util
 {
-    public static void set_channel_bwmode(AdapterState padapter, byte channel, byte channel_offset, channel_width bwmode)
+    public static void set_channel_bwmode(AdapterState padapter, byte channel, byte channel_offset, ChannelWidth bwmode)
     {
         u8 center_ch, chnl_offset80 = HAL_PRIME_CHNL_OFFSET_DONT_CARE;
 
@@ -12,7 +12,7 @@ public static class rtw_wlan_util
         //}
 
         center_ch = rtw_get_center_ch(channel, bwmode, channel_offset);
-        if (bwmode == channel_width.CHANNEL_WIDTH_80)
+        if (bwmode == ChannelWidth.CHANNEL_WIDTH_80)
         {
             if (center_ch > channel)
             {
@@ -31,11 +31,11 @@ public static class rtw_wlan_util
         rtw_hal_set_chnl_bw(padapter, center_ch, bwmode, channel_offset, chnl_offset80); /* set center channel */
     }
 
-    private static u8 rtw_get_center_ch(u8 channel, channel_width chnl_bw, u8 chnl_offset)
+    private static u8 rtw_get_center_ch(u8 channel, ChannelWidth chnl_bw, u8 chnl_offset)
     {
         u8 center_ch = channel;
 
-        if (chnl_bw == channel_width.CHANNEL_WIDTH_80)
+        if (chnl_bw == ChannelWidth.CHANNEL_WIDTH_80)
         {
             if (channel == 36 || channel == 40 || channel == 44 || channel == 48)
                 center_ch = 42;
@@ -54,7 +54,7 @@ public static class rtw_wlan_util
             else if (channel <= 14)
                 center_ch = 7;
         }
-        else if (chnl_bw == channel_width.CHANNEL_WIDTH_40)
+        else if (chnl_bw == ChannelWidth.CHANNEL_WIDTH_40)
         {
             if (chnl_offset == HAL_PRIME_CHNL_OFFSET_LOWER)
             {
@@ -65,7 +65,7 @@ public static class rtw_wlan_util
                 center_ch = (byte)(channel - 2);
             }
         }
-        else if (chnl_bw == channel_width.CHANNEL_WIDTH_20)
+        else if (chnl_bw == ChannelWidth.CHANNEL_WIDTH_20)
             center_ch = channel;
         else
         {
@@ -75,23 +75,23 @@ public static class rtw_wlan_util
         return center_ch;
     }
 
-    public static void rtw_hal_set_chnl_bw(AdapterState padapter, u8 channel, channel_width Bandwidth, u8 Offset40,
+    public static void rtw_hal_set_chnl_bw(AdapterState padapter, u8 channel, ChannelWidth Bandwidth, u8 Offset40,
         u8 Offset80)
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
-        u8 cch_160 = Bandwidth == channel_width.CHANNEL_WIDTH_160 ? channel : (u8)0;
-        u8 cch_80 = Bandwidth == channel_width.CHANNEL_WIDTH_80 ? channel : (u8)0;
-        u8 cch_40 = Bandwidth == channel_width.CHANNEL_WIDTH_40 ? channel : (u8)0;
-        u8 cch_20 = Bandwidth == channel_width.CHANNEL_WIDTH_20 ? channel : (u8)0;
+        u8 cch_160 = Bandwidth == ChannelWidth.CHANNEL_WIDTH_160 ? channel : (u8)0;
+        u8 cch_80 = Bandwidth == ChannelWidth.CHANNEL_WIDTH_80 ? channel : (u8)0;
+        u8 cch_40 = Bandwidth == ChannelWidth.CHANNEL_WIDTH_40 ? channel : (u8)0;
+        u8 cch_20 = Bandwidth == ChannelWidth.CHANNEL_WIDTH_20 ? channel : (u8)0;
 
         if (cch_80 != 0)
         {
-            cch_40 = rtw_get_scch_by_cch_offset(cch_80, channel_width.CHANNEL_WIDTH_80, Offset80);
+            cch_40 = rtw_get_scch_by_cch_offset(cch_80, ChannelWidth.CHANNEL_WIDTH_80, Offset80);
         }
 
         if (cch_40 != 0)
         {
-            cch_20 = rtw_get_scch_by_cch_offset(cch_40, channel_width.CHANNEL_WIDTH_40, Offset40);
+            cch_20 = rtw_get_scch_by_cch_offset(cch_40, ChannelWidth.CHANNEL_WIDTH_40, Offset40);
         }
 
         PHY_SetSwChnlBWMode8812(padapter, channel, Bandwidth, Offset40, Offset80);

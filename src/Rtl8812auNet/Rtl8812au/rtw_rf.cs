@@ -9,11 +9,11 @@ public static class rtw_rf
     /// <param name="bw">the given bandwidth</param>
     /// <param name="offset">the given primary SC offset of the given bandwidth</param>
     /// <returns>center channel of smaller bandiwdth if valid, or 0</returns>
-    public static u8 rtw_get_scch_by_cch_offset(u8 cch, channel_width bw, u8 offset)
+    public static u8 rtw_get_scch_by_cch_offset(u8 cch, ChannelWidth bw, u8 offset)
     {
         u8 t_cch = 0;
 
-        if (bw == channel_width.CHANNEL_WIDTH_20)
+        if (bw == ChannelWidth.CHANNEL_WIDTH_20)
         {
             t_cch = cch;
             goto exit;
@@ -26,28 +26,28 @@ public static class rtw_rf
         }
 
         /* 2.4G, 40MHz */
-        if (cch >= 3 && cch <= 11 && bw == channel_width.CHANNEL_WIDTH_40)
+        if (cch >= 3 && cch <= 11 && bw == ChannelWidth.CHANNEL_WIDTH_40)
         {
             t_cch = (byte)((offset == HAL_PRIME_CHNL_OFFSET_UPPER) ? cch + 2 : cch - 2);
             goto exit;
         }
 
         /* 5G, 160MHz */
-        if (cch >= 50 && cch <= 163 && bw == channel_width.CHANNEL_WIDTH_160)
+        if (cch >= 50 && cch <= 163 && bw == ChannelWidth.CHANNEL_WIDTH_160)
         {
             t_cch = (byte)((offset == HAL_PRIME_CHNL_OFFSET_UPPER) ? cch + 8 : cch - 8);
             goto exit;
 
             /* 5G, 80MHz */
         }
-        else if (cch >= 42 && cch <= 171 && bw == channel_width.CHANNEL_WIDTH_80)
+        else if (cch >= 42 && cch <= 171 && bw == ChannelWidth.CHANNEL_WIDTH_80)
         {
             t_cch = (byte)((offset == HAL_PRIME_CHNL_OFFSET_UPPER) ? cch + 4 : cch - 4);
             goto exit;
 
             /* 5G, 40MHz */
         }
-        else if (cch >= 38 && cch <= 175 && bw == channel_width.CHANNEL_WIDTH_40)
+        else if (cch >= 38 && cch <= 175 && bw == ChannelWidth.CHANNEL_WIDTH_40)
         {
             t_cch = (byte)((offset == HAL_PRIME_CHNL_OFFSET_UPPER) ? cch + 2 : cch - 2);
             goto exit;
