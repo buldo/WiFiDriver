@@ -1591,8 +1591,6 @@ public static class UsbHalInit
             Efuse_ReadAllMap(pAdapterState, efuseType, pHalData.efuse_eeprom_data);
         }
 
-        rtw_mask_map_read(0x00, mapLen, pHalData.efuse_eeprom_data);
-
         rtw_dump_cur_efuse(pAdapterState);
     }
 
@@ -1600,7 +1598,7 @@ public static class UsbHalInit
     {
         HAL_DATA_TYPE hal_data = GET_HAL_DATA(padapter);
 
-        var mapsize = EFUSE_GetEfuseDefinition(padapter, EFUSE_WIFI, EFUSE_DEF_TYPE.TYPE_EFUSE_MAP_LEN);
+        var mapsize = EFUSE_MAP_LEN_JAGUAR;
 
         var linesCount = mapsize / (4 * 4);
         var lineLength = 4 * 4;
@@ -1617,11 +1615,6 @@ public static class UsbHalInit
 
             Console.WriteLine(builder);
         }
-    }
-
-    static int EFUSE_GetEfuseDefinition(AdapterState pAdapterState, u8 efuseType, EFUSE_DEF_TYPE type)
-    {
-        return rtl8812_EFUSE_GetEfuseDefinition(pAdapterState, efuseType, type);
     }
 
     static void Efuse_ReadAllMap(AdapterState adapterState, byte efuseType, byte[] Efuse)
@@ -1838,34 +1831,6 @@ public static class UsbHalInit
         efuse_usage = (byte)((eFuse_Addr * 100) / EFUSE_REAL_CONTENT_LEN_JAGUAR);
         // TODO: SetHwReg8812AU(HW_VARIABLES.HW_VAR_EFUSE_BYTES, (u8*)&eFuse_Addr);
         RTW_INFO($"Hal_EfuseReadEFuse8812A: eFuse_Addr offset(0x{eFuse_Addr:X}) !!");
-    }
-
-    private static void rtw_mask_map_read(UInt16 addr, UInt16 cnts, byte[] data)
-    {
-        UInt16 i = 0;
-        // TODO:
-        //if (registrypriv.boffefusemask == 0)
-        //{
-
-        //    for (i = 0; i < cnts; i++)
-        //    {
-        //        if (registrypriv.bFileMaskEfuse == true)
-        //        {
-        //            if (rtw_file_efuse_IsMasked(padapter, addr + i)) /*use file efuse mask.*/
-        //                data[i] = 0xff;
-        //        }
-        //        else
-        //        {
-        //            /*RTW_INFO(" %s , data[%d] = %x\n", __func__, i, data[i]);*/
-        //            if (efuse_IsMasked(padapter, addr + i))
-        //            {
-        //                data[i] = 0xff;
-        //                /*RTW_INFO(" %s ,mask data[%d] = %x\n", __func__, i, data[i]);*/
-        //            }
-        //        }
-        //    }
-
-        //}
     }
 
     private static void EfusePowerSwitch8812A(AdapterState adapterState, bool bWrite, bool pwrState)

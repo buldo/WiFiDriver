@@ -75,24 +75,6 @@ public static class usb_intf
         hal_spec.pg_txgi_diff_factor = 1;
     }
 
-    public static int rtl8812_EFUSE_GetEfuseDefinition(AdapterState pAdapterState, u8 efuseType, EFUSE_DEF_TYPE type)
-    {
-        switch (type)
-        {
-            case EFUSE_DEF_TYPE.TYPE_EFUSE_MAP_LEN:
-            {
-
-                if (efuseType == EFUSE_WIFI)
-                    return EFUSE_MAP_LEN_JAGUAR;
-                else
-                    throw new NotImplementedException();
-            }
-                break;
-        }
-
-        return 0;
-    }
-
     static void loadparam(AdapterState padapter)
     {
         var registry_par = padapter.registrypriv;
