@@ -8,12 +8,9 @@ public class dvobj_priv
     /*-------- below is common data --------*/
 
     public RTL871X_HCI_TYPE interface_type = RTL871X_HCI_TYPE.RTW_USB; /*USB,SDIO,SPI,PCI*/
-    public byte oper_channel; /* saved channel info when call set_channel_bw */
     public _adapter[] padapters { get; } =new _adapter[CONFIG_IFACE_NUMBER]; /*IFACE_ID_MAX*/
 
     public byte iface_nums; /* total number of ifaces used runtime */
-
-    public rf_ctl_t rf_ctl = new rf_ctl_t();
 
     /* In /Out Pipe information */
     public int[] RtInPipe = new int[2];

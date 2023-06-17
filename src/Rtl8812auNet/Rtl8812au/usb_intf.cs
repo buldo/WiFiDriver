@@ -14,14 +14,10 @@ public static class usb_intf
 
     public static _adapter rtw_drv_init(IRtlUsbDevice pusb_intf)
     {
-        _adapter padapter = null;
-        int status = _FAIL;
 
-        /* step 0. */
-        /* Initialize dvobj_priv */
         var dvobj = usb_dvobj_init(pusb_intf);
 
-        padapter = rtw_usb_primary_adapter_init(dvobj, pusb_intf);
+        var padapter = rtw_usb_primary_adapter_init(dvobj, pusb_intf);
         if (padapter == null)
         {
             RTW_INFO("rtw_usb_primary_adapter_init Failed!");
@@ -228,16 +224,14 @@ public static class usb_intf
     {
         var status = rtl8812au_hal_init(padapter);
 
-        if (status == true)
+        if (status)
         {
-            padapter.HalData.hw_init_completed = true;
             init_hw_mlme_ext(padapter, initChannel);
             rtw_setopmode_cmd(padapter, RTW_CMDF.RTW_CMDF_DIRECTLY);
 
         }
         else
         {
-            padapter.HalData.hw_init_completed =  false;
             RTW_ERR("rtw_hal_init: fail");
         }
 

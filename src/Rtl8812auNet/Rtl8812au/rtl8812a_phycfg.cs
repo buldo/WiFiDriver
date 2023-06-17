@@ -196,8 +196,6 @@ public static class rtl8812a_phycfg
                 pDM_Odm.rssi_trsw_h = 80;
                 pDM_Odm.rssi_trsw_iso = 25;
             }
-
-            pDM_Odm.rssi_trsw_l = pDM_Odm.rssi_trsw_h - pDM_Odm.rssi_trsw_iso - 10;
         }
     }
 
@@ -254,104 +252,12 @@ public static class rtl8812a_phycfg
             writeData |= (((PowerLevel > 2) ? (PowerLevel) : 2) << (i * 8));
         }
 
-        UsbHalInit.phy_set_bb_reg(Adapter, writeOffset, 0xffffff, writeData);
+        phy_set_bb_reg(Adapter, writeOffset, 0xffffff, writeData);
     }
 
     static u8 phy_get_tx_power_index(PADAPTER pAdapter, rf_path RFPath, MGN_RATE Rate, channel_width BandWidth,
         u8 Channel)
     {
-        return rtw_hal_get_tx_power_index(pAdapter, RFPath, Rate, BandWidth, Channel, null);
-    }
-
-    static u8 rtw_hal_get_tx_power_index(
-        PADAPTER padapter,
-        rf_path rfpath,
-        MGN_RATE rate,
-        channel_width bandwidth,
-        u8 channel,
-        txpwr_idx_comp tic)
-    {
-        return PHY_GetTxPowerIndex_8812A(padapter, rfpath, rate, bandwidth, channel, tic);
-    }
-
-    public static u8 PHY_GetTxPowerIndex_8812A(
-        PADAPTER pAdapter,
-        rf_path RFPath,
-        MGN_RATE Rate,
-        channel_width BandWidth,
-        u8 Channel,
-        txpwr_idx_comp? tic
-    )
-    {
-        //PHAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapter);
-        //hal_spec_t hal_spec = GET_HAL_SPEC(pAdapter);
-        //s16 power_idx;
-        //u8 base_idx = 0;
-        //s8 by_rate_diff = 0, limit = 0, tpt_offset = 0, extra_bias = 0;
-        //RF_TX_NUM ntx_idx = phy_get_current_tx_num(pAdapter, Rate);
-        //BOOLEAN bIn24G = false;
-
-        //base_idx = PHY_GetTxPowerIndexBase(
-        //    pAdapter,
-        //    RFPath,
-        //    Rate,
-        //    ntx_idx,
-        //    BandWidth,
-        //    Channel,
-        //    bIn24G);
-
-        //by_rate_diff = PHY_GetTxPowerByRate(
-        //    pAdapter,
-        //    (u8)((!bIn24G ? 1 : 0)),
-        //    RFPath,
-        //    Rate);
-
-
-        //limit = PHY_GetTxPowerLimit(
-        //    pAdapter,
-        //    null,
-        //    (u8)((!bIn24G ? 1:0)),
-        //    pHalData.current_channel_bw,
-        //    RFPath,
-        //    Rate,
-        //    ntx_idx,
-        //    pHalData.current_channel);
-
-        //tpt_offset = PHY_GetTxPowerTrackingOffset(pAdapter, RFPath, Rate);
-
-        //if (tic != null)
-        //{
-        //    tic.ntx_idx = ntx_idx;
-        //    tic.@base = base_idx;
-        //    tic.by_rate = by_rate_diff;
-        //    tic.limit = limit;
-        //    tic.tpt = tpt_offset;
-        //    tic.ebias = extra_bias;
-        //}
-
-        //by_rate_diff = by_rate_diff > limit ? limit : by_rate_diff;
-        //power_idx = (s16)(base_idx + by_rate_diff + tpt_offset + extra_bias + transmit_power_boost);
-
-        //if (transmit_power_override != 0)
-        //{
-        //    power_idx = transmit_power_override;
-        //}
-
-        //if (power_idx < 1)
-        //{
-        //    power_idx = 1;
-        //}
-
-        //if (power_idx < 0)
-        //{
-        //    power_idx = 0;
-        //}
-        //else if (power_idx > hal_spec.txgi_max)
-        //{
-        //    power_idx = hal_spec.txgi_max;
-        //}
-
-        //return (byte)power_idx;
         return 16;
     }
 
@@ -360,29 +266,21 @@ public static class rtl8812a_phycfg
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
         BOOLEAN bIsIn24G = (pHalData.current_band_type == BAND_TYPE.BAND_ON_2_4G);
-        bool under_survey_ch = phy_check_under_survey_ch(Adapter);
 
-
-        /* if ( pMgntInfo.RegNByteAccess == 0 ) */
+        if (bIsIn24G)
         {
-            if (bIsIn24G)
-            {
-                phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.CCK);
-            }
+            phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.CCK);
+        }
 
-            phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.OFDM);
+        phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.OFDM);
 
-            //if (!under_survey_ch)
-            {
-                phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.HT_MCS0_MCS7);
-                phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.VHT_1SSMCS0_1SSMCS9);
+        phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.HT_MCS0_MCS7);
+        phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.VHT_1SSMCS0_1SSMCS9);
 
-                if (pHalData.NumTotalRFPath >= 2)
-                {
-                    phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.HT_MCS8_MCS15);
-                    phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.VHT_2SSMCS0_2SSMCS9);
-                }
-            }
+        if (pHalData.NumTotalRFPath >= 2)
+        {
+            phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.HT_MCS8_MCS15);
+            phy_set_tx_power_index_by_rate_section(Adapter, path, channel, RATE_SECTION.VHT_2SSMCS0_2SSMCS9);
         }
     }
 
@@ -424,42 +322,9 @@ public static class rtl8812a_phycfg
         for (int i = 0; i < Rates.Length; ++i)
         {
             var powerIndex = phy_get_tx_power_index(pAdapter, RFPath, Rates[i], BandWidth, Channel);
-            PHY_SetTxPowerIndex(pAdapter, powerIndex, RFPath, Rates[i]);
+            MGN_RATE rate = Rates[i];
+            PHY_SetTxPowerIndex_8812A(pAdapter, powerIndex, RFPath, rate);
         }
-    }
-
-    static void PHY_SetTxPowerIndex(PADAPTER pAdapter, u32 PowerIndex, rf_path RFPath, MGN_RATE Rate)
-    {
-        PHY_SetTxPowerIndex_8812A(pAdapter, PowerIndex, RFPath, Rate);
-    }
-
-    static bool phy_check_under_survey_ch(_adapter adapter)
-    {
-
-        var dvobj = adapter_to_dvobj(adapter);
-        _adapter iface = adapter;
-        //mlme_ext_priv mlmeext;
-        //bool ret = false;
-
-        //mlmeext = iface.mlmeextpriv;
-
-        //    /* check scan state */
-        //if (mlmeext_scan_state(mlmeext) != SCAN_DISABLE
-        //    && mlmeext_scan_state(mlmeext) != SCAN_COMPLETE
-        //    && mlmeext_scan_state(mlmeext) != SCAN_BACKING_OP)
-        //{
-        //    ret = _TRUE;
-        //}
-        //else if (mlmeext_scan_state(mlmeext) == SCAN_BACKING_OP
-        //         && !mlmeext_chk_scan_backop_flags(mlmeext, SS_BACKOP_TX_RESUME))
-        //{
-        //    ret = true;
-        //}
-
-
-        //return ret;
-
-        return true;
     }
 
     static void phy_SwChnl8812(PADAPTER pAdapter)

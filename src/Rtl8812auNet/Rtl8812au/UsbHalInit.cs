@@ -233,31 +233,6 @@ public static class UsbHalInit
     {
         /* Read all content in Efuse/EEPROM. */
         Hal_ReadPROMContent_8812A(Adapter);
-
-        /* We need to define the RF type after all PROM value is recognized. */
-        ReadRFType8812A(Adapter);
-    }
-
-    private static void ReadRFType8812A(PADAPTER padapter)
-    {
-        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
-
-        pHalData.rf_chip = RF_CHIP_E.RF_6052;
-
-        //if (IsSupported24G(padapter.registrypriv.wireless_mode) && is_supported_5g(padapter.registrypriv.wireless_mode))
-        {
-            pHalData.BandSet = BAND_TYPE.BAND_ON_BOTH;
-        }
-        // else if (is_supported_5g(padapter.registrypriv.wireless_mode))
-        // {
-        //     pHalData.BandSet = BAND_ON_5G;
-        // }
-        // else
-        // {
-        //     pHalData.BandSet = BAND_ON_2_4G;
-        // }
-
-
     }
 
     static void Hal_ReadPROMContent_8812A(PADAPTER Adapter)
@@ -796,7 +771,6 @@ public static class UsbHalInit
 
         if (pHalData.eeprom_thermal_meter == 0xff || AutoloadFail)
         {
-            pHalData.odmpriv.rf_calibrate_info.is_apk_thermal_meter_ignore = true;
             pHalData.eeprom_thermal_meter = 0xFF;
         }
 
@@ -2767,22 +2741,9 @@ public static class UsbHalInit
         //}
 
 
-            status = FirmwareDownload8812(Adapter, false);
-            if (status != true)
-            {
-                RTW_INFO("Download Firmware failed!!");
-                pHalData.bFWReady = false;
-                pHalData.fw_ractrl = false;
-                /* return status; */
-            }
-            else
-            {
-                RTW_INFO("Download Firmware Success!!");
-                pHalData.bFWReady = true;
-                pHalData.fw_ractrl = true;
-            }
+        FirmwareDownload8812(Adapter, false);
 
-            if (pwrctrlpriv.reg_rfoff == true)
+        if (pwrctrlpriv.reg_rfoff == true)
         {
             pwrctrlpriv.rf_pwrstate = rt_rf_power_state.rf_off;
         }
@@ -2834,14 +2795,7 @@ public static class UsbHalInit
             goto exit;
         }
 
-/* 92CU use 3-wire to r/w RF */
-/* pHalData.Rf_Mode = RF_OP_By_SW_3wire; */
-
-        status = PHY_RFConfig8812(Adapter);
-        if (status == false)
-        {
-            goto exit;
-        }
+        PHY_RFConfig8812(Adapter);
 
         if (pHalData.rf_type == rf_type.RF_1T1R)
         {
@@ -3151,12 +3105,10 @@ public static class UsbHalInit
         //rtw_sec_cam_map_clr_all(cam_ctl.used);
     }
 
-    public static s32 PHY_SwitchWirelessBand8812(PADAPTER Adapter, BAND_TYPE Band)
+    public static void PHY_SwitchWirelessBand8812(PADAPTER Adapter, BAND_TYPE Band)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        BAND_TYPE currentBand = pHalData.current_band_type;
         channel_width current_bw = pHalData.current_channel_bw;
-        rf_type rf_type = pHalData.rf_type;
         bool eLNA_2g = pHalData.ExternalLNA_2G;
 
         /* RTW_INFO("==>PHY_SwitchWirelessBand8812() %s\n", ((Band==0)?"2.4G":"5G")); */
@@ -3267,44 +3219,19 @@ public static class UsbHalInit
             /* RTW_INFO("==>PHY_SwitchWirelessBand8812() BAND_ON_5G settings OFDM index 0x%x\n", pHalData.OFDM_index[RF_PATH_A]); */
         }
 
-        phy_SetBBSwingByBand_8812A(Adapter, Band, currentBand);
-        /* RTW_INFO("<==PHY_SwitchWirelessBand8812():Switch Band OK.\n"); */
-        return _SUCCESS;
+        phy_SetBBSwingByBand_8812A(Adapter, Band);
     }
 
-    static void phy_SetBBSwingByBand_8812A(PADAPTER Adapter, BAND_TYPE Band, BAND_TYPE PreviousBand)
+    static void phy_SetBBSwingByBand_8812A(PADAPTER Adapter, BAND_TYPE Band)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA((Adapter));
 
-        /* <20120903, Kordan> Tx BB swing setting for RL6286, asked by Ynlin. */
-        //if (IS_NORMAL_CHIP(pHalData.version_id) || IS_HARDWARE_TYPE_8821(Adapter))
-        {
-            s8 BBDiffBetweenBand = 0;
+        phy_set_bb_reg(Adapter, rA_TxScale_Jaguar, 0xFFE00000,
+            phy_get_tx_bb_swing_8812a(Adapter, (BAND_TYPE)Band, rf_path.RF_PATH_A)); /* 0xC1C[31:21] */
+        phy_set_bb_reg(Adapter, rB_TxScale_Jaguar, 0xFFE00000,
+            phy_get_tx_bb_swing_8812a(Adapter, (BAND_TYPE)Band, rf_path.RF_PATH_B)); /* 0xE1C[31:21] */
 
-            dm_struct pDM_Odm = pHalData.odmpriv;
-            dm_rf_calibration_struct pRFCalibrateInfo = (pDM_Odm.rf_calibrate_info);
-            rf_path path = rf_path.RF_PATH_A;
-
-            phy_set_bb_reg(Adapter, rA_TxScale_Jaguar, 0xFFE00000,
-                phy_get_tx_bb_swing_8812a(Adapter, (BAND_TYPE)Band, rf_path.RF_PATH_A)); /* 0xC1C[31:21] */
-            phy_set_bb_reg(Adapter, rB_TxScale_Jaguar, 0xFFE00000,
-                phy_get_tx_bb_swing_8812a(Adapter, (BAND_TYPE)Band, rf_path.RF_PATH_B)); /* 0xE1C[31:21] */
-
-            /* <20121005, Kordan> When TxPowerTrack is ON, we should take care of the change of BB swing. */
-            /* That is, reset all info to trigger Tx power tracking. */
-            {
-
-                if (Band != PreviousBand)
-                {
-                    BBDiffBetweenBand = (sbyte)(pRFCalibrateInfo.bb_swing_diff_2g - pRFCalibrateInfo.bb_swing_diff_5g);
-                    BBDiffBetweenBand =
-                        (sbyte)((Band == BAND_TYPE.BAND_ON_2_4G) ? BBDiffBetweenBand : (-1 * BBDiffBetweenBand));
-                    pRFCalibrateInfo.default_ofdm_index += BBDiffBetweenBand * 2;
-                }
-
-                odm_clear_txpowertracking_state(pDM_Odm);
-            }
-        }
+        odm_clear_txpowertracking_state(pHalData.odmpriv);
     }
 
     static u32 phy_get_tx_bb_swing_8812a(PADAPTER Adapter, BAND_TYPE Band, rf_path RFPath)
@@ -3624,18 +3551,14 @@ public static class UsbHalInit
         phy_set_bb_reg(Adapter, 0xe64, bMaskDWord, 0);
     }
 
-    static bool PHY_RFConfig8812(PADAPTER Adapter)
+    static void PHY_RFConfig8812(PADAPTER Adapter)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        bool rtStatus = true;
-        rtStatus = PHY_RF6052_Config_8812(Adapter);
-        return rtStatus;
+        PHY_RF6052_Config_8812(Adapter);
     }
 
-    static bool PHY_RF6052_Config_8812(PADAPTER Adapter)
+    static void PHY_RF6052_Config_8812(PADAPTER Adapter)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        bool rtStatus = true;
 
         /* Initialize general global value */
         if (pHalData.rf_type == rf_type.RF_1T1R)
@@ -3650,58 +3573,31 @@ public static class UsbHalInit
         /*  */
         /* Config BB and RF */
         /*  */
-        rtStatus = phy_RF6052_Config_ParaFile_8812(Adapter);
-
-        return rtStatus;
+        phy_RF6052_Config_ParaFile_8812(Adapter);
     }
 
-    static bool phy_RF6052_Config_ParaFile_8812(PADAPTER Adapter)
+    static void phy_RF6052_Config_ParaFile_8812(PADAPTER Adapter)
     {
         rf_path eRFPath;
-        bool rtStatus = true;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
-        /* 3 */ /* ----------------------------------------------------------------- */
-        /* 3 */ /* <2> Initialize RF */
-        /* 3 */ /* ----------------------------------------------------------------- */
-        /* for(eRFPath = RF_PATH_A; eRFPath <pHalData.NumTotalRFPath; eRFPath++) */
         for (eRFPath = 0; (byte)eRFPath < pHalData.NumTotalRFPath; eRFPath++)
         {
             /*----Initialize RF fom connfiguration file----*/
             switch (eRFPath)
             {
                 case rf_path.RF_PATH_A:
-                {
-                    if (odm_config_rf_with_header_file(Adapter, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath) ==
-                        false)
-                    {
-                        rtStatus = false;
-                    }
-                }
+                    odm_config_rf_with_header_file(Adapter, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath);
                     break;
                 case rf_path.RF_PATH_B:
-                {
-                    if (odm_config_rf_with_header_file(Adapter, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath) ==
-                        false)
-                    {
-                        rtStatus = false;
-                    }
-                }
+                    odm_config_rf_with_header_file(Adapter, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath);
                     break;
                 default:
                     break;
             }
-
-            if (rtStatus != true)
-            {
-                throw new Exception();
-            }
-
         }
 
         odm_config_rf_with_tx_pwr_track_header_file(pHalData.odmpriv);
-
-        return rtStatus;
     }
 
     static bool phy_BB8812_Config_ParaFile(PADAPTER Adapter)
@@ -3844,11 +3740,6 @@ public static class UsbHalInit
                 rtw_write8(Adapter, REG_RXDMA_PRO_8812,
                     (byte)((provalue | BIT5 | BIT3 | BIT2 | BIT1) & (NotBIT4))); /* set burst pkt len=64B */
             }
-
-            /* rtw_write8(Adapter, 0x10c, 0xb4); */
-            /* hal_UphyUpdate8812AU(Adapter); */
-
-            pHalData.bSupportUSB3 = false;
         }
         else
         {
@@ -3858,10 +3749,7 @@ public static class UsbHalInit
             rtw_write8(Adapter, REG_RXDMA_PRO_8812,
                 //((provalue | BIT3 | BIT2 | BIT1) & (~(BIT5 | BIT4)))); /* set burst pkt len=1k */
                 (byte)((provalue | BIT3 | BIT2 | BIT1) & (0b1100_1111))); /* set burst pkt len=1k */
-            /* PlatformEFIOWrite2Byte(Adapter, REG_RXDMA_AGG_PG_TH,0x0a05); */ /* dmc agg th 20K */
-            pHalData.bSupportUSB3 = true;
 
-            /* set Reg 0xf008[3:4] to 2'00 to disable U1/U2 Mode to avoid 2.5G spur in USB3.0. added by page, 20120712 */
             rtw_write8(Adapter, 0xf008, (byte)(rtw_read8(Adapter, 0xf008) & 0xE7));
         }
 
@@ -4698,7 +4586,6 @@ public static class UsbHalInit
 
         var pFirmware = new RT_FIRMWARE_8812
         {
-            eFWSource = FIRMWARE_SOURCE.FW_SOURCE_HEADER_FILE,
             szFwBuffer = Firmware.array_mp_8812a_fw_nic,
             ulFwLength = (uint)Firmware.array_mp_8812a_fw_nic.Length
         };
@@ -4771,15 +4658,8 @@ public static class UsbHalInit
 
     static void InitializeFirmwareVars8812(PADAPTER padapter)
     {
-        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
-
-        pwrctrl_priv pwrpriv = adapter_to_pwrctl(padapter);
-
         /* Init H2C cmd. */
         rtw_write8(padapter, REG_HMETFR, 0x0f);
-
-        /* Init H2C counter. by tynli. 2009.12.09. */
-        pHalData.LastHMEBoxNum = 0;
     }
 
     static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)

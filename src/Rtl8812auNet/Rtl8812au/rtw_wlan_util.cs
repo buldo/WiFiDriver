@@ -33,11 +33,6 @@ public static class rtw_wlan_util
             }
         }
 
-        // set Channel
-        // saved channel/bw info
-        var dvobj = adapter_to_dvobj(padapter);
-        dvobj.oper_channel = channel;
-
         rtw_hal_set_chnl_bw(padapter, center_ch, bwmode, channel_offset, chnl_offset80); /* set center channel */
     }
 

@@ -2,9 +2,6 @@
 
 public static class usb_ops
 {
-    public static bool IS_FULL_SPEED_USB(_adapter Adapter) =>
-        (adapter_to_dvobj(Adapter).usb_speed == RTW_USB_SPEED_1_1);
-
     public static bool IS_HIGH_SPEED_USB(_adapter Adapter) =>
         (adapter_to_dvobj(Adapter).usb_speed == RTW_USB_SPEED_2);
     public static bool IS_SUPER_SPEED_USB(_adapter Adapter) =>

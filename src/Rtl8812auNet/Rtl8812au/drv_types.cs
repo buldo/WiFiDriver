@@ -10,6 +10,4 @@ public static class drv_types
     public static u8 GetRegRFEType(_adapter _Adapter) => (_Adapter.registrypriv.RFE_Type);
     public static registry_priv adapter_to_regsty(_adapter adapter) => dvobj_to_regsty(adapter_to_dvobj((adapter)));
     public static registry_priv dvobj_to_regsty(dvobj_priv dvobj) => ((dvobj.padapters[0].registrypriv));
-    public static rf_ctl_t adapter_to_rfctl(_adapter adapter) => dvobj_to_rfctl(adapter_to_dvobj((adapter)));
-    public static rf_ctl_t dvobj_to_rfctl(dvobj_priv dvobj) => ((dvobj.rf_ctl));
 }

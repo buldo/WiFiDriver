@@ -101,7 +101,6 @@ public static class rtl8812a_dm
         int i;
 
         /*phydm_op_mode could be change for different scenarios: ex: SoftAP - PHYDM_BALANCE_MODE*/
-        pHalData.phydm_op_mode = phydm_bb_op_mode.PHYDM_PERFORMANCE_MODE; /*Service one device*/
         rtw_odm_init_ic_type(adapter);
 
         odm_cmn_info_init(pDM_Odm, odm_cmninfo.ODM_CMNINFO_INTERFACE, (uint)adapter.dvobj.interface_type);

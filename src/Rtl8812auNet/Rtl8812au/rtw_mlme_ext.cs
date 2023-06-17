@@ -1,26 +1,7 @@
 ﻿namespace Rtl8812auNet.Rtl8812au;
 
-public class rf_ctl_t
-{
-    public object max_chan_nums;
-    public RT_CHANNEL_INFO[] channel_set = new RT_CHANNEL_INFO[MAX_CHANNEL_NUM];
-}
-
 public static class rtw_mlme_ext
 {
-    public static void rtw_rfctl_init(_adapter adapter)
-    {
-
-        rf_ctl_t rfctl = adapter_to_rfctl(adapter);
-
-        //rfctl.max_chan_nums = init_channel_set(adapter, rfctl.ChannelPlan, rfctl.channel_set);
-        //init_channel_list(adapter, rfctl.channel_set, rfctl.channel_list);
-        //_rtw_init_listhead(rfct.reg_exc_list);
-        //_rtw_init_listhead(rfctl.txpwr_lmt_list);
-
-        //rfctl.ch_sel_same_band_prefer = true;
-    }
-
     public static bool setopmode_hdl(_adapter padapter)
     {
         SetMonitorMode(padapter, NDIS_802_11_NETWORK_INFRASTRUCTURE.Ndis802_11Monitor);

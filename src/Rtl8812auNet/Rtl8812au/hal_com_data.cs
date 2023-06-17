@@ -3,23 +3,16 @@
 public class hal_com_data
 {
     public HAL_VERSION version_id = new HAL_VERSION();
-    public bool hw_init_completed;
     public u16 firmware_version;
     public u16 firmware_sub_version;
     public u16 FirmwareSignature;
-    public bool bFWReady;
-    public bool fw_ractrl;
-    public u8 LastHMEBoxNum; /* H2C - for host message to fw */
-    public BAND_TYPE BandSet;
     public u8 current_channel;
-    public bool bDisableSWChannelPlan; /* flag of disable software change channel plan	 */
-    public RF_CHIP_E rf_chip;
+    public RF_CHIP_E rf_chip = RF_CHIP_E.RF_6052;
     public rf_type rf_type; /*enum rf_type*/
     public u8 NumTotalRFPath;
     public bool bautoload_fail_flag { get; set; }
     public RT_MULTI_FUNC MultiFunc { get; set; }
     public RT_POLARITY_CTL PolarityCtl { get; set; }
-    public phydm_bb_op_mode phydm_op_mode { get; set; }
     public uint ReceiveConfig { get; set; }
     public channel_width current_channel_bw { get; set; }
     public byte cch_80 { get; set; }
@@ -113,12 +106,7 @@ public class hal_com_data
 
     public u8 rxagg_usb_timeout;
 
-
     public hal_spec_t hal_spec = new();
 
-    public uint rcr_backup;
-
     public BAND_TYPE current_band_type;
-
-    public bool bSupportUSB3;
 }
