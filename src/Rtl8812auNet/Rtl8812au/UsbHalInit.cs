@@ -68,13 +68,13 @@ public static class UsbHalInit
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
 
-        DvObj pdvobjpriv = padapter.dvobj;
+        DvObj pdvobjpriv = padapter.DvObj;
 
-        if (padapter.dvobj.UsbSpeed == RTW_USB_SPEED_3)
+        if (padapter.DvObj.UsbSpeed == RTW_USB_SPEED_3)
         {
             pHalData.UsbBulkOutSize = USB_SUPER_SPEED_BULK_SIZE; /* 1024 bytes */
         }
-        else if (padapter.dvobj.UsbSpeed == RTW_USB_SPEED_2)
+        else if (padapter.DvObj.UsbSpeed == RTW_USB_SPEED_2)
         {
             pHalData.UsbBulkOutSize = USB_HIGH_SPEED_BULK_SIZE; /* 512 bytes */
         }
@@ -92,7 +92,7 @@ public static class UsbHalInit
         pHalData.rxagg_dma_size = 16; /* uint: 128b, 0x0A = 10 = MAX_RX_DMA_BUFFER_SIZE/2/pHalData.UsbBulkOutSize */
         pHalData.rxagg_dma_timeout = 0x6; /* 6, absolute time = 34ms/(2^6) */
 
-        if (padapter.dvobj.UsbSpeed == RTW_USB_SPEED_3)
+        if (padapter.DvObj.UsbSpeed == RTW_USB_SPEED_3)
         {
             pHalData.rxagg_usb_size = 0x7;
             pHalData.rxagg_usb_timeout = 0x1a;
@@ -2032,187 +2032,6 @@ public static class UsbHalInit
         return t;
     }
 
-    public static bool rtl8812au_hal_init(AdapterState adapterState)
-    {
-        u8 value8 = 0, u1bRegCR;
-        u16 value16;
-        u8 txpktbuf_bndy;
-        bool status = false;
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
-
-        registry_priv pregistrypriv = adapterState.registrypriv;
-
-        // Check if MAC has already power on. by tynli. 2011.05.27.
-        value8 = rtw_read8(adapterState, REG_SYS_CLKR + 1);
-        u1bRegCR = rtw_read8(adapterState, REG_CR);
-        RTW_INFO(" power-on :REG_SYS_CLKR 0x09=0x%02x. REG_CR 0x100=0x%02x.\n", value8, u1bRegCR);
-        if ((value8 & BIT3) != 0 && (u1bRegCR != 0 && u1bRegCR != 0xEA))
-        {
-            /* pHalData.bMACFuncEnable = TRUE; */
-            RTW_INFO(" MAC has already power on.\n");
-        }
-        else
-        {
-            /* pHalData.bMACFuncEnable = FALSE; */
-            /* Set FwPSState to ALL_ON mode to prevent from the I/O be return because of 32k */
-            /* state which is set before sleep under wowlan mode. 2012.01.04. by tynli. */
-            /* pHalData.FwPSState = FW_PS_STATE_ALL_ON_88E; */
-            RTW_INFO(" MAC has not been powered on yet.\n");
-        }
-
-        rtw_write8(adapterState, REG_RF_CTRL, 5);
-        rtw_write8(adapterState, REG_RF_CTRL, 7);
-        rtw_write8(adapterState, REG_RF_B_CTRL_8812, 5);
-        rtw_write8(adapterState, REG_RF_B_CTRL_8812, 7);
-
-        // If HW didn't go through a complete de-initial procedure,
-        // it probably occurs some problem for double initial procedure.
-        // Like "CONFIG_DEINIT_BEFORE_INIT" in 92du chip
-        rtl8812au_hw_reset(adapterState);
-
-        status = InitPowerOn(adapterState);
-        if (status == false)
-        {
-            goto exit;
-        }
-
-        if (!pregistrypriv.wifi_spec)
-        {
-            txpktbuf_bndy = TX_PAGE_BOUNDARY_8812;
-        }
-        else
-        {
-            throw new NotImplementedException();
-            /* for WMM */
-            //txpktbuf_bndy = WMM_NORMAL_TX_PAGE_BOUNDARY_8812;
-        }
-
-        status = InitLLTTable8812A(adapterState, txpktbuf_bndy);
-        if (status == false)
-        {
-            goto exit;
-        }
-
-        _InitHardwareDropIncorrectBulkOut_8812A(adapterState);
-
-        FirmwareDownload8812(adapterState);
-
-        PHY_MACConfig8812(adapterState);
-
-        _InitQueueReservedPage_8812AUsb(adapterState);
-        _InitTxBufferBoundary_8812AUsb(adapterState);
-
-        _InitQueuePriority_8812AUsb(adapterState);
-        _InitPageBoundary_8812AUsb(adapterState);
-
-        _InitTransferPageSize_8812AUsb(adapterState);
-
-        // Get Rx PHY status in order to report RSSI and others.
-        _InitDriverInfoSize_8812A(adapterState, DRVINFO_SZ);
-
-        _InitInterrupt_8812AU(adapterState);
-        _InitNetworkType_8812A(adapterState); /* set msr	 */
-        _InitWMACSetting_8812A(adapterState);
-        _InitAdaptiveCtrl_8812AUsb(adapterState);
-        _InitEDCA_8812AUsb(adapterState);
-
-        _InitRetryFunction_8812A(adapterState);
-        init_UsbAggregationSetting_8812A(adapterState);
-
-        _InitBeaconParameters_8812A(adapterState);
-        _InitBeaconMaxError_8812A(adapterState);
-
-        _InitBurstPktLen(adapterState); // added by page. 20110919
-
-        // Init CR MACTXEN, MACRXEN after setting RxFF boundary REG_TRXFF_BNDY to patch
-        // Hw bug which Hw initials RxFF boundry size to a value which is larger than the real Rx buffer size in 88E.
-        // 2011.08.05. by tynli.
-        value8 = rtw_read8(adapterState, REG_CR);
-        rtw_write8(adapterState, REG_CR, (byte)(value8 | MACTXEN | MACRXEN));
-
-        rtw_write16(adapterState, REG_PKT_VO_VI_LIFE_TIME, 0x0400); /* unit: 256us. 256ms */
-        rtw_write16(adapterState, REG_PKT_BE_BK_LIFE_TIME, 0x0400); /* unit: 256us. 256ms */
-
-        status = PHY_BBConfig8812(adapterState);
-        if (status == false)
-        {
-            goto exit;
-        }
-
-        PHY_RF6052_Config_8812(adapterState);
-
-        if (pHalData.rf_type == RfType.RF_1T1R)
-        {
-            PHY_BB8812_Config_1T(adapterState);
-        }
-
-        if (adapterState.registrypriv.rf_config == RfType.RF_1T2R)
-        {
-            phy_set_bb_reg(adapterState, rTxPath_Jaguar, bMaskLWord, 0x1111);
-        }
-
-
-        if (adapterState.registrypriv.channel <= 14)
-        {
-            PHY_SwitchWirelessBand8812(adapterState, BandType.BAND_ON_2_4G);
-        }
-        else
-        {
-            PHY_SwitchWirelessBand8812(adapterState, BandType.BAND_ON_5G);
-        }
-
-        rtw_hal_set_chnl_bw(adapterState, adapterState.registrypriv.channel, ChannelWidth.CHANNEL_WIDTH_20,
-            HAL_PRIME_CHNL_OFFSET_DONT_CARE,
-            HAL_PRIME_CHNL_OFFSET_DONT_CARE);
-
-
-        // HW SEQ CTRL
-        // set 0x0 to 0xFF by tynli. Default enable HW SEQ NUM.
-        rtw_write8(adapterState, REG_HWSEQ_CTRL, 0xFF);
-
-
-        // Disable BAR, suggested by Scott
-        // 2010.04.09 add by hpfan
-        rtw_write32(adapterState, REG_BAR_MODE_CTRL, 0x0201ffff);
-
-        if (pregistrypriv.wifi_spec)
-        {
-            rtw_write16(adapterState, REG_FAST_EDCA_CTRL, 0);
-        }
-
-        // Nav limit , suggest by scott
-        rtw_write8(adapterState, 0x652, 0x0);
-
-        init_phydm_info(adapterState);
-
-
-        /* 0x4c6[3] 1: RTS BW = Data BW */
-        /* 0: RTS BW depends on CCA / secondary CCA result. */
-        rtw_write8(adapterState, REG_QUEUE_CTRL, (byte)(rtw_read8(adapterState, REG_QUEUE_CTRL) & 0xF7));
-
-        /* enable Tx report. */
-        rtw_write8(adapterState, REG_FWHW_TXQ_CTRL + 1, 0x0F);
-
-        /* Suggested by SD1 pisa. Added by tynli. 2011.10.21. */
-        rtw_write8(adapterState, REG_EARLY_MODE_CONTROL_8812 + 3, 0x01); /* Pretx_en, for WEP/TKIP SEC */
-
-        /* tynli_test_tx_report. */
-        rtw_write16(adapterState, REG_TX_RPT_TIME, 0x3DF0);
-
-        /* Reset USB mode switch setting */
-        rtw_write8(adapterState, REG_SDIO_CTRL_8812, 0x0);
-        rtw_write8(adapterState, REG_ACLK_MON, 0x0);
-
-        rtw_write8(adapterState, REG_USB_HRPWM, 0);
-
-        // TODO:
-        ///* ack for xmit mgmt frames. */
-        rtw_write32(adapterState, REG_FWHW_TXQ_CTRL, rtw_read32(adapterState, REG_FWHW_TXQ_CTRL) | BIT12);
-        exit:
-
-        return status;
-    }
-
     public static void phy_set_bb_reg(AdapterState adapterState, u16 RegAddr, u32 BitMask, u32 Data) =>
         PHY_SetBBReg8812(adapterState, RegAddr, BitMask, Data);
 
@@ -3186,7 +3005,7 @@ public static class UsbHalInit
         rtw_write32(adapterState, REG_TXDMA_OFFSET_CHK, value32);
     }
 
-    private static bool InitLLTTable8812A(AdapterState padapter, u8 txpktbuf_bndy)
+    public static bool InitLLTTable8812A(AdapterState padapter, u8 txpktbuf_bndy)
     {
         bool status = false;
         u32 i;
@@ -3280,48 +3099,6 @@ public static class UsbHalInit
         return status;
     }
 
-    private static bool InitPowerOn(AdapterState padapter)
-    {
-        bool bMacPwrCtrlOn = padapter.HalData.bMacPwrCtrlOn;
-        if (bMacPwrCtrlOn == true)
-        {
-            return true;
-        }
-
-        if (!HalPwrSeqCmdParsing(padapter,
-                CutMsk.PWR_CUT_ALL_MSK,
-                FabMsk.PWR_FAB_ALL_MSK,
-                InterfaceMask.PWR_INTF_USB_MSK,
-                PowerSequences.Rtl8812_NIC_ENABLE_FLOW))
-        {
-            RTW_ERR("InitPowerOn: run power on flow fail");
-            return false;
-        }
-
-        /* Enable MAC DMA/WMAC/SCHEDULE/SEC block */
-        /* Set CR bit10 to enable 32k calibration. Suggested by SD1 Gimmy. Added by tynli. 2011.08.31. */
-        rtw_write16(padapter, REG_CR, 0x00); /* suggseted by zhouzhou, by page, 20111230 */
-        u16 u2btmp = rtw_read16(padapter, REG_CR);
-        u2btmp |= (ushort)(
-            CrBit.HCI_TXDMA_EN |
-            CrBit.HCI_RXDMA_EN |
-            CrBit.TXDMA_EN |
-            CrBit.RXDMA_EN |
-            CrBit.PROTOCOL_EN |
-            CrBit.SCHEDULE_EN |
-            CrBit.ENSEC |
-            CrBit.CALTMR_EN);
-        rtw_write16(padapter, REG_CR, u2btmp);
-
-        /* Need remove below furture, suggest by Jackie. */
-        /* if 0xF0[24] =1 (LDO), need to set the 0x7C[6] to 1. */
-
-        bMacPwrCtrlOn = true;
-        padapter.HalData.bMacPwrCtrlOn = bMacPwrCtrlOn;
-
-        return true;
-    }
-
     static void rtl8812au_hw_reset(AdapterState adapterState)
     {
         uint reg_val = 0;
@@ -3366,7 +3143,174 @@ public static class UsbHalInit
         }
     }
 
-    static void _8051Reset8812(AdapterState padapter)
+    static bool HalPwrSeqCmdParsing(
+AdapterState adapterState,
+CutMsk CutVersion,
+FabMsk FabVersion,
+InterfaceMask InterfaceType,
+WLAN_PWR_CFG[] PwrSeqCmd)
+    {
+        bool bHWICSupport = false;
+        UInt32 AryIdx = 0;
+        //UInt16 offset = 0;
+        UInt32 pollingCount = 0; /* polling autoload done. */
+
+        do
+        {
+            var PwrCfgCmd = PwrSeqCmd[AryIdx];
+
+            /* 2 Only Handle the command whose FAB, CUT, and Interface are matched */
+            //if ((GET_PWR_CFG_FAB_MASK(PwrCfgCmd) & FabVersion) &&
+            //    (GET_PWR_CFG_CUT_MASK(PwrCfgCmd) & CutVersion) &&
+            //    (GET_PWR_CFG_INTF_MASK(PwrCfgCmd) & InterfaceType))
+            if (((PwrCfgCmd.fab_msk & FabVersion) != 0) &&
+                ((PwrCfgCmd.cut_msk & CutVersion) != 0) &&
+                ((PwrCfgCmd.interface_msk & InterfaceType) != 0))
+            {
+                switch (PwrCfgCmd.cmd)
+                {
+                    case PwrCmd.PWR_CMD_READ:
+                        break;
+
+                    case PwrCmd.PWR_CMD_WRITE:
+                        {
+                            var offset = PwrCfgCmd.offset;
+                            /* Read the value from system register */
+                            var currentOffsetValue = Read8(adapterState, offset);
+
+                            currentOffsetValue = (byte)(currentOffsetValue & unchecked((byte)(~PwrCfgCmd.msk)));
+                            currentOffsetValue = (byte)(currentOffsetValue | ((PwrCfgCmd.value) & (PwrCfgCmd.msk)));
+
+                            /* Write the value back to sytem register */
+                            Write8(adapterState, offset, currentOffsetValue);
+                        }
+                        break;
+
+                    case PwrCmd.PWR_CMD_POLLING:
+
+                        {
+                            var bPollingBit = false;
+                            var offset = (PwrCfgCmd.offset);
+                            UInt32 maxPollingCnt = 5000;
+                            bool flag = false;
+
+                            maxPollingCnt = 5000;
+
+                            do
+                            {
+                                var value = Read8(adapterState, offset);
+
+                                value = (byte)(value & PwrCfgCmd.msk);
+                                if (value == ((PwrCfgCmd.value) & PwrCfgCmd.msk))
+                                {
+                                    bPollingBit = true;
+                                }
+                                else
+                                {
+                                    Thread.Sleep(10);
+                                }
+
+                                if (pollingCount++ > maxPollingCnt)
+                                {
+                                    // TODO: RTW_ERR("HalPwrSeqCmdParsing: Fail to polling Offset[%#x]=%02x\n", offset, value);
+
+                                    /* For PCIE + USB package poll power bit timeout issue only modify 8821AE and 8723BE */
+                                    if (bHWICSupport && offset == 0x06 && flag == false)
+                                    {
+
+                                        // TODO: RTW_ERR("[WARNING] PCIE polling(0x%X) timeout(%d), Toggle 0x04[3] and try again.\n", offset, maxPollingCnt);
+
+                                        Write8(adapterState, 0x04, (byte)(Read8(adapterState, 0x04) | BIT3));
+                                        Write8(adapterState, 0x04, (byte)(Read8(adapterState, 0x04) & NotBIT3));
+
+                                        /* Retry Polling Process one more time */
+                                        pollingCount = 0;
+                                        flag = true;
+                                    }
+                                    else
+                                    {
+                                        return false;
+                                    }
+                                }
+                            } while (!bPollingBit);
+                        }
+
+                        break;
+
+                    case PwrCmd.PWR_CMD_DELAY:
+                        {
+                            if (PwrCfgCmd.value == (byte)PWRSEQ_DELAY_UNIT.PWRSEQ_DELAY_US)
+                            {
+                                Thread.Sleep((PwrCfgCmd.offset));
+                            }
+                            else
+                            {
+                                Thread.Sleep((PwrCfgCmd.offset) * 1000);
+                            }
+                        }
+                        break;
+
+                    case PwrCmd.PWR_CMD_END:
+                        /* When this command is parsed, end the process */
+                        return true;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            AryIdx++; /* Add Array Index */
+        } while (true);
+
+        return true;
+    }
+
+
+    private static bool InitPowerOn(AdapterState padapter)
+    {
+        bool bMacPwrCtrlOn = padapter.HalData.bMacPwrCtrlOn;
+        if (bMacPwrCtrlOn == true)
+        {
+            return true;
+        }
+
+        if (!HalPwrSeqCmdParsing(padapter,
+                CutMsk.PWR_CUT_ALL_MSK,
+                FabMsk.PWR_FAB_ALL_MSK,
+                InterfaceMask.PWR_INTF_USB_MSK,
+                PowerSequences.Rtl8812_NIC_ENABLE_FLOW))
+        {
+            RTW_ERR("InitPowerOn: run power on flow fail");
+            return false;
+        }
+
+        /* Enable MAC DMA/WMAC/SCHEDULE/SEC block */
+        /* Set CR bit10 to enable 32k calibration. Suggested by SD1 Gimmy. Added by tynli. 2011.08.31. */
+        rtw_write16(padapter, REG_CR, 0x00); /* suggseted by zhouzhou, by page, 20111230 */
+        u16 u2btmp = rtw_read16(padapter, REG_CR);
+        u2btmp |= (ushort)(
+            CrBit.HCI_TXDMA_EN |
+            CrBit.HCI_RXDMA_EN |
+            CrBit.TXDMA_EN |
+            CrBit.RXDMA_EN |
+            CrBit.PROTOCOL_EN |
+            CrBit.SCHEDULE_EN |
+            CrBit.ENSEC |
+            CrBit.CALTMR_EN);
+        rtw_write16(padapter, REG_CR, u2btmp);
+
+        /* Need remove below furture, suggest by Jackie. */
+        /* if 0xF0[24] =1 (LDO), need to set the 0x7C[6] to 1. */
+
+        bMacPwrCtrlOn = true;
+        padapter.HalData.bMacPwrCtrlOn = bMacPwrCtrlOn;
+
+        return true;
+    }
+
+
+    public static void _8051Reset8812(AdapterState padapter)
     {
         u8 u1bTmp, u1bTmp2;
 
@@ -3394,128 +3338,204 @@ public static class UsbHalInit
         RTW_INFO("=====> _8051Reset8812(): 8051 reset success .");
     }
 
-    static bool HalPwrSeqCmdParsing(
-        AdapterState adapterState,
-        CutMsk CutVersion,
-        FabMsk FabVersion,
-        InterfaceMask InterfaceType,
-        WLAN_PWR_CFG[] PwrSeqCmd)
+    public static bool rtw_hal_init(AdapterState padapter, InitChannel initChannel)
     {
-        bool bHWICSupport = false;
-        UInt32 AryIdx = 0;
-        //UInt16 offset = 0;
-        UInt32 pollingCount = 0; /* polling autoload done. */
+        var status = rtl8812au_hal_init(padapter);
 
-        do
+        if (status)
         {
-            var PwrCfgCmd = PwrSeqCmd[AryIdx];
+            init_hw_mlme_ext(padapter, initChannel);
+            setopmode_hdl(padapter);
+        }
+        else
+        {
+            RTW_ERR("rtw_hal_init: fail");
+        }
 
-            /* 2 Only Handle the command whose FAB, CUT, and Interface are matched */
-            //if ((GET_PWR_CFG_FAB_MASK(PwrCfgCmd) & FabVersion) &&
-            //    (GET_PWR_CFG_CUT_MASK(PwrCfgCmd) & CutVersion) &&
-            //    (GET_PWR_CFG_INTF_MASK(PwrCfgCmd) & InterfaceType))
-            if (((PwrCfgCmd.fab_msk & FabVersion) != 0) &&
-                ((PwrCfgCmd.cut_msk & CutVersion) != 0) &&
-                ((PwrCfgCmd.interface_msk & InterfaceType) != 0))
-            {
-                switch (PwrCfgCmd.cmd)
-                {
-                    case PwrCmd.PWR_CMD_READ:
-                        break;
-
-                    case PwrCmd.PWR_CMD_WRITE:
-                    {
-                        var offset = PwrCfgCmd.offset;
-                        /* Read the value from system register */
-                        var currentOffsetValue = Read8(adapterState, offset);
-
-                        currentOffsetValue = (byte)(currentOffsetValue & unchecked((byte)(~PwrCfgCmd.msk)));
-                        currentOffsetValue = (byte)(currentOffsetValue | ((PwrCfgCmd.value) & (PwrCfgCmd.msk)));
-
-                        /* Write the value back to sytem register */
-                        Write8(adapterState, offset, currentOffsetValue);
-                    }
-                        break;
-
-                    case PwrCmd.PWR_CMD_POLLING:
-
-                    {
-                        var bPollingBit = false;
-                        var offset = (PwrCfgCmd.offset);
-                        UInt32 maxPollingCnt = 5000;
-                        bool flag = false;
-
-                        maxPollingCnt = 5000;
-
-                        do
-                        {
-                            var value = Read8(adapterState, offset);
-
-                            value = (byte)(value & PwrCfgCmd.msk);
-                            if (value == ((PwrCfgCmd.value) & PwrCfgCmd.msk))
-                            {
-                                bPollingBit = true;
-                            }
-                            else
-                            {
-                                Thread.Sleep(10);
-                            }
-
-                            if (pollingCount++ > maxPollingCnt)
-                            {
-                                // TODO: RTW_ERR("HalPwrSeqCmdParsing: Fail to polling Offset[%#x]=%02x\n", offset, value);
-
-                                /* For PCIE + USB package poll power bit timeout issue only modify 8821AE and 8723BE */
-                                if (bHWICSupport && offset == 0x06 && flag == false)
-                                {
-
-                                    // TODO: RTW_ERR("[WARNING] PCIE polling(0x%X) timeout(%d), Toggle 0x04[3] and try again.\n", offset, maxPollingCnt);
-
-                                    Write8(adapterState, 0x04, (byte)(Read8(adapterState, 0x04) | BIT3));
-                                    Write8(adapterState, 0x04, (byte)(Read8(adapterState, 0x04) & NotBIT3));
-
-                                    /* Retry Polling Process one more time */
-                                    pollingCount = 0;
-                                    flag = true;
-                                }
-                                else
-                                {
-                                    return false;
-                                }
-                            }
-                        } while (!bPollingBit);
-                    }
-
-                        break;
-
-                    case PwrCmd.PWR_CMD_DELAY:
-                    {
-                        if (PwrCfgCmd.value == (byte)PWRSEQ_DELAY_UNIT.PWRSEQ_DELAY_US)
-                        {
-                            Thread.Sleep((PwrCfgCmd.offset));
-                        }
-                        else
-                        {
-                            Thread.Sleep((PwrCfgCmd.offset) * 1000);
-                        }
-                    }
-                        break;
-
-                    case PwrCmd.PWR_CMD_END:
-                        /* When this command is parsed, end the process */
-                        return true;
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
-            AryIdx++; /* Add Array Index */
-        } while (true);
-
-        return true;
+        return status;
     }
+
+    private static bool rtl8812au_hal_init(AdapterState adapterState)
+    {
+        u8 value8 = 0, u1bRegCR;
+        u16 value16;
+        u8 txpktbuf_bndy;
+        bool status = false;
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
+
+        registry_priv pregistrypriv = adapterState.registrypriv;
+
+        // Check if MAC has already power on. by tynli. 2011.05.27.
+        value8 = rtw_read8(adapterState, REG_SYS_CLKR + 1);
+        u1bRegCR = rtw_read8(adapterState, REG_CR);
+        RTW_INFO(" power-on :REG_SYS_CLKR 0x09=0x%02x. REG_CR 0x100=0x%02x.\n", value8, u1bRegCR);
+        if ((value8 & BIT3) != 0 && (u1bRegCR != 0 && u1bRegCR != 0xEA))
+        {
+            /* pHalData.bMACFuncEnable = TRUE; */
+            RTW_INFO(" MAC has already power on.\n");
+        }
+        else
+        {
+            /* pHalData.bMACFuncEnable = FALSE; */
+            /* Set FwPSState to ALL_ON mode to prevent from the I/O be return because of 32k */
+            /* state which is set before sleep under wowlan mode. 2012.01.04. by tynli. */
+            /* pHalData.FwPSState = FW_PS_STATE_ALL_ON_88E; */
+            RTW_INFO(" MAC has not been powered on yet.\n");
+        }
+
+        rtw_write8(adapterState, REG_RF_CTRL, 5);
+        rtw_write8(adapterState, REG_RF_CTRL, 7);
+        rtw_write8(adapterState, REG_RF_B_CTRL_8812, 5);
+        rtw_write8(adapterState, REG_RF_B_CTRL_8812, 7);
+
+        // If HW didn't go through a complete de-initial procedure,
+        // it probably occurs some problem for double initial procedure.
+        // Like "CONFIG_DEINIT_BEFORE_INIT" in 92du chip
+        rtl8812au_hw_reset(adapterState);
+
+        status = InitPowerOn(adapterState);
+        if (status == false)
+        {
+            goto exit;
+        }
+
+        if (!pregistrypriv.wifi_spec)
+        {
+            txpktbuf_bndy = TX_PAGE_BOUNDARY_8812;
+        }
+        else
+        {
+            throw new NotImplementedException();
+            /* for WMM */
+            //txpktbuf_bndy = WMM_NORMAL_TX_PAGE_BOUNDARY_8812;
+        }
+
+        status = InitLLTTable8812A(adapterState, txpktbuf_bndy);
+        if (status == false)
+        {
+            goto exit;
+        }
+
+        _InitHardwareDropIncorrectBulkOut_8812A(adapterState);
+
+        FirmwareDownload8812(adapterState);
+
+        PHY_MACConfig8812(adapterState);
+
+        _InitQueueReservedPage_8812AUsb(adapterState);
+        _InitTxBufferBoundary_8812AUsb(adapterState);
+
+        _InitQueuePriority_8812AUsb(adapterState);
+        _InitPageBoundary_8812AUsb(adapterState);
+
+        _InitTransferPageSize_8812AUsb(adapterState);
+
+        // Get Rx PHY status in order to report RSSI and others.
+        _InitDriverInfoSize_8812A(adapterState, DRVINFO_SZ);
+
+        _InitInterrupt_8812AU(adapterState);
+        _InitNetworkType_8812A(adapterState); /* set msr	 */
+        _InitWMACSetting_8812A(adapterState);
+        _InitAdaptiveCtrl_8812AUsb(adapterState);
+        _InitEDCA_8812AUsb(adapterState);
+
+        _InitRetryFunction_8812A(adapterState);
+        init_UsbAggregationSetting_8812A(adapterState);
+
+        _InitBeaconParameters_8812A(adapterState);
+        _InitBeaconMaxError_8812A(adapterState);
+
+        _InitBurstPktLen(adapterState); // added by page. 20110919
+
+        // Init CR MACTXEN, MACRXEN after setting RxFF boundary REG_TRXFF_BNDY to patch
+        // Hw bug which Hw initials RxFF boundry size to a value which is larger than the real Rx buffer size in 88E.
+        // 2011.08.05. by tynli.
+        value8 = rtw_read8(adapterState, REG_CR);
+        rtw_write8(adapterState, REG_CR, (byte)(value8 | MACTXEN | MACRXEN));
+
+        rtw_write16(adapterState, REG_PKT_VO_VI_LIFE_TIME, 0x0400); /* unit: 256us. 256ms */
+        rtw_write16(adapterState, REG_PKT_BE_BK_LIFE_TIME, 0x0400); /* unit: 256us. 256ms */
+
+        status = PHY_BBConfig8812(adapterState);
+        if (status == false)
+        {
+            goto exit;
+        }
+
+        PHY_RF6052_Config_8812(adapterState);
+
+        if (pHalData.rf_type == RfType.RF_1T1R)
+        {
+            PHY_BB8812_Config_1T(adapterState);
+        }
+
+        if (adapterState.registrypriv.rf_config == RfType.RF_1T2R)
+        {
+            phy_set_bb_reg(adapterState, rTxPath_Jaguar, bMaskLWord, 0x1111);
+        }
+
+
+        if (adapterState.registrypriv.channel <= 14)
+        {
+            PHY_SwitchWirelessBand8812(adapterState, BandType.BAND_ON_2_4G);
+        }
+        else
+        {
+            PHY_SwitchWirelessBand8812(adapterState, BandType.BAND_ON_5G);
+        }
+
+        rtw_hal_set_chnl_bw(adapterState, adapterState.registrypriv.channel, ChannelWidth.CHANNEL_WIDTH_20,
+            HAL_PRIME_CHNL_OFFSET_DONT_CARE,
+            HAL_PRIME_CHNL_OFFSET_DONT_CARE);
+
+
+        // HW SEQ CTRL
+        // set 0x0 to 0xFF by tynli. Default enable HW SEQ NUM.
+        rtw_write8(adapterState, REG_HWSEQ_CTRL, 0xFF);
+
+
+        // Disable BAR, suggested by Scott
+        // 2010.04.09 add by hpfan
+        rtw_write32(adapterState, REG_BAR_MODE_CTRL, 0x0201ffff);
+
+        if (pregistrypriv.wifi_spec)
+        {
+            rtw_write16(adapterState, REG_FAST_EDCA_CTRL, 0);
+        }
+
+        // Nav limit , suggest by scott
+        rtw_write8(adapterState, 0x652, 0x0);
+
+        init_phydm_info(adapterState);
+
+
+        /* 0x4c6[3] 1: RTS BW = Data BW */
+        /* 0: RTS BW depends on CCA / secondary CCA result. */
+        rtw_write8(adapterState, REG_QUEUE_CTRL, (byte)(rtw_read8(adapterState, REG_QUEUE_CTRL) & 0xF7));
+
+        /* enable Tx report. */
+        rtw_write8(adapterState, REG_FWHW_TXQ_CTRL + 1, 0x0F);
+
+        /* Suggested by SD1 pisa. Added by tynli. 2011.10.21. */
+        rtw_write8(adapterState, REG_EARLY_MODE_CONTROL_8812 + 3, 0x01); /* Pretx_en, for WEP/TKIP SEC */
+
+        /* tynli_test_tx_report. */
+        rtw_write16(adapterState, REG_TX_RPT_TIME, 0x3DF0);
+
+        /* Reset USB mode switch setting */
+        rtw_write8(adapterState, REG_SDIO_CTRL_8812, 0x0);
+        rtw_write8(adapterState, REG_ACLK_MON, 0x0);
+
+        rtw_write8(adapterState, REG_USB_HRPWM, 0);
+
+        // TODO:
+        ///* ack for xmit mgmt frames. */
+        rtw_write32(adapterState, REG_FWHW_TXQ_CTRL, rtw_read32(adapterState, REG_FWHW_TXQ_CTRL) | BIT12);
+    exit:
+
+        return status;
+    }
+
 
     private static bool FirmwareDownload8812(AdapterState adapterState)
     {

@@ -11,20 +11,21 @@ public class Rtl8812aDevice
     public Rtl8812aDevice(IRtlUsbDevice usbDevice)
     {
         _usbDevice = usbDevice;
-        _adapterState = usb_intf.rtw_drv_init(_usbDevice);
+        var dvobj = InitDvObj(_usbDevice);
+        _adapterState = InitAdapter(dvobj, _usbDevice);
     }
 
     public void Init()
     {
 
-        ioctl_cfg80211.cfg80211_rtw_change_iface(_adapterState, new InitChannel()
+        StartWithMonitorMode(new InitChannel()
         {
             cur_bwmode = ChannelWidth.CHANNEL_WIDTH_20,
             cur_ch_offset = 0,
             cur_channel = 8
         });
 
-        ioctl_cfg80211.cfg80211_rtw_set_monitor_channel(_adapterState, new InitChannel()
+        SetMonitorChannel(_adapterState, new InitChannel()
         {
             cur_bwmode = ChannelWidth.CHANNEL_WIDTH_20,
             cur_ch_offset = 0,
@@ -32,5 +33,31 @@ public class Rtl8812aDevice
         });
 
         _readTask = Task.Run(() => _usbDevice.InfinityRead());
+    }
+
+    private void StartWithMonitorMode(InitChannel initChannel)
+    {
+        if (NetDevOpen(initChannel) == false)
+        {
+            throw new Exception("StartWithMonitorMode failed NetDevOpen");
+        }
+
+        setopmode_hdl(_adapterState);
+    }
+
+    private void SetMonitorChannel(AdapterState padapter, InitChannel chandef)
+    {
+        set_channel_bwmode(padapter, chandef.cur_channel, chandef.cur_ch_offset, chandef.cur_bwmode);
+    }
+
+    private bool NetDevOpen(InitChannel initChannel)
+    {
+        var status = rtw_hal_init(_adapterState, initChannel);
+        if (status == false)
+        {
+            return false;
+        }
+
+        return true;
     }
 }

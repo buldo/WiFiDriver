@@ -4,15 +4,20 @@ namespace Rtl8812auNet.Rtl8812au;
 
 public class AdapterState
 {
-    public DvObj dvobj { get; set; }
+    public AdapterState(DvObj dvObj, HwPort hwPort, IRtlUsbDevice rtlUsbDevice)
+    {
+        DvObj = dvObj;
+        HwPort = hwPort;
+        Device = rtlUsbDevice;
+    }
+
+    public DvObj DvObj { get; }
 
     public registry_priv registrypriv { get; } = new ();
 
     public hal_com_data HalData { get; } = new();
 
-    public IRtlUsbDevice Device { get; init; }
+    public IRtlUsbDevice Device { get; }
 
-    public bool IsUp { get; set; }
-
-    public HwPort HwPort { get; set; }
+    public HwPort HwPort { get; }
 }
