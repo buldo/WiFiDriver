@@ -1,13 +1,9 @@
 ﻿using System.Buffers.Binary;
-using LibUsbDotNet.Main;
 
 namespace Rtl8812auNet.Rtl8812au;
 
 public static class rtw_io
 {
-    private const byte REALTEK_USB_VENQT_READ = 0xC0;
-    private const byte REALTEK_USB_VENQT_WRITE = 0x40;
-
     public static byte rtw_read8(_adapter adapter, ushort addr)
     {
         return ReadBytes(adapter, addr, 1)[0];
@@ -57,31 +53,11 @@ public static class rtw_io
 
     private static ReadOnlySpan<byte> ReadBytes(_adapter adapter, ushort register, ushort bytesCount)
     {
-        var packet = new UsbSetupPacket
-        {
-            RequestType = REALTEK_USB_VENQT_READ,
-            Request = 5,
-            Index = 0,
-            Length = (short)bytesCount,
-            Value = (short)register
-        };
-
-        var buffer = new byte[bytesCount];
-        var bytesReceived = adapter.Device.ControlTransfer(packet, buffer, 0, bytesCount);
-        return buffer.AsSpan(0, bytesReceived);
+        return adapter.Device.ReadBytes(register, bytesCount);
     }
 
     public static void WriteBytes(_adapter adapter, ushort register, Span<byte> data)
     {
-        var packet = new UsbSetupPacket
-        {
-            RequestType = REALTEK_USB_VENQT_WRITE,
-            Request = 5,
-            Index = 0,
-            Length = (short)data.Length, // ?? is it read length
-            Value = (short)register
-        };
-
-        var bytesReceived = adapter.Device.ControlTransfer(packet, data.ToArray(), 0, data.Length);
+        adapter.Device.WriteBytes(register, data);
     }
 }

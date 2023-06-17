@@ -1,5 +1,6 @@
 ﻿using LibUsbDotNet.LibUsb;
 using LibUsbDotNet;
+using Rtl8812auNet.LibUsb;
 using Rtl8812auNet.Rtl8812au;
 
 namespace Rtl8812auNet.ConsoleDemo;
@@ -16,8 +17,8 @@ internal class Program
         var devices = context.FindAll(SearchPredicate);
 
         var device = devices.First();
-
-        var rtlDevice = new Rtl8812aDevice((UsbDevice)device);
+        var rtlUsb = new LibUsbRtlUsbDevice((UsbDevice)device);
+        var rtlDevice = new Rtl8812aDevice(rtlUsb);
 
         rtlDevice.Init();
 

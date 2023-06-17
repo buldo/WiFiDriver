@@ -1,15 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rtl8812auNet.LibUsb\Rtl8812auNet.LibUsb.csproj" />
-    <ProjectReference Include="..\Rtl8812auNet\Rtl8812auNet.csproj" />
+    <PackageReference Include="LibUsbDotNet" Version="3.0.102-alpha" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Rtl8812auNet.Abstractions\Rtl8812auNet.Abstractions.csproj" />
+  </ItemGroup>
 </Project>

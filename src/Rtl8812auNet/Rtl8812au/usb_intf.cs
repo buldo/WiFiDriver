@@ -1,7 +1,4 @@
-﻿using LibUsbDotNet;
-using LibUsbDotNet.Info;
-using LibUsbDotNet.LibUsb;
-using LibUsbDotNet.Main;
+﻿using Rtl8812auNet.Abstractions;
 
 namespace Rtl8812auNet.Rtl8812au;
 
@@ -16,7 +13,7 @@ public static class usb_intf
 
     private static int[] ui_pid = new[] { 0, 0, 0 };
 
-    public static _adapter rtw_drv_init(UsbDevice pusb_intf)
+    public static _adapter rtw_drv_init(IRtlUsbDevice pusb_intf)
     {
         _adapter padapter = null;
         int status = _FAIL;
@@ -55,7 +52,7 @@ public static class usb_intf
         return padapter;
     }
 
-    private static _adapter rtw_usb_primary_adapter_init(dvobj_priv dvobj, UsbDevice pusb_intf)
+    private static _adapter rtw_usb_primary_adapter_init(dvobj_priv dvobj, IRtlUsbDevice pusb_intf)
     {
         _adapter padapter = new _adapter()
         {
@@ -1226,7 +1223,7 @@ registry_par.TxBBSwing_5G = -1;
         return status;
     }
 
-    private static dvobj_priv usb_dvobj_init(UsbDevice usb_intf)
+    private static dvobj_priv usb_dvobj_init(IRtlUsbDevice usb_intf)
     {
 
         bool status = false;

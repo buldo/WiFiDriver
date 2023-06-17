@@ -1,4 +1,4 @@
-﻿using LibUsbDotNet.LibUsb;
+﻿using Rtl8812auNet.Abstractions;
 
 namespace Rtl8812auNet.Rtl8812au;
 
@@ -84,8 +84,8 @@ public class dvobj_priv
 
     //_mutex usb_vendor_req_mutex;
 
-    public UsbDevice pusbintf;
-    public UsbDevice pusbdev;
+    public IRtlUsbDevice pusbintf;
+    public IRtlUsbDevice pusbdev;
 
 
     byte tpt_mode; /* RTK T/P Testing Mode, 0:default mode */
