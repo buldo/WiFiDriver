@@ -1,4 +1,4 @@
-﻿namespace WiFiDriver.App.Rtl8812au;
+﻿namespace Rtl8812auNet.Rtl8812au;
 
 public enum phydm_bb_op_mode
 {

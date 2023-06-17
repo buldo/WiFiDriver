@@ -1,4 +1,4 @@
-﻿namespace WiFiDriver.App.Rtl8812au;
+﻿namespace Rtl8812auNet.Rtl8812au;
 
 public static class hal_intf
 {

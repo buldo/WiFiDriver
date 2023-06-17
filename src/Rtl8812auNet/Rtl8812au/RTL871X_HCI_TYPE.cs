@@ -1,4 +1,4 @@
-﻿namespace WiFiDriver.App.Rtl8812au;
+﻿namespace Rtl8812auNet.Rtl8812au;
 
 public enum RTL871X_HCI_TYPE : uint
 {

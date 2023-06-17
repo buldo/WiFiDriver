@@ -1,12 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Threading.Channels;
-
-using WiFiDriver.App.Rtl8812au;
-
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace WiFiDriver.App.Rtl8812au;
+﻿namespace Rtl8812auNet.Rtl8812au;
 
 public static class rtl8812a_phycfg
 {

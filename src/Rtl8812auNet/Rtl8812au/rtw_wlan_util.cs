@@ -1,7 +1,4 @@
-﻿using System.Threading.Channels;
-using WiFiDriver.App.Rtl8812au;
-
-namespace WiFiDriver.App.Rtl8812au;
+﻿namespace Rtl8812auNet.Rtl8812au;
 
 public static class rtw_wlan_util
 {

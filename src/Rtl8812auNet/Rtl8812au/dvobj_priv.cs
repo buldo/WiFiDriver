@@ -1,5 +1,6 @@
 ﻿using LibUsbDotNet.LibUsb;
-namespace WiFiDriver.App.Rtl8812au;
+
+namespace Rtl8812auNet.Rtl8812au;
 
 public class dvobj_priv
 {

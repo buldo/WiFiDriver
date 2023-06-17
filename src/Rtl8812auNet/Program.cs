@@ -2,9 +2,9 @@
 
 using LibUsbDotNet;
 using LibUsbDotNet.LibUsb;
-using WiFiDriver.App.Rtl8812au;
+using Rtl8812auNet.Rtl8812au;
 
-namespace WiFiDriver.App;
+namespace Rtl8812auNet;
 
 public class Program
 {

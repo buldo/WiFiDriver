@@ -1,13 +1,9 @@
-﻿using System.Xml.Linq;
-
-using LibUsbDotNet;
+﻿using LibUsbDotNet;
 using LibUsbDotNet.Info;
 using LibUsbDotNet.LibUsb;
 using LibUsbDotNet.Main;
 
-using WiFiDriver.App.Rtl8812au;
-
-namespace WiFiDriver.App.Rtl8812au;
+namespace Rtl8812auNet.Rtl8812au;
 
 public static class usb_intf
 {

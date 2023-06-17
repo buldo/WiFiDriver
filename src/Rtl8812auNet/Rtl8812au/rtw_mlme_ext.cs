@@ -1,8 +1,4 @@
-﻿using Microsoft.Win32;
-using System;
-using WiFiDriver.App.Rtl8812au;
-
-namespace WiFiDriver.App.Rtl8812au;
+﻿namespace Rtl8812auNet.Rtl8812au;
 
 public class rf_ctl_t
 {

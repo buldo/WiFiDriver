@@ -1,7 +1,9 @@
-﻿public class pwrctrl_priv
+﻿namespace Rtl8812auNet.Rtl8812au;
+
+public class pwrctrl_priv
 {
- //   _pwrlock	lock;
-	//_pwrlock check_32k_lock;
+    //   _pwrlock	lock;
+    //_pwrlock check_32k_lock;
     volatile u8 rpwm; /* requested power state for fw */
     volatile u8 cpwm; /* fw current power state. updated when 1. read from HCPWM 2. driver lowers power level */
     volatile u8 tog; /* toggling */
@@ -102,7 +104,7 @@
 
     u8 wowlan_aoac_rpt_loc;
     //struct aoac_report wowlan_aoac_rpt;
-	u8 wowlan_dis_lps;/*for debug purpose*/
+    u8 wowlan_dis_lps;/*for debug purpose*/
 
     //_timer pwr_state_check_timer;
     int pwr_state_check_interval;

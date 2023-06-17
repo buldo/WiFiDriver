@@ -1,4 +1,4 @@
-﻿namespace WiFiDriver.App.Rtl8812au;
+﻿namespace Rtl8812auNet.Rtl8812au;
 
 public enum NDIS_802_11_NETWORK_INFRASTRUCTURE
 {

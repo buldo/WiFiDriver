@@ -1,10 +1,8 @@
-﻿using System.Threading.Channels;
-
-using LibUsbDotNet;
+﻿using LibUsbDotNet;
 using LibUsbDotNet.LibUsb;
 using LibUsbDotNet.Main;
 
-namespace WiFiDriver.App.Rtl8812au;
+namespace Rtl8812auNet.Rtl8812au;
 
 public class Rtl8812aDevice
 {
