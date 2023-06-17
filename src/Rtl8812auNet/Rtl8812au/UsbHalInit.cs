@@ -83,8 +83,6 @@ public static class UsbHalInit
             pHalData.UsbBulkOutSize = USB_FULL_SPEED_BULK_SIZE; /* 64 bytes */
         }
 
-        pHalData.interfaceIndex = pdvobjpriv.InterfaceNumber;
-
         pHalData.UsbTxAggMode = true;
         pHalData.UsbTxAggDescNum = 6; /* only 4 bits */
         pHalData.UsbTxAggDescNum = 0x01; /* adjust value for OQT  Overflow issue */ /* 0x3;	 */ /* only 4 bits */
@@ -771,7 +769,6 @@ public static class UsbHalInit
 
         if (AutoLoadFail)
         {
-            pwrctl.bHWPowerdown = false;
             pwrctl.bSupportRemoteWakeup = false;
         }
         else
@@ -811,29 +808,19 @@ public static class UsbHalInit
 
     static void Hal_EfuseParseBTCoexistInfo8812A(PADAPTER Adapter, u8[] hwinfo, BOOLEAN AutoLoadFail)
     {
-
-        registry_priv regsty = Adapter.registrypriv;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        u8 tmp_u8;
-        u32 tmp_u32;
-
-        pHalData.EEPROMBluetoothType = BT_RTL8812A;
 
         if (!AutoLoadFail)
         {
-            tmp_u8 = hwinfo[EEPROM_RF_BOARD_OPTION_8812];
+            var tmp_u8 = hwinfo[EEPROM_RF_BOARD_OPTION_8812];
             if (((tmp_u8 & 0xe0) >> 5) == 0x1) /* [7:5] */
                 pHalData.EEPROMBluetoothCoexist = true;
             else
                 pHalData.EEPROMBluetoothCoexist = false;
-
-            tmp_u8 = hwinfo[EEPROM_RF_BT_SETTING_8812];
-            pHalData.EEPROMBluetoothAntNum = (byte)(tmp_u8 & 0x1); /* bit [0] */
         }
         else
         {
             pHalData.EEPROMBluetoothCoexist = false;
-            pHalData.EEPROMBluetoothAntNum = 1; //Ant_x1;
         }
     }
 
@@ -2117,7 +2104,6 @@ public static class UsbHalInit
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
         u32 i;
-        u16 value16;
 
         if (false == pHalData.bautoload_fail_flag)
         {
@@ -2176,13 +2162,7 @@ public static class UsbHalInit
                     efuse_content[2] != 0xFF ||
                     efuse_content[3] != 0xFF)
                 {
-                    /* DbgPrint("Disable FW ofl load\n"); */
-                    /* pMgntInfo.RegFWOffload = FALSE; */
                     pHalData.bautoload_fail_flag = false;
-                }
-                else
-                {
-                    /* DbgPrint("EFUSE_Read1Byte(pAdapter, (u2Byte)512) = %x\n", EFUSE_Read1Byte(pAdapter, (u2Byte)512)); */
                 }
             }
 
@@ -2197,11 +2177,6 @@ public static class UsbHalInit
         if (check_phy_efuse_tx_power_info_valid(padapter) == false)
         {
             throw new NotImplementedException("Hal_readPGDataFromConfigFile");
-            // TODO: Maybe now not need
-            //if (Hal_readPGDataFromConfigFile() != true)
-            {
-                // TODO: RTW_ERR("invalid phy efuse and read from file fail, will use driver default!!\n");
-            }
         }
 
     }
@@ -2253,7 +2228,7 @@ public static class UsbHalInit
     {
         HAL_DATA_TYPE hal_data = GET_HAL_DATA(padapter);
 
-        var mapsize = EFUSE_GetEfuseDefinition(padapter, EFUSE_WIFI, EFUSE_DEF_TYPE.TYPE_EFUSE_MAP_LEN, false);
+        var mapsize = EFUSE_GetEfuseDefinition(padapter, EFUSE_WIFI, EFUSE_DEF_TYPE.TYPE_EFUSE_MAP_LEN);
 
         var linesCount = mapsize / (4 * 4);
         var lineLength = 4 * 4;
@@ -2269,14 +2244,12 @@ public static class UsbHalInit
             }
 
             Console.WriteLine(builder);
-
         }
-
     }
 
-    static int EFUSE_GetEfuseDefinition(PADAPTER pAdapter, u8 efuseType, EFUSE_DEF_TYPE type, BOOLEAN bPseudoTest)
+    static int EFUSE_GetEfuseDefinition(PADAPTER pAdapter, u8 efuseType, EFUSE_DEF_TYPE type)
     {
-        return pAdapter.hal_func.EFUSEGetEfuseDefinition(pAdapter, efuseType, type, bPseudoTest);
+        return rtl8812_EFUSE_GetEfuseDefinition(pAdapter, efuseType, type);
     }
 
     static void Efuse_ReadAllMap(_adapter adapter, byte efuseType, byte[] Efuse)
@@ -4513,10 +4486,7 @@ public static class UsbHalInit
 
     private static bool rtw_hal_power_on(_adapter padapter)
     {
-        bool ret = false;
-        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
-        ret = padapter.hal_func.hal_power_on(padapter);
-        return ret;
+        return _InitPowerOn_8812AU(padapter);
     }
 
     public static bool _InitPowerOn_8812AU(_adapter padapter)
@@ -4858,9 +4828,6 @@ public static class UsbHalInit
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
 
         pwrctrl_priv pwrpriv = adapter_to_pwrctl(padapter);
-
-        /* Init Fw LPS related. */
-        pwrpriv.bFwCurrentInPSMode = false;
 
         /* Init H2C cmd. */
         rtw_write8(padapter, REG_HMETFR, 0x0f);

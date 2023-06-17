@@ -662,17 +662,12 @@ public static class rtl8812a_phycfg
         return retValue;
     }
 
-    public static u32 phy_query_bb_reg(_adapter Adapter, u16 RegAddr, u32 BitMask) =>
+    private static u32 phy_query_bb_reg(_adapter Adapter, u16 RegAddr, u32 BitMask) =>
         rtw_hal_read_bbreg((Adapter), (RegAddr), (BitMask));
 
-    public static u32 rtw_hal_read_bbreg(_adapter padapter, u16 RegAddr, u32 BitMask)
+    private static u32 rtw_hal_read_bbreg(_adapter padapter, u16 RegAddr, u32 BitMask)
     {
-        u32 data = 0;
-        if (padapter.hal_func.read_bbreg != null)
-        {
-            data = padapter.hal_func.read_bbreg(padapter, RegAddr, BitMask);
-        }
-        return data;
+        return PHY_QueryBBReg8812(padapter, RegAddr, BitMask);
     }
 
     public static u32 PHY_QueryBBReg8812(PADAPTER    Adapter,u16         RegAddr,u32         BitMask)

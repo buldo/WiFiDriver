@@ -10,8 +10,6 @@ public static class rtl8812a_dm
 
         Init_ODM_ComInfo_8812(Adapter);
         odm_init_all_timers(podmpriv);
-
-        pHalData.CurrentTxPwrIdx = 20;
     }
 
     private static void Init_ODM_ComInfo_8812(PADAPTER Adapter)

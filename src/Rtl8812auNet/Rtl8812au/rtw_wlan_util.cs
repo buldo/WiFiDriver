@@ -36,20 +36,8 @@ public static class rtw_wlan_util
             // set Channel
             // saved channel/bw info
             rtw_set_oper_ch(padapter, channel);
-            rtw_set_oper_bw(padapter, bwmode);
-            rtw_set_oper_choffset(padapter, channel_offset);
 
             rtw_hal_set_chnl_bw(padapter, center_ch, bwmode, channel_offset, chnl_offset80); /* set center channel */
-    }
-
-    private static void rtw_set_oper_choffset(_adapter adapter, u8 offset)
-    {
-        adapter_to_dvobj(adapter).oper_ch_offset = offset;
-    }
-
-    private static void rtw_set_oper_bw(_adapter adapter, channel_width bw)
-    {
-        adapter_to_dvobj(adapter).oper_bwmode = bw;
     }
 
     private static void rtw_set_oper_ch(_adapter adapter, u8 ch)
