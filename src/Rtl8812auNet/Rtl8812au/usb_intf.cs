@@ -40,8 +40,6 @@ public static class usb_intf
 
         padapter.dvobj = dvobj;
 
-        dvobj.padapters[dvobj.iface_nums++] = padapter;
-
         padapter.hw_port = hw_port.HW_PORT0;
 
         /* step 2. hook HalFunc, allocate HalData */
@@ -112,77 +110,35 @@ public static class usb_intf
 
     private static dvobj_priv usb_dvobj_init(IRtlUsbDevice usb_intf)
     {
-        dvobj_priv pdvobjpriv = new()
-        {
-            RtNumInPipes = 0,
-            RtNumOutPipes = 0,
+        u8 numOutPipes = 0;
 
-            nr_endpoint = usb_intf.GetEndpointsCount()
-        };
-
-        /* RTW_INFO("\ndump usb_endpoint_descriptor:\n"); */
-        int i = 0;
         foreach (var endpoint in usb_intf.GetEndpoints())
         {
             var type = endpoint.Type;
             var direction = endpoint.Direction;
 
-            RTW_INFO("usb_endpoint_descriptor(%d):", i);
-
-            if (type == RtlEndpointType.Bulk && direction == RtlEndpointDirection.In)
+            if (type == RtlEndpointType.Bulk && direction == RtlEndpointDirection.Out)
             {
-                RTW_INFO("RT_usb_endpoint_is_bulk_in = %x", endpoint.GetUsbEndpointNum());
-                pdvobjpriv.RtNumInPipes++;
+                numOutPipes++;
             }
-            else if (direction == RtlEndpointDirection.In)
-            {
-                pdvobjpriv.RtNumInPipes++;
-            }
-            else if (type == RtlEndpointType.Bulk && direction == RtlEndpointDirection.Out)
-            {
-                RTW_INFO("RT_usb_endpoint_is_bulk_out = %x\n", endpoint.GetUsbEndpointNum());
-                pdvobjpriv.RtNumOutPipes++;
-            }
-
-            pdvobjpriv.ep_num[i] = endpoint.GetUsbEndpointNum();
         }
 
-        RTW_INFO("nr_endpoint=%d, in_num=%d, out_num=%d\n\n", pdvobjpriv.nr_endpoint, pdvobjpriv.RtNumInPipes,
-            pdvobjpriv.RtNumOutPipes);
-
-        switch (usb_intf.Speed)
+        var usbSpeed = usb_intf.Speed switch
         {
-            case USB_SPEED_LOW:
-                RTW_INFO("USB_SPEED_LOW");
-                pdvobjpriv.usb_speed = RTW_USB_SPEED_1_1;
-                break;
-            case USB_SPEED_FULL:
-                RTW_INFO("USB_SPEED_FULL");
-                pdvobjpriv.usb_speed = RTW_USB_SPEED_1_1;
-                break;
-            case USB_SPEED_HIGH:
-                RTW_INFO("USB_SPEED_HIGH");
-                pdvobjpriv.usb_speed = RTW_USB_SPEED_2;
-                break;
+            USB_SPEED_LOW => RTW_USB_SPEED_1_1,
+            USB_SPEED_FULL => RTW_USB_SPEED_1_1,
+            USB_SPEED_HIGH => RTW_USB_SPEED_2,
+            USB_SPEED_SUPER => RTW_USB_SPEED_3,
+            _ => RTW_USB_SPEED_UNKNOWN
+        };
 
-            case USB_SPEED_SUPER:
-                RTW_INFO("USB_SPEED_SUPER");
-                pdvobjpriv.usb_speed = RTW_USB_SPEED_3;
-                break;
-
-            default:
-                RTW_INFO("USB_SPEED_UNKNOWN(%x)", usb_intf.Speed);
-                pdvobjpriv.usb_speed = RTW_USB_SPEED_UNKNOWN;
-                break;
-        }
-
-        if (pdvobjpriv.usb_speed == RTW_USB_SPEED_UNKNOWN)
+        if (usbSpeed == RTW_USB_SPEED_UNKNOWN)
         {
             RTW_INFO("UNKNOWN USB SPEED MODE, ERROR !!!");
             throw new Exception();
         }
 
-        return pdvobjpriv;
+        return new dvobj_priv(numOutPipes, usbSpeed);
     }
 
     public static bool rtw_hal_init(_adapter padapter, InitChannel initChannel)
