@@ -2,7 +2,7 @@
 
 public static class phydm_regconfig8812a
 {
-    static void odm_config_rf_reg_8812a(_adapter dm, u32 addr, u32 data,rf_path RF_PATH, u16 reg_addr)
+    static void odm_config_rf_reg_8812a(AdapterState dm, u32 addr, u32 data,rf_path RF_PATH, u16 reg_addr)
     {
         if (addr == 0xfe || addr == 0xffe)
         {
@@ -16,7 +16,7 @@ public static class phydm_regconfig8812a
         }
     }
 
-    public static void odm_config_rf_radio_a_8812a(_adapter dm, u32 addr, u32 data)
+    public static void odm_config_rf_radio_a_8812a(AdapterState dm, u32 addr, u32 data)
     {
         u32 content = 0x1000; /* RF_Content: radioa_txt */
         u32 maskfor_phy_set = (u32)(content & 0xE000);
@@ -26,7 +26,7 @@ public static class phydm_regconfig8812a
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> odm_config_rf_with_header_file: [RadioA] %08X %08X\n", addr, data);
     }
 
-    public static void odm_config_rf_radio_b_8812a(_adapter dm, u32 addr, u32 data)
+    public static void odm_config_rf_radio_b_8812a(AdapterState dm, u32 addr, u32 data)
     {
         u32 content = 0x1001; /* RF_Content: radiob_txt */
         u32 maskfor_phy_set = (u32)(content & 0xE000);
@@ -36,15 +36,15 @@ public static class phydm_regconfig8812a
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> odm_config_rf_with_header_file: [RadioB] %08X %08X\n", addr, data);
     }
 
-    public static void odm_config_mac_8812a(_adapter adapter, u16 addr, u8 data)
+    public static void odm_config_mac_8812a(AdapterState adapterState, u16 addr, u8 data)
     {
-        odm_write_1byte(adapter, addr, data);
+        odm_write_1byte(adapterState, addr, data);
         //PHYDM_DBG(dm, ODM_COMP_INIT,
         //    "===> odm_config_mac_with_header_file: [MAC_REG] %08X %08X\n",
         //    addr, data);
     }
 
-    public static void odm_config_bb_phy_8812a(_adapter dm, u32 addr, u32 bitmask, u32 data)
+    public static void odm_config_bb_phy_8812a(AdapterState dm, u32 addr, u32 bitmask, u32 data)
     {
         if (addr == 0xfe)
         {
@@ -101,7 +101,7 @@ public static class phydm_regconfig8812a
         }
     }
 
-    public static void odm_config_bb_agc_8812a(_adapter dm, u32 addr, u32 bitmask,u32 data)
+    public static void odm_config_bb_agc_8812a(AdapterState dm, u32 addr, u32 bitmask,u32 data)
     {
 
         odm_set_bb_reg(dm, addr, bitmask, data);

@@ -2,7 +2,7 @@
 
 namespace Rtl8812auNet.Rtl8812au;
 
-public class _adapter
+public class AdapterState
 {
     public DvObj dvobj { get; set; }
 

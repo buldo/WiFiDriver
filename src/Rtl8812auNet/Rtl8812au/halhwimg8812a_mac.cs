@@ -2,7 +2,7 @@
 
 public static class halhwimg8812a_mac
 {
-    public static void odm_read_and_config_mp_8812a_mac_reg(_adapter adapter, dm_struct dm)
+    public static void odm_read_and_config_mp_8812a_mac_reg(AdapterState adapterState, dm_struct dm)
     {
         u32 i = 0;
         u8 c_cond;
@@ -71,7 +71,7 @@ public static class halhwimg8812a_mac
             {
                 if (is_matched)
                 {
-                    odm_config_mac_8812a(adapter, (u16)v1, (u8)v2);
+                    odm_config_mac_8812a(adapterState, (u16)v1, (u8)v2);
                 }
             }
 

@@ -7,7 +7,7 @@ public static class usb_intf
     static readonly bool rtw_wifi_spec = false;
     private static int[] ui_pid = new[] { 0, 0, 0 };
 
-    public static _adapter rtw_drv_init(IRtlUsbDevice pusb_intf)
+    public static AdapterState rtw_drv_init(IRtlUsbDevice pusb_intf)
     {
 
         var dvobj = InitDvObj(pusb_intf);
@@ -29,9 +29,9 @@ public static class usb_intf
         return padapter;
     }
 
-    private static _adapter rtw_usb_primary_adapter_init(DvObj dvobj, IRtlUsbDevice pusb_intf)
+    private static AdapterState rtw_usb_primary_adapter_init(DvObj dvobj, IRtlUsbDevice pusb_intf)
     {
-        _adapter padapter = new _adapter()
+        AdapterState padapter = new AdapterState()
         {
             Device = pusb_intf
         };
@@ -61,9 +61,9 @@ public static class usb_intf
         return padapter;
     }
 
-    static void init_hal_spec_8812a(_adapter adapter)
+    static void init_hal_spec_8812a(AdapterState adapterState)
     {
-        hal_spec_t hal_spec = GET_HAL_SPEC(adapter);
+        hal_spec_t hal_spec = GET_HAL_SPEC(adapterState);
 
         hal_spec.rfpath_num_2g = 2;
         hal_spec.rfpath_num_5g = 2;
@@ -75,7 +75,7 @@ public static class usb_intf
         hal_spec.pg_txgi_diff_factor = 1;
     }
 
-    public static int rtl8812_EFUSE_GetEfuseDefinition(PADAPTER pAdapter, u8 efuseType, EFUSE_DEF_TYPE type)
+    public static int rtl8812_EFUSE_GetEfuseDefinition(AdapterState pAdapterState, u8 efuseType, EFUSE_DEF_TYPE type)
     {
         switch (type)
         {
@@ -93,7 +93,7 @@ public static class usb_intf
         return 0;
     }
 
-    static void loadparam(_adapter padapter)
+    static void loadparam(AdapterState padapter)
     {
         var registry_par = padapter.registrypriv;
 
@@ -141,7 +141,7 @@ public static class usb_intf
         return new DvObj(numOutPipes, usbSpeed);
     }
 
-    public static bool rtw_hal_init(_adapter padapter, InitChannel initChannel)
+    public static bool rtw_hal_init(AdapterState padapter, InitChannel initChannel)
     {
         var status = rtl8812au_hal_init(padapter);
 

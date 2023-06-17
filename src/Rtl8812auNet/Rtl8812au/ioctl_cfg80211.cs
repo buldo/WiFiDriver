@@ -2,7 +2,7 @@
 
 public static class ioctl_cfg80211
 {
-    public static void cfg80211_rtw_change_iface(_adapter padapter, InitChannel initChannel)
+    public static void cfg80211_rtw_change_iface(AdapterState padapter, InitChannel initChannel)
     {
         nl80211_iftype type = nl80211_iftype.NL80211_IFTYPE_MONITOR;
 
@@ -21,12 +21,12 @@ public static class ioctl_cfg80211
         RTW_INFO($"cfg80211_rtw_change_iface end");
     }
 
-    public static void cfg80211_rtw_set_monitor_channel(_adapter padapter, InitChannel chandef)
+    public static void cfg80211_rtw_set_monitor_channel(AdapterState padapter, InitChannel chandef)
     {
         set_channel_bwmode(padapter, chandef.cur_channel, chandef.cur_ch_offset, chandef.cur_bwmode);
     }
 
-    private static bool netdev_open(_adapter padapter, InitChannel initChannel)
+    private static bool netdev_open(AdapterState padapter, InitChannel initChannel)
     {
         bool status;
 

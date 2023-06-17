@@ -2,7 +2,7 @@
 
 public static class rtw_wlan_util
 {
-    public static void set_channel_bwmode(_adapter padapter, byte channel, byte channel_offset, channel_width bwmode)
+    public static void set_channel_bwmode(AdapterState padapter, byte channel, byte channel_offset, channel_width bwmode)
     {
         u8 center_ch, chnl_offset80 = HAL_PRIME_CHNL_OFFSET_DONT_CARE;
 
@@ -75,7 +75,7 @@ public static class rtw_wlan_util
         return center_ch;
     }
 
-    public static void rtw_hal_set_chnl_bw(_adapter padapter, u8 channel, channel_width Bandwidth, u8 Offset40,
+    public static void rtw_hal_set_chnl_bw(AdapterState padapter, u8 channel, channel_width Bandwidth, u8 Offset40,
         u8 Offset80)
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);

@@ -2,5 +2,5 @@
 
 public static class hal_com_data_defs
 {
-    public static hal_com_data GET_HAL_DATA(_adapter a) => a.HalData;
+    public static hal_com_data GET_HAL_DATA(AdapterState a) => a.HalData;
 }

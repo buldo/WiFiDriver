@@ -2,7 +2,7 @@
 
 public static class halhwimg8812a_rf
 {
-    public static void odm_read_and_config_mp_8812a_radioa(_adapter dm)
+    public static void odm_read_and_config_mp_8812a_radioa(AdapterState dm)
     {
         u32 i = 0;
         u8 c_cond;
@@ -72,7 +72,7 @@ public static class halhwimg8812a_rf
         }
     }
 
-    public static void odm_read_and_config_mp_8812a_radiob(_adapter dm)
+    public static void odm_read_and_config_mp_8812a_radiob(AdapterState dm)
     {
 
         u32 i = 0;

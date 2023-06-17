@@ -101,7 +101,7 @@ public static class halhwimg8812a_bb
         }
     }
 
-    public static void odm_read_and_config_mp_8812a_phy_reg(_adapter dm)
+    public static void odm_read_and_config_mp_8812a_phy_reg(AdapterState dm)
     {
         u32 i = 0;
         u8 c_cond;
@@ -172,7 +172,7 @@ public static class halhwimg8812a_bb
         }
     }
 
-    public static void odm_read_and_config_mp_8812a_phy_reg_mp(_adapter dm)
+    public static void odm_read_and_config_mp_8812a_phy_reg_mp(AdapterState dm)
     {
         u32 i = 0;
         u8 c_cond;
@@ -249,7 +249,7 @@ public static class halhwimg8812a_bb
         }
     }
 
-    public static void odm_read_and_config_mp_8812a_agc_tab(_adapter dm)
+    public static void odm_read_and_config_mp_8812a_agc_tab(AdapterState dm)
     {
         u32 i = 0;
         u8 c_cond;

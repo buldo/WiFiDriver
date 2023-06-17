@@ -3,7 +3,7 @@
 public static class rtw_efuse
 {
     public static void efuse_ShadowRead1Byte(
-        PADAPTER pAdapter,
+        AdapterState pAdapter,
         u16 Offset,
         out u8 Value)
     {

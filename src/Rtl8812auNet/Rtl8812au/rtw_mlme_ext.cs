@@ -2,13 +2,13 @@
 
 public static class rtw_mlme_ext
 {
-    public static bool setopmode_hdl(_adapter padapter)
+    public static bool setopmode_hdl(AdapterState padapter)
     {
         SetMonitorMode(padapter, NDIS_802_11_NETWORK_INFRASTRUCTURE.Ndis802_11Monitor);
         return true;
     }
 
-    public static bool init_hw_mlme_ext(_adapter padapter, InitChannel pmlmeext)
+    public static bool init_hw_mlme_ext(AdapterState padapter, InitChannel pmlmeext)
     {
 
         //struct mlme_ext_priv *pmlmeext = &padapter.mlmeextpriv;
@@ -31,24 +31,24 @@ public static class rtw_mlme_ext
         return true;
     }
 
-    private static void Set_HW_VAR_ENABLE_RX_BAR(_adapter adapter, bool val)
+    private static void Set_HW_VAR_ENABLE_RX_BAR(AdapterState adapterState, bool val)
     {
         if (val == true)
         {
             /* enable RX BAR */
-            u32 val16 = rtw_read16(adapter, REG_RXFLTMAP1);
+            u32 val16 = rtw_read16(adapterState, REG_RXFLTMAP1);
 
             val16 |= BIT8;
-            rtw_write16(adapter, REG_RXFLTMAP1, (u16)val16);
+            rtw_write16(adapterState, REG_RXFLTMAP1, (u16)val16);
         }
         else
         {
             /* disable RX BAR */
-            u32 val16 = rtw_read16(adapter, REG_RXFLTMAP1);
+            u32 val16 = rtw_read16(adapterState, REG_RXFLTMAP1);
 
             val16 &= NotBIT8;
-            rtw_write16(adapter, REG_RXFLTMAP1, (u16)val16);
+            rtw_write16(adapterState, REG_RXFLTMAP1, (u16)val16);
         }
-        RTW_INFO($"[HW_VAR_ENABLE_RX_BAR] 0x{REG_RXFLTMAP1:X4}=0x{rtw_read16(adapter, REG_RXFLTMAP1):X4}");
+        RTW_INFO($"[HW_VAR_ENABLE_RX_BAR] 0x{REG_RXFLTMAP1:X4}=0x{rtw_read16(adapterState, REG_RXFLTMAP1):X4}");
     }
 }

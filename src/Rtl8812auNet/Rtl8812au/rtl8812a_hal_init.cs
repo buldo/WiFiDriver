@@ -2,16 +2,16 @@
 
 public static class rtl8812a_hal_init
 {
-    public static void SetMonitorMode(PADAPTER Adapter, NDIS_802_11_NETWORK_INFRASTRUCTURE val)
+    public static void SetMonitorMode(AdapterState adapterState, NDIS_802_11_NETWORK_INFRASTRUCTURE val)
     {
         if (val == NDIS_802_11_NETWORK_INFRASTRUCTURE.Ndis802_11Monitor)
         {
-            rtw_hal_set_msr(Adapter, _HW_STATE_NOLINK_);
-            hw_var_set_monitor(Adapter);
+            rtw_hal_set_msr(adapterState, _HW_STATE_NOLINK_);
+            hw_var_set_monitor(adapterState);
         }
     }
 
-    static void hw_var_set_monitor(PADAPTER Adapter)
+    static void hw_var_set_monitor(AdapterState adapterState)
     {
         u32 rcr_bits;
         u16 value_rxfltmap2;
@@ -22,11 +22,11 @@ public static class rtl8812a_hal_init
         /* Append FCS */
         rcr_bits |= RCR_APPFCS;
 
-        //rtw_hal_get_hwreg(Adapter, HW_VAR_RCR, pHalData.rcr_backup);
-        hw_var_rcr_config(Adapter, rcr_bits);
+        //rtw_hal_get_hwreg(adapterState, HW_VAR_RCR, pHalData.rcr_backup);
+        hw_var_rcr_config(adapterState, rcr_bits);
 
         /* Receive all data frames */
         value_rxfltmap2 = 0xFFFF;
-        rtw_write16(Adapter, REG_RXFLTMAP2, value_rxfltmap2);
+        rtw_write16(adapterState, REG_RXFLTMAP2, value_rxfltmap2);
     }
 }

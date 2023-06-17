@@ -64,7 +64,7 @@ public static class UsbHalInit
 /* G12 ~ G13*/171
     };
 
-    public static void rtl8812au_interface_configure(_adapter padapter)
+    public static void rtl8812au_interface_configure(AdapterState padapter)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
 
@@ -107,68 +107,68 @@ public static class UsbHalInit
         _ConfigChipOutEP_8812(padapter, pdvobjpriv.OutPipesCount);
     }
 
-    public static void ReadAdapterInfo8812AU(PADAPTER Adapter)
+    public static void ReadAdapterInfo8812AU(AdapterState adapterState)
     {
         /* Read all content in Efuse/EEPROM. */
-        Hal_ReadPROMContent_8812A(Adapter);
+        Hal_ReadPROMContent_8812A(adapterState);
     }
 
-    static void Hal_ReadPROMContent_8812A(PADAPTER Adapter)
+    static void Hal_ReadPROMContent_8812A(AdapterState adapterState)
     {
-        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
         u8 eeValue;
 
         /* check system boot selection */
-        eeValue = rtw_read8(Adapter, REG_9346CR);
+        eeValue = rtw_read8(adapterState, REG_9346CR);
         pHalData.EepromOrEfuse = (eeValue & BOOT_FROM_EEPROM) != 0 ? true : false;
         pHalData.bautoload_fail_flag = (eeValue & EEPROM_EN) != 0 ? false : true;
 
         RTW_INFO(
             $"Boot from {(pHalData.EepromOrEfuse ? "EEPROM" : "EFUSE")}, Autoload {(pHalData.bautoload_fail_flag ? "Fail" : "OK")} !");
 
-        /* pHalData.EEType = IS_BOOT_FROM_EEPROM(Adapter) ? EEPROM_93C46 : EEPROM_BOOT_EFUSE; */
+        /* pHalData.EEType = IS_BOOT_FROM_EEPROM(adapterState) ? EEPROM_93C46 : EEPROM_BOOT_EFUSE; */
 
-        InitAdapterVariablesByPROM_8812AU(Adapter);
+        InitAdapterVariablesByPROM_8812AU(adapterState);
     }
 
-    private static void InitAdapterVariablesByPROM_8812AU(PADAPTER Adapter)
+    private static void InitAdapterVariablesByPROM_8812AU(AdapterState adapterState)
     {
-        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
-        hal_InitPGData_8812A(Adapter, pHalData.efuse_eeprom_data);
+        hal_InitPGData_8812A(adapterState, pHalData.efuse_eeprom_data);
 
-        Hal_EfuseParseIDCode8812A(Adapter, pHalData.efuse_eeprom_data);
+        Hal_EfuseParseIDCode8812A(adapterState, pHalData.efuse_eeprom_data);
 
-        Hal_ReadPROMVersion8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        hal_ReadIDs_8812AU(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        Hal_ReadTxPowerInfo8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        Hal_ReadBoardType8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        Hal_ReadPROMVersion8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        hal_ReadIDs_8812AU(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        Hal_ReadTxPowerInfo8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        Hal_ReadBoardType8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
 
         /*  */
         /* Read Bluetooth co-exist and initialize */
         /*  */
-        Hal_EfuseParseBTCoexistInfo8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        Hal_EfuseParseBTCoexistInfo8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
 
-        Hal_EfuseParseXtal_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        Hal_ReadThermalMeter_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        Hal_EfuseParseXtal_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        Hal_ReadThermalMeter_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
 
-        Hal_ReadAmplifierType_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        Hal_ReadRFEType_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        Hal_ReadAmplifierType_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        Hal_ReadRFEType_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
 
 
-        hal_ReadUsbModeSwitch_8812AU(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        hal_ReadUsbModeSwitch_8812AU(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
 
         /* 2013/04/15 MH Add for different board type recognize. */
-        hal_ReadUsbType_8812AU(Adapter, pHalData.efuse_eeprom_data);
+        hal_ReadUsbType_8812AU(adapterState, pHalData.efuse_eeprom_data);
     }
 
-    static void hal_ReadUsbType_8812AU(PADAPTER Adapter, u8[] PROMContent)
+    static void hal_ReadUsbType_8812AU(AdapterState adapterState, u8[] PROMContent)
     {
-        /* if (IS_HARDWARE_TYPE_8812AU(Adapter) && Adapter.UsbModeMechanism.RegForcedUsbMode == 5) */
+        /* if (IS_HARDWARE_TYPE_8812AU(adapterState) && adapterState.UsbModeMechanism.RegForcedUsbMode == 5) */
         {
-            PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+            PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
-            hal_spec_t hal_spc = GET_HAL_SPEC(Adapter);
+            hal_spec_t hal_spc = GET_HAL_SPEC(adapterState);
             u8 reg_tmp, i, j, antenna = 0, wmode = 0;
             /* Read anenna type from EFUSE 1019/1018 */
             for (i = 0; i < 2; i++)
@@ -177,7 +177,7 @@ public static class UsbHalInit
                   Check efuse address 1019
                   Check efuse address 1018
                 */
-                efuse_OneByteRead(Adapter, (ushort)(1019 - i), out reg_tmp);
+                efuse_OneByteRead(adapterState, (ushort)(1019 - i), out reg_tmp);
                 /*
                   CHeck bit 7-5
                   Check bit 3-1
@@ -203,7 +203,7 @@ public static class UsbHalInit
                   Check efuse address 1021
                   Check efuse address 1020
                 */
-                efuse_OneByteRead(Adapter, (ushort)(1021 - i), out reg_tmp);
+                efuse_OneByteRead(adapterState, (ushort)(1021 - i), out reg_tmp);
 
                 /* CHeck bit 3-2 */
                 if (((reg_tmp >> 2) & 0x3) != 0)
@@ -219,7 +219,7 @@ public static class UsbHalInit
             {
                 /* Config 8812AU as 1*1 mode AC mode. */
                 pHalData.rf_type = rf_type.RF_1T1R;
-                /* UsbModeSwitch_SetUsbModeMechOn(Adapter, FALSE); */
+                /* UsbModeSwitch_SetUsbModeMechOn(adapterState, FALSE); */
                 /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU_VL; */
                 RTW_INFO("%s(): EFUSE_HIDDEN_812AU_VL\n");
             }
@@ -237,7 +237,7 @@ public static class UsbHalInit
                     {
                         /* Antenna == 2 WMODE = 3 RTL8812AU-VS 11AC + USB2.0 Mode */
                         /* Driver will not support USB automatic switch */
-                        /* UsbModeSwitch_SetUsbModeMechOn(Adapter, FALSE); */
+                        /* UsbModeSwitch_SetUsbModeMechOn(adapterState, FALSE); */
                         /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU_VS; */
                         RTW_INFO("%s(): EFUSE_HIDDEN_8812AU_VS");
                     }
@@ -245,7 +245,7 @@ public static class UsbHalInit
                 else if (wmode == 2)
                 {
                     /* Antenna == 2 WMODE = 2 RTL8812AU-VN 11N only + USB2.0 Mode */
-                    /* UsbModeSwitch_SetUsbModeMechOn(Adapter, FALSE); */
+                    /* UsbModeSwitch_SetUsbModeMechOn(adapterState, FALSE); */
                     /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU_VN; */
                     RTW_INFO("%s(): EFUSE_HIDDEN_8812AU_VN");
 
@@ -257,9 +257,9 @@ public static class UsbHalInit
         }
     }
 
-    private static void hal_ReadUsbModeSwitch_8812AU(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
+    private static void hal_ReadUsbModeSwitch_8812AU(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         if (AutoloadFail)
         {
@@ -273,17 +273,17 @@ public static class UsbHalInit
         RTW_INFO("Usb Switch: %d", pHalData.EEPROMUsbSwitch);
     }
 
-    private static void Hal_ReadRFEType_8812A(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
+    private static void Hal_ReadRFEType_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         if (!AutoloadFail)
         {
-            if ((GetRegRFEType(Adapter) != 64) || 0xFF == PROMContent[EEPROM_RFE_OPTION_8812])
+            if ((GetRegRFEType(adapterState) != 64) || 0xFF == PROMContent[EEPROM_RFE_OPTION_8812])
             {
-                if (GetRegRFEType(Adapter) != 64)
+                if (GetRegRFEType(adapterState) != 64)
                 {
-                    pHalData.rfe_type = GetRegRFEType(Adapter);
+                    pHalData.rfe_type = GetRegRFEType(adapterState);
                 }
                 else
                 {
@@ -326,8 +326,8 @@ public static class UsbHalInit
         }
         else
         {
-            if (GetRegRFEType(Adapter) != 64)
-                pHalData.rfe_type = GetRegRFEType(Adapter);
+            if (GetRegRFEType(adapterState) != 64)
+                pHalData.rfe_type = GetRegRFEType(adapterState);
             else
             {
                 pHalData.rfe_type = 0;
@@ -337,9 +337,9 @@ public static class UsbHalInit
         RTW_INFO("RFE Type: 0x%2x\n", pHalData.rfe_type);
     }
 
-    static void Hal_ReadThermalMeter_8812A(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
+    static void Hal_ReadThermalMeter_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
         /* u8	tempval; */
 
         /*  */
@@ -362,9 +362,9 @@ public static class UsbHalInit
         RTW_INFO("ThermalMeter = 0x%x\n", pHalData.eeprom_thermal_meter);
     }
 
-    static void Hal_EfuseParseBTCoexistInfo8812A(PADAPTER Adapter, u8[] hwinfo, BOOLEAN AutoLoadFail)
+    static void Hal_EfuseParseBTCoexistInfo8812A(AdapterState adapterState, u8[] hwinfo, BOOLEAN AutoLoadFail)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         if (!AutoLoadFail)
         {
@@ -380,9 +380,9 @@ public static class UsbHalInit
         }
     }
 
-    static void Hal_ReadBoardType8812A(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
+    static void Hal_ReadBoardType8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         if (!AutoloadFail)
         {
@@ -401,13 +401,13 @@ public static class UsbHalInit
 
     }
 
-    private static void Hal_ReadTxPowerInfo8812A(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoLoadFail)
+    private static void Hal_ReadTxPowerInfo8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoLoadFail)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
         TxPowerInfo24G pwrInfo24G = new TxPowerInfo24G();
         TxPowerInfo5G pwrInfo5G = new TxPowerInfo5G();
 
-        hal_load_txpwr_info(Adapter, pwrInfo24G, pwrInfo5G, PROMContent);
+        hal_load_txpwr_info(adapterState, pwrInfo24G, pwrInfo5G, PROMContent);
 
         /* 2010/10/19 MH Add Regulator recognize for CU. */
         if (!AutoLoadFail)
@@ -432,17 +432,17 @@ public static class UsbHalInit
 
     }
 
-    private static void hal_load_txpwr_info(_adapter adapter, TxPowerInfo24G pwr_info_2g, TxPowerInfo5G pwr_info_5g,
+    private static void hal_load_txpwr_info(AdapterState adapterState, TxPowerInfo24G pwr_info_2g, TxPowerInfo5G pwr_info_5g,
         u8[] pg_data)
     {
-        HAL_DATA_TYPE hal_data = GET_HAL_DATA(adapter);
+        HAL_DATA_TYPE hal_data = GET_HAL_DATA(adapterState);
 
-        var hal_spec = GET_HAL_SPEC(adapter);
+        var hal_spec = GET_HAL_SPEC(adapterState);
         u8 max_tx_cnt = hal_spec.max_tx_cnt;
         u8 rfpath, ch_idx, group = 0, tx_idx;
 
         /* load from pg data (or default value) */
-        hal_load_pg_txpwr_info(adapter, pwr_info_2g, pwr_info_5g, pg_data);
+        hal_load_pg_txpwr_info(adapterState, pwr_info_2g, pwr_info_5g, pg_data);
 
         /* transform to hal_data */
         for (rfpath = 0; rfpath < MAX_RF_PATH; rfpath++)
@@ -547,10 +547,10 @@ public static class UsbHalInit
         return map;
     }
 
-    private static void hal_load_pg_txpwr_info(_adapter adapter, TxPowerInfo24G pwr_info_2g, TxPowerInfo5G pwr_info_5g, u8[] pg_data)
+    private static void hal_load_pg_txpwr_info(AdapterState adapterState, TxPowerInfo24G pwr_info_2g, TxPowerInfo5G pwr_info_5g, u8[] pg_data)
     {
 
-        var hal_spec = GET_HAL_SPEC(adapter);
+        var hal_spec = GET_HAL_SPEC(adapterState);
         u8 path;
         u16 pg_offset;
         u8 txpwr_src = PG_TXPWR_SRC_PG_DATA;
@@ -558,8 +558,8 @@ public static class UsbHalInit
         map_t txpwr_map = null;
 
         /* init with invalid value and some dummy base and diff */
-        hal_init_pg_txpwr_info_2g(adapter, pwr_info_2g);
-        hal_init_pg_txpwr_info_5g(adapter, pwr_info_5g);
+        hal_init_pg_txpwr_info_2g(adapterState, pwr_info_2g);
+        hal_init_pg_txpwr_info_5g(adapterState, pwr_info_5g);
 
         select_src:
         pg_offset = hal_spec.pg_txpwr_saddr;
@@ -604,12 +604,12 @@ public static class UsbHalInit
         {
             if (!HAL_SPEC_CHK_RF_PATH_2G(hal_spec, path) && !HAL_SPEC_CHK_RF_PATH_5G(hal_spec, path))
                 break;
-            pg_offset = hal_load_pg_txpwr_info_path_2g(adapter, pwr_info_2g, path, txpwr_src, txpwr_map, pg_offset);
-            pg_offset = hal_load_pg_txpwr_info_path_5g(adapter, pwr_info_5g, path, txpwr_src, txpwr_map, pg_offset);
+            pg_offset = hal_load_pg_txpwr_info_path_2g(adapterState, pwr_info_2g, path, txpwr_src, txpwr_map, pg_offset);
+            pg_offset = hal_load_pg_txpwr_info_path_5g(adapterState, pwr_info_5g, path, txpwr_src, txpwr_map, pg_offset);
         }
 
-        if (hal_chk_pg_txpwr_info_2g(adapter, pwr_info_2g) &&
-            hal_chk_pg_txpwr_info_5g(adapter, pwr_info_5g))
+        if (hal_chk_pg_txpwr_info_2g(adapterState, pwr_info_2g) &&
+            hal_chk_pg_txpwr_info_5g(adapterState, pwr_info_5g))
         {
             goto exit;
         }
@@ -619,7 +619,7 @@ public static class UsbHalInit
         if (txpwr_src < PG_TXPWR_SRC_NUM)
             goto select_src;
 
-        if (hal_chk_pg_txpwr_info_2g(adapter, pwr_info_2g) || hal_chk_pg_txpwr_info_5g(adapter, pwr_info_5g))
+        if (hal_chk_pg_txpwr_info_2g(adapterState, pwr_info_2g) || hal_chk_pg_txpwr_info_5g(adapterState, pwr_info_5g))
         {
             throw new Exception();
         }
@@ -629,21 +629,21 @@ public static class UsbHalInit
         return;
     }
 
-    static bool hal_chk_band_cap(_adapter adapter, u8 cap)
+    static bool hal_chk_band_cap(AdapterState adapterState, u8 cap)
     {
-        return (GET_HAL_SPEC(adapter).band_cap & cap) != 0;
+        return (GET_HAL_SPEC(adapterState).band_cap & cap) != 0;
     }
 
     static bool IS_PG_TXPWR_BASE_INVALID(hal_spec_t hal_spec, byte _base) => ((_base) > hal_spec.txgi_max);
 
-    static bool hal_chk_pg_txpwr_info_2g(_adapter adapter, TxPowerInfo24G pwr_info)
+    static bool hal_chk_pg_txpwr_info_2g(AdapterState adapterState, TxPowerInfo24G pwr_info)
     {
         u8 BAND_CAP_2G = 0;
 
-        hal_spec_t hal_spec = GET_HAL_SPEC(adapter);
+        hal_spec_t hal_spec = GET_HAL_SPEC(adapterState);
         u8 path, group, tx_idx;
 
-        if (pwr_info == null || !hal_chk_band_cap(adapter, BAND_CAP_2G))
+        if (pwr_info == null || !hal_chk_band_cap(adapterState, BAND_CAP_2G))
             return true;
 
         for (path = 0; path < MAX_RF_PATH; path++)
@@ -686,13 +686,13 @@ public static class UsbHalInit
 
     static bool HAL_SPEC_CHK_TX_CNT(hal_spec_t _spec, byte _cnt_idx) => ((_spec).max_tx_cnt > (_cnt_idx));
 
-    static bool hal_chk_pg_txpwr_info_5g(_adapter adapter, TxPowerInfo5G pwr_info)
+    static bool hal_chk_pg_txpwr_info_5g(AdapterState adapterState, TxPowerInfo5G pwr_info)
     {
         u8 BAND_CAP_5G = 1;
-        hal_spec_t hal_spec = GET_HAL_SPEC(adapter);
+        hal_spec_t hal_spec = GET_HAL_SPEC(adapterState);
         u8 path, group, tx_idx;
 
-        if (pwr_info == null || !hal_chk_band_cap(adapter, BAND_CAP_5G))
+        if (pwr_info == null || !hal_chk_band_cap(adapterState, BAND_CAP_5G))
         {
             return true;
         }
@@ -770,18 +770,18 @@ public static class UsbHalInit
     static string pg_txpwr_src_str(int src) =>
         (((src) >= PG_TXPWR_SRC_NUM) ? _pg_txpwr_src_str[PG_TXPWR_SRC_NUM] : _pg_txpwr_src_str[(src)]);
 
-    static u16 hal_load_pg_txpwr_info_path_5g(_adapter adapter, TxPowerInfo5G pwr_info, byte path, u8 txpwr_src,
+    static u16 hal_load_pg_txpwr_info_path_5g(AdapterState adapterState, TxPowerInfo5G pwr_info, byte path, u8 txpwr_src,
         map_t txpwr_map, u16 pg_offset)
     {
 
-        hal_spec_t hal_spec = GET_HAL_SPEC(adapter);
+        hal_spec_t hal_spec = GET_HAL_SPEC(adapterState);
         u16 offset = pg_offset;
         u8 group, tx_idx;
         u8 val;
         u8 tmp_base;
         s8 tmp_diff;
 
-        if (pwr_info == null || !hal_chk_band_cap(adapter, BAND_CAP_5G))
+        if (pwr_info == null || !hal_chk_band_cap(adapterState, BAND_CAP_5G))
 
         {
             offset += PG_TXPWR_1PATH_BYTE_NUM_5G;
@@ -924,18 +924,18 @@ public static class UsbHalInit
         return offset;
     }
 
-    private static ushort hal_load_pg_txpwr_info_path_2g(_adapter adapter, TxPowerInfo24G pwr_info, byte path,
+    private static ushort hal_load_pg_txpwr_info_path_2g(AdapterState adapterState, TxPowerInfo24G pwr_info, byte path,
         u8 txpwr_src, map_t txpwr_map, u16 pg_offset)
     {
 
-        hal_spec_t hal_spec = GET_HAL_SPEC(adapter);
+        hal_spec_t hal_spec = GET_HAL_SPEC(adapterState);
         u16 offset = pg_offset;
         u8 group, tx_idx;
         u8 val;
         u8 tmp_base;
         s8 tmp_diff;
 
-        if (pwr_info == null || !hal_chk_band_cap(adapter, BAND_CAP_2G))
+        if (pwr_info == null || !hal_chk_band_cap(adapterState, BAND_CAP_2G))
         {
             offset += PG_TXPWR_1PATH_BYTE_NUM_2G;
             goto exit;
@@ -1069,9 +1069,9 @@ public static class UsbHalInit
         return offset;
     }
 
-    static void hal_init_pg_txpwr_info_2g(_adapter adapter, TxPowerInfo24G pwr_info)
+    static void hal_init_pg_txpwr_info_2g(AdapterState adapterState, TxPowerInfo24G pwr_info)
     {
-        var hal_spec = GET_HAL_SPEC(adapter);
+        var hal_spec = GET_HAL_SPEC(adapterState);
         u8 path, group, tx_idx;
 
         /* init with invalid value */
@@ -1106,9 +1106,9 @@ public static class UsbHalInit
         }
     }
 
-    static void hal_init_pg_txpwr_info_5g(_adapter adapter, TxPowerInfo5G pwr_info)
+    static void hal_init_pg_txpwr_info_5g(AdapterState adapterState, TxPowerInfo5G pwr_info)
     {
-        var hal_spec = GET_HAL_SPEC(adapter);
+        var hal_spec = GET_HAL_SPEC(adapterState);
         u8 path, group, tx_idx;
 
         /* init with invalid value */
@@ -1225,9 +1225,9 @@ public static class UsbHalInit
         return band;
     }
 
-    private static void Hal_ReadAmplifierType_8812A(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
+    private static void Hal_ReadAmplifierType_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         u8 extTypePA_2G_A = (byte)((PROMContent[0xBD] & BIT2) >> 2); /* 0xBD[2] */
         u8 extTypePA_2G_B = (byte)((PROMContent[0xBD] & BIT6) >> 6); /* 0xBD[6] */
@@ -1238,7 +1238,7 @@ public static class UsbHalInit
         u8 extTypeLNA_5G_A = (byte)((PROMContent[0xBF] & (BIT1 | BIT0)) >> 0); /* 0xBF[1:0] */
         u8 extTypeLNA_5G_B = (byte)((PROMContent[0xBF] & (BIT5 | BIT4)) >> 4); /* 0xBF[5:4] */
 
-        hal_ReadPAType_8812A(Adapter, PROMContent, AutoloadFail);
+        hal_ReadPAType_8812A(adapterState, PROMContent, AutoloadFail);
 
         if ((pHalData.PAType_2G & (BIT5 | BIT4)) == (BIT5 | BIT4)) /* [2.4G] Path A and B are both extPA */
         {
@@ -1270,13 +1270,13 @@ public static class UsbHalInit
     private const int EEPROM_LNA_TYPE_2G_8812AU = 0xBD;
     private const int EEPROM_LNA_TYPE_5G_8812AU = 0xBF;
 
-    private static void hal_ReadPAType_8812A(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
+    private static void hal_ReadPAType_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         if (!AutoloadFail)
         {
-            if (GetRegAmplifierType2G(Adapter) == 0)
+            if (GetRegAmplifierType2G(adapterState) == 0)
             {
                 /* AUTO */
                 pHalData.PAType_2G = PROMContent[EEPROM_PA_TYPE_8812AU];
@@ -1296,11 +1296,11 @@ public static class UsbHalInit
             }
             else
             {
-                pHalData.ExternalPA_2G = (GetRegAmplifierType2G(Adapter) & ODM_BOARD_EXT_PA) != 0;
-                pHalData.ExternalLNA_2G = (GetRegAmplifierType2G(Adapter) & ODM_BOARD_EXT_LNA) != 0;
+                pHalData.ExternalPA_2G = (GetRegAmplifierType2G(adapterState) & ODM_BOARD_EXT_PA) != 0;
+                pHalData.ExternalLNA_2G = (GetRegAmplifierType2G(adapterState) & ODM_BOARD_EXT_LNA) != 0;
             }
 
-            if (GetRegAmplifierType5G(Adapter) == 0)
+            if (GetRegAmplifierType5G(adapterState) == 0)
             {
                 /* AUTO */
                 pHalData.PAType_5G = PROMContent[EEPROM_PA_TYPE_8812AU];
@@ -1320,8 +1320,8 @@ public static class UsbHalInit
             }
             else
             {
-                pHalData.external_pa_5g = (GetRegAmplifierType5G(Adapter) & ODM_BOARD_EXT_PA_5G) != 0;
-                pHalData.external_lna_5g = (GetRegAmplifierType5G(Adapter) & ODM_BOARD_EXT_LNA_5G) != 0;
+                pHalData.external_pa_5g = (GetRegAmplifierType5G(adapterState) & ODM_BOARD_EXT_PA_5G) != 0;
+                pHalData.external_lna_5g = (GetRegAmplifierType5G(adapterState) & ODM_BOARD_EXT_LNA_5G) != 0;
             }
         }
         else
@@ -1331,7 +1331,7 @@ public static class UsbHalInit
             pHalData.ExternalLNA_2G = false;
             pHalData.external_lna_5g = true;
 
-            if (GetRegAmplifierType2G(Adapter) == 0)
+            if (GetRegAmplifierType2G(adapterState) == 0)
             {
                 /* AUTO */
                 pHalData.ExternalPA_2G = false;
@@ -1339,11 +1339,11 @@ public static class UsbHalInit
             }
             else
             {
-                pHalData.ExternalPA_2G = (GetRegAmplifierType2G(Adapter) & ODM_BOARD_EXT_PA) != 0;
-                pHalData.ExternalLNA_2G = (GetRegAmplifierType2G(Adapter) & ODM_BOARD_EXT_LNA) != 0;
+                pHalData.ExternalPA_2G = (GetRegAmplifierType2G(adapterState) & ODM_BOARD_EXT_PA) != 0;
+                pHalData.ExternalLNA_2G = (GetRegAmplifierType2G(adapterState) & ODM_BOARD_EXT_LNA) != 0;
             }
 
-            if (GetRegAmplifierType5G(Adapter) == 0)
+            if (GetRegAmplifierType5G(adapterState) == 0)
             {
                 /* AUTO */
                 pHalData.external_pa_5g = false;
@@ -1351,8 +1351,8 @@ public static class UsbHalInit
             }
             else
             {
-                pHalData.external_pa_5g = (GetRegAmplifierType5G(Adapter) & ODM_BOARD_EXT_PA_5G) != 0;
-                pHalData.external_lna_5g = (GetRegAmplifierType5G(Adapter) & ODM_BOARD_EXT_LNA_5G) != 0;
+                pHalData.external_pa_5g = (GetRegAmplifierType5G(adapterState) & ODM_BOARD_EXT_PA_5G) != 0;
+                pHalData.external_lna_5g = (GetRegAmplifierType5G(adapterState) & ODM_BOARD_EXT_LNA_5G) != 0;
             }
         }
 
@@ -1365,9 +1365,9 @@ public static class UsbHalInit
             $"pHalData.LNAType_5G is 0x{pHalData.LNAType_5G:X}, pHalData.external_lna_5g = {pHalData.external_lna_5g}");
     }
 
-    private static void Hal_EfuseParseXtal_8812A(PADAPTER pAdapter, u8[] hwinfo, bool AutoLoadFail)
+    private static void Hal_EfuseParseXtal_8812A(AdapterState pAdapterState, u8[] hwinfo, bool AutoLoadFail)
     {
-        var pHalData = GET_HAL_DATA(pAdapter);
+        var pHalData = GET_HAL_DATA(pAdapterState);
 
         if (!AutoLoadFail)
         {
@@ -1383,9 +1383,9 @@ public static class UsbHalInit
         RTW_INFO($"crystal_cap: 0x{pHalData.crystal_cap:X}");
     }
 
-    static void Hal_ReadPROMVersion8812A(PADAPTER Adapter, u8[] PROMContent, bool AutoloadFail)
+    static void Hal_ReadPROMVersion8812A(AdapterState adapterState, u8[] PROMContent, bool AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         if (AutoloadFail)
         {
@@ -1405,15 +1405,15 @@ public static class UsbHalInit
         RTW_INFO("pHalData.EEPROMVersion is 0x%x", pHalData.EEPROMVersion);
     }
 
-    private static void hal_ReadIDs_8812AU(PADAPTER Adapter, byte[] PROMContent, bool AutoloadFail)
+    private static void hal_ReadIDs_8812AU(AdapterState adapterState, byte[] PROMContent, bool AutoloadFail)
     {
         // TODO: Looks like not needed
-        // HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        // HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
         //
         // if (!AutoloadFail)
         // {
         //     /* VID, PID */
-        //     if (IS_HARDWARE_TYPE_8812AU(Adapter))
+        //     if (IS_HARDWARE_TYPE_8812AU(adapterState))
         //     {
         //         pHalData.EEPROMVID = ReadLE2Byte(&PROMContent[EEPROM_VID_8812AU]);
         //         pHalData.EEPROMPID = ReadLE2Byte(&PROMContent[EEPROM_PID_8812AU]);
@@ -1459,7 +1459,7 @@ public static class UsbHalInit
         // RTW_INFO("Customer ID: 0x%02X, SubCustomer ID: 0x%02X\n", pHalData.EEPROMCustomerID, pHalData.EEPROMSubCustomerID);
     }
 
-    static void Hal_EfuseParseIDCode8812A(PADAPTER padapter, u8[] hwinfo)
+    static void Hal_EfuseParseIDCode8812A(AdapterState padapter, u8[] hwinfo)
     {
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
         u16 EEPROMId;
@@ -1478,7 +1478,7 @@ public static class UsbHalInit
         RTW_INFO($"EEPROM ID=0x{EEPROMId}");
     }
 
-    static void hal_InitPGData_8812A(PADAPTER padapter, u8[] PROMContent)
+    static void hal_InitPGData_8812A(AdapterState padapter, u8[] PROMContent)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
         u32 i;
@@ -1491,7 +1491,7 @@ public static class UsbHalInit
                 /* Read all Content from EEPROM or EFUSE. */
                 for (i = 0; i < HWSET_MAX_SIZE_JAGUAR; i += 2)
                 {
-                    /* value16 = EF2Byte(ReadEEprom(pAdapter, (u2Byte) (i>>1))); */
+                    /* value16 = EF2Byte(ReadEEprom(pAdapterState, (u2Byte) (i>>1))); */
                     /* *((u16*)(&PROMContent[i])) = value16; */
                 }
             }
@@ -1553,9 +1553,9 @@ public static class UsbHalInit
 
     }
 
-    private static bool check_phy_efuse_tx_power_info_valid(_adapter adapter)
+    private static bool check_phy_efuse_tx_power_info_valid(AdapterState adapterState)
     {
-        var pContent = adapter.HalData.efuse_eeprom_data;
+        var pContent = adapterState.HalData.efuse_eeprom_data;
         int index = 0;
         UInt16 tx_index_offset = 0x0000;
 
@@ -1574,9 +1574,9 @@ public static class UsbHalInit
         return true;
     }
 
-    private static void EFUSE_ShadowMapUpdate(PADAPTER pAdapter, byte efuseType)
+    private static void EFUSE_ShadowMapUpdate(AdapterState pAdapterState, byte efuseType)
     {
-        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapter);
+        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapterState);
         UInt16 mapLen = 0;
 
         if (pHalData.bautoload_fail_flag == true)
@@ -1588,15 +1588,15 @@ public static class UsbHalInit
         }
         else
         {
-            Efuse_ReadAllMap(pAdapter, efuseType, pHalData.efuse_eeprom_data);
+            Efuse_ReadAllMap(pAdapterState, efuseType, pHalData.efuse_eeprom_data);
         }
 
         rtw_mask_map_read(0x00, mapLen, pHalData.efuse_eeprom_data);
 
-        rtw_dump_cur_efuse(pAdapter);
+        rtw_dump_cur_efuse(pAdapterState);
     }
 
-    static void rtw_dump_cur_efuse(PADAPTER padapter)
+    static void rtw_dump_cur_efuse(AdapterState padapter)
     {
         HAL_DATA_TYPE hal_data = GET_HAL_DATA(padapter);
 
@@ -1619,33 +1619,33 @@ public static class UsbHalInit
         }
     }
 
-    static int EFUSE_GetEfuseDefinition(PADAPTER pAdapter, u8 efuseType, EFUSE_DEF_TYPE type)
+    static int EFUSE_GetEfuseDefinition(AdapterState pAdapterState, u8 efuseType, EFUSE_DEF_TYPE type)
     {
-        return rtl8812_EFUSE_GetEfuseDefinition(pAdapter, efuseType, type);
+        return rtl8812_EFUSE_GetEfuseDefinition(pAdapterState, efuseType, type);
     }
 
-    static void Efuse_ReadAllMap(_adapter adapter, byte efuseType, byte[] Efuse)
+    static void Efuse_ReadAllMap(AdapterState adapterState, byte efuseType, byte[] Efuse)
     {
-        EfusePowerSwitch8812A(adapter, false, true);
-        efuse_ReadEFuse(adapter, efuseType, 0, EFUSE_MAP_LEN_JAGUAR, Efuse);
-        EfusePowerSwitch8812A(adapter, false, false);
+        EfusePowerSwitch8812A(adapterState, false, true);
+        efuse_ReadEFuse(adapterState, efuseType, 0, EFUSE_MAP_LEN_JAGUAR, Efuse);
+        EfusePowerSwitch8812A(adapterState, false, false);
     }
 
-    private static void efuse_ReadEFuse(_adapter adapter, byte efuseType, UInt16 _offset, UInt16 _size_byte,
+    private static void efuse_ReadEFuse(AdapterState adapterState, byte efuseType, UInt16 _offset, UInt16 _size_byte,
         byte[] pbuf)
     {
         if (efuseType == EFUSE_WIFI)
         {
-            Hal_EfuseReadEFuse8812A(adapter, _offset, _size_byte, pbuf);
+            Hal_EfuseReadEFuse8812A(adapterState, _offset, _size_byte, pbuf);
         }
         else
         {
             throw new NotImplementedException();
-            // hal_ReadEFuse_BT(Adapter, _offset, _size_byte, pbuf, bPseudoTest);
+            // hal_ReadEFuse_BT(adapterState, _offset, _size_byte, pbuf, bPseudoTest);
         }
     }
 
-    private static void Hal_EfuseReadEFuse8812A(_adapter adapter, UInt16 _offset, UInt16 _size_byte, byte[] pbuf)
+    private static void Hal_EfuseReadEFuse8812A(AdapterState adapterState, UInt16 _offset, UInt16 _size_byte, byte[] pbuf)
     {
         byte[] efuseTbl = null;
         byte[] rtemp8 = new byte[1];
@@ -1688,7 +1688,7 @@ public static class UsbHalInit
         /* 1. Read the first byte to check if efuse is empty!!! */
         /*  */
         /*  */
-        ReadEFuseByte(adapter, eFuse_Addr, rtemp8);
+        ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
         if (rtemp8[0] != 0xFF)
         {
             efuse_utilized++;
@@ -1718,14 +1718,14 @@ public static class UsbHalInit
 
                 /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("extended header u1temp=%x\n", u1temp)); */
 
-                ReadEFuseByte(adapter, eFuse_Addr, rtemp8);
+                ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
 
                 /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("extended header efuse_Addr-%d efuse_data=%x\n", eFuse_Addr, *rtemp8));	 */
 
                 if ((rtemp8[0] & 0x0F) == 0x0F)
                 {
                     eFuse_Addr++;
-                    ReadEFuseByte(adapter, eFuse_Addr, rtemp8);
+                    ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
 
                     if (rtemp8[0] != 0xFF && (eFuse_Addr < EFUSE_REAL_CONTENT_LEN_JAGUAR))
                         eFuse_Addr++;
@@ -1755,7 +1755,7 @@ public static class UsbHalInit
                     if (!((wren & 0x01) == 0x01))
                     {
                         /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("Addr=%d\n", eFuse_Addr)); */
-                        ReadEFuseByte(adapter, eFuse_Addr, rtemp8);
+                        ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
                         eFuse_Addr++;
                         efuse_utilized++;
                         eFuseWord[offset][i] = (ushort)(rtemp8[0] & 0xff);
@@ -1765,7 +1765,7 @@ public static class UsbHalInit
                             break;
 
                         /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("Addr=%d", eFuse_Addr)); */
-                        ReadEFuseByte(adapter, eFuse_Addr, rtemp8);
+                        ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
                         eFuse_Addr++;
 
                         efuse_utilized++;
@@ -1801,7 +1801,7 @@ public static class UsbHalInit
             }
 
             /* Read next PG header */
-            ReadEFuseByte(adapter, eFuse_Addr, rtemp8);
+            ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
             /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("Addr=%d rtemp 0x%x\n", eFuse_Addr, *rtemp8)); */
 
             if (rtemp8[0] != 0xFF && (eFuse_Addr < EFUSE_REAL_CONTENT_LEN_JAGUAR))
@@ -1868,86 +1868,86 @@ public static class UsbHalInit
         //}
     }
 
-    private static void EfusePowerSwitch8812A(_adapter adapter, bool bWrite, bool pwrState)
+    private static void EfusePowerSwitch8812A(AdapterState adapterState, bool bWrite, bool pwrState)
     {
         UInt16 tmpV16;
         const byte EFUSE_ACCESS_ON_JAGUAR = 0x69;
         const byte EFUSE_ACCESS_OFF_JAGUAR = 0x00;
         if (pwrState)
         {
-            rtw_write8(adapter, REG_EFUSE_BURN_GNT_8812, EFUSE_ACCESS_ON_JAGUAR);
+            rtw_write8(adapterState, REG_EFUSE_BURN_GNT_8812, EFUSE_ACCESS_ON_JAGUAR);
 
             /* 1.2V Power: From VDDON with Power Cut(0x0000h[15]), defualt valid */
-            tmpV16 = rtw_read16(adapter, REG_SYS_ISO_CTRL);
+            tmpV16 = rtw_read16(adapterState, REG_SYS_ISO_CTRL);
             if (!((tmpV16 & SysIsoCtrlBits.PWC_EV12V) == SysIsoCtrlBits.PWC_EV12V))
             {
                 tmpV16 |= SysIsoCtrlBits.PWC_EV12V;
-                /* Write16(pAdapter,REG_SYS_ISO_CTRL,tmpV16); */
+                /* Write16(pAdapterState,REG_SYS_ISO_CTRL,tmpV16); */
             }
 
             /* Reset: 0x0000h[28], default valid */
-            tmpV16 = rtw_read16(adapter, REG_SYS_FUNC_EN);
+            tmpV16 = rtw_read16(adapterState, REG_SYS_FUNC_EN);
             if (!((tmpV16 & SysFuncEnBits.FEN_ELDR) == SysFuncEnBits.FEN_ELDR))
             {
                 tmpV16 |= SysFuncEnBits.FEN_ELDR;
-                rtw_write16(adapter, REG_SYS_FUNC_EN, tmpV16);
+                rtw_write16(adapterState, REG_SYS_FUNC_EN, tmpV16);
             }
 
             /* Clock: Gated(0x0008h[5]) 8M(0x0008h[1]) clock from ANA, default valid */
-            tmpV16 = rtw_read16(adapter, REG_SYS_CLKR);
+            tmpV16 = rtw_read16(adapterState, REG_SYS_CLKR);
             if ((!((tmpV16 & SysClkrBits.LOADER_CLK_EN) == SysClkrBits.LOADER_CLK_EN)) ||
                 (!((tmpV16 & SysClkrBits.ANA8M) == SysClkrBits.ANA8M)))
             {
                 tmpV16 |= (SysClkrBits.LOADER_CLK_EN | SysClkrBits.ANA8M);
-                rtw_write16(adapter, REG_SYS_CLKR, tmpV16);
+                rtw_write16(adapterState, REG_SYS_CLKR, tmpV16);
             }
 
             if (bWrite)
             {
                 /* Enable LDO 2.5V before read/write action */
-                var tempval = rtw_read8(adapter, REG_EFUSE_TEST + 3);
+                var tempval = rtw_read8(adapterState, REG_EFUSE_TEST + 3);
                 //tempval &= ~(BIT3 | BIT4 | BIT5 | BIT6);
                 //tempval &= (0b1111_0111 & 0b1110_1111 & 0b1101_1111 & 0b1011_1111);
                 tempval &= 0b1000_0111;
                 tempval |= (VoltageValues.VOLTAGE_V25 << 3);
                 tempval |= 0b1000_0000;
-                rtw_write8(adapter, REG_EFUSE_TEST + 3, tempval);
+                rtw_write8(adapterState, REG_EFUSE_TEST + 3, tempval);
             }
         }
         else
         {
-            rtw_write8(adapter, REG_EFUSE_BURN_GNT_8812, EFUSE_ACCESS_OFF_JAGUAR);
+            rtw_write8(adapterState, REG_EFUSE_BURN_GNT_8812, EFUSE_ACCESS_OFF_JAGUAR);
 
             if (bWrite)
             {
                 /* Disable LDO 2.5V after read/write action */
-                var tempval = rtw_read8(adapter, REG_EFUSE_TEST + 3);
-                rtw_write8(adapter, REG_EFUSE_TEST + 3, (byte)(tempval & 0x7F));
+                var tempval = rtw_read8(adapterState, REG_EFUSE_TEST + 3);
+                rtw_write8(adapterState, REG_EFUSE_TEST + 3, (byte)(tempval & 0x7F));
             }
         }
 
     }
 
-    static bool efuse_OneByteRead(PADAPTER pAdapter, UInt16 addr, out byte data)
+    static bool efuse_OneByteRead(AdapterState pAdapterState, UInt16 addr, out byte data)
     {
         /* -----------------e-fuse reg ctrl --------------------------------- */
         /* address			 */
         var addressBytes = new byte[2];
         BinaryPrimitives.TryWriteUInt16LittleEndian(addressBytes, addr);
-        rtw_write8(pAdapter, EFUSE_CTRL + 1, addressBytes[0]);
-        var tmpRead = rtw_read8(pAdapter, EFUSE_CTRL + 2);
+        rtw_write8(pAdapterState, EFUSE_CTRL + 1, addressBytes[0]);
+        var tmpRead = rtw_read8(pAdapterState, EFUSE_CTRL + 2);
         var secondAddr = (addressBytes[1] & 0x03) | (tmpRead & 0xFC);
-        rtw_write8(pAdapter, EFUSE_CTRL + (2), (byte)secondAddr);
+        rtw_write8(pAdapterState, EFUSE_CTRL + (2), (byte)secondAddr);
 
-        /* Write8(pAdapter, EFUSE_CTRL+3,  0x72); */
+        /* Write8(pAdapterState, EFUSE_CTRL+3,  0x72); */
         /* read cmd	 */
         /* Write bit 32 0 */
-        var readbyte = rtw_read8(pAdapter, EFUSE_CTRL + 3);
-        rtw_write8(pAdapter, EFUSE_CTRL + 3, (byte)(readbyte & 0x7f));
+        var readbyte = rtw_read8(pAdapterState, EFUSE_CTRL + 3);
+        rtw_write8(pAdapterState, EFUSE_CTRL + 3, (byte)(readbyte & 0x7f));
 
 
         UInt32 tmpidx = 0;
-        while ((0x80 & rtw_read8(pAdapter, EFUSE_CTRL + (3))) == 0 && (tmpidx < 1000))
+        while ((0x80 & rtw_read8(pAdapterState, EFUSE_CTRL + (3))) == 0 && (tmpidx < 1000))
         {
             Thread.Sleep(1);
             tmpidx++;
@@ -1956,7 +1956,7 @@ public static class UsbHalInit
         bool bResult;
         if (tmpidx < 100)
         {
-            data = rtw_read8(pAdapter, EFUSE_CTRL);
+            data = rtw_read8(pAdapterState, EFUSE_CTRL);
             bResult = true;
         }
         else
@@ -1964,34 +1964,34 @@ public static class UsbHalInit
             data = 0xff;
             bResult = false;
             //RTW_INFO("%s: [ERROR] addr=0x%x bResult=%d time out 1s !!!\n", __FUNCTION__, addr, bResult);
-            //RTW_INFO("%s: [ERROR] EFUSE_CTRL =0x%08x !!!\n", __FUNCTION__, rtw_read32(pAdapter, EFUSE_CTRL));
+            //RTW_INFO("%s: [ERROR] EFUSE_CTRL =0x%08x !!!\n", __FUNCTION__, rtw_read32(pAdapterState, EFUSE_CTRL));
         }
 
         return bResult;
     }
 
-    static void ReadEFuseByte(_adapter Adapter, UInt16 _offset, byte[] pbuf)
+    static void ReadEFuseByte(AdapterState adapterState, UInt16 _offset, byte[] pbuf)
     {
         u32 value32;
         u8 readbyte;
         u16 retry;
 
         /* Write Address */
-        rtw_write8(Adapter, EFUSE_CTRL + 1, (byte)(_offset & 0xff));
-        readbyte = rtw_read8(Adapter, EFUSE_CTRL + 2);
-        rtw_write8(Adapter, EFUSE_CTRL + 2, (byte)(((_offset >> 8) & 0x03) | (readbyte & 0xfc)));
+        rtw_write8(adapterState, EFUSE_CTRL + 1, (byte)(_offset & 0xff));
+        readbyte = rtw_read8(adapterState, EFUSE_CTRL + 2);
+        rtw_write8(adapterState, EFUSE_CTRL + 2, (byte)(((_offset >> 8) & 0x03) | (readbyte & 0xfc)));
 
         /* Write bit 32 0 */
-        readbyte = rtw_read8(Adapter, EFUSE_CTRL + 3);
-        rtw_write8(Adapter, EFUSE_CTRL + 3, (byte)(readbyte & 0x7f));
+        readbyte = rtw_read8(adapterState, EFUSE_CTRL + 3);
+        rtw_write8(adapterState, EFUSE_CTRL + 3, (byte)(readbyte & 0x7f));
 
         /* Check bit 32 read-ready */
         retry = 0;
-        value32 = rtw_read32(Adapter, EFUSE_CTRL);
+        value32 = rtw_read32(adapterState, EFUSE_CTRL);
         /* while(!(((value32 >> 24) & 0xff) & 0x80)  && (retry<10)) */
         while ((((value32 >> 24) & 0xff) & 0x80) == 0 && (retry < 10000))
         {
-            value32 = rtw_read32(Adapter, EFUSE_CTRL);
+            value32 = rtw_read32(adapterState, EFUSE_CTRL);
             retry++;
         }
 
@@ -2000,15 +2000,15 @@ public static class UsbHalInit
         /* Designer says that there shall be some delay after ready bit is set, or the */
         /* result will always stay on last data we read. */
         Thread.Sleep(50);
-        value32 = rtw_read32(Adapter, EFUSE_CTRL);
+        value32 = rtw_read32(adapterState, EFUSE_CTRL);
 
         pbuf[0] = (u8)(value32 & 0xff);
 
     }
 
-    static void _ConfigChipOutEP_8812(PADAPTER pAdapter, u8 NumOutPipe)
+    static void _ConfigChipOutEP_8812(AdapterState pAdapterState, u8 NumOutPipe)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapterState);
 
 
         pHalData.OutEpQueueSel = 0;
@@ -2042,7 +2042,7 @@ public static class UsbHalInit
 
     }
 
-    private static bool is_boot_from_eeprom(_adapter adapter) => (GET_HAL_DATA(adapter).EepromOrEfuse);
+    private static bool is_boot_from_eeprom(AdapterState adapterState) => (GET_HAL_DATA(adapterState).EepromOrEfuse);
 
     private static map_seg_t MAPSEG_PTR_ENT(UInt16 _sa, u8[] _p)
     {
@@ -2068,19 +2068,19 @@ public static class UsbHalInit
         return t;
     }
 
-    public static bool rtl8812au_hal_init(PADAPTER Adapter)
+    public static bool rtl8812au_hal_init(AdapterState adapterState)
     {
         u8 value8 = 0, u1bRegCR;
         u16 value16;
         u8 txpktbuf_bndy;
         bool status = false;
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
-        registry_priv pregistrypriv = Adapter.registrypriv;
+        registry_priv pregistrypriv = adapterState.registrypriv;
 
         // Check if MAC has already power on. by tynli. 2011.05.27.
-        value8 = rtw_read8(Adapter, REG_SYS_CLKR + 1);
-        u1bRegCR = rtw_read8(Adapter, REG_CR);
+        value8 = rtw_read8(adapterState, REG_SYS_CLKR + 1);
+        u1bRegCR = rtw_read8(adapterState, REG_CR);
         RTW_INFO(" power-on :REG_SYS_CLKR 0x09=0x%02x. REG_CR 0x100=0x%02x.\n", value8, u1bRegCR);
         if ((value8 & BIT3) != 0 && (u1bRegCR != 0 && u1bRegCR != 0xEA))
         {
@@ -2096,17 +2096,17 @@ public static class UsbHalInit
             RTW_INFO(" MAC has not been powered on yet.\n");
         }
 
-        rtw_write8(Adapter, REG_RF_CTRL, 5);
-        rtw_write8(Adapter, REG_RF_CTRL, 7);
-        rtw_write8(Adapter, REG_RF_B_CTRL_8812, 5);
-        rtw_write8(Adapter, REG_RF_B_CTRL_8812, 7);
+        rtw_write8(adapterState, REG_RF_CTRL, 5);
+        rtw_write8(adapterState, REG_RF_CTRL, 7);
+        rtw_write8(adapterState, REG_RF_B_CTRL_8812, 5);
+        rtw_write8(adapterState, REG_RF_B_CTRL_8812, 7);
 
         // If HW didn't go through a complete de-initial procedure,
         // it probably occurs some problem for double initial procedure.
         // Like "CONFIG_DEINIT_BEFORE_INIT" in 92du chip
-        rtl8812au_hw_reset(Adapter);
+        rtl8812au_hw_reset(adapterState);
 
-        status = _InitPowerOn_8812AU(Adapter);
+        status = _InitPowerOn_8812AU(adapterState);
         if (status == false)
         {
             goto exit;
@@ -2123,154 +2123,154 @@ public static class UsbHalInit
             //txpktbuf_bndy = WMM_NORMAL_TX_PAGE_BOUNDARY_8812;
         }
 
-        status = InitLLTTable8812A(Adapter, txpktbuf_bndy);
+        status = InitLLTTable8812A(adapterState, txpktbuf_bndy);
         if (status == false)
         {
             goto exit;
         }
 
-        _InitHardwareDropIncorrectBulkOut_8812A(Adapter);
+        _InitHardwareDropIncorrectBulkOut_8812A(adapterState);
 
-        FirmwareDownload8812(Adapter);
+        FirmwareDownload8812(adapterState);
 
-        status = PHY_MACConfig8812(Adapter);
+        status = PHY_MACConfig8812(adapterState);
         if (status == false)
         {
             goto exit;
         }
 
 
-        _InitQueueReservedPage_8812AUsb(Adapter);
-        _InitTxBufferBoundary_8812AUsb(Adapter);
+        _InitQueueReservedPage_8812AUsb(adapterState);
+        _InitTxBufferBoundary_8812AUsb(adapterState);
 
-        _InitQueuePriority_8812AUsb(Adapter);
-        _InitPageBoundary_8812AUsb(Adapter);
+        _InitQueuePriority_8812AUsb(adapterState);
+        _InitPageBoundary_8812AUsb(adapterState);
 
-        _InitTransferPageSize_8812AUsb(Adapter);
+        _InitTransferPageSize_8812AUsb(adapterState);
 
         // Get Rx PHY status in order to report RSSI and others.
-        _InitDriverInfoSize_8812A(Adapter, DRVINFO_SZ);
+        _InitDriverInfoSize_8812A(adapterState, DRVINFO_SZ);
 
-        _InitInterrupt_8812AU(Adapter);
-        _InitNetworkType_8812A(Adapter); /* set msr	 */
-        _InitWMACSetting_8812A(Adapter);
-        _InitAdaptiveCtrl_8812AUsb(Adapter);
-        _InitEDCA_8812AUsb(Adapter);
+        _InitInterrupt_8812AU(adapterState);
+        _InitNetworkType_8812A(adapterState); /* set msr	 */
+        _InitWMACSetting_8812A(adapterState);
+        _InitAdaptiveCtrl_8812AUsb(adapterState);
+        _InitEDCA_8812AUsb(adapterState);
 
-        _InitRetryFunction_8812A(Adapter);
-        init_UsbAggregationSetting_8812A(Adapter);
+        _InitRetryFunction_8812A(adapterState);
+        init_UsbAggregationSetting_8812A(adapterState);
 
-        _InitBeaconParameters_8812A(Adapter);
-        _InitBeaconMaxError_8812A(Adapter, true);
+        _InitBeaconParameters_8812A(adapterState);
+        _InitBeaconMaxError_8812A(adapterState, true);
 
-        _InitBurstPktLen(Adapter); // added by page. 20110919
+        _InitBurstPktLen(adapterState); // added by page. 20110919
 
         // Init CR MACTXEN, MACRXEN after setting RxFF boundary REG_TRXFF_BNDY to patch
         // Hw bug which Hw initials RxFF boundry size to a value which is larger than the real Rx buffer size in 88E.
         // 2011.08.05. by tynli.
-        value8 = rtw_read8(Adapter, REG_CR);
-        rtw_write8(Adapter, REG_CR, (byte)(value8 | MACTXEN | MACRXEN));
+        value8 = rtw_read8(adapterState, REG_CR);
+        rtw_write8(adapterState, REG_CR, (byte)(value8 | MACTXEN | MACRXEN));
 
-        rtw_write16(Adapter, REG_PKT_VO_VI_LIFE_TIME, 0x0400);  /* unit: 256us. 256ms */
-        rtw_write16(Adapter, REG_PKT_BE_BK_LIFE_TIME, 0x0400);	/* unit: 256us. 256ms */
+        rtw_write16(adapterState, REG_PKT_VO_VI_LIFE_TIME, 0x0400);  /* unit: 256us. 256ms */
+        rtw_write16(adapterState, REG_PKT_BE_BK_LIFE_TIME, 0x0400);	/* unit: 256us. 256ms */
 
-        status = PHY_BBConfig8812(Adapter);
+        status = PHY_BBConfig8812(adapterState);
         if (status == false)
         {
             goto exit;
         }
 
-        PHY_RFConfig8812(Adapter);
+        PHY_RFConfig8812(adapterState);
 
         if (pHalData.rf_type == rf_type.RF_1T1R)
         {
-            PHY_BB8812_Config_1T(Adapter);
+            PHY_BB8812_Config_1T(adapterState);
         }
 
-        if (Adapter.registrypriv.rf_config == rf_type.RF_1T2R)
+        if (adapterState.registrypriv.rf_config == rf_type.RF_1T2R)
         {
-            phy_set_bb_reg(Adapter, rTxPath_Jaguar, bMaskLWord, 0x1111);
+            phy_set_bb_reg(adapterState, rTxPath_Jaguar, bMaskLWord, 0x1111);
         }
 
 
-        if (Adapter.registrypriv.channel <= 14)
+        if (adapterState.registrypriv.channel <= 14)
         {
-            PHY_SwitchWirelessBand8812(Adapter, BAND_TYPE.BAND_ON_2_4G);
+            PHY_SwitchWirelessBand8812(adapterState, BAND_TYPE.BAND_ON_2_4G);
         }
         else
         {
-            PHY_SwitchWirelessBand8812(Adapter, BAND_TYPE.BAND_ON_5G);
+            PHY_SwitchWirelessBand8812(adapterState, BAND_TYPE.BAND_ON_5G);
         }
 
-        rtw_hal_set_chnl_bw(Adapter, Adapter.registrypriv.channel, channel_width.CHANNEL_WIDTH_20,
+        rtw_hal_set_chnl_bw(adapterState, adapterState.registrypriv.channel, channel_width.CHANNEL_WIDTH_20,
             HAL_PRIME_CHNL_OFFSET_DONT_CARE,
             HAL_PRIME_CHNL_OFFSET_DONT_CARE);
 
 
-        invalidate_cam_all(Adapter);
+        invalidate_cam_all(adapterState);
 
         // HW SEQ CTRL
         // set 0x0 to 0xFF by tynli. Default enable HW SEQ NUM.
-        rtw_write8(Adapter, REG_HWSEQ_CTRL, 0xFF);
+        rtw_write8(adapterState, REG_HWSEQ_CTRL, 0xFF);
 
 
         // Disable BAR, suggested by Scott
         // 2010.04.09 add by hpfan
-        rtw_write32(Adapter, REG_BAR_MODE_CTRL, 0x0201ffff);
+        rtw_write32(adapterState, REG_BAR_MODE_CTRL, 0x0201ffff);
 
         if (pregistrypriv.wifi_spec)
         {
-            rtw_write16(Adapter, REG_FAST_EDCA_CTRL, 0);
+            rtw_write16(adapterState, REG_FAST_EDCA_CTRL, 0);
         }
 
         // Nav limit , suggest by scott
-        rtw_write8(Adapter, 0x652, 0x0);
+        rtw_write8(adapterState, 0x652, 0x0);
 
-        rtl8812_InitHalDm(Adapter);
+        rtl8812_InitHalDm(adapterState);
 
 
             /* 0x4c6[3] 1: RTS BW = Data BW */
             /* 0: RTS BW depends on CCA / secondary CCA result. */
-            rtw_write8(Adapter, REG_QUEUE_CTRL, (byte)(rtw_read8(Adapter, REG_QUEUE_CTRL) & 0xF7));
+            rtw_write8(adapterState, REG_QUEUE_CTRL, (byte)(rtw_read8(adapterState, REG_QUEUE_CTRL) & 0xF7));
 
             /* enable Tx report. */
-            rtw_write8(Adapter, REG_FWHW_TXQ_CTRL + 1, 0x0F);
+            rtw_write8(adapterState, REG_FWHW_TXQ_CTRL + 1, 0x0F);
 
             /* Suggested by SD1 pisa. Added by tynli. 2011.10.21. */
-            rtw_write8(Adapter, REG_EARLY_MODE_CONTROL_8812 + 3, 0x01); /* Pretx_en, for WEP/TKIP SEC */
+            rtw_write8(adapterState, REG_EARLY_MODE_CONTROL_8812 + 3, 0x01); /* Pretx_en, for WEP/TKIP SEC */
 
             /* tynli_test_tx_report. */
-            rtw_write16(Adapter, REG_TX_RPT_TIME, 0x3DF0);
+            rtw_write16(adapterState, REG_TX_RPT_TIME, 0x3DF0);
 
             /* Reset USB mode switch setting */
-            rtw_write8(Adapter, REG_SDIO_CTRL_8812, 0x0);
-            rtw_write8(Adapter, REG_ACLK_MON, 0x0);
+            rtw_write8(adapterState, REG_SDIO_CTRL_8812, 0x0);
+            rtw_write8(adapterState, REG_ACLK_MON, 0x0);
 
-        rtw_write8(Adapter, REG_USB_HRPWM, 0);
+        rtw_write8(adapterState, REG_USB_HRPWM, 0);
 
         // TODO:
         ///* ack for xmit mgmt frames. */
-        rtw_write32(Adapter, REG_FWHW_TXQ_CTRL, rtw_read32(Adapter, REG_FWHW_TXQ_CTRL) | BIT12);
+        rtw_write32(adapterState, REG_FWHW_TXQ_CTRL, rtw_read32(adapterState, REG_FWHW_TXQ_CTRL) | BIT12);
         exit:
 
         return status;
     }
 
-    public static void phy_set_bb_reg(_adapter Adapter, u16 RegAddr, u32 BitMask, u32 Data) =>
-        PHY_SetBBReg8812(Adapter, RegAddr, BitMask, Data);
+    public static void phy_set_bb_reg(AdapterState adapterState, u16 RegAddr, u32 BitMask, u32 Data) =>
+        PHY_SetBBReg8812(adapterState, RegAddr, BitMask, Data);
 
-    static void rtl8812_InitHalDm(PADAPTER Adapter)
+    static void rtl8812_InitHalDm(AdapterState adapterState)
     {
-        dm_InitGPIOSetting(Adapter);
-        rtw_phydm_init(Adapter);
-        /* Adapter.fix_rate = 0xFF; */
+        dm_InitGPIOSetting(adapterState);
+        rtw_phydm_init(adapterState);
+        /* adapterState.fix_rate = 0xFF; */
     }
 
-    static void rtw_phydm_init(_adapter adapter)
+    static void rtw_phydm_init(AdapterState adapterState)
     {
-        var hal_data = GET_HAL_DATA(adapter);
+        var hal_data = GET_HAL_DATA(adapterState);
         var phydm = (hal_data.odmpriv);
-        init_phydm_info(adapter);
+        init_phydm_info(adapterState);
         odm_dm_init(phydm);
     }
 
@@ -2428,27 +2428,27 @@ public static class UsbHalInit
         //halrf_tssi_init(dm);
     }
 
-    static void init_phydm_info(_adapter adapter)
+    static void init_phydm_info(AdapterState adapterState)
     {
-        PHAL_DATA_TYPE hal_data = GET_HAL_DATA(adapter);
+        PHAL_DATA_TYPE hal_data = GET_HAL_DATA(adapterState);
         dm_struct phydm = (hal_data.odmpriv);
         odm_cmn_info_init(phydm, odm_cmninfo.ODM_CMNINFO_FW_VER, hal_data.firmware_version);
         odm_cmn_info_init(phydm, odm_cmninfo.ODM_CMNINFO_FW_SUB_VER, hal_data.firmware_sub_version);
     }
 
-    static void dm_InitGPIOSetting(PADAPTER Adapter)
+    static void dm_InitGPIOSetting(AdapterState adapterState)
     {
-        //PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        //PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         //u8 tmp1byte;
 
-        //tmp1byte = rtw_read8(Adapter, REG_GPIO_MUXCFG);
+        //tmp1byte = rtw_read8(adapterState, REG_GPIO_MUXCFG);
         //tmp1byte &= (GPIOSEL_GPIO | ~GPIOSEL_ENBT);
 
-        //rtw_write8(Adapter, REG_GPIO_MUXCFG, tmp1byte);
+        //rtw_write8(adapterState, REG_GPIO_MUXCFG, tmp1byte);
     }
 
-    static void invalidate_cam_all(_adapter padapter)
+    static void invalidate_cam_all(AdapterState padapter)
     {
         //DvObj dvobj = adapter_to_dvobj(padapter);
         //cam_ctl_t cam_ctl = dvobj.cam_ctl;
@@ -2457,9 +2457,9 @@ public static class UsbHalInit
         //rtw_sec_cam_map_clr_all(cam_ctl.used);
     }
 
-    public static void PHY_SwitchWirelessBand8812(PADAPTER Adapter, BAND_TYPE Band)
+    public static void PHY_SwitchWirelessBand8812(AdapterState adapterState, BAND_TYPE Band)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
         channel_width current_bw = pHalData.current_channel_bw;
         bool eLNA_2g = pHalData.ExternalLNA_2G;
 
@@ -2471,12 +2471,12 @@ public static class UsbHalInit
         {
             /* 2.4G band */
 
-            phy_set_bb_reg(Adapter, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
+            phy_set_bb_reg(adapterState, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
 
             /* <20131128, VincentL> Remove 0x830[3:1] setting when switching 2G/5G, requested by Yn. */
-            phy_set_bb_reg(Adapter, rBWIndication_Jaguar, 0x3, 0x1); /* 0x834[1:0] = 0x1 */
+            phy_set_bb_reg(adapterState, rBWIndication_Jaguar, 0x3, 0x1); /* 0x834[1:0] = 0x1 */
             /* set PD_TH_20M for BB Yn user guide R27 */
-            phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17,
+            phy_set_bb_reg(adapterState, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17,
                 0x17); /* 0x830[17:13]=5'b10111 */
 
 
@@ -2487,30 +2487,30 @@ public static class UsbHalInit
                 && eLNA_2g == false)
             {
                 /* 0x830[3:1]=3'b010 */
-                phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x02);
+                phy_set_bb_reg(adapterState, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x02);
             }
             else
             {
                 /* 0x830[3:1]=3'b100 */
-                phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
+                phy_set_bb_reg(adapterState, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
             }
 
 
             /* AGC table select */
-            phy_set_bb_reg(Adapter, rAGC_table_Jaguar, 0x3, 0); /* 0x82C[1:0] = 2b'00 */
+            phy_set_bb_reg(adapterState, rAGC_table_Jaguar, 0x3, 0); /* 0x82C[1:0] = 2b'00 */
 
-            phy_SetRFEReg8812(Adapter, Band);
+            phy_SetRFEReg8812(adapterState, Band);
 
             /* <20131106, Kordan> Workaround to fix CCK FA for scan issue. */
             /* if( pHalData.bMPMode == FALSE) */
 
-            phy_set_bb_reg(Adapter, rTxPath_Jaguar, 0xf0, 0x1);
-            phy_set_bb_reg(Adapter, rCCK_RX_Jaguar, 0x0f000000, 0x1);
+            phy_set_bb_reg(adapterState, rTxPath_Jaguar, 0xf0, 0x1);
+            phy_set_bb_reg(adapterState, rCCK_RX_Jaguar, 0x0f000000, 0x1);
 
-            update_tx_basic_rate(Adapter, NETWORK_TYPE.WIRELESS_11BG);
+            update_tx_basic_rate(adapterState, NETWORK_TYPE.WIRELESS_11BG);
 
             /* CCK_CHECK_en */
-            rtw_write8(Adapter, REG_CCK_CHECK_8812, (byte)(rtw_read8(Adapter, REG_CCK_CHECK_8812) & (NotBIT7)));
+            rtw_write8(adapterState, REG_CCK_CHECK_8812, (byte)(rtw_read8(adapterState, REG_CCK_CHECK_8812) & (NotBIT7)));
         }
         else
         {
@@ -2519,10 +2519,10 @@ public static class UsbHalInit
 
 
             /* CCK_CHECK_en */
-            rtw_write8(Adapter, REG_CCK_CHECK_8812, (byte)(rtw_read8(Adapter, REG_CCK_CHECK_8812) | BIT7));
+            rtw_write8(adapterState, REG_CCK_CHECK_8812, (byte)(rtw_read8(adapterState, REG_CCK_CHECK_8812) | BIT7));
 
             count = 0;
-            reg41A = rtw_read16(Adapter, REG_TXPKT_EMPTY);
+            reg41A = rtw_read16(adapterState, REG_TXPKT_EMPTY);
             /* RTW_INFO("Reg41A value %d", reg41A); */
             reg41A &= 0x30;
             while ((reg41A != 0x30) && (count < 50))
@@ -2530,7 +2530,7 @@ public static class UsbHalInit
                 Thread.Sleep(50);
                 /* RTW_INFO("Delay 50us\n"); */
 
-                reg41A = rtw_read16(Adapter, REG_TXPKT_EMPTY);
+                reg41A = rtw_read16(adapterState, REG_TXPKT_EMPTY);
                 reg41A &= 0x30;
                 count++;
                 /* RTW_INFO("Reg41A value %d", reg41A); */
@@ -2540,57 +2540,57 @@ public static class UsbHalInit
                 RTW_INFO("PHY_SwitchWirelessBand8812(): Switch to 5G Band. Count = %d reg41A=0x%x\n", count, reg41A);
 
             /* 2012/02/01, Sinda add registry to switch workaround without long-run verification for scan issue. */
-            phy_set_bb_reg(Adapter, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
+            phy_set_bb_reg(adapterState, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
 
             /* <20131128, VincentL> Remove 0x830[3:1] setting when switching 2G/5G, requested by Yn. */
-            phy_set_bb_reg(Adapter, rBWIndication_Jaguar, 0x3, 0x2); /* 0x834[1:0] = 0x2 */
+            phy_set_bb_reg(adapterState, rBWIndication_Jaguar, 0x3, 0x2); /* 0x834[1:0] = 0x2 */
             /* set PD_TH_20M for BB Yn user guide R27 */
-            phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17,
+            phy_set_bb_reg(adapterState, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17,
                 0x15); /* 0x830[17:13]=5'b10101 */
 
 
             /* set PWED_TH for BB Yn user guide R29 */
             /* 0x830[3:1]=3'b100 */
-            phy_set_bb_reg(Adapter, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
+            phy_set_bb_reg(adapterState, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
 
             /* AGC table select */
-            phy_set_bb_reg(Adapter, rAGC_table_Jaguar, 0x3, 1); /* 0x82C[1:0] = 2'b00 */
+            phy_set_bb_reg(adapterState, rAGC_table_Jaguar, 0x3, 1); /* 0x82C[1:0] = 2'b00 */
 
-            phy_SetRFEReg8812(Adapter, Band);
+            phy_SetRFEReg8812(adapterState, Band);
 
             /* <20131106, Kordan> Workaround to fix CCK FA for scan issue. */
             /* if( pHalData.bMPMode == FALSE) */
-            phy_set_bb_reg(Adapter, rTxPath_Jaguar, 0xf0, 0x0);
-            phy_set_bb_reg(Adapter, rCCK_RX_Jaguar, 0x0f000000, 0xF);
+            phy_set_bb_reg(adapterState, rTxPath_Jaguar, 0xf0, 0x0);
+            phy_set_bb_reg(adapterState, rCCK_RX_Jaguar, 0x0f000000, 0xF);
 
             /* avoid using cck rate in 5G band */
             /* Set RRSR rate table. */
-            update_tx_basic_rate(Adapter, NETWORK_TYPE.WIRELESS_11A);
+            update_tx_basic_rate(adapterState, NETWORK_TYPE.WIRELESS_11A);
 
 
             /* RTW_INFO("==>PHY_SwitchWirelessBand8812() BAND_ON_5G settings OFDM index 0x%x\n", pHalData.OFDM_index[RF_PATH_A]); */
         }
 
-        phy_SetBBSwingByBand_8812A(Adapter, Band);
+        phy_SetBBSwingByBand_8812A(adapterState, Band);
     }
 
-    static void phy_SetBBSwingByBand_8812A(PADAPTER Adapter, BAND_TYPE Band)
+    static void phy_SetBBSwingByBand_8812A(AdapterState adapterState, BAND_TYPE Band)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA((Adapter));
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA((adapterState));
 
-        phy_set_bb_reg(Adapter, rA_TxScale_Jaguar, 0xFFE00000,
-            phy_get_tx_bb_swing_8812a(Adapter, (BAND_TYPE)Band, rf_path.RF_PATH_A)); /* 0xC1C[31:21] */
-        phy_set_bb_reg(Adapter, rB_TxScale_Jaguar, 0xFFE00000,
-            phy_get_tx_bb_swing_8812a(Adapter, (BAND_TYPE)Band, rf_path.RF_PATH_B)); /* 0xE1C[31:21] */
+        phy_set_bb_reg(adapterState, rA_TxScale_Jaguar, 0xFFE00000,
+            phy_get_tx_bb_swing_8812a(adapterState, (BAND_TYPE)Band, rf_path.RF_PATH_A)); /* 0xC1C[31:21] */
+        phy_set_bb_reg(adapterState, rB_TxScale_Jaguar, 0xFFE00000,
+            phy_get_tx_bb_swing_8812a(adapterState, (BAND_TYPE)Band, rf_path.RF_PATH_B)); /* 0xE1C[31:21] */
     }
 
-    static u32 phy_get_tx_bb_swing_8812a(PADAPTER Adapter, BAND_TYPE Band, rf_path RFPath)
+    static u32 phy_get_tx_bb_swing_8812a(AdapterState adapterState, BAND_TYPE Band, rf_path RFPath)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA((Adapter));
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA((adapterState));
         dm_struct pDM_Odm = pHalData.odmpriv;
 
-        s8 bbSwing_2G = (s8)(-1 * Adapter.registrypriv.TxBBSwing_2G);
-        s8 bbSwing_5G = (s8)(-1 * Adapter.registrypriv.TxBBSwing_5G);
+        s8 bbSwing_2G = (s8)(-1 * adapterState.registrypriv.TxBBSwing_2G);
+        s8 bbSwing_5G = (s8)(-1 * adapterState.registrypriv.TxBBSwing_5G);
         u32 _out = 0x200;
         const s8 AUTO = -1;
 
@@ -2650,9 +2650,9 @@ public static class UsbHalInit
 
             if (Band == BAND_TYPE.BAND_ON_2_4G)
             {
-                if (Adapter.registrypriv.TxBBSwing_2G == AUTO)
+                if (adapterState.registrypriv.TxBBSwing_2G == AUTO)
                 {
-                    efuse_ShadowRead1Byte(Adapter, EEPROM_TX_BBSWING_2G_8812, out swing);
+                    efuse_ShadowRead1Byte(adapterState, EEPROM_TX_BBSWING_2G_8812, out swing);
                     swing = (swing == 0xFF) ? (byte)0x00 : swing;
                 }
                 else if (bbSwing_2G == 0)
@@ -2668,9 +2668,9 @@ public static class UsbHalInit
             }
             else
             {
-                if (Adapter.registrypriv.TxBBSwing_5G == AUTO)
+                if (adapterState.registrypriv.TxBBSwing_5G == AUTO)
                 {
-                    efuse_ShadowRead1Byte(Adapter, EEPROM_TX_BBSWING_5G_8812, out swing);
+                    efuse_ShadowRead1Byte(adapterState, EEPROM_TX_BBSWING_5G_8812, out swing);
                     swing = (swing == 0xFF) ? (byte)0x00 : swing;
                 }
                 else if (bbSwing_5G == 0)
@@ -2713,10 +2713,10 @@ public static class UsbHalInit
         return _out;
     }
 
-    static void phy_SetRFEReg8812(PADAPTER Adapter, BAND_TYPE Band)
+    static void phy_SetRFEReg8812(AdapterState adapterState, BAND_TYPE Band)
     {
         uint u1tmp = 0;
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         if (Band == BAND_TYPE.BAND_ON_2_4G)
         {
@@ -2724,46 +2724,46 @@ public static class UsbHalInit
             {
                 case 0:
                 case 2:
-                    phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
-                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
                     break;
                 case 1:
                 {
-                    phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
-                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
                 }
                     break;
                 case 3:
-                    phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337770);
-                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337770);
-                    phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
-                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
-                    phy_set_bb_reg(Adapter, r_ANTSEL_SW_Jaguar, 0x00000303, 0x1);
+                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337770);
+                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337770);
+                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    phy_set_bb_reg(adapterState, r_ANTSEL_SW_Jaguar, 0x00000303, 0x1);
                     break;
                 case 4:
-                    phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x001);
-                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x001);
+                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x001);
+                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x001);
                     break;
                 case 5:
-                    rtw_write8(Adapter, rA_RFE_Pinmux_Jaguar + 2, 0x77);
+                    rtw_write8(adapterState, rA_RFE_Pinmux_Jaguar + 2, 0x77);
 
-                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    u1tmp = rtw_read8(Adapter, rA_RFE_Inv_Jaguar + 3);
+                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    u1tmp = rtw_read8(adapterState, rA_RFE_Inv_Jaguar + 3);
                     u1tmp &= NotBIT0;
-                    rtw_write8(Adapter, rA_RFE_Inv_Jaguar + 3, (byte)(u1tmp));
-                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    rtw_write8(adapterState, rA_RFE_Inv_Jaguar + 3, (byte)(u1tmp));
+                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
                     break;
                 case 6:
-                    phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x07772770);
-                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x07772770);
-                    phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
-                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
+                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x07772770);
+                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x07772770);
+                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
+                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
                     break;
                 default:
                     break;
@@ -2774,45 +2774,45 @@ public static class UsbHalInit
             switch (pHalData.rfe_type)
             {
                 case 0:
-                    phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
-                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
-                    phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
-                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
+                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
+                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
                     break;
                 case 1:
                 {
-                    phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
-                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
-                    phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
-                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
+                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
+                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
                 }
                     break;
                 case 2:
                 case 4:
-                    phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
-                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
-                    phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
-                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
+                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
+                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
                     break;
                 case 3:
-                    phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337717);
-                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337717);
-                    phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
-                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
-                    phy_set_bb_reg(Adapter, r_ANTSEL_SW_Jaguar, 0x00000303, 0x1);
+                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337717);
+                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337717);
+                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    phy_set_bb_reg(adapterState, r_ANTSEL_SW_Jaguar, 0x00000303, 0x1);
                     break;
                 case 5:
-                    rtw_write8(Adapter, rA_RFE_Pinmux_Jaguar + 2, 0x33);
-                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
-                    u1tmp = rtw_read8(Adapter, rA_RFE_Inv_Jaguar + 3);
-                    rtw_write8(Adapter, rA_RFE_Inv_Jaguar + 3, (byte)(u1tmp |= BIT0));
-                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    rtw_write8(adapterState, rA_RFE_Pinmux_Jaguar + 2, 0x33);
+                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
+                    u1tmp = rtw_read8(adapterState, rA_RFE_Inv_Jaguar + 3);
+                    rtw_write8(adapterState, rA_RFE_Inv_Jaguar + 3, (byte)(u1tmp |= BIT0));
+                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
                     break;
                 case 6:
-                    phy_set_bb_reg(Adapter, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x07737717);
-                    phy_set_bb_reg(Adapter, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x07737717);
-                    phy_set_bb_reg(Adapter, rA_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
-                    phy_set_bb_reg(Adapter, rB_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
+                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x07737717);
+                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x07737717);
+                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
+                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
                     break;
                 default:
                     break;
@@ -2821,7 +2821,7 @@ public static class UsbHalInit
     }
 
     /* Update RRSR and Rate for USERATE */
-    static void update_tx_basic_rate(_adapter padapter, NETWORK_TYPE wirelessmode)
+    static void update_tx_basic_rate(AdapterState padapter, NETWORK_TYPE wirelessmode)
     {
         //NDIS_802_11_RATES_EX supported_rates;
 
@@ -2858,33 +2858,33 @@ public static class UsbHalInit
         //rtw_hal_set_hwreg(padapter, HW_VAR_BASIC_RATE, supported_rates);
     }
 
-    static void PHY_BB8812_Config_1T(PADAPTER Adapter)
+    static void PHY_BB8812_Config_1T(AdapterState adapterState)
     {
         /* BB OFDM RX Path_A */
-        phy_set_bb_reg(Adapter, rRxPath_Jaguar, bRxPath_Jaguar, 0x11);
+        phy_set_bb_reg(adapterState, rRxPath_Jaguar, bRxPath_Jaguar, 0x11);
         /* BB OFDM TX Path_A */
-        phy_set_bb_reg(Adapter, rTxPath_Jaguar, bMaskLWord, 0x1111);
+        phy_set_bb_reg(adapterState, rTxPath_Jaguar, bMaskLWord, 0x1111);
         /* BB CCK R/Rx Path_A */
-        phy_set_bb_reg(Adapter, rCCK_RX_Jaguar, bCCK_RX_Jaguar, 0x0);
+        phy_set_bb_reg(adapterState, rCCK_RX_Jaguar, bCCK_RX_Jaguar, 0x0);
         /* MCS support */
-        phy_set_bb_reg(Adapter, 0x8bc, 0xc0000060, 0x4);
+        phy_set_bb_reg(adapterState, 0x8bc, 0xc0000060, 0x4);
         /* RF Path_B HSSI OFF */
-        phy_set_bb_reg(Adapter, 0xe00, 0xf, 0x4);
+        phy_set_bb_reg(adapterState, 0xe00, 0xf, 0x4);
         /* RF Path_B Power Down */
-        phy_set_bb_reg(Adapter, 0xe90, bMaskDWord, 0);
+        phy_set_bb_reg(adapterState, 0xe90, bMaskDWord, 0);
         /* ADDA Path_B OFF */
-        phy_set_bb_reg(Adapter, 0xe60, bMaskDWord, 0);
-        phy_set_bb_reg(Adapter, 0xe64, bMaskDWord, 0);
+        phy_set_bb_reg(adapterState, 0xe60, bMaskDWord, 0);
+        phy_set_bb_reg(adapterState, 0xe64, bMaskDWord, 0);
     }
 
-    static void PHY_RFConfig8812(PADAPTER Adapter)
+    static void PHY_RFConfig8812(AdapterState adapterState)
     {
-        PHY_RF6052_Config_8812(Adapter);
+        PHY_RF6052_Config_8812(adapterState);
     }
 
-    static void PHY_RF6052_Config_8812(PADAPTER Adapter)
+    static void PHY_RF6052_Config_8812(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         /* Initialize general global value */
         if (pHalData.rf_type == rf_type.RF_1T1R)
@@ -2899,13 +2899,13 @@ public static class UsbHalInit
         /*  */
         /* Config BB and RF */
         /*  */
-        phy_RF6052_Config_ParaFile_8812(Adapter);
+        phy_RF6052_Config_ParaFile_8812(adapterState);
     }
 
-    static void phy_RF6052_Config_ParaFile_8812(PADAPTER Adapter)
+    static void phy_RF6052_Config_ParaFile_8812(AdapterState adapterState)
     {
         rf_path eRFPath;
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         for (eRFPath = 0; (byte)eRFPath < pHalData.NumTotalRFPath; eRFPath++)
         {
@@ -2913,10 +2913,10 @@ public static class UsbHalInit
             switch (eRFPath)
             {
                 case rf_path.RF_PATH_A:
-                    odm_config_rf_with_header_file(Adapter, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath);
+                    odm_config_rf_with_header_file(adapterState, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath);
                     break;
                 case rf_path.RF_PATH_B:
-                    odm_config_rf_with_header_file(Adapter, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath);
+                    odm_config_rf_with_header_file(adapterState, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath);
                     break;
                 default:
                     break;
@@ -2924,10 +2924,10 @@ public static class UsbHalInit
         }
     }
 
-    static bool phy_BB8812_Config_ParaFile(PADAPTER Adapter)
+    static bool phy_BB8812_Config_ParaFile(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        bool rtStatus = odm_config_bb_with_header_file(Adapter, odm_bb_config_type.CONFIG_BB_PHY_REG);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
+        bool rtStatus = odm_config_bb_with_header_file(adapterState, odm_bb_config_type.CONFIG_BB_PHY_REG);
 
         /* Read PHY_REG.TXT BB INIT!! */
 
@@ -2937,7 +2937,7 @@ public static class UsbHalInit
             goto phy_BB_Config_ParaFile_Fail;
         }
 
-        rtStatus = odm_config_bb_with_header_file(Adapter, odm_bb_config_type.CONFIG_BB_AGC_TAB);
+        rtStatus = odm_config_bb_with_header_file(adapterState, odm_bb_config_type.CONFIG_BB_AGC_TAB);
 
         if (rtStatus != true)
         {
@@ -2949,50 +2949,50 @@ public static class UsbHalInit
         return rtStatus;
     }
 
-    static bool PHY_BBConfig8812(PADAPTER Adapter)
+    static bool PHY_BBConfig8812(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
         uint TmpU1B = 0;
 
-        phy_InitBBRFRegisterDefinition(Adapter);
+        phy_InitBBRFRegisterDefinition(adapterState);
 
         /* tangw check start 20120412 */
         /* . APLL_EN,,APLL_320_GATEB,APLL_320BIAS,  auto config by hw fsm after pfsm_go (0x4 bit 8) set */
-        TmpU1B = rtw_read8(Adapter, REG_SYS_FUNC_EN);
+        TmpU1B = rtw_read8(adapterState, REG_SYS_FUNC_EN);
 
         TmpU1B |= FEN_USBA;
 
-        rtw_write8(Adapter, REG_SYS_FUNC_EN, (byte)TmpU1B);
+        rtw_write8(adapterState, REG_SYS_FUNC_EN, (byte)TmpU1B);
 
-        rtw_write8(Adapter, REG_SYS_FUNC_EN, (byte)(TmpU1B | FEN_BB_GLB_RSTn | FEN_BBRSTB)); /* same with 8812 */
+        rtw_write8(adapterState, REG_SYS_FUNC_EN, (byte)(TmpU1B | FEN_BB_GLB_RSTn | FEN_BBRSTB)); /* same with 8812 */
         /* 6. 0x1f[7:0] = 0x07 PathA RF Power On */
-        rtw_write8(Adapter, REG_RF_CTRL, 0x07); /* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
+        rtw_write8(adapterState, REG_RF_CTRL, 0x07); /* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
         /* 7.  PathB RF Power On */
-        rtw_write8(Adapter, REG_OPT_CTRL_8812 + 2, 0x7); /* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
+        rtw_write8(adapterState, REG_OPT_CTRL_8812 + 2, 0x7); /* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
         /* tangw check end 20120412 */
 
 
         /*  */
         /* Config BB and AGC */
         /*  */
-        var rtStatus = phy_BB8812_Config_ParaFile(Adapter);
+        var rtStatus = phy_BB8812_Config_ParaFile(adapterState);
 
-        hal_set_crystal_cap(Adapter, pHalData.crystal_cap);
+        hal_set_crystal_cap(adapterState, pHalData.crystal_cap);
 
         return rtStatus;
     }
 
-    static void hal_set_crystal_cap(_adapter adapter, u8 crystal_cap)
+    static void hal_set_crystal_cap(AdapterState adapterState, u8 crystal_cap)
     {
         crystal_cap = (byte)(crystal_cap & 0x3F);
 
         /* write 0x2C[30:25] = 0x2C[24:19] = CrystalCap */
-        phy_set_bb_reg(adapter, REG_MAC_PHY_CTRL, 0x7FF80000u, (byte)(crystal_cap | (crystal_cap << 6)));
+        phy_set_bb_reg(adapterState, REG_MAC_PHY_CTRL, 0x7FF80000u, (byte)(crystal_cap | (crystal_cap << 6)));
     }
 
-    static void phy_InitBBRFRegisterDefinition(PADAPTER Adapter)
+    static void phy_InitBBRFRegisterDefinition(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         /* RF Interface Sowrtware Control */
         pHalData.PHYRegDef[rf_path.RF_PATH_A].rfintfs =
@@ -3023,40 +3023,40 @@ public static class UsbHalInit
         pHalData.PHYRegDef[rf_path.RF_PATH_B].rfLSSIReadBackPi = rB_PIRead_Jaguar;
     }
 
-    static void _InitBurstPktLen(PADAPTER Adapter)
+    static void _InitBurstPktLen(AdapterState adapterState)
     {
         u8 speedvalue, provalue, temp;
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
-        rtw_write8(Adapter, 0xf050, 0x01); /* usb3 rx interval */
-        rtw_write16(Adapter, REG_RXDMA_STATUS, 0x7400); /* burset lenght=4, set 0x3400 for burset length=2 */
-        rtw_write8(Adapter, 0x289, 0xf5); /* for rxdma control */
+        rtw_write8(adapterState, 0xf050, 0x01); /* usb3 rx interval */
+        rtw_write16(adapterState, REG_RXDMA_STATUS, 0x7400); /* burset lenght=4, set 0x3400 for burset length=2 */
+        rtw_write8(adapterState, 0x289, 0xf5); /* for rxdma control */
 
         /* 0x456 = 0x70, sugguested by Zhilin */
-        rtw_write8(Adapter, REG_AMPDU_MAX_TIME_8812, 0x70);
+        rtw_write8(adapterState, REG_AMPDU_MAX_TIME_8812, 0x70);
 
-        rtw_write32(Adapter, REG_AMPDU_MAX_LENGTH_8812, 0xffffffff);
-        rtw_write8(Adapter, REG_USTIME_TSF, 0x50);
-        rtw_write8(Adapter, REG_USTIME_EDCA, 0x50);
+        rtw_write32(adapterState, REG_AMPDU_MAX_LENGTH_8812, 0xffffffff);
+        rtw_write8(adapterState, REG_USTIME_TSF, 0x50);
+        rtw_write8(adapterState, REG_USTIME_EDCA, 0x50);
 
-        speedvalue = rtw_read8(Adapter, 0xff); /* check device operation speed: SS 0xff bit7 */
+        speedvalue = rtw_read8(adapterState, 0xff); /* check device operation speed: SS 0xff bit7 */
 
         if ((speedvalue & BIT7) != 0)
         {
             /* USB2/1.1 Mode */
-            temp = rtw_read8(Adapter, 0xfe17);
+            temp = rtw_read8(adapterState, 0xfe17);
             if (((temp >> 4) & 0x03) == 0)
             {
                 pHalData.UsbBulkOutSize = USB_HIGH_SPEED_BULK_SIZE;
-                provalue = rtw_read8(Adapter, REG_RXDMA_PRO_8812);
-                rtw_write8(Adapter, REG_RXDMA_PRO_8812,
+                provalue = rtw_read8(adapterState, REG_RXDMA_PRO_8812);
+                rtw_write8(adapterState, REG_RXDMA_PRO_8812,
                     (byte)((provalue | BIT4 | BIT3 | BIT2 | BIT1) & (NotBIT5))); /* set burst pkt len=512B */
             }
             else
             {
                 pHalData.UsbBulkOutSize = 64;
-                provalue = rtw_read8(Adapter, REG_RXDMA_PRO_8812);
-                rtw_write8(Adapter, REG_RXDMA_PRO_8812,
+                provalue = rtw_read8(adapterState, REG_RXDMA_PRO_8812);
+                rtw_write8(adapterState, REG_RXDMA_PRO_8812,
                     (byte)((provalue | BIT5 | BIT3 | BIT2 | BIT1) & (NotBIT4))); /* set burst pkt len=64B */
             }
         }
@@ -3064,152 +3064,152 @@ public static class UsbHalInit
         {
             /* USB3 Mode */
             pHalData.UsbBulkOutSize = USB_SUPER_SPEED_BULK_SIZE;
-            provalue = rtw_read8(Adapter, REG_RXDMA_PRO_8812);
-            rtw_write8(Adapter, REG_RXDMA_PRO_8812,
+            provalue = rtw_read8(adapterState, REG_RXDMA_PRO_8812);
+            rtw_write8(adapterState, REG_RXDMA_PRO_8812,
                 //((provalue | BIT3 | BIT2 | BIT1) & (~(BIT5 | BIT4)))); /* set burst pkt len=1k */
                 (byte)((provalue | BIT3 | BIT2 | BIT1) & (0b1100_1111))); /* set burst pkt len=1k */
 
-            rtw_write8(Adapter, 0xf008, (byte)(rtw_read8(Adapter, 0xf008) & 0xE7));
+            rtw_write8(adapterState, 0xf008, (byte)(rtw_read8(adapterState, 0xf008) & 0xE7));
         }
 
-        temp = rtw_read8(Adapter, REG_SYS_FUNC_EN);
-        rtw_write8(Adapter, REG_SYS_FUNC_EN, (byte)(temp & (NotBIT10))); /* reset 8051 */
+        temp = rtw_read8(adapterState, REG_SYS_FUNC_EN);
+        rtw_write8(adapterState, REG_SYS_FUNC_EN, (byte)(temp & (NotBIT10))); /* reset 8051 */
 
-        rtw_write8(Adapter, REG_HT_SINGLE_AMPDU_8812,
-            (byte)(rtw_read8(Adapter, REG_HT_SINGLE_AMPDU_8812) | BIT7)); /* enable single pkt ampdu */
-        rtw_write8(Adapter, REG_RX_PKT_LIMIT, 0x18); /* for VHT packet length 11K */
+        rtw_write8(adapterState, REG_HT_SINGLE_AMPDU_8812,
+            (byte)(rtw_read8(adapterState, REG_HT_SINGLE_AMPDU_8812) | BIT7)); /* enable single pkt ampdu */
+        rtw_write8(adapterState, REG_RX_PKT_LIMIT, 0x18); /* for VHT packet length 11K */
 
-        rtw_write8(Adapter, REG_PIFS, 0x00);
+        rtw_write8(adapterState, REG_PIFS, 0x00);
 
-        rtw_write16(Adapter, REG_MAX_AGGR_NUM, 0x1f1f);
-        rtw_write8(Adapter, REG_FWHW_TXQ_CTRL, (byte)(rtw_read8(Adapter, REG_FWHW_TXQ_CTRL) & (NotBIT7)));
+        rtw_write16(adapterState, REG_MAX_AGGR_NUM, 0x1f1f);
+        rtw_write8(adapterState, REG_FWHW_TXQ_CTRL, (byte)(rtw_read8(adapterState, REG_FWHW_TXQ_CTRL) & (NotBIT7)));
 
         if (pHalData.AMPDUBurstMode)
         {
-            rtw_write8(Adapter, REG_AMPDU_BURST_MODE_8812, 0x5F);
+            rtw_write8(adapterState, REG_AMPDU_BURST_MODE_8812, 0x5F);
         }
 
-        rtw_write8(Adapter, 0x1c,
-            (byte)(rtw_read8(Adapter, 0x1c) | BIT5 | BIT6)); /* to prevent mac is reseted by bus. 20111208, by Page */
+        rtw_write8(adapterState, 0x1c,
+            (byte)(rtw_read8(adapterState, 0x1c) | BIT5 | BIT6)); /* to prevent mac is reseted by bus. 20111208, by Page */
 
         /* ARFB table 9 for 11ac 5G 2SS */
-        rtw_write32(Adapter, REG_ARFR0_8812, 0x00000010);
-        rtw_write32(Adapter, REG_ARFR0_8812 + 4, 0xfffff000);
+        rtw_write32(adapterState, REG_ARFR0_8812, 0x00000010);
+        rtw_write32(adapterState, REG_ARFR0_8812 + 4, 0xfffff000);
 
         /* ARFB table 10 for 11ac 5G 1SS */
-        rtw_write32(Adapter, REG_ARFR1_8812, 0x00000010);
-        rtw_write32(Adapter, REG_ARFR1_8812 + 4, 0x003ff000);
+        rtw_write32(adapterState, REG_ARFR1_8812, 0x00000010);
+        rtw_write32(adapterState, REG_ARFR1_8812 + 4, 0x003ff000);
 
         /* ARFB table 11 for 11ac 24G 1SS */
-        rtw_write32(Adapter, REG_ARFR2_8812, 0x00000015);
-        rtw_write32(Adapter, REG_ARFR2_8812 + 4, 0x003ff000);
+        rtw_write32(adapterState, REG_ARFR2_8812, 0x00000015);
+        rtw_write32(adapterState, REG_ARFR2_8812 + 4, 0x003ff000);
         /* ARFB table 12 for 11ac 24G 2SS */
-        rtw_write32(Adapter, REG_ARFR3_8812, 0x00000015);
-        rtw_write32(Adapter, REG_ARFR3_8812 + 4, 0xffcff000);
+        rtw_write32(adapterState, REG_ARFR3_8812, 0x00000015);
+        rtw_write32(adapterState, REG_ARFR3_8812 + 4, 0xffcff000);
     }
 
-    static void _InitBeaconMaxError_8812A(PADAPTER Adapter, BOOLEAN InfraMode)
+    static void _InitBeaconMaxError_8812A(AdapterState adapterState, BOOLEAN InfraMode)
     {
-        rtw_write8(Adapter, REG_BCN_MAX_ERR, 0xFF);
+        rtw_write8(adapterState, REG_BCN_MAX_ERR, 0xFF);
     }
 
-    static void _InitBeaconParameters_8812A(PADAPTER Adapter)
+    static void _InitBeaconParameters_8812A(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
         var val8 = DIS_TSF_UDT;
         var val16 = (u16)(val8 | (val8 << 8)); /* port0 and port1 */
 
-        rtw_write16(Adapter, REG_BCN_CTRL, val16);
+        rtw_write16(adapterState, REG_BCN_CTRL, val16);
 
         /* TBTT setup time */
-        rtw_write8(Adapter, REG_TBTT_PROHIBIT, TBTT_PROHIBIT_SETUP_TIME);
+        rtw_write8(adapterState, REG_TBTT_PROHIBIT, TBTT_PROHIBIT_SETUP_TIME);
 
         /* TBTT hold time: 0x540[19:8] */
-        rtw_write8(Adapter, REG_TBTT_PROHIBIT + 1, TBTT_PROHIBIT_HOLD_TIME_STOP_BCN & 0xFF);
-        rtw_write8(Adapter, REG_TBTT_PROHIBIT + 2,
-            (byte)((rtw_read8(Adapter, REG_TBTT_PROHIBIT + 2) & 0xF0) | (TBTT_PROHIBIT_HOLD_TIME_STOP_BCN >> 8)));
+        rtw_write8(adapterState, REG_TBTT_PROHIBIT + 1, TBTT_PROHIBIT_HOLD_TIME_STOP_BCN & 0xFF);
+        rtw_write8(adapterState, REG_TBTT_PROHIBIT + 2,
+            (byte)((rtw_read8(adapterState, REG_TBTT_PROHIBIT + 2) & 0xF0) | (TBTT_PROHIBIT_HOLD_TIME_STOP_BCN >> 8)));
 
-        rtw_write8(Adapter, REG_DRVERLYINT, DRIVER_EARLY_INT_TIME_8812); /* 5ms */
-        rtw_write8(Adapter, REG_BCNDMATIM, BCN_DMA_ATIME_INT_TIME_8812); /* 2ms */
+        rtw_write8(adapterState, REG_DRVERLYINT, DRIVER_EARLY_INT_TIME_8812); /* 5ms */
+        rtw_write8(adapterState, REG_BCNDMATIM, BCN_DMA_ATIME_INT_TIME_8812); /* 2ms */
 
         /* Suggested by designer timchen. Change beacon AIFS to the largest number */
         /* beacause test chip does not contension before sending beacon. by tynli. 2009.11.03 */
-        rtw_write16(Adapter, REG_BCNTCFG, 0x4413);
+        rtw_write16(adapterState, REG_BCNTCFG, 0x4413);
 
     }
 
-    static void init_UsbAggregationSetting_8812A(PADAPTER Adapter)
+    static void init_UsbAggregationSetting_8812A(AdapterState adapterState)
     {
         ///* Tx aggregation setting */
-        usb_AggSettingTxUpdate_8812A(Adapter);
+        usb_AggSettingTxUpdate_8812A(adapterState);
 
         ///* Rx aggregation setting */
-        usb_AggSettingRxUpdate_8812A(Adapter);
+        usb_AggSettingRxUpdate_8812A(adapterState);
     }
 
-    static void _InitRetryFunction_8812A(PADAPTER Adapter)
+    static void _InitRetryFunction_8812A(AdapterState adapterState)
     {
         uint value8;
 
-        value8 = rtw_read8(Adapter, REG_FWHW_TXQ_CTRL);
+        value8 = rtw_read8(adapterState, REG_FWHW_TXQ_CTRL);
         value8 |= EN_AMPDU_RTY_NEW;
-        rtw_write8(Adapter, REG_FWHW_TXQ_CTRL, (byte)value8);
+        rtw_write8(adapterState, REG_FWHW_TXQ_CTRL, (byte)value8);
 
         /* Set ACK timeout */
-        /* rtw_write8(Adapter, REG_ACKTO, 0x40);  */ /* masked by page for BCM IOT issue temporally */
-        rtw_write8(Adapter, REG_ACKTO, 0x80);
+        /* rtw_write8(adapterState, REG_ACKTO, 0x40);  */ /* masked by page for BCM IOT issue temporally */
+        rtw_write8(adapterState, REG_ACKTO, 0x80);
     }
 
-    static void _InitEDCA_8812AUsb(PADAPTER Adapter)
+    static void _InitEDCA_8812AUsb(AdapterState adapterState)
     {
         /* Set Spec SIFS (used in NAV) */
-        rtw_write16(Adapter, REG_SPEC_SIFS, 0x100a);
-        rtw_write16(Adapter, REG_MAC_SPEC_SIFS, 0x100a);
+        rtw_write16(adapterState, REG_SPEC_SIFS, 0x100a);
+        rtw_write16(adapterState, REG_MAC_SPEC_SIFS, 0x100a);
 
         /* Set SIFS for CCK */
-        rtw_write16(Adapter, REG_SIFS_CTX, 0x100a);
+        rtw_write16(adapterState, REG_SIFS_CTX, 0x100a);
 
         /* Set SIFS for OFDM */
-        rtw_write16(Adapter, REG_SIFS_TRX, 0x100a);
+        rtw_write16(adapterState, REG_SIFS_TRX, 0x100a);
 
         /* TXOP */
-        rtw_write32(Adapter, REG_EDCA_BE_PARAM, 0x005EA42B);
-        rtw_write32(Adapter, REG_EDCA_BK_PARAM, 0x0000A44F);
-        rtw_write32(Adapter, REG_EDCA_VI_PARAM, 0x005EA324);
-        rtw_write32(Adapter, REG_EDCA_VO_PARAM, 0x002FA226);
+        rtw_write32(adapterState, REG_EDCA_BE_PARAM, 0x005EA42B);
+        rtw_write32(adapterState, REG_EDCA_BK_PARAM, 0x0000A44F);
+        rtw_write32(adapterState, REG_EDCA_VI_PARAM, 0x005EA324);
+        rtw_write32(adapterState, REG_EDCA_VO_PARAM, 0x002FA226);
 
         /* 0x50 for 80MHz clock */
-        rtw_write8(Adapter, REG_USTIME_TSF, 0x50);
-        rtw_write8(Adapter, REG_USTIME_EDCA, 0x50);
+        rtw_write8(adapterState, REG_USTIME_TSF, 0x50);
+        rtw_write8(adapterState, REG_USTIME_EDCA, 0x50);
     }
 
-    static void _InitAdaptiveCtrl_8812AUsb(PADAPTER Adapter)
+    static void _InitAdaptiveCtrl_8812AUsb(AdapterState adapterState)
     {
         u16 value16;
         u32 value32;
 
         /* Response Rate Set */
-        value32 = rtw_read32(Adapter, REG_RRSR);
+        value32 = rtw_read32(adapterState, REG_RRSR);
         value32 &= NotRATE_BITMAP_ALL;
 
-        if (Adapter.registrypriv.wireless_mode.HasFlag(NETWORK_TYPE.WIRELESS_11B))
+        if (adapterState.registrypriv.wireless_mode.HasFlag(NETWORK_TYPE.WIRELESS_11B))
             value32 |= RATE_RRSR_CCK_ONLY_1M;
         else
             value32 |= RATE_RRSR_WITHOUT_CCK;
 
         value32 |= RATE_RRSR_CCK_ONLY_1M;
-        rtw_write32(Adapter, REG_RRSR, value32);
+        rtw_write32(adapterState, REG_RRSR, value32);
 
         /* CF-END Threshold */
         /* m_spIoBase.rtw_write8(REG_CFEND_TH, 0x1); */
 
         /* SIFS (used in NAV) */
         value16 = (u16)(_SPEC_SIFS_CCK(0x10) | _SPEC_SIFS_OFDM(0x10));
-        rtw_write16(Adapter, REG_SPEC_SIFS, value16);
+        rtw_write16(adapterState, REG_SPEC_SIFS, value16);
 
         /* Retry Limit */
         value16 = (u16)(BIT_LRL(RL_VAL_STA) | BIT_SRL(RL_VAL_STA));
-        rtw_write16(Adapter, REG_RETRY_LIMIT, value16);
+        rtw_write16(adapterState, REG_RETRY_LIMIT, value16);
     }
 
     public static u16 BIT_LRL(u16 x) => (u16)(((x) & BIT_MASK_LRL) << BIT_SHIFT_LRL);
@@ -3218,7 +3218,7 @@ public static class UsbHalInit
     public static u16 _SPEC_SIFS_CCK(u16 x) => (u16)((x) & 0xFF);
     public static u16 _SPEC_SIFS_OFDM(u16 x) => (u16)(((x) & 0xFF) << 8);
 
-    static void _InitWMACSetting_8812A(PADAPTER Adapter)
+    static void _InitWMACSetting_8812A(AdapterState adapterState)
     {
         /* rcr = AAP | APM | AM | AB | APP_ICV | ADF | AMF | APP_FCS | HTC_LOC_CTRL | APP_MIC | APP_PHYSTS; */
         u32 rcr = RCR_APM |
@@ -3234,85 +3234,85 @@ public static class UsbHalInit
                   RCR_APPFCS |
                   FORCEACK;
 
-        hw_var_rcr_config(Adapter, rcr);
+        hw_var_rcr_config(adapterState, rcr);
 
         /* Accept all multicast address */
-        rtw_write32(Adapter, REG_MAR, 0xFFFFFFFF);
-        rtw_write32(Adapter, REG_MAR + 4, 0xFFFFFFFF);
+        rtw_write32(adapterState, REG_MAR, 0xFFFFFFFF);
+        rtw_write32(adapterState, REG_MAR + 4, 0xFFFFFFFF);
 
         uint value16 = BIT10 | BIT5;
-        rtw_write16(Adapter, REG_RXFLTMAP1, (u16)value16);
+        rtw_write16(adapterState, REG_RXFLTMAP1, (u16)value16);
     }
 
-    static void _InitNetworkType_8812A(PADAPTER Adapter)
+    static void _InitNetworkType_8812A(AdapterState adapterState)
     {
         u32 value32;
 
-        value32 = rtw_read32(Adapter, REG_CR);
+        value32 = rtw_read32(adapterState, REG_CR);
         /* TODO: use the other function to set network type */
         value32 = (value32 & ~MASK_NETTYPE) | _NETTYPE(NT_LINK_AP);
 
-        rtw_write32(Adapter, REG_CR, value32);
+        rtw_write32(adapterState, REG_CR, value32);
     }
 
     public static u32 _NETTYPE(u32 x) => (((x) & 0x3) << 16);
 
-    static void _InitInterrupt_8812AU(PADAPTER Adapter)
+    static void _InitInterrupt_8812AU(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
         u8 usb_opt;
 
         /* HIMR */
-        rtw_write32(Adapter, REG_HIMR0_8812, pHalData.IntrMask[0] & 0xFFFFFFFF);
-        rtw_write32(Adapter, REG_HIMR1_8812, pHalData.IntrMask[1] & 0xFFFFFFFF);
+        rtw_write32(adapterState, REG_HIMR0_8812, pHalData.IntrMask[0] & 0xFFFFFFFF);
+        rtw_write32(adapterState, REG_HIMR1_8812, pHalData.IntrMask[1] & 0xFFFFFFFF);
     }
 
-    static void _InitDriverInfoSize_8812A(PADAPTER Adapter, u8 drvInfoSize)
+    static void _InitDriverInfoSize_8812A(AdapterState adapterState, u8 drvInfoSize)
     {
-        rtw_write8(Adapter, REG_RX_DRVINFO_SZ, drvInfoSize);
+        rtw_write8(adapterState, REG_RX_DRVINFO_SZ, drvInfoSize);
     }
 
-    static void _InitTransferPageSize_8812AUsb(PADAPTER Adapter)
+    static void _InitTransferPageSize_8812AUsb(AdapterState adapterState)
     {
 
         u8 value8;
         value8 = _PSTX(PBP_512);
 
-        rtw_write8(Adapter, REG_PBP, value8);
+        rtw_write8(adapterState, REG_PBP, value8);
     }
 
     static byte _PSTX(byte x) => (byte)((x) << 4);
 
-    static void _InitPageBoundary_8812AUsb(PADAPTER Adapter)
+    static void _InitPageBoundary_8812AUsb(AdapterState adapterState)
     {
         /* u2Byte 			rxff_bndy; */
         /* u2Byte			Offset; */
         /* BOOLEAN			bSupportRemoteWakeUp; */
 
-        /* Adapter.HalFunc.get_hal_def_var_handler(Adapter, HAL_DEF_WOWLAN , &bSupportRemoteWakeUp); */
+        /* adapterState.HalFunc.get_hal_def_var_handler(adapterState, HAL_DEF_WOWLAN , &bSupportRemoteWakeUp); */
         /* RX Page Boundary */
         /* srand(static_cast<unsigned int>(time(NULL)) ); */
 
         /*	Offset = MAX_RX_DMA_BUFFER_SIZE_8812/256;
          *	rxff_bndy = (Offset*256)-1; */
 
-        rtw_write16(Adapter, (REG_TRXFF_BNDY + 2), RX_DMA_BOUNDARY_8812);
+        rtw_write16(adapterState, (REG_TRXFF_BNDY + 2), RX_DMA_BOUNDARY_8812);
     }
 
-    static void _InitQueuePriority_8812AUsb(PADAPTER Adapter)
+    static void _InitQueuePriority_8812AUsb(AdapterState adapterState)
     {
-        var pHalData = GET_HAL_DATA(Adapter);
+        var pHalData = GET_HAL_DATA(adapterState);
 
         switch (pHalData.OutEpNumber)
         {
             case 2:
-                _InitNormalChipTwoOutEpPriority_8812AUsb(Adapter);
+                _InitNormalChipTwoOutEpPriority_8812AUsb(adapterState);
                 break;
             case 3:
-                _InitNormalChipThreeOutEpPriority_8812AUsb(Adapter);
+                _InitNormalChipThreeOutEpPriority_8812AUsb(adapterState);
                 break;
             case 4:
-                _InitNormalChipFourOutEpPriority_8812AUsb(Adapter);
+                _InitNormalChipFourOutEpPriority_8812AUsb(adapterState);
                 break;
             default:
                 RTW_INFO("_InitQueuePriority_8812AUsb(): Shall not reach here!\n");
@@ -3320,10 +3320,10 @@ public static class UsbHalInit
         }
     }
 
-    static void _InitNormalChipFourOutEpPriority_8812AUsb(PADAPTER Adapter)
+    static void _InitNormalChipFourOutEpPriority_8812AUsb(AdapterState adapterState)
     {
 
-        registry_priv pregistrypriv = Adapter.registrypriv;
+        registry_priv pregistrypriv = adapterState.registrypriv;
         u16 beQ, bkQ, viQ, voQ, mgtQ, hiQ;
 
         if (!pregistrypriv.wifi_spec)
@@ -3347,20 +3347,20 @@ public static class UsbHalInit
             hiQ = QUEUE_HIGH;
         }
 
-        _InitNormalChipRegPriority_8812AUsb(Adapter, beQ, bkQ, viQ, voQ, mgtQ, hiQ);
-        init_hi_queue_config_8812a_usb(Adapter);
+        _InitNormalChipRegPriority_8812AUsb(adapterState, beQ, bkQ, viQ, voQ, mgtQ, hiQ);
+        init_hi_queue_config_8812a_usb(adapterState);
     }
 
-    static void init_hi_queue_config_8812a_usb(PADAPTER Adapter)
+    static void init_hi_queue_config_8812a_usb(AdapterState adapterState)
     {
         /* Packet in Hi Queue Tx immediately (No constraint for ATIM Period)*/
-        rtw_write8(Adapter, REG_HIQ_NO_LMT_EN, 0xFF);
+        rtw_write8(adapterState, REG_HIQ_NO_LMT_EN, 0xFF);
     }
 
-    static void _InitNormalChipThreeOutEpPriority_8812AUsb(PADAPTER Adapter)
+    static void _InitNormalChipThreeOutEpPriority_8812AUsb(AdapterState adapterState)
     {
 
-        registry_priv pregistrypriv = Adapter.registrypriv;
+        registry_priv pregistrypriv = adapterState.registrypriv;
         u16 beQ, bkQ, viQ, voQ, mgtQ, hiQ;
 
         if (!pregistrypriv.wifi_spec)
@@ -3384,14 +3384,14 @@ public static class UsbHalInit
             hiQ = QUEUE_HIGH;
         }
 
-        _InitNormalChipRegPriority_8812AUsb(Adapter, beQ, bkQ, viQ, voQ, mgtQ, hiQ);
+        _InitNormalChipRegPriority_8812AUsb(adapterState, beQ, bkQ, viQ, voQ, mgtQ, hiQ);
     }
 
-    static void _InitNormalChipTwoOutEpPriority_8812AUsb(PADAPTER Adapter)
+    static void _InitNormalChipTwoOutEpPriority_8812AUsb(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
-        registry_priv pregistrypriv = Adapter.registrypriv;
+        registry_priv pregistrypriv = adapterState.registrypriv;
         u16 beQ, bkQ, viQ, voQ, mgtQ, hiQ;
 
 
@@ -3438,11 +3438,11 @@ public static class UsbHalInit
             hiQ = valueHi;
         }
 
-        _InitNormalChipRegPriority_8812AUsb(Adapter, beQ, bkQ, viQ, voQ, mgtQ, hiQ);
+        _InitNormalChipRegPriority_8812AUsb(adapterState, beQ, bkQ, viQ, voQ, mgtQ, hiQ);
     }
 
     static void _InitNormalChipRegPriority_8812AUsb(
-        PADAPTER Adapter,
+        AdapterState adapterState,
         u16 beQ,
         u16 bkQ,
         u16 viQ,
@@ -3451,14 +3451,14 @@ public static class UsbHalInit
         u16 hiQ
     )
     {
-        u16 value16 = (u16)(rtw_read16(Adapter, REG_TRXDMA_CTRL) & 0x7);
+        u16 value16 = (u16)(rtw_read16(adapterState, REG_TRXDMA_CTRL) & 0x7);
 
         value16 = (u16)(value16 |
                         _TXDMA_BEQ_MAP(beQ) | _TXDMA_BKQ_MAP(bkQ) |
                         _TXDMA_VIQ_MAP(viQ) | _TXDMA_VOQ_MAP(voQ) |
                         _TXDMA_MGQ_MAP(mgtQ) | _TXDMA_HIQ_MAP(hiQ));
 
-        rtw_write16(Adapter, REG_TRXDMA_CTRL, value16);
+        rtw_write16(adapterState, REG_TRXDMA_CTRL, value16);
     }
 
     public static u16 _TXDMA_HIQ_MAP(u16 x) => (u16)(((x) & 0x3) << 14);
@@ -3468,48 +3468,48 @@ public static class UsbHalInit
     public static u16 _TXDMA_VIQ_MAP(u16 x) => (u16)(((x) & 0x3) << 6);
     public static u16 _TXDMA_VOQ_MAP(u16 x) => (u16)(((x) & 0x3) << 4);
 
-    static void _InitTxBufferBoundary_8812AUsb(PADAPTER Adapter)
+    static void _InitTxBufferBoundary_8812AUsb(AdapterState adapterState)
     {
-        var pregistrypriv = Adapter.registrypriv;
+        var pregistrypriv = adapterState.registrypriv;
         u8 txpktbuf_bndy;
 
         txpktbuf_bndy = TX_PAGE_BOUNDARY_8812;
 
-        rtw_write8(Adapter, REG_BCNQ_BDNY, txpktbuf_bndy);
-        rtw_write8(Adapter, REG_MGQ_BDNY, txpktbuf_bndy);
-        rtw_write8(Adapter, REG_WMAC_LBK_BF_HD, txpktbuf_bndy);
-        rtw_write8(Adapter, REG_TRXFF_BNDY, txpktbuf_bndy);
-        rtw_write8(Adapter, REG_TDECTRL + 1, txpktbuf_bndy);
+        rtw_write8(adapterState, REG_BCNQ_BDNY, txpktbuf_bndy);
+        rtw_write8(adapterState, REG_MGQ_BDNY, txpktbuf_bndy);
+        rtw_write8(adapterState, REG_WMAC_LBK_BF_HD, txpktbuf_bndy);
+        rtw_write8(adapterState, REG_TRXFF_BNDY, txpktbuf_bndy);
+        rtw_write8(adapterState, REG_TDECTRL + 1, txpktbuf_bndy);
 
     }
 
-    static bool PHY_MACConfig8812(PADAPTER Adapter)
+    static bool PHY_MACConfig8812(AdapterState adapterState)
     {
         bool rtStatus = false;
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         /*  */
         /* Config MAC */
         /*  */
-        //rtStatus = phy_ConfigMACWithParaFile(Adapter, PHY_FILE_MAC_REG);
+        //rtStatus = phy_ConfigMACWithParaFile(adapterState, PHY_FILE_MAC_REG);
         if (rtStatus == false)
         {
-            odm_read_and_config_mp_8812a_mac_reg(Adapter, pHalData.odmpriv);
+            odm_read_and_config_mp_8812a_mac_reg(adapterState, pHalData.odmpriv);
             rtStatus = true;
         }
 
         return rtStatus;
     }
 
-    static void _InitHardwareDropIncorrectBulkOut_8812A(PADAPTER Adapter)
+    static void _InitHardwareDropIncorrectBulkOut_8812A(AdapterState adapterState)
     {
         var DROP_DATA_EN = BIT9;
-        u32 value32 = rtw_read32(Adapter, REG_TXDMA_OFFSET_CHK);
+        u32 value32 = rtw_read32(adapterState, REG_TXDMA_OFFSET_CHK);
         value32 |= DROP_DATA_EN;
-        rtw_write32(Adapter, REG_TXDMA_OFFSET_CHK, value32);
+        rtw_write32(adapterState, REG_TXDMA_OFFSET_CHK, value32);
     }
 
-    private static bool InitLLTTable8812A(PADAPTER padapter, u8 txpktbuf_bndy)
+    private static bool InitLLTTable8812A(AdapterState padapter, u8 txpktbuf_bndy)
     {
         bool status = false;
         u32 i;
@@ -3574,18 +3574,18 @@ public static class UsbHalInit
         return (((x) >> 30) & 0x3);
     }
 
-    private static bool _LLTWrite_8812A(PADAPTER Adapter, u32 address, u32 data)
+    private static bool _LLTWrite_8812A(AdapterState adapterState, u32 address, u32 data)
     {
         bool status = true;
         s32 count = 0;
         u32 value = _LLT_INIT_ADDR(address) | _LLT_INIT_DATA(data) | _LLT_OP(_LLT_WRITE_ACCESS);
 
-        rtw_write32(Adapter, REG_LLT_INIT, value);
+        rtw_write32(adapterState, REG_LLT_INIT, value);
 
         /* polling */
         do
         {
-            value = rtw_read32(Adapter, REG_LLT_INIT);
+            value = rtw_read32(adapterState, REG_LLT_INIT);
             if (_LLT_NO_ACTIVE == _LLT_OP_VALUE(value))
             {
                 break;
@@ -3603,7 +3603,7 @@ public static class UsbHalInit
         return status;
     }
 
-    private static bool _InitPowerOn_8812AU(_adapter padapter)
+    private static bool _InitPowerOn_8812AU(AdapterState padapter)
     {
         u16 u2btmp = 0;
         u8 u1btmp = 0;
@@ -3650,51 +3650,51 @@ public static class UsbHalInit
         return true;
     }
 
-    static void rtl8812au_hw_reset(_adapter Adapter)
+    static void rtl8812au_hw_reset(AdapterState adapterState)
     {
         uint reg_val = 0;
-        if ((rtw_read8(Adapter, REG_MCUFWDL) & BIT7) != 0)
+        if ((rtw_read8(adapterState, REG_MCUFWDL) & BIT7) != 0)
         {
-            _8051Reset8812(Adapter);
-            rtw_write8(Adapter, REG_MCUFWDL, 0x00);
+            _8051Reset8812(adapterState);
+            rtw_write8(adapterState, REG_MCUFWDL, 0x00);
             /* before BB reset should do clock gated */
-            rtw_write32(Adapter, rFPGA0_XCD_RFPara,
-                rtw_read32(Adapter, rFPGA0_XCD_RFPara) | (BIT6));
+            rtw_write32(adapterState, rFPGA0_XCD_RFPara,
+                rtw_read32(adapterState, rFPGA0_XCD_RFPara) | (BIT6));
             /* reset BB */
-            reg_val = rtw_read8(Adapter, REG_SYS_FUNC_EN);
+            reg_val = rtw_read8(adapterState, REG_SYS_FUNC_EN);
             reg_val = (byte)(reg_val & ~(BIT0 | BIT1));
-            rtw_write8(Adapter, REG_SYS_FUNC_EN, (byte)reg_val);
+            rtw_write8(adapterState, REG_SYS_FUNC_EN, (byte)reg_val);
             /* reset RF */
-            rtw_write8(Adapter, REG_RF_CTRL, 0);
+            rtw_write8(adapterState, REG_RF_CTRL, 0);
             /* reset TRX path */
-            rtw_write16(Adapter, REG_CR, 0);
+            rtw_write16(adapterState, REG_CR, 0);
             /* reset MAC */
-            reg_val = rtw_read8(Adapter, REG_APS_FSMCO + 1);
+            reg_val = rtw_read8(adapterState, REG_APS_FSMCO + 1);
             reg_val |= BIT1;
-            rtw_write8(Adapter, REG_APS_FSMCO + 1, (byte)reg_val); /* reg0x5[1] ,auto FSM off */
+            rtw_write8(adapterState, REG_APS_FSMCO + 1, (byte)reg_val); /* reg0x5[1] ,auto FSM off */
 
-            reg_val = rtw_read8(Adapter, REG_APS_FSMCO + 1);
+            reg_val = rtw_read8(adapterState, REG_APS_FSMCO + 1);
 
             /* check if   reg0x5[1] auto cleared */
             while ((reg_val & BIT1) != 0)
             {
                 Thread.Sleep(1);
-                reg_val = rtw_read8(Adapter, REG_APS_FSMCO + 1);
+                reg_val = rtw_read8(adapterState, REG_APS_FSMCO + 1);
             }
 
             reg_val |= BIT0;
-            rtw_write8(Adapter, REG_APS_FSMCO + 1, (byte)reg_val); /* reg0x5[0] ,auto FSM on */
+            rtw_write8(adapterState, REG_APS_FSMCO + 1, (byte)reg_val); /* reg0x5[0] ,auto FSM on */
 
-            reg_val = rtw_read8(Adapter, REG_SYS_FUNC_EN + 1);
+            reg_val = rtw_read8(adapterState, REG_SYS_FUNC_EN + 1);
             reg_val = (byte)(reg_val & ~(BIT4 | BIT7));
-            rtw_write8(Adapter, REG_SYS_FUNC_EN + 1, (byte)reg_val);
-            reg_val = rtw_read8(Adapter, REG_SYS_FUNC_EN + 1);
+            rtw_write8(adapterState, REG_SYS_FUNC_EN + 1, (byte)reg_val);
+            reg_val = rtw_read8(adapterState, REG_SYS_FUNC_EN + 1);
             reg_val = (byte)(reg_val | BIT4 | BIT7);
-            rtw_write8(Adapter, REG_SYS_FUNC_EN + 1, (byte)reg_val);
+            rtw_write8(adapterState, REG_SYS_FUNC_EN + 1, (byte)reg_val);
         }
     }
 
-    static void _8051Reset8812(PADAPTER padapter)
+    static void _8051Reset8812(AdapterState padapter)
     {
         u8 u1bTmp, u1bTmp2;
 
@@ -3723,7 +3723,7 @@ public static class UsbHalInit
     }
 
     static bool HalPwrSeqCmdParsing(
-        _adapter adapter,
+        AdapterState adapterState,
         CutMsk CutVersion,
         FabMsk FabVersion,
         InterfaceMask InterfaceType,
@@ -3755,13 +3755,13 @@ public static class UsbHalInit
                     {
                         var offset = PwrCfgCmd.offset;
                         /* Read the value from system register */
-                        var currentOffsetValue = Read8(adapter, offset);
+                        var currentOffsetValue = Read8(adapterState, offset);
 
                         currentOffsetValue = (byte)(currentOffsetValue & unchecked((byte)(~PwrCfgCmd.msk)));
                         currentOffsetValue = (byte)(currentOffsetValue | ((PwrCfgCmd.value) & (PwrCfgCmd.msk)));
 
                         /* Write the value back to sytem register */
-                        Write8(adapter, offset, currentOffsetValue);
+                        Write8(adapterState, offset, currentOffsetValue);
                     }
                         break;
 
@@ -3789,7 +3789,7 @@ public static class UsbHalInit
 
                         do
                         {
-                            var value = Read8(adapter, offset);
+                            var value = Read8(adapterState, offset);
 
                             value = (byte)(value & PwrCfgCmd.msk);
                             if (value == ((PwrCfgCmd.value) & PwrCfgCmd.msk))
@@ -3811,8 +3811,8 @@ public static class UsbHalInit
 
                                     // TODO: RTW_ERR("[WARNING] PCIE polling(0x%X) timeout(%d), Toggle 0x04[3] and try again.\n", offset, maxPollingCnt);
 
-                                    Write8(adapter, 0x04, (byte)(Read8(adapter, 0x04) | BIT3));
-                                    Write8(adapter, 0x04, (byte)(Read8(adapter, 0x04) & NotBIT3));
+                                    Write8(adapterState, 0x04, (byte)(Read8(adapterState, 0x04) | BIT3));
+                                    Write8(adapterState, 0x04, (byte)(Read8(adapterState, 0x04) & NotBIT3));
 
                                     /* Retry Polling Process one more time */
                                     pollingCount = 0;
@@ -3857,11 +3857,11 @@ public static class UsbHalInit
         return true;
     }
 
-    private static bool FirmwareDownload8812(PADAPTER Adapter)
+    private static bool FirmwareDownload8812(AdapterState adapterState)
     {
         bool rtStatus = true;
         u8 write_fw = 0;
-        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         var pFirmware = new RT_FIRMWARE_8812
         {
@@ -3889,40 +3889,40 @@ public static class UsbHalInit
 
         /* Suggested by Filen. If 8051 is running in RAM code, driver should inform Fw to reset by itself, */
         /* or it will cause download Fw fail. 2010.02.01. by tynli. */
-        if ((rtw_read8(Adapter, REG_MCUFWDL) & BIT7) != 0)
+        if ((rtw_read8(adapterState, REG_MCUFWDL) & BIT7) != 0)
         {
             /* 8051 RAM code */
-            rtw_write8(Adapter, REG_MCUFWDL, 0x00);
-            _8051Reset8812(Adapter);
+            rtw_write8(adapterState, REG_MCUFWDL, 0x00);
+            _8051Reset8812(adapterState);
         }
 
-        _FWDownloadEnable_8812(Adapter, true);
+        _FWDownloadEnable_8812(adapterState, true);
         var fwdl_start_time = Stopwatch.StartNew();
         while ((write_fw++ < 3 || (fwdl_start_time.ElapsedMilliseconds) < 500))
         {
             /* reset FWDL chksum */
-            rtw_write8(Adapter, REG_MCUFWDL, (byte)(rtw_read8(Adapter, REG_MCUFWDL) | FWDL_ChkSum_rpt));
+            rtw_write8(adapterState, REG_MCUFWDL, (byte)(rtw_read8(adapterState, REG_MCUFWDL) | FWDL_ChkSum_rpt));
 
-            rtStatus = _WriteFW_8812(Adapter, pFirmwareBuf, FirmwareLen);
+            rtStatus = _WriteFW_8812(adapterState, pFirmwareBuf, FirmwareLen);
             if (rtStatus != true)
             {
                 continue;
             }
 
-            rtStatus = polling_fwdl_chksum(Adapter, 5, 50);
+            rtStatus = polling_fwdl_chksum(adapterState, 5, 50);
             if (rtStatus == true)
             {
                 break;
             }
         }
 
-        _FWDownloadEnable_8812(Adapter, false);
+        _FWDownloadEnable_8812(adapterState, false);
         if (true != rtStatus)
         {
             goto exit;
         }
 
-        rtStatus = _FWFreeToGo8812(Adapter, 10, 200);
+        rtStatus = _FWFreeToGo8812(adapterState, 10, 200);
         if (true != rtStatus)
         {
             goto exit;
@@ -3930,36 +3930,36 @@ public static class UsbHalInit
 
         exit:
 
-        InitializeFirmwareVars8812(Adapter);
+        InitializeFirmwareVars8812(adapterState);
 
         return rtStatus;
     }
 
-    static void InitializeFirmwareVars8812(PADAPTER padapter)
+    static void InitializeFirmwareVars8812(AdapterState padapter)
     {
         /* Init H2C cmd. */
         rtw_write8(padapter, REG_HMETFR, 0x0f);
     }
 
-    static bool _FWFreeToGo8812(_adapter adapter, u32 min_cnt, u32 timeout_ms)
+    static bool _FWFreeToGo8812(AdapterState adapterState, u32 min_cnt, u32 timeout_ms)
     {
         bool ret = false;
         u32 value32;
         u32 cnt = 0;
 
-        value32 = rtw_read32(adapter, REG_MCUFWDL);
+        value32 = rtw_read32(adapterState, REG_MCUFWDL);
         value32 |= MCUFWDL_RDY;
         value32 = (u32)(value32 & ~WINTINI_RDY);
-        rtw_write32(adapter, REG_MCUFWDL, value32);
+        rtw_write32(adapterState, REG_MCUFWDL, value32);
 
-        _8051Reset8812(adapter);
+        _8051Reset8812(adapterState);
 
         var start = Stopwatch.StartNew();
         /*  polling for FW ready */
         do
         {
             cnt++;
-            value32 = rtw_read32(adapter, REG_MCUFWDL);
+            value32 = rtw_read32(adapterState, REG_MCUFWDL);
             if ((value32 & WINTINI_RDY) != 0)
             {
                 break;
@@ -3985,7 +3985,7 @@ public static class UsbHalInit
         return ret;
     }
 
-    static bool polling_fwdl_chksum(_adapter adapter, uint min_cnt, uint timeout_ms)
+    static bool polling_fwdl_chksum(AdapterState adapterState, uint min_cnt, uint timeout_ms)
     {
         bool ret = false;
         uint value32;
@@ -3996,7 +3996,7 @@ public static class UsbHalInit
         do
         {
             cnt++;
-            value32 = rtw_read32(adapter, REG_MCUFWDL);
+            value32 = rtw_read32(adapterState, REG_MCUFWDL);
             if ((value32 & Firmware.FWDL_ChkSum_rpt) != 0)
             {
                 break;
@@ -4011,7 +4011,7 @@ public static class UsbHalInit
         return true;
     }
 
-    static bool _WriteFW_8812(_adapter adapter, Span<byte> buffer, UInt32 size)
+    static bool _WriteFW_8812(AdapterState adapterState, Span<byte> buffer, UInt32 size)
     {
         const int MAX_DLFW_PAGE_SIZE = 4096; /* @ page : 4k bytes */
 
@@ -4029,7 +4029,7 @@ public static class UsbHalInit
         for (page = 0; page < pageNums; page++)
         {
             offset = page * MAX_DLFW_PAGE_SIZE;
-            ret = _PageWrite_8812(adapter, page, bufferPtr.Slice(offset), MAX_DLFW_PAGE_SIZE);
+            ret = _PageWrite_8812(adapterState, page, bufferPtr.Slice(offset), MAX_DLFW_PAGE_SIZE);
 
             if (ret == false)
             {
@@ -4041,7 +4041,7 @@ public static class UsbHalInit
         {
             offset = pageNums * MAX_DLFW_PAGE_SIZE;
             page = pageNums;
-            ret = _PageWrite_8812(adapter, page, bufferPtr.Slice(offset), remainSize);
+            ret = _PageWrite_8812(adapterState, page, bufferPtr.Slice(offset), remainSize);
 
             if (ret == false)
             {
@@ -4054,18 +4054,18 @@ public static class UsbHalInit
         return ret;
     }
 
-    static bool _PageWrite_8812(_adapter adapter, int page, Span<byte> buffer, int size)
+    static bool _PageWrite_8812(AdapterState adapterState, int page, Span<byte> buffer, int size)
     {
         byte value8;
         byte u8Page = (byte)(page & 0x07);
 
-        value8 = (byte)((Read8(adapter, (REG_MCUFWDL + 2)) & 0xF8) | u8Page);
-        Write8(adapter, (REG_MCUFWDL + 2), value8);
+        value8 = (byte)((Read8(adapterState, (REG_MCUFWDL + 2)) & 0xF8) | u8Page);
+        Write8(adapterState, (REG_MCUFWDL + 2), value8);
 
-        return _BlockWrite_8812(adapter, buffer, size);
+        return _BlockWrite_8812(adapterState, buffer, size);
     }
 
-    static bool _BlockWrite_8812(_adapter adapter, Span<byte> buffer, int buffSize)
+    static bool _BlockWrite_8812(AdapterState adapterState, Span<byte> buffer, int buffSize)
     {
         const int MAX_REG_BOLCK_SIZE = 196;
 
@@ -4088,7 +4088,7 @@ public static class UsbHalInit
 
         for (i = 0; i < blockCount_p1; i++)
         {
-            WriteBytes(adapter, (ushort)(FW_START_ADDRESS + i * blockSize_p1),
+            WriteBytes(adapterState, (ushort)(FW_START_ADDRESS + i * blockSize_p1),
                 buffer.Slice((int)(i * blockSize_p1), (int)blockSize_p1));
         }
 
@@ -4102,7 +4102,7 @@ public static class UsbHalInit
 
             for (i = 0; i < blockCount_p2; i++)
             {
-                WriteBytes(adapter, (ushort)(FW_START_ADDRESS + offset + i * blockSize_p2),
+                WriteBytes(adapterState, (ushort)(FW_START_ADDRESS + offset + i * blockSize_p2),
                     buffer.Slice((int)(offset + i * blockSize_p2), (int)blockSize_p2));
             }
 
@@ -4118,14 +4118,14 @@ public static class UsbHalInit
 
             for (i = 0; i < blockCount_p3; i++)
             {
-                Write8(adapter, (ushort)(FW_START_ADDRESS + offset + i), buffer[(int)(offset + i)]);
+                Write8(adapterState, (ushort)(FW_START_ADDRESS + offset + i), buffer[(int)(offset + i)]);
             }
         }
 
         return ret;
     }
 
-    static void _FWDownloadEnable_8812(PADAPTER padapter, BOOLEAN enable)
+    static void _FWDownloadEnable_8812(AdapterState padapter, BOOLEAN enable)
     {
         u8 tmp;
 
@@ -4176,18 +4176,18 @@ public static class UsbHalInit
 
     private static UInt32 BIT_LEN_MASK_32(int __BitLen) => ((u32)(0xFFFFFFFF >> (32 - (__BitLen))));
 
-    public static void read_chip_version_8812a(PADAPTER Adapter)
+    public static void read_chip_version_8812a(AdapterState adapterState)
     {
         u32 value32;
         PHAL_DATA_TYPE pHalData;
-        pHalData = GET_HAL_DATA(Adapter);
+        pHalData = GET_HAL_DATA(adapterState);
 
-        value32 = rtw_read32(Adapter, REG_SYS_CFG);
+        value32 = rtw_read32(adapterState, REG_SYS_CFG);
         RTW_INFO($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
 
         pHalData.version_id.RFType = HAL_RF_TYPE_E.RF_TYPE_2T2R; /* RF_2T2R; */
 
-        if (Adapter.registrypriv.special_rf_path == 1)
+        if (adapterState.registrypriv.special_rf_path == 1)
             pHalData.version_id.RFType = HAL_RF_TYPE_E.RF_TYPE_1T1R; /* RF_1T1R; */
 
         pHalData.version_id.CUTVersion =
@@ -4196,16 +4196,16 @@ public static class UsbHalInit
 
         /* For multi-function consideration. Added by Roger, 2010.10.06. */
         pHalData.MultiFunc = RT_MULTI_FUNC.RT_MULTI_FUNC_NONE;
-        value32 = rtw_read32(Adapter, REG_MULTI_FUNC_CTRL);
+        value32 = rtw_read32(adapterState, REG_MULTI_FUNC_CTRL);
         pHalData.MultiFunc |= ((value32 & WL_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_WIFI : 0);
         pHalData.MultiFunc |= ((value32 & BT_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_BT : 0);
 
-        rtw_hal_config_rftype(Adapter);
+        rtw_hal_config_rftype(adapterState);
 
         //dump_chip_info(pHalData.version_id);
     }
 
-    static void rtw_hal_config_rftype(PADAPTER padapter)
+    static void rtw_hal_config_rftype(AdapterState padapter)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
 
@@ -4243,11 +4243,11 @@ public static class UsbHalInit
         RTW_INFO($"rtw_hal_config_rftype RF_Type is {pHalData.rf_type} TotalTxPath is {pHalData.NumTotalRFPath}");
     }
 
-    static void _InitQueueReservedPage_8812AUsb(PADAPTER Adapter)
+    static void _InitQueueReservedPage_8812AUsb(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
-        registry_priv pregistrypriv = Adapter.registrypriv;
+        registry_priv pregistrypriv = adapterState.registrypriv;
         u32 numHQ = 0;
         u32 numLQ = 0;
         u32 numNQ = 0;
@@ -4297,11 +4297,11 @@ public static class UsbHalInit
         numPubQ = TX_TOTAL_PAGE_NUMBER_8812 - numHQ - numLQ - numNQ;
 
         value8 = (u8)_NPQ(numNQ);
-        rtw_write8(Adapter, REG_RQPN_NPQ, value8);
+        rtw_write8(adapterState, REG_RQPN_NPQ, value8);
 
 /* TX DMA */
         value32 = _HPQ(numHQ) | _LPQ(numLQ) | _PUBQ(numPubQ) | LD_RQPN();
-        rtw_write32(Adapter, REG_RQPN, value32);
+        rtw_write32(adapterState, REG_RQPN, value32);
     }
 
     static u32 _NPQ(u32 x) => ((x) & 0xFF);
@@ -4310,36 +4310,36 @@ public static class UsbHalInit
     static u32 _PUBQ(u32 x) => (((x) & 0xFF) << 16);
     static u32 LD_RQPN() => BIT31;
 
-    static void usb_AggSettingTxUpdate_8812A(PADAPTER            Adapter)
+    static void usb_AggSettingTxUpdate_8812A(AdapterState            adapterState)
     {
 
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
         u32 value32;
 
-        if (Adapter.registrypriv.wifi_spec)
+        if (adapterState.registrypriv.wifi_spec)
         {
             pHalData.UsbTxAggMode = false;
         }
 
         if (pHalData.UsbTxAggMode)
         {
-            value32 = rtw_read32(Adapter, REG_TDECTRL);
+            value32 = rtw_read32(adapterState, REG_TDECTRL);
             value32 = value32 & ~(BLK_DESC_NUM_MASK << BLK_DESC_NUM_SHIFT);
             value32 |= ((pHalData.UsbTxAggDescNum & BLK_DESC_NUM_MASK) << BLK_DESC_NUM_SHIFT);
 
-            rtw_write32(Adapter, REG_DWBCN0_CTRL_8812, value32);
-            //if (IS_HARDWARE_TYPE_8821U(Adapter))   /* page added for Jaguar */
-            //    rtw_write8(Adapter, REG_DWBCN1_CTRL_8812, pHalData.UsbTxAggDescNum << 1);
+            rtw_write32(adapterState, REG_DWBCN0_CTRL_8812, value32);
+            //if (IS_HARDWARE_TYPE_8821U(adapterState))   /* page added for Jaguar */
+            //    rtw_write8(adapterState, REG_DWBCN1_CTRL_8812, pHalData.UsbTxAggDescNum << 1);
         }
     }
 
 
-    static void usb_AggSettingRxUpdate_8812A(PADAPTER Adapter)
+    static void usb_AggSettingRxUpdate_8812A(AdapterState adapterState)
     {
 
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
-        uint valueDMA = rtw_read8(Adapter, REG_TRXDMA_CTRL);
+        uint valueDMA = rtw_read8(adapterState, REG_TRXDMA_CTRL);
         switch (pHalData.rxagg_mode)
         {
             case RX_AGG_MODE.RX_AGG_DMA:
@@ -4350,8 +4350,8 @@ public static class UsbHalInit
 
                 /* Adjust DMA page and thresh. */
                 temp = (u16)(pHalData.rxagg_dma_size | (pHalData.rxagg_dma_timeout << 8));
-                rtw_write16(Adapter, REG_RXDMA_AGG_PG_TH, temp);
-                rtw_write8(Adapter, REG_RXDMA_AGG_PG_TH + 3, (byte)BIT7); /* for dma agg , 0x280[31]GBIT_RXDMA_AGG_OLD_MOD, set 1 */
+                rtw_write16(adapterState, REG_RXDMA_AGG_PG_TH, temp);
+                rtw_write8(adapterState, REG_RXDMA_AGG_PG_TH + 3, (byte)BIT7); /* for dma agg , 0x280[31]GBIT_RXDMA_AGG_OLD_MOD, set 1 */
             }
                 break;
             case RX_AGG_MODE.RX_AGG_USB:
@@ -4361,7 +4361,7 @@ public static class UsbHalInit
 
                 /* Adjust DMA page and thresh. */
                 temp = (u16)(pHalData.rxagg_usb_size | (pHalData.rxagg_usb_timeout << 8));
-                rtw_write16(Adapter, REG_RXDMA_AGG_PG_TH, temp);
+                rtw_write16(adapterState, REG_RXDMA_AGG_PG_TH, temp);
             }
                 break;
             case RX_AGG_MODE.RX_AGG_MIX:
@@ -4371,6 +4371,6 @@ public static class UsbHalInit
                 break;
         }
 
-        rtw_write8(Adapter, REG_TRXDMA_CTRL, (byte)valueDMA);
+        rtw_write8(adapterState, REG_TRXDMA_CTRL, (byte)valueDMA);
     }
 }

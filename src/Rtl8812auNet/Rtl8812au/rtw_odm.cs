@@ -22,12 +22,12 @@ public static class rtw_odm
     };
 
     /* set ODM_CMNINFO_IC_TYPE based on chip_type */
-    public static void rtw_odm_init_ic_type(_adapter adapter)
+    public static void rtw_odm_init_ic_type(AdapterState adapterState)
     {
-        dm_struct odm = adapter_to_phydm(adapter);
+        dm_struct odm = adapter_to_phydm(adapterState);
         UInt32 ic_type = _chip_type_to_odm_ic_type[3];
         odm_cmn_info_init(odm, odm_cmninfo.ODM_CMNINFO_IC_TYPE, ic_type);
     }
 
-    public static dm_struct adapter_to_phydm(_adapter adapter) => (GET_HAL_DATA(adapter).odmpriv);
+    public static dm_struct adapter_to_phydm(AdapterState adapterState) => (GET_HAL_DATA(adapterState).odmpriv);
 }

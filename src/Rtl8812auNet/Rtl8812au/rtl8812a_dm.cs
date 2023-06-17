@@ -2,15 +2,15 @@
 
 public static class rtl8812a_dm
 {
-    public static void Init_ODM_ComInfo_8812(PADAPTER Adapter)
+    public static void Init_ODM_ComInfo_8812(AdapterState adapterState)
     {
-        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
+        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
         dm_struct pDM_Odm = (pHalData.odmpriv);
         odm_cut_version cut_ver;
         odm_fab fab_ver;
 
-        Init_ODM_ComInfo(Adapter);
+        Init_ODM_ComInfo(adapterState);
 
         // TODO: WTF no mapping
         fab_ver = odm_fab.ODM_TSMC;
@@ -43,12 +43,12 @@ public static class rtl8812a_dm
         odm_cmn_info_init(pDM_Odm, odm_cmninfo.ODM_CMNINFO_CUT_VER, (ulong)cut_ver);
     }
 
-    static void Init_ODM_ComInfo(_adapter adapter)
+    static void Init_ODM_ComInfo(AdapterState adapterState)
     {
-        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapter);
+        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
         dm_struct pDM_Odm = (pHalData.odmpriv);
 
-        rtw_odm_init_ic_type(adapter);
+        rtw_odm_init_ic_type(adapterState);
 
         odm_cmn_info_init(pDM_Odm, odm_cmninfo.ODM_CMNINFO_RF_TYPE, (ulong)pHalData.rf_type);
         {

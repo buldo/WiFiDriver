@@ -2,8 +2,8 @@
 
 public static class HalVerDef
 {
-    public static bool IS_VENDOR_8812A_C_CUT(_adapter _Adapter) =>
-        GET_CVID_CUT_VERSION(GET_HAL_DATA(_Adapter).version_id) == HAL_CUT_VERSION_E.C_CUT_VERSION;
+    public static bool IS_VENDOR_8812A_C_CUT(AdapterState adapterState) =>
+        GET_CVID_CUT_VERSION(GET_HAL_DATA(adapterState).version_id) == HAL_CUT_VERSION_E.C_CUT_VERSION;
 
     public static bool IS_A_CUT(HAL_VERSION version) =>
         ((GET_CVID_CUT_VERSION(version) == HAL_CUT_VERSION_E.A_CUT_VERSION) ? true : false);
