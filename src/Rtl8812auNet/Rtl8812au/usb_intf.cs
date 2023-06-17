@@ -10,7 +10,7 @@ public static class usb_intf
     public static _adapter rtw_drv_init(IRtlUsbDevice pusb_intf)
     {
 
-        var dvobj = usb_dvobj_init(pusb_intf);
+        var dvobj = InitDvObj(pusb_intf);
 
         var padapter = rtw_usb_primary_adapter_init(dvobj, pusb_intf);
         if (padapter == null)
@@ -29,7 +29,7 @@ public static class usb_intf
         return padapter;
     }
 
-    private static _adapter rtw_usb_primary_adapter_init(dvobj_priv dvobj, IRtlUsbDevice pusb_intf)
+    private static _adapter rtw_usb_primary_adapter_init(DvObj dvobj, IRtlUsbDevice pusb_intf)
     {
         _adapter padapter = new _adapter()
         {
@@ -108,11 +108,11 @@ public static class usb_intf
         registry_par.AmplifierType_5G = 0;
     }
 
-    private static dvobj_priv usb_dvobj_init(IRtlUsbDevice usb_intf)
+    private static DvObj InitDvObj(IRtlUsbDevice usbInterface)
     {
         u8 numOutPipes = 0;
 
-        foreach (var endpoint in usb_intf.GetEndpoints())
+        foreach (var endpoint in usbInterface.GetEndpoints())
         {
             var type = endpoint.Type;
             var direction = endpoint.Direction;
@@ -123,7 +123,7 @@ public static class usb_intf
             }
         }
 
-        var usbSpeed = usb_intf.Speed switch
+        var usbSpeed = usbInterface.Speed switch
         {
             USB_SPEED_LOW => RTW_USB_SPEED_1_1,
             USB_SPEED_FULL => RTW_USB_SPEED_1_1,
@@ -138,7 +138,7 @@ public static class usb_intf
             throw new Exception();
         }
 
-        return new dvobj_priv(numOutPipes, usbSpeed);
+        return new DvObj(numOutPipes, usbSpeed);
     }
 
     public static bool rtw_hal_init(_adapter padapter, InitChannel initChannel)

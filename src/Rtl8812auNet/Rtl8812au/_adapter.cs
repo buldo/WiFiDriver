@@ -4,7 +4,7 @@ namespace Rtl8812auNet.Rtl8812au;
 
 public class _adapter
 {
-    public dvobj_priv dvobj { get; set; }
+    public DvObj dvobj { get; set; }
 
     public registry_priv registrypriv { get; } = new ();
 

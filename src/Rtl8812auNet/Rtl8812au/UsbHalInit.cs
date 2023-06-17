@@ -68,7 +68,7 @@ public static class UsbHalInit
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
 
-        dvobj_priv pdvobjpriv = adapter_to_dvobj(padapter);
+        DvObj pdvobjpriv = adapter_to_dvobj(padapter);
 
         if (IS_SUPER_SPEED_USB(padapter))
         {
@@ -104,7 +104,7 @@ public static class UsbHalInit
             pHalData.rxagg_usb_timeout = 0x20;
         }
 
-        _ConfigChipOutEP_8812(padapter, pdvobjpriv.RtNumOutPipes);
+        _ConfigChipOutEP_8812(padapter, pdvobjpriv.OutPipesCount);
     }
 
     public static void ReadAdapterInfo8812AU(PADAPTER Adapter)
@@ -151,10 +151,6 @@ public static class UsbHalInit
 
         Hal_EfuseParseXtal_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
         Hal_ReadThermalMeter_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        Hal_ReadRemoteWakeup_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        // Fully disabled via CONFIG_ANTENNA_DIVERSITY
-        //Hal_ReadAntennaDiversity8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-
 
         Hal_ReadAmplifierType_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
         Hal_ReadRFEType_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
@@ -339,23 +335,6 @@ public static class UsbHalInit
         }
 
         RTW_INFO("RFE Type: 0x%2x\n", pHalData.rfe_type);
-    }
-
-    private static void Hal_ReadRemoteWakeup_8812A(PADAPTER padapter, u8[] hwinfo, BOOLEAN AutoLoadFail)
-    {
-        pwrctrl_priv pwrctl = adapter_to_pwrctl(padapter);
-
-        if (AutoLoadFail)
-        {
-            pwrctl.bSupportRemoteWakeup = false;
-        }
-        else
-        {
-            /* decide hw if support remote wakeup function */
-            /* if hw supported, 8051 (SIE) will generate WeakUP signal( D+/D- toggle) when autoresume */
-            pwrctl.bSupportRemoteWakeup = (hwinfo[EEPROM_USB_OPTIONAL_FUNCTION0] & BIT1) != 0 ? true : false;
-            RTW_INFO("%s...bSupportRemoteWakeup(%x)", pwrctl.bSupportRemoteWakeup);
-        }
     }
 
     static void Hal_ReadThermalMeter_8812A(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
@@ -2097,10 +2076,7 @@ public static class UsbHalInit
         bool status = false;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
 
-        pwrctrl_priv pwrctrlpriv = adapter_to_pwrctl(Adapter);
         registry_priv pregistrypriv = Adapter.registrypriv;
-
-        rt_rf_power_state eRfPowerStateToSet;
 
         // Check if MAC has already power on. by tynli. 2011.05.27.
         value8 = rtw_read8(Adapter, REG_SYS_CLKR + 1);
@@ -2155,7 +2131,7 @@ public static class UsbHalInit
 
         _InitHardwareDropIncorrectBulkOut_8812A(Adapter);
 
-        FirmwareDownload8812(Adapter, false);
+        FirmwareDownload8812(Adapter);
 
         status = PHY_MACConfig8812(Adapter);
         if (status == false)
@@ -2252,17 +2228,6 @@ public static class UsbHalInit
 
         rtl8812_InitHalDm(Adapter);
 
-        {
-            /*  */
-            /* 2010/08/11 MH Merge from 8192SE for Minicard init. We need to confirm current radio status */
-            /* and then decide to enable RF or not.!!!??? For Selective suspend mode. We may not */
-            /* call init_adapter. May cause some problem?? */
-            /*  */
-            /* Fix the bug that Hw/Sw radio off before S3/S4, the RF off action will not be executed */
-            /* in MgntActSet_RF_State() after wake up, because the value of pHalData.eRFPowerState */
-            /* is the same as eRfOff, we should change it to eRfOn after we config RF parameters. */
-            /* Added by tynli. 2010.03.30. */
-            pwrctrlpriv.rf_pwrstate = rt_rf_power_state.rf_on;
 
             /* 0x4c6[3] 1: RTS BW = Data BW */
             /* 0: RTS BW depends on CCA / secondary CCA result. */
@@ -2280,28 +2245,6 @@ public static class UsbHalInit
             /* Reset USB mode switch setting */
             rtw_write8(Adapter, REG_SDIO_CTRL_8812, 0x0);
             rtw_write8(Adapter, REG_ACLK_MON, 0x0);
-
-
-            /* 2010/08/26 MH Merge from 8192CE. */
-            if (pwrctrlpriv.rf_pwrstate == rt_rf_power_state.rf_on)
-            {
-                /*		if(IS_HARDWARE_TYPE_8812AU(Adapter))
-                        {
-                #if (RTL8812A_SUPPORT == 1)
-                            pHalData.bNeedIQK = _TRUE;
-                            if(pHalData.bIQKInitialized)
-                                PHY_IQCalibrate_8812A(Adapter, _TRUE);
-                            else
-                            {
-                                PHY_IQCalibrate_8812A(Adapter, _FALSE);
-                                pHalData.bIQKInitialized = _TRUE;
-                            }
-                #endif
-                        }*/
-                /* odm_txpowertracking_check(&pHalData.odmpriv ); */
-                /* PHY_LCCalibrate_8812A(Adapter); */
-            }
-        }
 
         rtw_write8(Adapter, REG_USB_HRPWM, 0);
 
@@ -2507,7 +2450,7 @@ public static class UsbHalInit
 
     static void invalidate_cam_all(_adapter padapter)
     {
-        //dvobj_priv dvobj = adapter_to_dvobj(padapter);
+        //DvObj dvobj = adapter_to_dvobj(padapter);
         //cam_ctl_t cam_ctl = dvobj.cam_ctl;
         //u8 val8 = 0;
         //rtw_hal_set_hwreg(padapter, HW_VAR_CAM_INVALID_ALL, val8);
@@ -3914,12 +3857,11 @@ public static class UsbHalInit
         return true;
     }
 
-    private static bool FirmwareDownload8812(PADAPTER Adapter, BOOLEAN bUsedWoWLANFw)
+    private static bool FirmwareDownload8812(PADAPTER Adapter)
     {
         bool rtStatus = true;
         u8 write_fw = 0;
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
-        pwrctrl_priv pwrpriv = adapter_to_pwrctl(Adapter);
 
         var pFirmware = new RT_FIRMWARE_8812
         {
