@@ -2,6 +2,6 @@
 
 public class HAL_VERSION
 {
-    public HAL_CUT_VERSION_E CUTVersion { get; set; }
-    public HAL_RF_TYPE_E RFType { get; set; }
+    public CutVersion CUTVersion { get; set; }
+    public HalRFType RFType { get; set; }
 }

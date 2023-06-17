@@ -4146,13 +4146,13 @@ public static class UsbHalInit
         value32 = rtw_read32(adapterState, REG_SYS_CFG);
         RTW_INFO($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
 
-        pHalData.version_id.RFType = HAL_RF_TYPE_E.RF_TYPE_2T2R; /* RF_2T2R; */
+        pHalData.version_id.RFType = HalRFType.RF_TYPE_2T2R; /* RF_2T2R; */
 
         if (adapterState.registrypriv.special_rf_path == 1)
-            pHalData.version_id.RFType = HAL_RF_TYPE_E.RF_TYPE_1T1R; /* RF_1T1R; */
+            pHalData.version_id.RFType = HalRFType.RF_TYPE_1T1R; /* RF_1T1R; */
 
         pHalData.version_id.CUTVersion =
-            (HAL_CUT_VERSION_E)((value32 & CHIP_VER_RTL_MASK) >> CHIP_VER_RTL_SHIFT); /* IC version (CUT) */
+            (CutVersion)((value32 & CHIP_VER_RTL_MASK) >> CHIP_VER_RTL_SHIFT); /* IC version (CUT) */
         pHalData.version_id.CUTVersion += 1;
 
         /* For multi-function consideration. Added by Roger, 2010.10.06. */

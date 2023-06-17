@@ -1,6 +1,6 @@
 ﻿namespace Rtl8812auNet.Rtl8812au;
 
-public enum HAL_RF_TYPE_E
+public enum HalRFType
 {
     RF_TYPE_1T1R = 0,
     RF_TYPE_1T2R = 1,

@@ -1,6 +1,6 @@
 ﻿namespace Rtl8812auNet.Rtl8812au;
 
-public enum HAL_CUT_VERSION_E
+public enum CutVersion
 {
     A_CUT_VERSION = 0,
     B_CUT_VERSION = 1,
