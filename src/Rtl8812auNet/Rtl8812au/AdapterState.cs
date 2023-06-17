@@ -14,5 +14,5 @@ public class AdapterState
 
     public bool IsUp { get; set; }
 
-    public hw_port HwPort { get; set; }
+    public HwPort HwPort { get; set; }
 }

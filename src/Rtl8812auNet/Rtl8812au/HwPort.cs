@@ -1,6 +1,6 @@
 ﻿namespace Rtl8812auNet.Rtl8812au;
 
-public enum hw_port
+public enum HwPort
 {
     HW_PORT0,
     HW_PORT1,

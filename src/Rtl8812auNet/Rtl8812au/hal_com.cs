@@ -6,7 +6,7 @@ public static class hal_com
     {
         switch (adapterState.HwPort)
         {
-            case hw_port.HW_PORT0:
+            case HwPort.HW_PORT0:
                 /*REG_CR - BIT[17:16]-Network Type for port 0*/
                 var val8 = (byte)(rtw_read8(adapterState, MSR) & 0x0C);
                 val8 |= net_type;

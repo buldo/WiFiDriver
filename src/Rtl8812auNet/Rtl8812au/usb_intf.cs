@@ -40,7 +40,7 @@ public static class usb_intf
 
         padapter.dvobj = dvobj;
 
-        padapter.HwPort = hw_port.HW_PORT0;
+        padapter.HwPort = HwPort.HW_PORT0;
 
         /* step 2. hook HalFunc, allocate HalData */
         init_hal_spec_8812a(padapter);
