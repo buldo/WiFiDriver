@@ -18,8 +18,4 @@ public class LibUsbRtlEndpoint : IRtlEndpoint
     public RtlEndpointType Type => (RtlEndpointType)(_usbEndpointInfo.Attributes & 0x3);
 
     public RtlEndpointDirection Direction => (RtlEndpointDirection)(_usbEndpointInfo.EndpointAddress & (0b1000_0000));
-    public int GetUsbEndpointNum()
-    {
-        return _usbEndpointInfo.EndpointAddress & USB_ENDPOINT_NUMBER_MASK;
-    }
 }

@@ -24,11 +24,6 @@ public class LibUsbRtlUsbDevice : IRtlUsbDevice
         _reader = _usbDevice.OpenEndpointReader(GetInEp());
     }
 
-    public byte GetEndpointsCount()
-    {
-        return (byte)_usbDevice.Configs[0].Interfaces[0].Endpoints.Count;
-    }
-
     public void InfinityRead()
     {
         var readBuffer = new byte[8192 + 1024];

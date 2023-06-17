@@ -5,6 +5,4 @@ public interface IRtlEndpoint
     public RtlEndpointType Type { get; }
 
     public RtlEndpointDirection Direction { get; }
-
-    public int GetUsbEndpointNum();
 }

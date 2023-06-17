@@ -2,7 +2,6 @@
 
 public interface IRtlUsbDevice
 {
-    byte GetEndpointsCount();
     void InfinityRead();
     int Speed { get; }
 
