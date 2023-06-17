@@ -19,7 +19,6 @@ global using static Rtl8812auNet.Rtl8812au.usb_ops;
 global using static Rtl8812auNet.Rtl8812au.hal_data;
 global using static Rtl8812auNet.Rtl8812au.rtw_io;
 global using static Rtl8812auNet.Rtl8812au.CommonConsts;
-global using static Rtl8812auNet.Rtl8812au.hal_intf;
 global using static Rtl8812auNet.Rtl8812au.odm_board_type;
 global using static Rtl8812auNet.Rtl8812au.usb_intf;
 global using static Rtl8812auNet.Rtl8812au.halhwimg8812a_mac;

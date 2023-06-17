@@ -2,11 +2,6 @@
 
 public static class rtw_wlan_util
 {
-    public static void Set_MSR(_adapter padapter, u8 type)
-    {
-        rtw_hal_set_msr(padapter, type);
-    }
-
     public static void set_channel_bwmode(_adapter padapter, byte channel, byte channel_offset, channel_width bwmode)
     {
         u8 center_ch, chnl_offset80 = HAL_PRIME_CHNL_OFFSET_DONT_CARE;

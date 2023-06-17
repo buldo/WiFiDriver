@@ -10,19 +10,6 @@ public static class CommonConsts
     public const ushort REG_SYS_FUNC_EN = 0x0002;
     public const ushort REG_EFUSE_TEST = 0x0034;
     public const ushort REG_SYS_CLKR = 0x0008;
-    //public const ushort ;
-    //public const ushort ;
-    //public const ushort ;
-    //public const ushort ;
-    //public const ushort ;
-    //public const ushort ;
-    //public const ushort ;
-    //public const ushort ;
-    //public const ushort ;
-    //public const ushort ;
-    //public const ushort ;
-    //public const ushort ;
-    //public const ushort ;
     public const int MAX_RF_PATH = 4;
     public const int RF_PATH_MAX = MAX_RF_PATH;
     public const int MAX_CHNL_GROUP_5G = 14;
@@ -51,16 +38,6 @@ public static class CommonConsts
     public const bool DBG_PG_TXPWR_READ = true;
     public const byte BAND_CAP_2G = 0;
     public const byte BAND_CAP_5G = 1;
-    //public const byte BW_CAP_20M = BIT2;
-    //public const byte BW_CAP_40M = BIT3;
-    //public const byte BW_CAP_80M = BIT4;
-    //public const byte PROTO_CAP_11B = BIT0;
-    //public const byte PROTO_CAP_11G = BIT1;
-    //public const byte PROTO_CAP_11N = BIT2;
-    //public const byte PROTO_CAP_11AC = BIT3;
-    //public const byte WL_FUNC_P2P = BIT0;
-    //public const byte WL_FUNC_MIRACAST = BIT1;
-    //public const byte WL_FUNC_TDLS = BIT2;
     public const uint BW_CAP_20M = BIT2;
     public const uint BW_CAP_40M = BIT3;
     public const uint BW_CAP_80M = BIT4;
@@ -258,7 +235,6 @@ public static class CommonConsts
     public const ushort rA_PIRead_Jaguar = 0xd04;/* RF readback with PI */
     public const ushort rB_PIRead_Jaguar = 0xd44; /* RF readback with PI */
 
-    public const uint RATE_BITMAP_ALL = 0x00_0F_FF_FF;
     public const uint NotRATE_BITMAP_ALL = 0xFF_F0_00_00;
     public const uint RATE_RRSR_CCK_ONLY_1M = 0xFFFF1;
     public const uint RATE_RRSR_WITHOUT_CCK = 0xFFFF0;
@@ -316,15 +292,5 @@ public static class CommonConsts
     public const ushort REG_PKT_VO_VI_LIFE_TIME = 0x04C0;
     public const ushort REG_PKT_BE_BK_LIFE_TIME = 0x04C2;
 
-    public const uint MAX_CHANNEL_NUM_2G = CENTER_CH_2G_NUM;
-    public const uint MAX_CHANNEL_NUM_5G = CENTER_CH_5G_20M_NUM;
-    public const uint MAX_CHANNEL_NUM = (MAX_CHANNEL_NUM_2G + MAX_CHANNEL_NUM_5G);
-
     public const uint RFREGOFFSETMASK = 0xfffff;
-
-    public const byte TXPWR_LMT_RS_CCK = 0;
-    public const byte TXPWR_LMT_RS_OFDM = 1;
-    public const byte TXPWR_LMT_RS_HT = 2;
-    public const byte TXPWR_LMT_RS_VHT = 3;
-    public const byte MAX_2_4G_BANDWIDTH_NUM = 2;
 }

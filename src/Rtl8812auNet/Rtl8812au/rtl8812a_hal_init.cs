@@ -6,7 +6,7 @@ public static class rtl8812a_hal_init
     {
         if (val == NDIS_802_11_NETWORK_INFRASTRUCTURE.Ndis802_11Monitor)
         {
-            Set_MSR(Adapter, _HW_STATE_NOLINK_);
+            rtw_hal_set_msr(Adapter, _HW_STATE_NOLINK_);
             hw_var_set_monitor(Adapter);
         }
     }

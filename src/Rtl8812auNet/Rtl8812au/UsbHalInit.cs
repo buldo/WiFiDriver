@@ -531,14 +531,12 @@ public static class UsbHalInit
             if ((GetRegRFEType(Adapter) != 64) || 0xFF == PROMContent[EEPROM_RFE_OPTION_8812])
             {
                 if (GetRegRFEType(Adapter) != 64)
+                {
                     pHalData.rfe_type = GetRegRFEType(Adapter);
+                }
                 else
                 {
-                    if (IS_HARDWARE_TYPE_8812AU(Adapter))
-                    {
-                        pHalData.rfe_type = 0;
-                    }
-
+                    pHalData.rfe_type = 0;
                 }
 
             }
@@ -571,11 +569,7 @@ public static class UsbHalInit
                     (pHalData.external_pa_5g == true || pHalData.ExternalPA_2G == true ||
                      pHalData.external_lna_5g == true || pHalData.ExternalLNA_2G == true))
                 {
-                    if (IS_HARDWARE_TYPE_8812AU(Adapter))
-                    {
-                        pHalData.rfe_type = 0;
-                    }
-
+                    pHalData.rfe_type = 0;
                 }
             }
         }
@@ -585,11 +579,7 @@ public static class UsbHalInit
                 pHalData.rfe_type = GetRegRFEType(Adapter);
             else
             {
-                if (IS_HARDWARE_TYPE_8812AU(Adapter))
-                {
-                    pHalData.rfe_type = 0;
-                }
-
+                pHalData.rfe_type = 0;
             }
         }
 
@@ -2094,21 +2084,18 @@ public static class UsbHalInit
                 /*  */
                 /* 2013/03/08 MH Add for 8812A HW limitation, ROM code can only */
                 /*  */
-                if (IS_HARDWARE_TYPE_8812AU(padapter))
+                var efuse_content = new byte[4];
+                efuse_OneByteRead(padapter, 0x200, out efuse_content[0]);
+                efuse_OneByteRead(padapter, 0x202, out efuse_content[1]);
+                efuse_OneByteRead(padapter, 0x204, out efuse_content[2]);
+                efuse_OneByteRead(padapter, 0x210, out efuse_content[3]);
+                if (efuse_content[0] != 0xFF ||
+                    efuse_content[1] != 0xFF ||
+                    efuse_content[2] != 0xFF ||
+                    efuse_content[3] != 0xFF)
                 {
-                    var efuse_content = new byte[4];
-                    efuse_OneByteRead(padapter, 0x200, out efuse_content[0]);
-                    efuse_OneByteRead(padapter, 0x202, out efuse_content[1]);
-                    efuse_OneByteRead(padapter, 0x204, out efuse_content[2]);
-                    efuse_OneByteRead(padapter, 0x210, out efuse_content[3]);
-                    if (efuse_content[0] != 0xFF ||
-                        efuse_content[1] != 0xFF ||
-                        efuse_content[2] != 0xFF ||
-                        efuse_content[3] != 0xFF)
-                    {
-                        /* DbgPrint("Disable FW ofl load\n"); */
-                        /* pMgntInfo.RegFWOffload = FALSE; */
-                    }
+                    /* DbgPrint("Disable FW ofl load\n"); */
+                    /* pMgntInfo.RegFWOffload = FALSE; */
                 }
 
                 /* Read EFUSE real map to shadow. */
@@ -2122,20 +2109,17 @@ public static class UsbHalInit
             /*  */
             /* 2013/03/08 MH Add for 8812A HW limitation, ROM code can only */
             /*  */
-            if (IS_HARDWARE_TYPE_8812AU(padapter))
+            var efuse_content = new byte[4];
+            efuse_OneByteRead(padapter, 0x200, out efuse_content[0]);
+            efuse_OneByteRead(padapter, 0x202, out efuse_content[1]);
+            efuse_OneByteRead(padapter, 0x204, out efuse_content[2]);
+            efuse_OneByteRead(padapter, 0x210, out efuse_content[3]);
+            if (efuse_content[0] != 0xFF ||
+                efuse_content[1] != 0xFF ||
+                efuse_content[2] != 0xFF ||
+                efuse_content[3] != 0xFF)
             {
-                var efuse_content = new byte[4];
-                efuse_OneByteRead(padapter, 0x200, out efuse_content[0]);
-                efuse_OneByteRead(padapter, 0x202, out efuse_content[1]);
-                efuse_OneByteRead(padapter, 0x204, out efuse_content[2]);
-                efuse_OneByteRead(padapter, 0x210, out efuse_content[3]);
-                if (efuse_content[0] != 0xFF ||
-                    efuse_content[1] != 0xFF ||
-                    efuse_content[2] != 0xFF ||
-                    efuse_content[3] != 0xFF)
-                {
-                    pHalData.bautoload_fail_flag = false;
-                }
+                pHalData.bautoload_fail_flag = false;
             }
 
             /* update to default value 0xFF */
@@ -3238,7 +3222,6 @@ public static class UsbHalInit
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA((Adapter));
         dm_struct pDM_Odm = pHalData.odmpriv;
-        dm_rf_calibration_struct pRFCalibrateInfo = (pDM_Odm.rf_calibrate_info);
 
         s8 bbSwing_2G = (s8)(-1 * Adapter.registrypriv.TxBBSwing_2G);
         s8 bbSwing_5G = (s8)(-1 * Adapter.registrypriv.TxBBSwing_5G);
@@ -3250,7 +3233,6 @@ public static class UsbHalInit
         {
             if (Band == BAND_TYPE.BAND_ON_2_4G)
             {
-                pRFCalibrateInfo.bb_swing_diff_2g = bbSwing_2G;
                 if (bbSwing_2G == 0)
                     _out = 0x200; /* 0 dB */
                 else if (bbSwing_2G == -3)
@@ -3263,19 +3245,16 @@ public static class UsbHalInit
                 {
                     if (pHalData.ExternalPA_2G)
                     {
-                        pRFCalibrateInfo.bb_swing_diff_2g = -3;
                         _out = 0x16A;
                     }
                     else
                     {
-                        pRFCalibrateInfo.bb_swing_diff_2g = 0;
                         _out = 0x200;
                     }
                 }
             }
             else if (Band == BAND_TYPE.BAND_ON_5G)
             {
-                pRFCalibrateInfo.bb_swing_diff_5g = bbSwing_5G;
                 if (bbSwing_5G == 0)
                     _out = 0x200; /* 0 dB */
 
@@ -3290,14 +3269,11 @@ public static class UsbHalInit
 
                 else
                 {
-                    pRFCalibrateInfo.bb_swing_diff_5g = 0;
                     _out = 0x200;
                 }
             }
             else
             {
-                pRFCalibrateInfo.bb_swing_diff_2g = -3;
-                pRFCalibrateInfo.bb_swing_diff_5g = -3;
                 _out = 0x16A; /* -3 dB */
             }
         }
@@ -3350,34 +3326,18 @@ public static class UsbHalInit
 
             if (onePathSwing == 0x0)
             {
-                if (Band == BAND_TYPE.BAND_ON_2_4G)
-                    pRFCalibrateInfo.bb_swing_diff_2g = 0;
-                else
-                    pRFCalibrateInfo.bb_swing_diff_5g = 0;
                 _out = 0x200; /* 0 dB */
             }
             else if (onePathSwing == 0x1)
             {
-                if (Band == BAND_TYPE.BAND_ON_2_4G)
-                    pRFCalibrateInfo.bb_swing_diff_2g = -3;
-                else
-                    pRFCalibrateInfo.bb_swing_diff_5g = -3;
                 _out = 0x16A; /* -3 dB */
             }
             else if (onePathSwing == 0x2)
             {
-                if (Band == BAND_TYPE.BAND_ON_2_4G)
-                    pRFCalibrateInfo.bb_swing_diff_2g = -6;
-                else
-                    pRFCalibrateInfo.bb_swing_diff_5g = -6;
                 _out = 0x101; /* -6 dB */
             }
             else if (onePathSwing == 0x3)
             {
-                if (Band == BAND_TYPE.BAND_ON_2_4G)
-                    pRFCalibrateInfo.bb_swing_diff_2g = -9;
-                else
-                    pRFCalibrateInfo.bb_swing_diff_5g = -9;
                 _out = 0x0B6; /* -9 dB */
             }
         }
@@ -4915,25 +4875,14 @@ public static class UsbHalInit
         value32 = rtw_read32(Adapter, REG_SYS_CFG);
         RTW_INFO($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
 
-        pHalData.version_id.ICType = HAL_IC_TYPE_E.CHIP_8812;
-
-        pHalData.version_id.ChipType =
-            ((value32 & RTL_ID) != 0 ? HAL_CHIP_TYPE_E.TEST_CHIP : HAL_CHIP_TYPE_E.NORMAL_CHIP);
-
         pHalData.version_id.RFType = HAL_RF_TYPE_E.RF_TYPE_2T2R; /* RF_2T2R; */
 
         if (Adapter.registrypriv.special_rf_path == 1)
             pHalData.version_id.RFType = HAL_RF_TYPE_E.RF_TYPE_1T1R; /* RF_1T1R; */
 
-        pHalData.version_id.VendorType =
-            ((value32 & VENDOR_ID) != 0 ? HAL_VENDOR_E.CHIP_VENDOR_UMC : HAL_VENDOR_E.CHIP_VENDOR_TSMC);
-
         pHalData.version_id.CUTVersion =
             (HAL_CUT_VERSION_E)((value32 & CHIP_VER_RTL_MASK) >> CHIP_VER_RTL_SHIFT); /* IC version (CUT) */
         pHalData.version_id.CUTVersion += 1;
-
-        /* value32 = rtw_read32(Adapter, REG_GPIO_OUTSTS); */
-        pHalData.version_id.ROMVer = 0; /* ROM code version. */
 
         /* For multi-function consideration. Added by Roger, 2010.10.06. */
         pHalData.MultiFunc = RT_MULTI_FUNC.RT_MULTI_FUNC_NONE;
