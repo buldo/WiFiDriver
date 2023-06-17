@@ -6,10 +6,6 @@ public static class phydm
     {
         switch (cmn_info)
         {
-            case odm_cmninfo.ODM_CMNINFO_PLATFORM:
-                dm.support_platform = (u8)value;
-                break;
-
             case odm_cmninfo.ODM_CMNINFO_CUT_VER:
                 dm.cut_version = (odm_cut_version)value;
                 break;

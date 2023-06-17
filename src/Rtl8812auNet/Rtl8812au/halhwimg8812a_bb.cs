@@ -23,7 +23,6 @@ public static class halhwimg8812a_bb
 
         u32 driver1 = cut_version_for_para << 24 |
                       ((uint)RTL871X_HCI_TYPE.RTW_USB & 0xF0) << 16 |
-                      (uint)dm.support_platform << 16 |
                       pkg_type_for_para << 12 |
                       ((uint)RTL871X_HCI_TYPE.RTW_USB & 0x0F) << 8 |
                       _board_type;
