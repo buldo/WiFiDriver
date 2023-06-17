@@ -1,14 +1,12 @@
-﻿// See https://aka.ms/new-console-template for more information
-
+﻿using LibUsbDotNet.LibUsb;
 using LibUsbDotNet;
-using LibUsbDotNet.LibUsb;
 using Rtl8812auNet.Rtl8812au;
 
-namespace Rtl8812auNet;
+namespace Rtl8812auNet.ConsoleDemo;
 
-public class Program
+internal class Program
 {
-    public static async Task Main()
+    static void Main(string[] args)
     {
         Console.WriteLine("Hello, World!");
 
