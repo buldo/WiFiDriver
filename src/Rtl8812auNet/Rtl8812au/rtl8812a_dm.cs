@@ -45,16 +45,10 @@ public static class rtl8812a_dm
 
     static void Init_ODM_ComInfo(_adapter adapter)
     {
-
-        dvobj_priv dvobj = adapter_to_dvobj(adapter);
         PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapter);
         dm_struct pDM_Odm = (pHalData.odmpriv);
-        pwrctrl_priv pwrctl = adapter_to_pwrctl(adapter);
-        int i;
 
         rtw_odm_init_ic_type(adapter);
-
-        odm_cmn_info_init(pDM_Odm, odm_cmninfo.ODM_CMNINFO_INTERFACE, (uint)adapter.dvobj.interface_type);
 
         odm_cmn_info_init(pDM_Odm, odm_cmninfo.ODM_CMNINFO_RF_TYPE, (ulong)pHalData.rf_type);
         {

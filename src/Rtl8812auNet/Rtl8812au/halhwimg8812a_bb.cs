@@ -22,10 +22,10 @@ public static class halhwimg8812a_bb
         uint pkg_type_for_para = (dm.package_type == 0) ? (u8)15 : dm.package_type;
 
         u32 driver1 = cut_version_for_para << 24 |
-                      ((uint)dm.support_interface & 0xF0) << 16 |
+                      ((uint)RTL871X_HCI_TYPE.RTW_USB & 0xF0) << 16 |
                       (uint)dm.support_platform << 16 |
                       pkg_type_for_para << 12 |
-                      ((uint)dm.support_interface & 0x0F) << 8 |
+                      ((uint)RTL871X_HCI_TYPE.RTW_USB & 0x0F) << 8 |
                       _board_type;
 
         u32 driver2 =

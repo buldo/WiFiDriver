@@ -182,10 +182,6 @@ public static class usb_intf
             throw new Exception();
         }
 
-
-        /*step 1-1., decide the chip_type via driver_info*/
-        pdvobjpriv.interface_type = RTL871X_HCI_TYPE.RTW_USB;
-
         return pdvobjpriv;
     }
 
