@@ -12,7 +12,6 @@ global using static Rtl8812auNet.Rtl8812au.Logging;
 global using static Rtl8812auNet.Rtl8812au.RTW_USB_SPEED;
 global using static Rtl8812auNet.Rtl8812au.libusb_speed;
 global using static Rtl8812auNet.Rtl8812au.Bits;
-global using static Rtl8812auNet.Rtl8812au.rtw_xmit_consts;
 global using static Rtl8812auNet.Rtl8812au.drv_types;
 global using static Rtl8812auNet.Rtl8812au.hal_com_data_defs;
 global using static Rtl8812auNet.Rtl8812au.usb_ops;

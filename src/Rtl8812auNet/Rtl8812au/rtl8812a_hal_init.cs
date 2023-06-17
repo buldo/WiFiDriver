@@ -28,5 +28,5 @@ public static class rtl8812a_hal_init
         /* Receive all data frames */
         value_rxfltmap2 = 0xFFFF;
         rtw_write16(Adapter, REG_RXFLTMAP2, value_rxfltmap2);
-}
+    }
 }

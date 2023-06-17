@@ -58,7 +58,7 @@ public static class usb_intf
         ReadAdapterInfo8812AU(padapter);
 
         /* step 5. */
-        rtl8812_init_dm_priv(padapter);
+        Init_ODM_ComInfo_8812(padapter);
 
         return padapter;
     }
@@ -67,28 +67,12 @@ public static class usb_intf
     {
         hal_spec_t hal_spec = GET_HAL_SPEC(adapter);
 
-        hal_spec.ic_name = "rtl8812a";
-        hal_spec.macid_num = 128;
-        hal_spec.sec_cam_ent_num = 64;
-        hal_spec.sec_cap = 0;
         hal_spec.rfpath_num_2g = 2;
         hal_spec.rfpath_num_5g = 2;
         hal_spec.txgi_max = 63;
-        hal_spec.txgi_pdbm = 2;
         hal_spec.max_tx_cnt = 2;
-        hal_spec.tx_nss_num = 2;
-        hal_spec.rx_nss_num = 2;
         hal_spec.band_cap = BAND_CAP_2G | BAND_CAP_5G;
-        hal_spec.bw_cap = (byte)(BW_CAP_20M | BW_CAP_40M | BW_CAP_80M);
-        hal_spec.port_num = 2;
         hal_spec.proto_cap = (byte)(PROTO_CAP_11B | PROTO_CAP_11G | PROTO_CAP_11N | PROTO_CAP_11AC);
-
-        hal_spec.wl_func = (byte)(0
-                            | WL_FUNC_P2P
-                            | WL_FUNC_MIRACAST
-                            | WL_FUNC_TDLS)
-            ;
-
         hal_spec.pg_txpwr_saddr = 0x10;
         hal_spec.pg_txgi_diff_factor = 1;
     }
