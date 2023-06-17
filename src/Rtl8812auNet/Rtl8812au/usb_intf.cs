@@ -4,12 +4,7 @@ namespace Rtl8812auNet.Rtl8812au;
 
 public static class usb_intf
 {
-    static readonly int rtw_rfintfs = (int)RFINTFS.HWPI;
-    static readonly int rtw_chip_version = 0x00;
-    static readonly int rtw_lbkmode = 0; /* RTL8712_AIR_TRX; */
     static readonly bool rtw_wifi_spec = false;
-
-
     private static int[] ui_pid = new[] { 0, 0, 0 };
 
     public static _adapter rtw_drv_init(IRtlUsbDevice pusb_intf)
@@ -53,7 +48,8 @@ public static class usb_intf
         init_hal_spec_8812a(padapter);
 
         /* step read_chip_version */
-        rtw_hal_read_chip_version(padapter);
+        read_chip_version_8812a(padapter);
+        rtw_odm_init_ic_type(padapter);
 
         /* step usb endpoint mapping */
         rtl8812au_interface_configure(padapter);
@@ -67,15 +63,8 @@ public static class usb_intf
         return padapter;
     }
 
-    static void rtw_hal_read_chip_version(_adapter padapter)
-    {
-        read_chip_version_8812a(padapter);
-        rtw_odm_init_ic_type(padapter);
-    }
-
     static void init_hal_spec_8812a(_adapter adapter)
     {
-
         hal_spec_t hal_spec = GET_HAL_SPEC(adapter);
 
         hal_spec.ic_name = "rtl8812a";
@@ -159,19 +148,15 @@ public static class usb_intf
             if (type == RtlEndpointType.Bulk && direction == RtlEndpointDirection.In)
             {
                 RTW_INFO("RT_usb_endpoint_is_bulk_in = %x", endpoint.GetUsbEndpointNum());
-                pdvobjpriv.RtInPipe[pdvobjpriv.RtNumInPipes] = endpoint.GetUsbEndpointNum();
                 pdvobjpriv.RtNumInPipes++;
             }
             else if (direction == RtlEndpointDirection.In)
             {
-                //RTW_INFO("RT_usb_endpoint_is_int_in = %x, Interval = %x\n", RT_usb_endpoint_num(endpoint), endpoint.Interval);
-                pdvobjpriv.RtInPipe[pdvobjpriv.RtNumInPipes] = endpoint.GetUsbEndpointNum();
                 pdvobjpriv.RtNumInPipes++;
             }
             else if (type == RtlEndpointType.Bulk && direction == RtlEndpointDirection.Out)
             {
                 RTW_INFO("RT_usb_endpoint_is_bulk_out = %x\n", endpoint.GetUsbEndpointNum());
-                pdvobjpriv.RtOutPipe[pdvobjpriv.RtNumOutPipes] = endpoint.GetUsbEndpointNum();
                 pdvobjpriv.RtNumOutPipes++;
             }
 

@@ -12,13 +12,6 @@ public class dvobj_priv
 
     public byte iface_nums; /* total number of ifaces used runtime */
 
-    /* In /Out Pipe information */
-    public int[] RtInPipe = new int[2];
-    public int[] RtOutPipe = new int[4];
-    public int[] Queue2Pipe = new int[HW_QUEUE_ENTRY]; /* for out pipe mapping */
-
-    //_lock xmit_block_lock;
-
     public pwrctrl_priv pwrctl_priv = new pwrctrl_priv();
 
     /*-------- below is for USB INTERFACE --------*/

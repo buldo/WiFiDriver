@@ -104,129 +104,7 @@ public static class UsbHalInit
             pHalData.rxagg_usb_timeout = 0x20;
         }
 
-        HalUsbSetQueuePipeMapping8812AUsb(padapter, pdvobjpriv.RtNumInPipes, pdvobjpriv.RtNumOutPipes);
-    }
-
-    static bool HalUsbSetQueuePipeMapping8812AUsb(PADAPTER pAdapter, u8 NumInPipe, u8 NumOutPipe)
-    {
-        var pHalData = GET_HAL_DATA(pAdapter);
-        bool result = false;
-
-        var pregistrypriv = pAdapter.registrypriv;
-        var bWIFICfg = (pregistrypriv.wifi_spec) ? true : false;
-
-        _ConfigChipOutEP_8812(pAdapter, NumOutPipe);
-
-        /* Normal chip with one IN and one OUT doesn't have interrupt IN EP. */
-        if (1 == pHalData.OutEpNumber)
-        {
-            if (1 != NumInPipe)
-            {
-                return result;
-            }
-        }
-
-        /* All config other than above support one Bulk IN and one Interrupt IN. */
-        /* if(2 != NumInPipe){ */
-        /*	return result; */
-        /* } */
-
-        if (NumOutPipe == 4)
-        {
-            result = true;
-            {
-                // TODO:
-                throw new NotImplementedException("_FourOutPipeMapping88212AU");
-                //_FourOutPipeMapping88212AU(pAdapter, bWIFICfg);
-            }
-        }
-        else
-        {
-            result = Hal_MappingOutPipe(pAdapter, NumOutPipe);
-        }
-
-        return result;
-
-    }
-
-    /// <remarks>
-    /// NumOutPipe == 3 for tenda
-    /// </remarks>>
-    static BOOLEAN Hal_MappingOutPipe(PADAPTER pAdapter, u8 NumOutPipe)
-    {
-        registry_priv pregistrypriv = pAdapter.registrypriv;
-
-        BOOLEAN bWIFICfg = (pregistrypriv.wifi_spec) ? true : false;
-
-        BOOLEAN result = true;
-
-        switch (NumOutPipe)
-        {
-            //    case 2:
-            //        _TwoOutPipeMapping(pAdapter, bWIFICfg);
-            //        break;
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-                _ThreeOutPipeMapping(pAdapter, bWIFICfg);
-                break;
-            //    case 1:
-            //        _OneOutPipeMapping(pAdapter);
-            //        break;
-            default:
-                result = false;
-                break;
-        }
-
-        return result;
-
-    }
-
-    static void _ThreeOutPipeMapping(PADAPTER pAdapter, BOOLEAN bWIFICfg)
-    {
-
-        dvobj_priv pdvobjpriv = adapter_to_dvobj(pAdapter);
-
-        if (bWIFICfg)
-        {
-            /* for WMM */
-
-            /*	BK, 	BE, 	VI, 	VO, 	BCN,	CMD,MGT,HIGH,HCCA  */
-            /* {  1, 	2, 	1, 	0, 	0, 	0, 	0, 	0, 		0	}; */
-            /* 0:H, 1:N, 2:L */
-
-            pdvobjpriv.Queue2Pipe[0] = pdvobjpriv.RtOutPipe[0]; /* VO */
-            pdvobjpriv.Queue2Pipe[1] = pdvobjpriv.RtOutPipe[1]; /* VI */
-            pdvobjpriv.Queue2Pipe[2] = pdvobjpriv.RtOutPipe[2]; /* BE */
-            pdvobjpriv.Queue2Pipe[3] = pdvobjpriv.RtOutPipe[1]; /* BK */
-
-            pdvobjpriv.Queue2Pipe[4] = pdvobjpriv.RtOutPipe[0]; /* BCN */
-            pdvobjpriv.Queue2Pipe[5] = pdvobjpriv.RtOutPipe[0]; /* MGT */
-            pdvobjpriv.Queue2Pipe[6] = pdvobjpriv.RtOutPipe[0]; /* HIGH */
-            pdvobjpriv.Queue2Pipe[7] = pdvobjpriv.RtOutPipe[0]; /* TXCMD */
-
-        }
-        else
-        {
-            /* typical setting */
-
-
-            /*	BK, 	BE, 	VI, 	VO, 	BCN,	CMD,MGT,HIGH,HCCA  */
-            /* {  2, 	2, 	1, 	0, 	0, 	0, 	0, 	0, 		0	};			 */
-            /* 0:H, 1:N, 2:L */
-
-            pdvobjpriv.Queue2Pipe[0] = pdvobjpriv.RtOutPipe[0]; /* VO */
-            pdvobjpriv.Queue2Pipe[1] = pdvobjpriv.RtOutPipe[1]; /* VI */
-            pdvobjpriv.Queue2Pipe[2] = pdvobjpriv.RtOutPipe[2]; /* BE */
-            pdvobjpriv.Queue2Pipe[3] = pdvobjpriv.RtOutPipe[2]; /* BK */
-
-            pdvobjpriv.Queue2Pipe[4] = pdvobjpriv.RtOutPipe[0]; /* BCN */
-            pdvobjpriv.Queue2Pipe[5] = pdvobjpriv.RtOutPipe[0]; /* MGT */
-            pdvobjpriv.Queue2Pipe[6] = pdvobjpriv.RtOutPipe[0]; /* HIGH */
-            pdvobjpriv.Queue2Pipe[7] = pdvobjpriv.RtOutPipe[0]; /* TXCMD	 */
-        }
-
+        _ConfigChipOutEP_8812(padapter, pdvobjpriv.RtNumOutPipes);
     }
 
     public static void ReadAdapterInfo8812AU(PADAPTER Adapter)
@@ -272,7 +150,6 @@ public static class UsbHalInit
         /*  */
         Hal_EfuseParseBTCoexistInfo8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
 
-        Hal_ReadChannelPlan8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
         Hal_EfuseParseXtal_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
         Hal_ReadThermalMeter_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
         Hal_ReadRemoteWakeup_8812A(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
@@ -285,41 +162,12 @@ public static class UsbHalInit
 
 
         hal_ReadUsbModeSwitch_8812AU(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        hal_CustomizeByCustomerID_8812AU(Adapter);
-
-        ReadLEDSetting_8812AU(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
 
         /* 2013/04/15 MH Add for different board type recognize. */
-        hal_ReadUsbType_8812AU(Adapter, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-
-
-        /* set coex. ant info once efuse parsing is done */
-        rtw_btcoex_set_ant_info(Adapter);
+        hal_ReadUsbType_8812AU(Adapter, pHalData.efuse_eeprom_data);
     }
 
-    static void rtw_btcoex_set_ant_info(PADAPTER padapter)
-    {
-        rtw_btcoex_wifionly_AntInfoSetting(padapter);
-    }
-
-    static void rtw_btcoex_wifionly_AntInfoSetting(PADAPTER padapter)
-    {
-        hal_btcoex_wifionly_AntInfoSetting(padapter);
-    }
-
-    static void hal_btcoex_wifionly_AntInfoSetting(PADAPTER padapter)
-    {
-        //wifi_only_cfg        pwifionlycfg = GLBtCoexistWifiOnly;
-        //wifi_only_haldata    pwifionly_haldata = pwifionlycfg.haldata_info;
-        //HAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
-
-        //pwifionly_haldata.efuse_pg_antnum = pHalData.EEPROMBluetoothAntNum;
-        //pwifionly_haldata.efuse_pg_antpath = pHalData.ant_path;
-        //pwifionly_haldata.rfe_type = pHalData.rfe_type;
-        //pwifionly_haldata.ant_div_cfg = pHalData.AntDivCfg;
-    }
-
-    static void hal_ReadUsbType_8812AU(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
+    static void hal_ReadUsbType_8812AU(PADAPTER Adapter, u8[] PROMContent)
     {
         /* if (IS_HARDWARE_TYPE_8812AU(Adapter) && Adapter.UsbModeMechanism.RegForcedUsbMode == 5) */
         {
@@ -414,97 +262,6 @@ public static class UsbHalInit
         }
     }
 
-    static void ReadLEDSetting_8812AU(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
-    {
-//#ifdef CONFIG_RTW_LED
-//        struct led_priv *pledpriv = adapter_to_led(Adapter);
-
-//# ifdef CONFIG_RTW_SW_LED
-//        pledpriv.bRegUseLed = true;
-//#else /* HW LED */
-//        pledpriv.LedStrategy = HW_LED;
-//#endif /* CONFIG_RTW_SW_LED */
-//#endif
-    }
-
-    static void hal_CustomizeByCustomerID_8812AU(PADAPTER pAdapter)
-    {
-        // Looks like all this need for led
-        //HAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapter);
-
-        ///* For customized behavior. */
-        //if ((pHalData.EEPROMVID == 0x103C) && (pHalData.EEPROMPID == 0x1629)) /* HP Lite-On for RTL8188CUS Slim Combo. */
-        //    pHalData.CustomerID = RT_CID_819x_HP;
-        //else if ((pHalData.EEPROMVID == 0x9846) && (pHalData.EEPROMPID == 0x9041))
-        //    pHalData.CustomerID = RT_CID_NETGEAR;
-        //else if ((pHalData.EEPROMVID == 0x2019) && (pHalData.EEPROMPID == 0x1201))
-        //    pHalData.CustomerID = RT_CID_PLANEX;
-        //else if ((pHalData.EEPROMVID == 0x0BDA) && (pHalData.EEPROMPID == 0x5088))
-        //    pHalData.CustomerID = RT_CID_CC_C;
-        //else if ((pHalData.EEPROMVID == 0x0411) && ((pHalData.EEPROMPID == 0x0242) || (pHalData.EEPROMPID == 0x025D)))
-        //    pHalData.CustomerID = RT_CID_DNI_BUFFALO;
-        //else if (((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3314)) ||
-        //    ((pHalData.EEPROMVID == 0x20F4) && (pHalData.EEPROMPID == 0x804B)) ||
-        //    ((pHalData.EEPROMVID == 0x20F4) && (pHalData.EEPROMPID == 0x805B)) ||
-        //    ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3315)) ||
-        //    ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3316)))
-        //    pHalData.CustomerID = RT_CID_DLINK;
-
-        //RTW_INFO("PID= 0x%x, VID=  %x\n", pHalData.EEPROMPID, pHalData.EEPROMVID);
-
-        ///*	Decide CustomerID according to VID/DID or EEPROM */
-        //switch (pHalData.EEPROMCustomerID)
-        //{
-        //    case EEPROM_CID_DEFAULT:
-        //        if ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3308))
-        //            pHalData.CustomerID = RT_CID_DLINK;
-        //        else if ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3309))
-        //            pHalData.CustomerID = RT_CID_DLINK;
-        //        else if ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x330a))
-        //            pHalData.CustomerID = RT_CID_DLINK;
-        //        else if ((pHalData.EEPROMVID == 0x0BFF) && (pHalData.EEPROMPID == 0x8160))
-        //        {
-        //            /* pHalData.bAutoConnectEnable = false; */
-        //            pHalData.CustomerID = RT_CID_CHINA_MOBILE;
-        //        }
-        //        else if ((pHalData.EEPROMVID == 0x0BDA) && (pHalData.EEPROMPID == 0x5088))
-        //            pHalData.CustomerID = RT_CID_CC_C;
-        //        else if ((pHalData.EEPROMVID == 0x0846) && (pHalData.EEPROMPID == 0x9052))
-        //            pHalData.CustomerID = RT_CID_NETGEAR;
-        //        else if ((pHalData.EEPROMVID == 0x0411) && ((pHalData.EEPROMPID == 0x0242) || (pHalData.EEPROMPID == 0x025D)))
-        //            pHalData.CustomerID = RT_CID_DNI_BUFFALO;
-        //        else if (((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3314)) ||
-        //            ((pHalData.EEPROMVID == 0x20F4) && (pHalData.EEPROMPID == 0x804B)) ||
-        //            ((pHalData.EEPROMVID == 0x20F4) && (pHalData.EEPROMPID == 0x805B)) ||
-        //            ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3315)) ||
-        //            ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3316)))
-        //            pHalData.CustomerID = RT_CID_DLINK;
-        //        RTW_INFO("PID= 0x%x, VID=  %x\n", pHalData.EEPROMPID, pHalData.EEPROMVID);
-        //        break;
-        //    case EEPROM_CID_WHQL:
-        //        /* padapter.bInHctTest = TRUE; */
-
-        //        /* pMgntInfo.bSupportTurboMode = FALSE; */
-        //        /* pMgntInfo.bAutoTurboBy8186 = FALSE; */
-
-        //        /* pMgntInfo.PowerSaveControl.bInactivePs = FALSE; */
-        //        /* pMgntInfo.PowerSaveControl.bIPSModeBackup = FALSE; */
-        //        /* pMgntInfo.PowerSaveControl.bLeisurePs = FALSE; */
-        //        /* pMgntInfo.PowerSaveControl.bLeisurePsModeBackup = FALSE; */
-        //        /* pMgntInfo.keepAliveLevel = 0; */
-
-        //        /* padapter.bUnloadDriverwhenS3S4 = FALSE; */
-        //        break;
-        //    default:
-        //        pHalData.CustomerID = RT_CID_DEFAULT;
-        //        break;
-
-        //}
-        //RTW_INFO("Customer ID: 0x%2x\n", pHalData.CustomerID);
-
-        //hal_CustomizedBehavior_8812AU(pAdapter);
-    }
-
     private static void hal_ReadUsbModeSwitch_8812AU(PADAPTER Adapter, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(Adapter);
@@ -513,8 +270,7 @@ public static class UsbHalInit
         {
             pHalData.EEPROMUsbSwitch = false;
         }
-        else
-            /* check efuse 0x08 bit2 */
+        else /* check efuse 0x08 bit2 */
         {
             pHalData.EEPROMUsbSwitch = ((PROMContent[EEPROM_USB_MODE_8812] & BIT1) >> 1) != 0;
         }
@@ -584,146 +340,6 @@ public static class UsbHalInit
         }
 
         RTW_INFO("RFE Type: 0x%2x\n", pHalData.rfe_type);
-    }
-
-    static void Hal_ReadChannelPlan8812A(PADAPTER padapter, u8[] hwinfo, BOOLEAN AutoLoadFail)
-    {
-        //hal_com_config_channel_plan(
-        //    padapter
-        //    , hwinfo[EEPROM_COUNTRY_CODE_8812]
-        //    , hwinfo[EEPROM_ChannelPlan_8812]
-        //    , padapter.registrypriv.alpha2
-        //    , padapter.registrypriv.channel_plan
-        //    , RTW_CHPLAN_REALTEK_DEFINE
-        //    , AutoLoadFail
-        //);
-    }
-
-    /// <summary>
-    /// Use hardware(efuse), driver parameter(registry) and default channel plan
-    /// to decide which one should be used.
-    /// </summary>
-    /// <param name="padapter"></param>
-    /// <param name="hw_alpha2">country code from HW (efuse/eeprom/mapfile)</param>
-    /// <param name="hw_chplan">
-    /// channel plan from HW (efuse/eeprom/mapfile)
-    /// BIT[7] software configure mode; 0:Enable, 1:disable
-    /// BIT[6:0] Channel Plan
-    /// </param>
-    /// <param name="sw_alpha2">country code from HW (registry/module param)</param>
-    /// <param name="sw_chplan">channel plan from SW (registry/module param)</param>
-    /// <param name="def_chplan">channel plan used when HW/SW both invalid</param>
-    /// <param name="AutoLoadFail"></param>
-    static void hal_com_config_channel_plan(
-        PADAPTER padapter,
-        string hw_alpha2,
-        u8 hw_chplan,
-        string sw_alpha2,
-        u8 sw_chplan,
-        u8 def_chplan,
-        BOOLEAN AutoLoadFail
-    )
-    {
-
-//        rf_ctl_t rfctl = adapter_to_rfctl(padapter);
-//        PHAL_DATA_TYPE pHalData;
-//        bool force_hw_chplan = false;
-//        int chplan = -1;
-//        country_chplan country_ent = null, ent;
-
-//        pHalData = GET_HAL_DATA(padapter);
-
-//        /* treat 0xFF as invalid value, bypass hw_chplan & force_hw_chplan parsing */
-//        if (hw_chplan == 0xFF)
-//            goto chk_hw_country_code;
-
-//        if (AutoLoadFail == true)
-//        {
-//            goto chk_sw_config;
-//        }
-
-////#ifndef CONFIG_FORCE_SW_CHANNEL_PLAN
-////	if (hw_chplan & EEPROM_CHANNEL_PLAN_BY_HW_MASK)
-////		force_hw_chplan = true;
-////#endif
-
-//        hw_chplan &= (~EEPROM_CHANNEL_PLAN_BY_HW_MASK);
-
-//        chk_hw_country_code:
-//        if (hw_alpha2 && !IS_ALPHA2_NO_SPECIFIED(hw_alpha2))
-//        {
-//            ent = rtw_get_chplan_from_country(hw_alpha2);
-//            if (ent)
-//            {
-//                /* get chplan from hw country code, by pass hw chplan setting */
-//                country_ent = ent;
-//                chplan = ent.chplan;
-//                goto chk_sw_config;
-//            }
-//            else
-//            {
-//                RTW_PRINT("%s unsupported hw_alpha2:\"%c%c\"\n", __func__, hw_alpha2[0], hw_alpha2[1]);
-//            }
-//        }
-
-//        if (rtw_is_channel_plan_valid(hw_chplan))
-//            chplan = hw_chplan;
-//        else if (force_hw_chplan == true)
-//        {
-//            RTW_PRINT("%s unsupported hw_chplan:0x%02X\n", hw_chplan);
-//            /* hw infomaton invalid, refer to sw information */
-//            force_hw_chplan = false;
-//        }
-
-//        chk_sw_config:
-//        if (force_hw_chplan == true)
-//        {
-//            goto done;
-//        }
-
-//        if (!string.IsNullOrWhiteSpace(sw_alpha2))
-//        {
-//            ent = rtw_get_chplan_from_country(sw_alpha2);
-//            if (ent !=null)
-//            {
-//                /* get chplan from sw country code, by pass sw chplan setting */
-//                country_ent = ent;
-//                chplan = ent.chplan;
-//                goto done;
-//            }
-//            else
-//            {
-//                RTW_PRINT("%s unsupported sw_alpha2:\"%c%c\"\n",  sw_alpha2[0], sw_alpha2[1]);
-//            }
-//        }
-
-//        if (rtw_is_channel_plan_valid(sw_chplan))
-//        {
-//            /* cancel hw_alpha2 because chplan is specified by sw_chplan*/
-//            country_ent = null;
-//            chplan = sw_chplan;
-//        }
-//        else if (sw_chplan != RTW_CHPLAN_UNSPECIFIED)
-//        {
-//            RTW_PRINT("%s unsupported sw_chplan:0x%02X", sw_chplan);
-//        }
-
-//        done:
-//        if (chplan == -1)
-//        {
-//            RTW_PRINT("%s use def_chplan:0x%02X\n", def_chplan);
-//            chplan = def_chplan;
-//        }
-//        else if (country_ent != null)
-//        {
-//            RTW_PRINT("%s country code:\"%c%c\" with chplan:0x%02X\n",country_ent.alpha2[0], country_ent.alpha2[1], country_ent.chplan);
-//        }
-//        else
-//            RTW_PRINT("%s chplan:0x%02X\n", chplan);
-
-//        rfctl.country_ent = country_ent;
-//        rfctl.ChannelPlan = chplan;
-//        pHalData.bDisableSWChannelPlan = force_hw_chplan;
     }
 
     private static void Hal_ReadRemoteWakeup_8812A(PADAPTER padapter, u8[] hwinfo, BOOLEAN AutoLoadFail)
@@ -1140,34 +756,6 @@ public static class UsbHalInit
         return true;
     }
 
-    //static u8 map_read8(map_t map, u16 offset)
-    //{
-    //    map_seg_t seg;
-    //    u8 val = map.init_value;
-    //    int i;
-
-    //    if (offset + 1 > map.len)
-    //    {
-    //        throw new Exception("WTF");
-    //        goto exit;
-    //    }
-
-    //    for (i = 0; i < map.seg_num; i++)
-    //    {
-    //        seg = map.segs + i;
-    //        if (seg.sa + seg.len <= offset || seg.sa >= offset + 1)
-    //        {
-    //            continue;
-    //        }
-
-    //        val = * (seg.c + offset - seg.sa);
-    //        break;
-    //    }
-
-    //    exit:
-    //    return val;
-    //}
-
     static u8 map_read8(map_t map, u16 offset)
     {
         map_seg_t seg = map.segs[0];
@@ -1228,12 +816,6 @@ public static class UsbHalInit
             goto exit;
         }
 
-
-        if (DBG_PG_TXPWR_READ)
-        {
-            RTW_INFO($"{rf_path_char(path)}[hal_load_pg_txpwr_info_path_5g] eaddr:{offset}");
-        }
-
         for (group = 0; group < MAX_CHNL_GROUP_5G; group++)
         {
             if (HAL_SPEC_CHK_RF_PATH_5G(hal_spec, path))
@@ -1244,11 +826,6 @@ public static class UsbHalInit
                    )
                 {
                     pwr_info.IndexBW40_Base[path, group] = tmp_base;
-                    if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                    {
-                        RTW_INFO(
-                            $"[{rf_path_char(path)}] 5G G{group} BW40-1S base:{tmp_base} from {pg_txpwr_src_str(txpwr_src)}");
-                    }
                 }
             }
 
@@ -1268,11 +845,6 @@ public static class UsbHalInit
                        )
                     {
                         pwr_info.BW20_Diff[path, tx_idx] = tmp_diff;
-                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                        {
-                            RTW_INFO(
-                                $"[{rf_path_char(path)}] 5G BW20-{tx_idx + 1} diff:{tmp_diff} from {pg_txpwr_src_str(txpwr_src)}");
-                        }
                     }
 
                     tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
@@ -1281,11 +853,6 @@ public static class UsbHalInit
                        )
                     {
                         pwr_info.OFDM_Diff[path, tx_idx] = tmp_diff;
-                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                        {
-                            RTW_INFO(
-                                $"[{rf_path_char(path)}] 5G OFDM-{tx_idx + 1} diff:{tmp_diff} from {pg_txpwr_src_str(txpwr_src)}");
-                        }
                     }
                 }
 
@@ -1302,11 +869,6 @@ public static class UsbHalInit
                        )
                     {
                         pwr_info.BW40_Diff[path, tx_idx] = tmp_diff;
-                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                        {
-                            RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G BW40-%dS diff:%d from %s\n",
-                                rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
-                        }
                     }
 
                     tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
@@ -1315,11 +877,6 @@ public static class UsbHalInit
                        )
                     {
                         pwr_info.BW20_Diff[path, tx_idx] = tmp_diff;
-                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                        {
-                            RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G BW20-%dS diff:%d from %s\n",
-                                rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
-                        }
                     }
                 }
 
@@ -1335,11 +892,6 @@ public static class UsbHalInit
             if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff) && IS_PG_TXPWR_DIFF_INVALID(pwr_info.OFDM_Diff[path, 1]))
             {
                 pwr_info.OFDM_Diff[path, 1] = tmp_diff;
-                if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                {
-                    RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), 2,
-                        tmp_diff, pg_txpwr_src_str(txpwr_src));
-                }
             }
 
             if (HAL_SPEC_CHK_TX_CNT(hal_spec, 2))
@@ -1348,11 +900,6 @@ public static class UsbHalInit
                 if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff) && IS_PG_TXPWR_DIFF_INVALID(pwr_info.OFDM_Diff[path, 2]))
                 {
                     pwr_info.OFDM_Diff[path, 2] = tmp_diff;
-                    if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                    {
-                        RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path),
-                            3, tmp_diff, pg_txpwr_src_str(txpwr_src));
-                    }
                 }
             }
         }
@@ -1367,11 +914,6 @@ public static class UsbHalInit
             if (!IS_PG_TXPWR_DIFF_INVALID(tmp_diff) && IS_PG_TXPWR_DIFF_INVALID(pwr_info.OFDM_Diff[path, 3]))
             {
                 pwr_info.OFDM_Diff[path, 3] = tmp_diff;
-                if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                {
-                    RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G OFDM-%dT diff:%d from %s\n", rf_path_char(path), 4,
-                        tmp_diff, pg_txpwr_src_str(txpwr_src));
-                }
             }
         }
 
@@ -1387,9 +929,6 @@ public static class UsbHalInit
                    )
                 {
                     pwr_info.BW80_Diff[path, tx_idx] = tmp_diff;
-                    if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                        RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G BW80-%dS diff:%d from %s\n", rf_path_char(path),
-                            tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
                 }
 
                 tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
@@ -1397,11 +936,6 @@ public static class UsbHalInit
                    )
                 {
                     pwr_info.BW160_Diff[path, tx_idx] = tmp_diff;
-                    if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                    {
-                        RTW_INFO("[hal_load_pg_txpwr_info_path_5g] 5G BW160-%dS diff:%d from %s\n", rf_path_char(path),
-                            tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
-                    }
                 }
             }
 
@@ -1410,18 +944,12 @@ public static class UsbHalInit
 
         if (offset != pg_offset + PG_TXPWR_1PATH_BYTE_NUM_5G)
         {
-            RTW_ERR(
-                $"[hal_load_pg_txpwr_info_path_5g] parse {offset - pg_offset} bytes != {PG_TXPWR_1PATH_BYTE_NUM_5G}");
+            RTW_ERR($"[hal_load_pg_txpwr_info_path_5g] parse {offset - pg_offset} bytes != {PG_TXPWR_1PATH_BYTE_NUM_5G}");
             throw new Exception("ERRR");
         }
 
         exit:
         return offset;
-    }
-
-    private static bool LOAD_PG_TXPWR_WARN_COND(byte txpwrSrc)
-    {
-        return true; // Because DBG_PG_TXPWR_READ
     }
 
     private static ushort hal_load_pg_txpwr_info_path_2g(_adapter adapter, TxPowerInfo24G pwr_info, byte path,
@@ -1456,11 +984,7 @@ public static class UsbHalInit
                    )
                 {
                     pwr_info.IndexCCK_Base[path, group] = tmp_base;
-                    if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                    {
-                        RTW_INFO(
-                            $"[{rf_path_char(path)}] 2G G{group:2} CCK-1T base:{tmp_base} from {pg_txpwr_src_str(txpwr_src)}");
-                    }
+                    RTW_INFO($"[{rf_path_char(path)}] 2G G{group:2} CCK-1T base:{tmp_base} from {pg_txpwr_src_str(txpwr_src)}");
                 }
             }
 
@@ -1477,11 +1001,7 @@ public static class UsbHalInit
                    )
                 {
                     pwr_info.IndexBW40_Base[path, group] = tmp_base;
-                    if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                    {
-                        RTW_INFO(
-                            $"[{rf_path_char(path)}] 2G G{group:2} BW40-1S base:{tmp_base} from {pg_txpwr_src_str(txpwr_src)}");
-                    }
+                    RTW_INFO($"[{rf_path_char(path)}] 2G G{group:2} BW40-1S base:{tmp_base} from {pg_txpwr_src_str(txpwr_src)}");
                 }
             }
 
@@ -1501,11 +1021,7 @@ public static class UsbHalInit
                        )
                     {
                         pwr_info.BW20_Diff[path, tx_idx] = tmp_diff;
-                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                        {
-                            RTW_INFO("[%c] 2G BW20-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff,
-                                pg_txpwr_src_str(txpwr_src));
-                        }
+                        RTW_INFO("[%c] 2G BW20-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
                     }
 
                     tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
@@ -1514,11 +1030,7 @@ public static class UsbHalInit
                        )
                     {
                         pwr_info.OFDM_Diff[path, tx_idx] = tmp_diff;
-                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                        {
-                            RTW_INFO("[%c] 2G OFDM-%dT diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff,
-                                pg_txpwr_src_str(txpwr_src));
-                        }
+                        RTW_INFO("[%c] 2G OFDM-%dT diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
                     }
                 }
 
@@ -1534,12 +1046,7 @@ public static class UsbHalInit
                         IS_PG_TXPWR_DIFF_INVALID(pwr_info.BW40_Diff[path, tx_idx]))
                     {
                         pwr_info.BW40_Diff[path, tx_idx] = tmp_diff;
-                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                        {
-                            RTW_INFO("[%c] 2G BW40-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff,
-                                pg_txpwr_src_str(txpwr_src));
-                        }
-
+                        RTW_INFO("[%c] 2G BW40-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
                     }
 
                     tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
@@ -1548,9 +1055,7 @@ public static class UsbHalInit
                        )
                     {
                         pwr_info.BW20_Diff[path, tx_idx] = tmp_diff;
-                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                            RTW_INFO("[%c] 2G BW20-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff,
-                                pg_txpwr_src_str(txpwr_src));
+                        RTW_INFO("[%c] 2G BW20-%dS diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
                     }
                 }
 
@@ -1565,11 +1070,7 @@ public static class UsbHalInit
                        )
                     {
                         pwr_info.OFDM_Diff[path, tx_idx] = tmp_diff;
-                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                        {
-                            RTW_INFO("[%c] 2G OFDM-%dT diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff,
-                                pg_txpwr_src_str(txpwr_src));
-                        }
+                        RTW_INFO("[%c] 2G OFDM-%dT diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
                     }
 
                     tmp_diff = PG_TXPWR_LSB_DIFF_TO_S8BIT(val);
@@ -1578,11 +1079,7 @@ public static class UsbHalInit
                        )
                     {
                         pwr_info.CCK_Diff[path, tx_idx] = tmp_diff;
-                        if (LOAD_PG_TXPWR_WARN_COND(txpwr_src))
-                        {
-                            RTW_INFO("[%c] 2G CCK-%dT diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff,
-                                pg_txpwr_src_str(txpwr_src));
-                        }
+                        RTW_INFO("[%c] 2G CCK-%dT diff:%d from %s\n", rf_path_char(path), tx_idx + 1, tmp_diff, pg_txpwr_src_str(txpwr_src));
                     }
                 }
 
