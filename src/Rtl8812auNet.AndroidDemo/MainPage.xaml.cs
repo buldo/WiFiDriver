@@ -1,4 +1,11 @@
-﻿namespace Rtl8812auNet.AndroidDemo
+﻿using Android.App;
+using Android.Content;
+using Android.Hardware.Usb;
+using Rtl8812auNet.AndroidDemo.RtlUsb;
+using Rtl8812auNet.Rtl8812au;
+using Application = Android.App.Application;
+
+namespace Rtl8812auNet.AndroidDemo
 {
     public partial class MainPage : ContentPage
     {
@@ -11,14 +18,22 @@
 
         private void OnCounterClicked(object sender, EventArgs e)
         {
-            count++;
+            var context = Android.App.Application.Context;
+            var usbManager = (UsbManager)context.GetSystemService(Android.Content.Context.UsbService);
+            var dev = usbManager.DeviceList.Single(pair => pair.Value.ManufacturerName == "Realtek").Value;
+            var pi = PendingIntent.GetBroadcast(
+                Application.Context,
+                0,
+                new Intent(Context.UsbService),
+                PendingIntentFlags.Immutable);
+            usbManager.RequestPermission(dev, pi);
 
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
+            var conn = usbManager.OpenDevice(dev);
+            var rtlUsbDevice = new RtlUsbDevice(dev, conn);
+            var rtl = new Rtl8812aDevice(rtlUsbDevice);
+            rtl.Init();
 
-            SemanticScreenReader.Announce(CounterBtn.Text);
+            Console.WriteLine("READY");
         }
     }
 }
