@@ -288,4 +288,7 @@ public static class CommonConsts
     public const uint USB_SUPER_SPEED_BULK_SIZE = 1024; /* usb 3.0 */
     public const uint USB_HIGH_SPEED_BULK_SIZE = 512; /* usb 2.0 */
     public const uint USB_FULL_SPEED_BULK_SIZE = 64; /* usb 1.1 */
+
+    public const int RXDESC_SIZE = 24;
+    public const int RXDESC_OFFSET = RXDESC_SIZE;
 }
