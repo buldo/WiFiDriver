@@ -1,9 +1,14 @@
-﻿namespace Rtl8812auNet.Abstractions;
+﻿using System.Threading.Channels;
+
+namespace Rtl8812auNet.Abstractions;
 
 public interface IRtlUsbDevice
 {
-    void InfinityRead();
     int Speed { get; }
+
+    public ChannelReader<byte[]> BulkTransfersReader { get; }
+
+    void InfinityRead();
 
     void WriteBytes(ushort register, Span<byte> data);
 

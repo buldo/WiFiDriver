@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Rtl8812au\FrameParsing.cs.bak" />
+    <None Remove="Rtl8812au\usb_ops_linux.cs.bak" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Rtl8812auNet.Abstractions\Rtl8812auNet.Abstractions.csproj" />
   </ItemGroup>
 
