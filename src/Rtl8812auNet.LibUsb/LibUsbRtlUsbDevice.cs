@@ -27,7 +27,7 @@ public class LibUsbRtlUsbDevice : IRtlUsbDevice
         _reader = _usbDevice.OpenEndpointReader(GetInEp());
     }
 
-    public ChannelReader<byte[]> BulkTransfersReader { get; }
+    public ChannelReader<byte[]> BulkTransfersReader => _bulkTransfersChannel.Reader;
 
     public void InfinityRead()
     {
@@ -48,7 +48,7 @@ public class LibUsbRtlUsbDevice : IRtlUsbDevice
 
                 if (len != 0)
                 {
-                    Console.WriteLine($"BULK read OK {len}");
+                    //Console.WriteLine($"BULK read OK {len}");
                     _bulkTransfersChannel.Writer.TryWrite(readBuffer.AsSpan(0, len).ToArray());
                 }
             }

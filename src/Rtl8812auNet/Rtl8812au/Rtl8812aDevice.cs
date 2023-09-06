@@ -7,6 +7,7 @@ public class Rtl8812aDevice
 {
     private readonly IRtlUsbDevice _usbDevice;
     private readonly AdapterState _adapterState;
+    private readonly StatefulFrameParser _frameParser = new();
     private Task _readTask;
     private Task _parseTask;
 
@@ -24,14 +25,16 @@ public class Rtl8812aDevice
         {
             cur_bwmode = ChannelWidth.CHANNEL_WIDTH_20,
             cur_ch_offset = 0,
-            cur_channel = 140
+            //cur_channel = 140,
+            cur_channel = 36
         });
 
         SetMonitorChannel(_adapterState, new InitChannel()
         {
             cur_bwmode = ChannelWidth.CHANNEL_WIDTH_20,
             cur_ch_offset = 0,
-            cur_channel = 140
+            //cur_channel = 140,
+            cur_channel = 36
         });
 
         _readTask = Task.Run(() => _usbDevice.InfinityRead());
@@ -68,7 +71,11 @@ public class Rtl8812aDevice
     {
         await foreach (var transfer in _usbDevice.BulkTransfersReader.ReadAllAsync())
         {
-
+            var packet = _frameParser.ParsedRadioPacket(transfer);
+            foreach (var radioPacket in packet)
+            {
+                Console.WriteLine(Convert.ToHexString(radioPacket.Data));
+            }
         }
     }
 }
@@ -84,7 +91,7 @@ public class recv_frame_hdr
 
     int frame_tag;
 
-    public rx_pkt_attrib attrib;
+    public rx_pkt_attrib attrib = new rx_pkt_attrib();
 
     public uint len;
     u8[] rx_head;
