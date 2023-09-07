@@ -23,9 +23,9 @@ public static class rtw_mlme_ext
         {
             case HwPort.HW_PORT0:
                 /*REG_CR - BIT[17:16]-Network Type for port 0*/
-                var val8 = (byte)(rtw_read8(adapterState, MSR) & 0x0C);
+                var val8 = (byte)(adapterState.Device.rtw_read8(MSR) & 0x0C);
                 val8 |= net_type;
-                rtw_write8(adapterState, MSR, val8);
+                adapterState.Device.rtw_write8(MSR, val8);
                 break;
             //case HwPort.HW_PORT1:
             //    /*REG_CR - BIT[19:18]-Network Type for port 1*/
@@ -55,7 +55,7 @@ public static class rtw_mlme_ext
 
         /* Receive all data frames */
         value_rxfltmap2 = 0xFFFF;
-        rtw_write16(adapterState, REG_RXFLTMAP2, value_rxfltmap2);
+        adapterState.Device.rtw_write16(REG_RXFLTMAP2, value_rxfltmap2);
     }
 
     public static bool init_hw_mlme_ext(AdapterState padapter, InitChannel pmlmeext)
@@ -86,19 +86,19 @@ public static class rtw_mlme_ext
         if (val == true)
         {
             /* enable RX BAR */
-            u32 val16 = rtw_read16(adapterState, REG_RXFLTMAP1);
+            u32 val16 = adapterState.Device.rtw_read16(REG_RXFLTMAP1);
 
             val16 |= BIT8;
-            rtw_write16(adapterState, REG_RXFLTMAP1, (u16)val16);
+            adapterState.Device.rtw_write16(REG_RXFLTMAP1, (u16)val16);
         }
         else
         {
             /* disable RX BAR */
-            u32 val16 = rtw_read16(adapterState, REG_RXFLTMAP1);
+            u32 val16 = adapterState.Device.rtw_read16(REG_RXFLTMAP1);
 
             val16 &= NotBIT8;
-            rtw_write16(adapterState, REG_RXFLTMAP1, (u16)val16);
+            adapterState.Device.rtw_write16(REG_RXFLTMAP1, (u16)val16);
         }
-        RTW_INFO($"[HW_VAR_ENABLE_RX_BAR] 0x{REG_RXFLTMAP1:X4}=0x{rtw_read16(adapterState, REG_RXFLTMAP1):X4}");
+        RTW_INFO($"[HW_VAR_ENABLE_RX_BAR] 0x{REG_RXFLTMAP1:X4}=0x{adapterState.Device.rtw_read16(REG_RXFLTMAP1):X4}");
     }
 }

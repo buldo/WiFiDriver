@@ -17,8 +17,9 @@ internal class Program
         var devices = context.FindAll(SearchPredicate);
 
         var device = devices.First();
-        var rtlUsb = new LibUsbRtlUsbDevice((UsbDevice)device);
-        var rtlDevice = new Rtl8812aDevice(rtlUsb);
+        var usb = new LibUsbRtlUsbDevice((UsbDevice)device);
+        var rtlAdapter = new RtlUsbAdapter(usb);
+        var rtlDevice = new Rtl8812aDevice(rtlAdapter);
 
         rtlDevice.Init();
 

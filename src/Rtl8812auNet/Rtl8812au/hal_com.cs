@@ -4,6 +4,6 @@ public static class hal_com
 {
     public static void hw_var_rcr_config(AdapterState adapterState, u32 rcr)
     {
-        rtw_write32(adapterState, REG_RCR, rcr);
+        adapterState.Device.rtw_write32(REG_RCR, rcr);
     }
 }

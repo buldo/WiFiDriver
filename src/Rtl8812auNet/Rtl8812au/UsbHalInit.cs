@@ -119,7 +119,7 @@ public static class UsbHalInit
         u8 eeValue;
 
         /* check system boot selection */
-        eeValue = rtw_read8(adapterState, REG_9346CR);
+        eeValue = adapterState.Device.rtw_read8(REG_9346CR);
         pHalData.EepromOrEfuse = (eeValue & BOOT_FROM_EEPROM) != 0 ? true : false;
         pHalData.bautoload_fail_flag = (eeValue & EEPROM_EN) != 0 ? false : true;
 
@@ -1839,10 +1839,10 @@ public static class UsbHalInit
         const byte EFUSE_ACCESS_OFF_JAGUAR = 0x00;
         if (pwrState)
         {
-            rtw_write8(adapterState, REG_EFUSE_BURN_GNT_8812, EFUSE_ACCESS_ON_JAGUAR);
+            adapterState.Device.rtw_write8(REG_EFUSE_BURN_GNT_8812, EFUSE_ACCESS_ON_JAGUAR);
 
             /* 1.2V Power: From VDDON with Power Cut(0x0000h[15]), defualt valid */
-            tmpV16 = rtw_read16(adapterState, REG_SYS_ISO_CTRL);
+            tmpV16 = adapterState.Device.rtw_read16(REG_SYS_ISO_CTRL);
             if (!((tmpV16 & SysIsoCtrlBits.PWC_EV12V) == SysIsoCtrlBits.PWC_EV12V))
             {
                 tmpV16 |= SysIsoCtrlBits.PWC_EV12V;
@@ -1850,43 +1850,43 @@ public static class UsbHalInit
             }
 
             /* Reset: 0x0000h[28], default valid */
-            tmpV16 = rtw_read16(adapterState, REG_SYS_FUNC_EN);
+            tmpV16 = adapterState.Device.rtw_read16(REG_SYS_FUNC_EN);
             if (!((tmpV16 & SysFuncEnBits.FEN_ELDR) == SysFuncEnBits.FEN_ELDR))
             {
                 tmpV16 |= SysFuncEnBits.FEN_ELDR;
-                rtw_write16(adapterState, REG_SYS_FUNC_EN, tmpV16);
+                adapterState.Device.rtw_write16(REG_SYS_FUNC_EN, tmpV16);
             }
 
             /* Clock: Gated(0x0008h[5]) 8M(0x0008h[1]) clock from ANA, default valid */
-            tmpV16 = rtw_read16(adapterState, REG_SYS_CLKR);
+            tmpV16 = adapterState.Device.rtw_read16(REG_SYS_CLKR);
             if ((!((tmpV16 & SysClkrBits.LOADER_CLK_EN) == SysClkrBits.LOADER_CLK_EN)) ||
                 (!((tmpV16 & SysClkrBits.ANA8M) == SysClkrBits.ANA8M)))
             {
                 tmpV16 |= (SysClkrBits.LOADER_CLK_EN | SysClkrBits.ANA8M);
-                rtw_write16(adapterState, REG_SYS_CLKR, tmpV16);
+                adapterState.Device.rtw_write16(REG_SYS_CLKR, tmpV16);
             }
 
             if (bWrite)
             {
                 /* Enable LDO 2.5V before read/write action */
-                var tempval = rtw_read8(adapterState, REG_EFUSE_TEST + 3);
+                var tempval = adapterState.Device.rtw_read8(REG_EFUSE_TEST + 3);
                 //tempval &= ~(BIT3 | BIT4 | BIT5 | BIT6);
                 //tempval &= (0b1111_0111 & 0b1110_1111 & 0b1101_1111 & 0b1011_1111);
                 tempval &= 0b1000_0111;
                 tempval |= (VoltageValues.VOLTAGE_V25 << 3);
                 tempval |= 0b1000_0000;
-                rtw_write8(adapterState, REG_EFUSE_TEST + 3, tempval);
+                adapterState.Device.rtw_write8(REG_EFUSE_TEST + 3, tempval);
             }
         }
         else
         {
-            rtw_write8(adapterState, REG_EFUSE_BURN_GNT_8812, EFUSE_ACCESS_OFF_JAGUAR);
+            adapterState.Device.rtw_write8(REG_EFUSE_BURN_GNT_8812, EFUSE_ACCESS_OFF_JAGUAR);
 
             if (bWrite)
             {
                 /* Disable LDO 2.5V after read/write action */
-                var tempval = rtw_read8(adapterState, REG_EFUSE_TEST + 3);
-                rtw_write8(adapterState, REG_EFUSE_TEST + 3, (byte)(tempval & 0x7F));
+                var tempval = adapterState.Device.rtw_read8(REG_EFUSE_TEST + 3);
+                adapterState.Device.rtw_write8(REG_EFUSE_TEST + 3, (byte)(tempval & 0x7F));
             }
         }
 
@@ -1898,20 +1898,20 @@ public static class UsbHalInit
         /* address			 */
         var addressBytes = new byte[2];
         BinaryPrimitives.TryWriteUInt16LittleEndian(addressBytes, addr);
-        rtw_write8(pAdapterState, EFUSE_CTRL + 1, addressBytes[0]);
-        var tmpRead = rtw_read8(pAdapterState, EFUSE_CTRL + 2);
+        pAdapterState.Device.rtw_write8(EFUSE_CTRL + 1, addressBytes[0]);
+        var tmpRead = pAdapterState.Device.rtw_read8(EFUSE_CTRL + 2);
         var secondAddr = (addressBytes[1] & 0x03) | (tmpRead & 0xFC);
-        rtw_write8(pAdapterState, EFUSE_CTRL + (2), (byte)secondAddr);
+        pAdapterState.Device.rtw_write8(EFUSE_CTRL + (2), (byte)secondAddr);
 
         /* Write8(pAdapterState, EFUSE_CTRL+3,  0x72); */
         /* read cmd	 */
         /* Write bit 32 0 */
-        var readbyte = rtw_read8(pAdapterState, EFUSE_CTRL + 3);
-        rtw_write8(pAdapterState, EFUSE_CTRL + 3, (byte)(readbyte & 0x7f));
+        var readbyte = pAdapterState.Device.rtw_read8(EFUSE_CTRL + 3);
+        pAdapterState.Device.rtw_write8(EFUSE_CTRL + 3, (byte)(readbyte & 0x7f));
 
 
         UInt32 tmpidx = 0;
-        while ((0x80 & rtw_read8(pAdapterState, EFUSE_CTRL + (3))) == 0 && (tmpidx < 1000))
+        while ((0x80 & pAdapterState.Device.rtw_read8(EFUSE_CTRL + (3))) == 0 && (tmpidx < 1000))
         {
             Thread.Sleep(1);
             tmpidx++;
@@ -1920,7 +1920,7 @@ public static class UsbHalInit
         bool bResult;
         if (tmpidx < 100)
         {
-            data = rtw_read8(pAdapterState, EFUSE_CTRL);
+            data = pAdapterState.Device.rtw_read8(EFUSE_CTRL);
             bResult = true;
         }
         else
@@ -1941,21 +1941,21 @@ public static class UsbHalInit
         u16 retry;
 
         /* Write Address */
-        rtw_write8(adapterState, EFUSE_CTRL + 1, (byte)(_offset & 0xff));
-        readbyte = rtw_read8(adapterState, EFUSE_CTRL + 2);
-        rtw_write8(adapterState, EFUSE_CTRL + 2, (byte)(((_offset >> 8) & 0x03) | (readbyte & 0xfc)));
+        adapterState.Device.rtw_write8(EFUSE_CTRL + 1, (byte)(_offset & 0xff));
+        readbyte = adapterState.Device.rtw_read8(EFUSE_CTRL + 2);
+        adapterState.Device.rtw_write8(EFUSE_CTRL + 2, (byte)(((_offset >> 8) & 0x03) | (readbyte & 0xfc)));
 
         /* Write bit 32 0 */
-        readbyte = rtw_read8(adapterState, EFUSE_CTRL + 3);
-        rtw_write8(adapterState, EFUSE_CTRL + 3, (byte)(readbyte & 0x7f));
+        readbyte = adapterState.Device.rtw_read8(EFUSE_CTRL + 3);
+        adapterState.Device.rtw_write8(EFUSE_CTRL + 3, (byte)(readbyte & 0x7f));
 
         /* Check bit 32 read-ready */
         retry = 0;
-        value32 = rtw_read32(adapterState, EFUSE_CTRL);
+        value32 = adapterState.Device.rtw_read32(EFUSE_CTRL);
         /* while(!(((value32 >> 24) & 0xff) & 0x80)  && (retry<10)) */
         while ((((value32 >> 24) & 0xff) & 0x80) == 0 && (retry < 10000))
         {
-            value32 = rtw_read32(adapterState, EFUSE_CTRL);
+            value32 = adapterState.Device.rtw_read32(EFUSE_CTRL);
             retry++;
         }
 
@@ -1964,7 +1964,7 @@ public static class UsbHalInit
         /* Designer says that there shall be some delay after ready bit is set, or the */
         /* result will always stay on last data we read. */
         Thread.Sleep(50);
-        value32 = rtw_read32(adapterState, EFUSE_CTRL);
+        value32 = adapterState.Device.rtw_read32(EFUSE_CTRL);
 
         pbuf[0] = (u8)(value32 & 0xff);
 
@@ -2094,7 +2094,7 @@ public static class UsbHalInit
             phy_set_bb_reg(adapterState, rCCK_RX_Jaguar, 0x0f000000, 0x1);
 
             /* CCK_CHECK_en */
-            rtw_write8(adapterState, REG_CCK_CHECK_8812, (byte)(rtw_read8(adapterState, REG_CCK_CHECK_8812) & (NotBIT7)));
+            adapterState.Device.rtw_write8(REG_CCK_CHECK_8812, (byte)(adapterState.Device.rtw_read8(REG_CCK_CHECK_8812) & (NotBIT7)));
         }
         else
         {
@@ -2103,10 +2103,10 @@ public static class UsbHalInit
 
 
             /* CCK_CHECK_en */
-            rtw_write8(adapterState, REG_CCK_CHECK_8812, (byte)(rtw_read8(adapterState, REG_CCK_CHECK_8812) | BIT7));
+            adapterState.Device.rtw_write8(REG_CCK_CHECK_8812, (byte)(adapterState.Device.rtw_read8(REG_CCK_CHECK_8812) | BIT7));
 
             count = 0;
-            reg41A = rtw_read16(adapterState, REG_TXPKT_EMPTY);
+            reg41A = adapterState.Device.rtw_read16(REG_TXPKT_EMPTY);
             /* RTW_INFO("Reg41A value %d", reg41A); */
             reg41A &= 0x30;
             while ((reg41A != 0x30) && (count < 50))
@@ -2114,7 +2114,7 @@ public static class UsbHalInit
                 Thread.Sleep(50);
                 /* RTW_INFO("Delay 50us\n"); */
 
-                reg41A = rtw_read16(adapterState, REG_TXPKT_EMPTY);
+                reg41A = adapterState.Device.rtw_read16(REG_TXPKT_EMPTY);
                 reg41A &= 0x30;
                 count++;
                 /* RTW_INFO("Reg41A value %d", reg41A); */
@@ -2328,12 +2328,12 @@ public static class UsbHalInit
                     phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x001);
                     break;
                 case 5:
-                    rtw_write8(adapterState, rA_RFE_Pinmux_Jaguar + 2, 0x77);
+                    adapterState.Device.rtw_write8(rA_RFE_Pinmux_Jaguar + 2, 0x77);
 
                     phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    u1tmp = rtw_read8(adapterState, rA_RFE_Inv_Jaguar + 3);
+                    u1tmp = adapterState.Device.rtw_read8(rA_RFE_Inv_Jaguar + 3);
                     u1tmp &= NotBIT0;
-                    rtw_write8(adapterState, rA_RFE_Inv_Jaguar + 3, (byte)(u1tmp));
+                    adapterState.Device.rtw_write8(rA_RFE_Inv_Jaguar + 3, (byte)(u1tmp));
                     phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
                     break;
                 case 6:
@@ -2379,10 +2379,10 @@ public static class UsbHalInit
                     phy_set_bb_reg(adapterState, r_ANTSEL_SW_Jaguar, 0x00000303, 0x1);
                     break;
                 case 5:
-                    rtw_write8(adapterState, rA_RFE_Pinmux_Jaguar + 2, 0x33);
+                    adapterState.Device.rtw_write8(rA_RFE_Pinmux_Jaguar + 2, 0x33);
                     phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
-                    u1tmp = rtw_read8(adapterState, rA_RFE_Inv_Jaguar + 3);
-                    rtw_write8(adapterState, rA_RFE_Inv_Jaguar + 3, (byte)(u1tmp |= BIT0));
+                    u1tmp = adapterState.Device.rtw_read8(rA_RFE_Inv_Jaguar + 3);
+                    adapterState.Device.rtw_write8(rA_RFE_Inv_Jaguar + 3, (byte)(u1tmp |= BIT0));
                     phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
                     break;
                 case 6:
@@ -2491,17 +2491,17 @@ public static class UsbHalInit
 
         /* tangw check start 20120412 */
         /* . APLL_EN,,APLL_320_GATEB,APLL_320BIAS,  auto config by hw fsm after pfsm_go (0x4 bit 8) set */
-        uint TmpU1B = rtw_read8(adapterState, REG_SYS_FUNC_EN);
+        uint TmpU1B = adapterState.Device.rtw_read8(REG_SYS_FUNC_EN);
 
         TmpU1B |= FEN_USBA;
 
-        rtw_write8(adapterState, REG_SYS_FUNC_EN, (byte)TmpU1B);
+        adapterState.Device.rtw_write8(REG_SYS_FUNC_EN, (byte)TmpU1B);
 
-        rtw_write8(adapterState, REG_SYS_FUNC_EN, (byte)(TmpU1B | FEN_BB_GLB_RSTn | FEN_BBRSTB)); /* same with 8812 */
+        adapterState.Device.rtw_write8(REG_SYS_FUNC_EN, (byte)(TmpU1B | FEN_BB_GLB_RSTn | FEN_BBRSTB)); /* same with 8812 */
         /* 6. 0x1f[7:0] = 0x07 PathA RF Power On */
-        rtw_write8(adapterState, REG_RF_CTRL, 0x07); /* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
+        adapterState.Device.rtw_write8(REG_RF_CTRL, 0x07); /* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
         /* 7.  PathB RF Power On */
-        rtw_write8(adapterState, REG_OPT_CTRL_8812 + 2, 0x7); /* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
+        adapterState.Device.rtw_write8(REG_OPT_CTRL_8812 + 2, 0x7); /* RF_SDMRSTB,RF_RSTB,RF_EN same with 8723a */
         /* tangw check end 20120412 */
 
 
@@ -2561,35 +2561,34 @@ public static class UsbHalInit
         u8 speedvalue, provalue, temp;
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
-        rtw_write8(adapterState, 0xf050, 0x01); /* usb3 rx interval */
-        rtw_write16(adapterState, REG_RXDMA_STATUS, 0x7400); /* burset lenght=4, set 0x3400 for burset length=2 */
-        rtw_write8(adapterState, 0x289, 0xf5); /* for rxdma control */
+        adapterState.Device.rtw_write8(0xf050, 0x01); /* usb3 rx interval */
+        adapterState.Device.rtw_write16(REG_RXDMA_STATUS, 0x7400); /* burset lenght=4, set 0x3400 for burset length=2 */
+        adapterState.Device.rtw_write8(0x289, 0xf5); /* for rxdma control */
 
         /* 0x456 = 0x70, sugguested by Zhilin */
-        rtw_write8(adapterState, REG_AMPDU_MAX_TIME_8812, 0x70);
+        adapterState.Device.rtw_write8(REG_AMPDU_MAX_TIME_8812, 0x70);
 
-        rtw_write32(adapterState, REG_AMPDU_MAX_LENGTH_8812, 0xffffffff);
-        rtw_write8(adapterState, REG_USTIME_TSF, 0x50);
-        rtw_write8(adapterState, REG_USTIME_EDCA, 0x50);
+        adapterState.Device.rtw_write32(REG_AMPDU_MAX_LENGTH_8812, 0xffffffff);
+        adapterState.Device.rtw_write8(REG_USTIME_TSF, 0x50);
+        adapterState.Device.rtw_write8(REG_USTIME_EDCA, 0x50);
 
-        speedvalue = rtw_read8(adapterState, 0xff); /* check device operation speed: SS 0xff bit7 */
+        speedvalue = adapterState.Device.rtw_read8(0xff); /* check device operation speed: SS 0xff bit7 */
 
         if ((speedvalue & BIT7) != 0)
         {
             /* USB2/1.1 Mode */
-            temp = rtw_read8(adapterState, 0xfe17);
+            temp = adapterState.Device.rtw_read8(0xfe17);
             if (((temp >> 4) & 0x03) == 0)
             {
                 pHalData.UsbBulkOutSize = USB_HIGH_SPEED_BULK_SIZE;
-                provalue = rtw_read8(adapterState, REG_RXDMA_PRO_8812);
-                rtw_write8(adapterState, REG_RXDMA_PRO_8812,
-                    (byte)((provalue | BIT4 | BIT3 | BIT2 | BIT1) & (NotBIT5))); /* set burst pkt len=512B */
+                provalue = adapterState.Device.rtw_read8(REG_RXDMA_PRO_8812);
+                adapterState.Device.rtw_write8(REG_RXDMA_PRO_8812,(byte)((provalue | BIT4 | BIT3 | BIT2 | BIT1) & (NotBIT5))); /* set burst pkt len=512B */
             }
             else
             {
                 pHalData.UsbBulkOutSize = 64;
-                provalue = rtw_read8(adapterState, REG_RXDMA_PRO_8812);
-                rtw_write8(adapterState, REG_RXDMA_PRO_8812,
+                provalue = adapterState.Device.rtw_read8(REG_RXDMA_PRO_8812);
+                adapterState.Device.rtw_write8(REG_RXDMA_PRO_8812,
                     (byte)((provalue | BIT5 | BIT3 | BIT2 | BIT1) & (NotBIT4))); /* set burst pkt len=64B */
             }
         }
@@ -2597,53 +2596,53 @@ public static class UsbHalInit
         {
             /* USB3 Mode */
             pHalData.UsbBulkOutSize = USB_SUPER_SPEED_BULK_SIZE;
-            provalue = rtw_read8(adapterState, REG_RXDMA_PRO_8812);
-            rtw_write8(adapterState, REG_RXDMA_PRO_8812,
+            provalue = adapterState.Device.rtw_read8(REG_RXDMA_PRO_8812);
+            adapterState.Device.rtw_write8(REG_RXDMA_PRO_8812,
                 //((provalue | BIT3 | BIT2 | BIT1) & (~(BIT5 | BIT4)))); /* set burst pkt len=1k */
                 (byte)((provalue | BIT3 | BIT2 | BIT1) & (0b1100_1111))); /* set burst pkt len=1k */
 
-            rtw_write8(adapterState, 0xf008, (byte)(rtw_read8(adapterState, 0xf008) & 0xE7));
+            adapterState.Device.rtw_write8(0xf008, (byte)(adapterState.Device.rtw_read8(0xf008) & 0xE7));
         }
 
-        temp = rtw_read8(adapterState, REG_SYS_FUNC_EN);
-        rtw_write8(adapterState, REG_SYS_FUNC_EN, (byte)(temp & (NotBIT10))); /* reset 8051 */
+        temp = adapterState.Device.rtw_read8(REG_SYS_FUNC_EN);
+        adapterState.Device.rtw_write8(REG_SYS_FUNC_EN, (byte)(temp & (NotBIT10))); /* reset 8051 */
 
-        rtw_write8(adapterState, REG_HT_SINGLE_AMPDU_8812,
-            (byte)(rtw_read8(adapterState, REG_HT_SINGLE_AMPDU_8812) | BIT7)); /* enable single pkt ampdu */
-        rtw_write8(adapterState, REG_RX_PKT_LIMIT, 0x18); /* for VHT packet length 11K */
+        adapterState.Device.rtw_write8(REG_HT_SINGLE_AMPDU_8812,
+            (byte)(adapterState.Device.rtw_read8(REG_HT_SINGLE_AMPDU_8812) | BIT7)); /* enable single pkt ampdu */
+        adapterState.Device.rtw_write8(REG_RX_PKT_LIMIT, 0x18); /* for VHT packet length 11K */
 
-        rtw_write8(adapterState, REG_PIFS, 0x00);
+        adapterState.Device.rtw_write8(REG_PIFS, 0x00);
 
-        rtw_write16(adapterState, REG_MAX_AGGR_NUM, 0x1f1f);
-        rtw_write8(adapterState, REG_FWHW_TXQ_CTRL, (byte)(rtw_read8(adapterState, REG_FWHW_TXQ_CTRL) & (NotBIT7)));
+        adapterState.Device.rtw_write16(REG_MAX_AGGR_NUM, 0x1f1f);
+        adapterState.Device.rtw_write8(REG_FWHW_TXQ_CTRL, (byte)(adapterState.Device.rtw_read8(REG_FWHW_TXQ_CTRL) & (NotBIT7)));
 
         if (pHalData.AMPDUBurstMode)
         {
-            rtw_write8(adapterState, REG_AMPDU_BURST_MODE_8812, 0x5F);
+            adapterState.Device.rtw_write8(REG_AMPDU_BURST_MODE_8812, 0x5F);
         }
 
-        rtw_write8(adapterState, 0x1c,
-            (byte)(rtw_read8(adapterState, 0x1c) | BIT5 | BIT6)); /* to prevent mac is reseted by bus. 20111208, by Page */
+        adapterState.Device.rtw_write8(0x1c,
+            (byte)(adapterState.Device.rtw_read8(0x1c) | BIT5 | BIT6)); /* to prevent mac is reseted by bus. 20111208, by Page */
 
         /* ARFB table 9 for 11ac 5G 2SS */
-        rtw_write32(adapterState, REG_ARFR0_8812, 0x00000010);
-        rtw_write32(adapterState, REG_ARFR0_8812 + 4, 0xfffff000);
+        adapterState.Device.rtw_write32(REG_ARFR0_8812, 0x00000010);
+        adapterState.Device.rtw_write32(REG_ARFR0_8812 + 4, 0xfffff000);
 
         /* ARFB table 10 for 11ac 5G 1SS */
-        rtw_write32(adapterState, REG_ARFR1_8812, 0x00000010);
-        rtw_write32(adapterState, REG_ARFR1_8812 + 4, 0x003ff000);
+        adapterState.Device.rtw_write32(REG_ARFR1_8812, 0x00000010);
+        adapterState.Device.rtw_write32(REG_ARFR1_8812 + 4, 0x003ff000);
 
         /* ARFB table 11 for 11ac 24G 1SS */
-        rtw_write32(adapterState, REG_ARFR2_8812, 0x00000015);
-        rtw_write32(adapterState, REG_ARFR2_8812 + 4, 0x003ff000);
+        adapterState.Device.rtw_write32(REG_ARFR2_8812, 0x00000015);
+        adapterState.Device.rtw_write32(REG_ARFR2_8812 + 4, 0x003ff000);
         /* ARFB table 12 for 11ac 24G 2SS */
-        rtw_write32(adapterState, REG_ARFR3_8812, 0x00000015);
-        rtw_write32(adapterState, REG_ARFR3_8812 + 4, 0xffcff000);
+        adapterState.Device.rtw_write32(REG_ARFR3_8812, 0x00000015);
+        adapterState.Device.rtw_write32(REG_ARFR3_8812 + 4, 0xffcff000);
     }
 
     static void _InitBeaconMaxError_8812A(AdapterState adapterState)
     {
-        rtw_write8(adapterState, REG_BCN_MAX_ERR, 0xFF);
+        adapterState.Device.rtw_write8(REG_BCN_MAX_ERR, 0xFF);
     }
 
     static void _InitBeaconParameters_8812A(AdapterState adapterState)
@@ -2651,22 +2650,22 @@ public static class UsbHalInit
         var val8 = DIS_TSF_UDT;
         var val16 = (u16)(val8 | (val8 << 8)); /* port0 and port1 */
 
-        rtw_write16(adapterState, REG_BCN_CTRL, val16);
+        adapterState.Device.rtw_write16( REG_BCN_CTRL, val16);
 
         /* TBTT setup time */
-        rtw_write8(adapterState, REG_TBTT_PROHIBIT, TBTT_PROHIBIT_SETUP_TIME);
+        adapterState.Device.rtw_write8(REG_TBTT_PROHIBIT, TBTT_PROHIBIT_SETUP_TIME);
 
         /* TBTT hold time: 0x540[19:8] */
-        rtw_write8(adapterState, REG_TBTT_PROHIBIT + 1, TBTT_PROHIBIT_HOLD_TIME_STOP_BCN & 0xFF);
-        rtw_write8(adapterState, REG_TBTT_PROHIBIT + 2,
-            (byte)((rtw_read8(adapterState, REG_TBTT_PROHIBIT + 2) & 0xF0) | (TBTT_PROHIBIT_HOLD_TIME_STOP_BCN >> 8)));
+        adapterState.Device.rtw_write8(REG_TBTT_PROHIBIT + 1, TBTT_PROHIBIT_HOLD_TIME_STOP_BCN & 0xFF);
+        adapterState.Device.rtw_write8(REG_TBTT_PROHIBIT + 2,
+            (byte)((adapterState.Device.rtw_read8(REG_TBTT_PROHIBIT + 2) & 0xF0) | (TBTT_PROHIBIT_HOLD_TIME_STOP_BCN >> 8)));
 
-        rtw_write8(adapterState, REG_DRVERLYINT, DRIVER_EARLY_INT_TIME_8812); /* 5ms */
-        rtw_write8(adapterState, REG_BCNDMATIM, BCN_DMA_ATIME_INT_TIME_8812); /* 2ms */
+        adapterState.Device.rtw_write8(REG_DRVERLYINT, DRIVER_EARLY_INT_TIME_8812); /* 5ms */
+        adapterState.Device.rtw_write8(REG_BCNDMATIM, BCN_DMA_ATIME_INT_TIME_8812); /* 2ms */
 
         /* Suggested by designer timchen. Change beacon AIFS to the largest number */
         /* beacause test chip does not contension before sending beacon. by tynli. 2009.11.03 */
-        rtw_write16(adapterState, REG_BCNTCFG, 0x4413);
+        adapterState.Device.rtw_write16(REG_BCNTCFG, 0x4413);
 
     }
 
@@ -2683,58 +2682,58 @@ public static class UsbHalInit
     {
         uint value8;
 
-        value8 = rtw_read8(adapterState, REG_FWHW_TXQ_CTRL);
+        value8 = adapterState.Device.rtw_read8(REG_FWHW_TXQ_CTRL);
         value8 |= EN_AMPDU_RTY_NEW;
-        rtw_write8(adapterState, REG_FWHW_TXQ_CTRL, (byte)value8);
+        adapterState.Device.rtw_write8(REG_FWHW_TXQ_CTRL, (byte)value8);
 
         /* Set ACK timeout */
         /* rtw_write8(adapterState, REG_ACKTO, 0x40);  */ /* masked by page for BCM IOT issue temporally */
-        rtw_write8(adapterState, REG_ACKTO, 0x80);
+        adapterState.Device.rtw_write8(REG_ACKTO, 0x80);
     }
 
     static void _InitEDCA_8812AUsb(AdapterState adapterState)
     {
         /* Set Spec SIFS (used in NAV) */
-        rtw_write16(adapterState, REG_SPEC_SIFS, 0x100a);
-        rtw_write16(adapterState, REG_MAC_SPEC_SIFS, 0x100a);
+        adapterState.Device.rtw_write16(REG_SPEC_SIFS, 0x100a);
+        adapterState.Device.rtw_write16(REG_MAC_SPEC_SIFS, 0x100a);
 
         /* Set SIFS for CCK */
-        rtw_write16(adapterState, REG_SIFS_CTX, 0x100a);
+        adapterState.Device.rtw_write16(REG_SIFS_CTX, 0x100a);
 
         /* Set SIFS for OFDM */
-        rtw_write16(adapterState, REG_SIFS_TRX, 0x100a);
+        adapterState.Device.rtw_write16(REG_SIFS_TRX, 0x100a);
 
         /* TXOP */
-        rtw_write32(adapterState, REG_EDCA_BE_PARAM, 0x005EA42B);
-        rtw_write32(adapterState, REG_EDCA_BK_PARAM, 0x0000A44F);
-        rtw_write32(adapterState, REG_EDCA_VI_PARAM, 0x005EA324);
-        rtw_write32(adapterState, REG_EDCA_VO_PARAM, 0x002FA226);
+        adapterState.Device.rtw_write32(REG_EDCA_BE_PARAM, 0x005EA42B);
+        adapterState.Device.rtw_write32(REG_EDCA_BK_PARAM, 0x0000A44F);
+        adapterState.Device.rtw_write32(REG_EDCA_VI_PARAM, 0x005EA324);
+        adapterState.Device.rtw_write32(REG_EDCA_VO_PARAM, 0x002FA226);
 
         /* 0x50 for 80MHz clock */
-        rtw_write8(adapterState, REG_USTIME_TSF, 0x50);
-        rtw_write8(adapterState, REG_USTIME_EDCA, 0x50);
+        adapterState.Device.rtw_write8(REG_USTIME_TSF, 0x50);
+        adapterState.Device.rtw_write8(REG_USTIME_EDCA, 0x50);
     }
 
     static void _InitAdaptiveCtrl_8812AUsb(AdapterState adapterState)
     {
         /* Response Rate Set */
-        u32 value32 = rtw_read32(adapterState, REG_RRSR);
+        u32 value32 = adapterState.Device.rtw_read32(REG_RRSR);
         value32 &= NotRATE_BITMAP_ALL;
 
         value32 |= RATE_RRSR_WITHOUT_CCK;
         value32 |= RATE_RRSR_CCK_ONLY_1M;
-        rtw_write32(adapterState, REG_RRSR, value32);
+        adapterState.Device.rtw_write32(REG_RRSR, value32);
 
         /* CF-END Threshold */
         /* m_spIoBase.rtw_write8(REG_CFEND_TH, 0x1); */
 
         /* SIFS (used in NAV) */
         u16 value16 = (u16)(_SPEC_SIFS_CCK(0x10) | _SPEC_SIFS_OFDM(0x10));
-        rtw_write16(adapterState, REG_SPEC_SIFS, value16);
+        adapterState.Device.rtw_write16(REG_SPEC_SIFS, value16);
 
         /* Retry Limit */
         value16 = (u16)(BIT_LRL(RL_VAL_STA) | BIT_SRL(RL_VAL_STA));
-        rtw_write16(adapterState, REG_RETRY_LIMIT, value16);
+        adapterState.Device.rtw_write16(REG_RETRY_LIMIT, value16);
     }
 
     private static u16 BIT_LRL(u16 x) => (u16)(((x) & BIT_MASK_LRL) << BIT_SHIFT_LRL);
@@ -2762,22 +2761,22 @@ public static class UsbHalInit
         hw_var_rcr_config(adapterState, rcr);
 
         /* Accept all multicast address */
-        rtw_write32(adapterState, REG_MAR, 0xFFFFFFFF);
-        rtw_write32(adapterState, REG_MAR + 4, 0xFFFFFFFF);
+        adapterState.Device.rtw_write32(REG_MAR, 0xFFFFFFFF);
+        adapterState.Device.rtw_write32(REG_MAR + 4, 0xFFFFFFFF);
 
         uint value16 = BIT10 | BIT5;
-        rtw_write16(adapterState, REG_RXFLTMAP1, (u16)value16);
+        adapterState.Device.rtw_write16(REG_RXFLTMAP1, (u16)value16);
     }
 
     static void _InitNetworkType_8812A(AdapterState adapterState)
     {
         u32 value32;
 
-        value32 = rtw_read32(adapterState, REG_CR);
+        value32 = adapterState.Device.rtw_read32(REG_CR);
         /* TODO: use the other function to set network type */
         value32 = (value32 & ~MASK_NETTYPE) | _NETTYPE(NT_LINK_AP);
 
-        rtw_write32(adapterState, REG_CR, value32);
+        adapterState.Device.rtw_write32(REG_CR, value32);
     }
 
     private static u32 _NETTYPE(u32 x) => (((x) & 0x3) << 16);
@@ -2787,27 +2786,27 @@ public static class UsbHalInit
         var pHalData = GET_HAL_DATA(adapterState);
 
         /* HIMR */
-        rtw_write32(adapterState, REG_HIMR0_8812, pHalData.IntrMask[0] & 0xFFFFFFFF);
-        rtw_write32(adapterState, REG_HIMR1_8812, pHalData.IntrMask[1] & 0xFFFFFFFF);
+        adapterState.Device.rtw_write32(REG_HIMR0_8812, pHalData.IntrMask[0] & 0xFFFFFFFF);
+        adapterState.Device.rtw_write32(REG_HIMR1_8812, pHalData.IntrMask[1] & 0xFFFFFFFF);
     }
 
     static void _InitDriverInfoSize_8812A(AdapterState adapterState, u8 drvInfoSize)
     {
-        rtw_write8(adapterState, REG_RX_DRVINFO_SZ, drvInfoSize);
+        adapterState.Device.rtw_write8(REG_RX_DRVINFO_SZ, drvInfoSize);
     }
 
     static void _InitTransferPageSize_8812AUsb(AdapterState adapterState)
     {
         u8 value8 = _PSTX(PBP_512);
 
-        rtw_write8(adapterState, REG_PBP, value8);
+        adapterState.Device.rtw_write8(REG_PBP, value8);
     }
 
     static byte _PSTX(byte x) => (byte)((x) << 4);
 
     static void _InitPageBoundary_8812AUsb(AdapterState adapterState)
     {
-        rtw_write16(adapterState, (REG_TRXFF_BNDY + 2), RX_DMA_BOUNDARY_8812);
+        adapterState.Device.rtw_write16((REG_TRXFF_BNDY + 2), RX_DMA_BOUNDARY_8812);
     }
 
     static void _InitQueuePriority_8812AUsb(AdapterState adapterState)
@@ -2865,7 +2864,7 @@ public static class UsbHalInit
     static void init_hi_queue_config_8812a_usb(AdapterState adapterState)
     {
         /* Packet in Hi Queue Tx immediately (No constraint for ATIM Period)*/
-        rtw_write8(adapterState, REG_HIQ_NO_LMT_EN, 0xFF);
+        adapterState.Device.rtw_write8(REG_HIQ_NO_LMT_EN, 0xFF);
     }
 
     static void _InitNormalChipThreeOutEpPriority_8812AUsb(AdapterState adapterState)
@@ -2962,14 +2961,14 @@ public static class UsbHalInit
         u16 hiQ
     )
     {
-        u16 value16 = (u16)(rtw_read16(adapterState, REG_TRXDMA_CTRL) & 0x7);
+        u16 value16 = (u16)(adapterState.Device.rtw_read16(REG_TRXDMA_CTRL) & 0x7);
 
         value16 = (u16)(value16 |
                         _TXDMA_BEQ_MAP(beQ) | _TXDMA_BKQ_MAP(bkQ) |
                         _TXDMA_VIQ_MAP(viQ) | _TXDMA_VOQ_MAP(voQ) |
                         _TXDMA_MGQ_MAP(mgtQ) | _TXDMA_HIQ_MAP(hiQ));
 
-        rtw_write16(adapterState, REG_TRXDMA_CTRL, value16);
+        adapterState.Device.rtw_write16(REG_TRXDMA_CTRL, value16);
     }
 
     private static u16 _TXDMA_HIQ_MAP(u16 x) => (u16)(((x) & 0x3) << 14);
@@ -2983,11 +2982,11 @@ public static class UsbHalInit
     {
         u8 txPageBoundary8812 = TX_PAGE_BOUNDARY_8812;
 
-        rtw_write8(adapterState, REG_BCNQ_BDNY, txPageBoundary8812);
-        rtw_write8(adapterState, REG_MGQ_BDNY, txPageBoundary8812);
-        rtw_write8(adapterState, REG_WMAC_LBK_BF_HD, txPageBoundary8812);
-        rtw_write8(adapterState, REG_TRXFF_BNDY, txPageBoundary8812);
-        rtw_write8(adapterState, REG_TDECTRL + 1, txPageBoundary8812);
+        adapterState.Device.rtw_write8(REG_BCNQ_BDNY, txPageBoundary8812);
+        adapterState.Device.rtw_write8(REG_MGQ_BDNY, txPageBoundary8812);
+        adapterState.Device.rtw_write8(REG_WMAC_LBK_BF_HD, txPageBoundary8812);
+        adapterState.Device.rtw_write8(REG_TRXFF_BNDY, txPageBoundary8812);
+        adapterState.Device.rtw_write8(REG_TDECTRL + 1, txPageBoundary8812);
 
     }
 
@@ -3000,9 +2999,9 @@ public static class UsbHalInit
     static void _InitHardwareDropIncorrectBulkOut_8812A(AdapterState adapterState)
     {
         var DROP_DATA_EN = BIT9;
-        u32 value32 = rtw_read32(adapterState, REG_TXDMA_OFFSET_CHK);
+        u32 value32 = adapterState.Device.rtw_read32(REG_TXDMA_OFFSET_CHK);
         value32 |= DROP_DATA_EN;
-        rtw_write32(adapterState, REG_TXDMA_OFFSET_CHK, value32);
+        adapterState.Device.rtw_write32(REG_TXDMA_OFFSET_CHK, value32);
     }
 
     public static bool InitLLTTable8812A(AdapterState padapter, u8 txpktbuf_bndy)
@@ -3076,12 +3075,12 @@ public static class UsbHalInit
         s32 count = 0;
         u32 value = _LLT_INIT_ADDR(address) | _LLT_INIT_DATA(data) | _LLT_OP(_LLT_WRITE_ACCESS);
 
-        rtw_write32(adapterState, REG_LLT_INIT, value);
+        adapterState.Device.rtw_write32(REG_LLT_INIT, value);
 
         /* polling */
         do
         {
-            value = rtw_read32(adapterState, REG_LLT_INIT);
+            value = adapterState.Device.rtw_read32(REG_LLT_INIT);
             if (_LLT_NO_ACTIVE == _LLT_OP_VALUE(value))
             {
                 break;
@@ -3102,44 +3101,44 @@ public static class UsbHalInit
     static void rtl8812au_hw_reset(AdapterState adapterState)
     {
         uint reg_val = 0;
-        if ((rtw_read8(adapterState, REG_MCUFWDL) & BIT7) != 0)
+        if ((adapterState.Device.rtw_read8(REG_MCUFWDL) & BIT7) != 0)
         {
             _8051Reset8812(adapterState);
-            rtw_write8(adapterState, REG_MCUFWDL, 0x00);
+            adapterState.Device.rtw_write8(REG_MCUFWDL, 0x00);
             /* before BB reset should do clock gated */
-            rtw_write32(adapterState, rFPGA0_XCD_RFPara,
-                rtw_read32(adapterState, rFPGA0_XCD_RFPara) | (BIT6));
+            adapterState.Device.rtw_write32(rFPGA0_XCD_RFPara,
+                adapterState.Device.rtw_read32(rFPGA0_XCD_RFPara) | (BIT6));
             /* reset BB */
-            reg_val = rtw_read8(adapterState, REG_SYS_FUNC_EN);
+            reg_val = adapterState.Device.rtw_read8(REG_SYS_FUNC_EN);
             reg_val = (byte)(reg_val & ~(BIT0 | BIT1));
-            rtw_write8(adapterState, REG_SYS_FUNC_EN, (byte)reg_val);
+            adapterState.Device.rtw_write8(REG_SYS_FUNC_EN, (byte)reg_val);
             /* reset RF */
-            rtw_write8(adapterState, REG_RF_CTRL, 0);
+            adapterState.Device.rtw_write8(REG_RF_CTRL, 0);
             /* reset TRX path */
-            rtw_write16(adapterState, REG_CR, 0);
+            adapterState.Device.rtw_write16(REG_CR, 0);
             /* reset MAC */
-            reg_val = rtw_read8(adapterState, REG_APS_FSMCO + 1);
+            reg_val = adapterState.Device.rtw_read8(REG_APS_FSMCO + 1);
             reg_val |= BIT1;
-            rtw_write8(adapterState, REG_APS_FSMCO + 1, (byte)reg_val); /* reg0x5[1] ,auto FSM off */
+            adapterState.Device.rtw_write8(REG_APS_FSMCO + 1, (byte)reg_val); /* reg0x5[1] ,auto FSM off */
 
-            reg_val = rtw_read8(adapterState, REG_APS_FSMCO + 1);
+            reg_val = adapterState.Device.rtw_read8(REG_APS_FSMCO + 1);
 
             /* check if   reg0x5[1] auto cleared */
             while ((reg_val & BIT1) != 0)
             {
                 Thread.Sleep(1);
-                reg_val = rtw_read8(adapterState, REG_APS_FSMCO + 1);
+                reg_val = adapterState.Device.rtw_read8(REG_APS_FSMCO + 1);
             }
 
             reg_val |= BIT0;
-            rtw_write8(adapterState, REG_APS_FSMCO + 1, (byte)reg_val); /* reg0x5[0] ,auto FSM on */
+            adapterState.Device.rtw_write8(REG_APS_FSMCO + 1, (byte)reg_val); /* reg0x5[0] ,auto FSM on */
 
-            reg_val = rtw_read8(adapterState, REG_SYS_FUNC_EN + 1);
+            reg_val = adapterState.Device.rtw_read8(REG_SYS_FUNC_EN + 1);
             reg_val = (byte)(reg_val & ~(BIT4 | BIT7));
-            rtw_write8(adapterState, REG_SYS_FUNC_EN + 1, (byte)reg_val);
-            reg_val = rtw_read8(adapterState, REG_SYS_FUNC_EN + 1);
+            adapterState.Device.rtw_write8(REG_SYS_FUNC_EN + 1, (byte)reg_val);
+            reg_val = adapterState.Device.rtw_read8(REG_SYS_FUNC_EN + 1);
             reg_val = (byte)(reg_val | BIT4 | BIT7);
-            rtw_write8(adapterState, REG_SYS_FUNC_EN + 1, (byte)reg_val);
+            adapterState.Device.rtw_write8(REG_SYS_FUNC_EN + 1, (byte)reg_val);
         }
     }
 
@@ -3176,13 +3175,13 @@ WLAN_PWR_CFG[] PwrSeqCmd)
                         {
                             var offset = PwrCfgCmd.offset;
                             /* Read the value from system register */
-                            var currentOffsetValue = Read8(adapterState, offset);
+                            var currentOffsetValue = adapterState.Device.Read8(offset);
 
                             currentOffsetValue = (byte)(currentOffsetValue & unchecked((byte)(~PwrCfgCmd.msk)));
                             currentOffsetValue = (byte)(currentOffsetValue | ((PwrCfgCmd.value) & (PwrCfgCmd.msk)));
 
                             /* Write the value back to sytem register */
-                            Write8(adapterState, offset, currentOffsetValue);
+                            adapterState.Device.Write8(offset, currentOffsetValue);
                         }
                         break;
 
@@ -3198,7 +3197,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
                             do
                             {
-                                var value = Read8(adapterState, offset);
+                                var value = adapterState.Device.Read8(offset);
 
                                 value = (byte)(value & PwrCfgCmd.msk);
                                 if (value == ((PwrCfgCmd.value) & PwrCfgCmd.msk))
@@ -3220,8 +3219,8 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
                                         // TODO: RTW_ERR("[WARNING] PCIE polling(0x%X) timeout(%d), Toggle 0x04[3] and try again.\n", offset, maxPollingCnt);
 
-                                        Write8(adapterState, 0x04, (byte)(Read8(adapterState, 0x04) | BIT3));
-                                        Write8(adapterState, 0x04, (byte)(Read8(adapterState, 0x04) & NotBIT3));
+                                        adapterState.Device.Write8(0x04, (byte)(adapterState.Device.Read8(0x04) | BIT3));
+                                        adapterState.Device.Write8(0x04, (byte)(adapterState.Device.Read8(0x04) & NotBIT3));
 
                                         /* Retry Polling Process one more time */
                                         pollingCount = 0;
@@ -3287,8 +3286,8 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
         /* Enable MAC DMA/WMAC/SCHEDULE/SEC block */
         /* Set CR bit10 to enable 32k calibration. Suggested by SD1 Gimmy. Added by tynli. 2011.08.31. */
-        rtw_write16(padapter, REG_CR, 0x00); /* suggseted by zhouzhou, by page, 20111230 */
-        u16 u2btmp = rtw_read16(padapter, REG_CR);
+        padapter.Device.rtw_write16(REG_CR, 0x00); /* suggseted by zhouzhou, by page, 20111230 */
+        u16 u2btmp = padapter.Device.rtw_read16(REG_CR);
         u2btmp |= (ushort)(
             CrBit.HCI_TXDMA_EN |
             CrBit.HCI_RXDMA_EN |
@@ -3298,7 +3297,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
             CrBit.SCHEDULE_EN |
             CrBit.ENSEC |
             CrBit.CALTMR_EN);
-        rtw_write16(padapter, REG_CR, u2btmp);
+        padapter.Device.rtw_write16(REG_CR, u2btmp);
 
         /* Need remove below furture, suggest by Jackie. */
         /* if 0xF0[24] =1 (LDO), need to set the 0x7C[6] to 1. */
@@ -3316,24 +3315,24 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
         /* Reset MCU IO Wrapper- sugggest by SD1-Gimmy */
 
-        u1bTmp2 = rtw_read8(padapter, REG_RSV_CTRL);
-        rtw_write8(padapter, REG_RSV_CTRL, (byte)(u1bTmp2 & (NotBIT1)));
-        u1bTmp2 = rtw_read8(padapter, REG_RSV_CTRL + 1);
-        rtw_write8(padapter, REG_RSV_CTRL + 1, (byte)(u1bTmp2 & (NotBIT3)));
+        u1bTmp2 = padapter.Device.rtw_read8(REG_RSV_CTRL);
+        padapter.Device.rtw_write8(REG_RSV_CTRL, (byte)(u1bTmp2 & (NotBIT1)));
+        u1bTmp2 = padapter.Device.rtw_read8(REG_RSV_CTRL + 1);
+        padapter.Device.rtw_write8(REG_RSV_CTRL + 1, (byte)(u1bTmp2 & (NotBIT3)));
 
 
-        u1bTmp = rtw_read8(padapter, REG_SYS_FUNC_EN + 1);
-        rtw_write8(padapter, REG_SYS_FUNC_EN + 1, (byte)(u1bTmp & (NotBIT2)));
+        u1bTmp = padapter.Device.rtw_read8(REG_SYS_FUNC_EN + 1);
+        padapter.Device.rtw_write8(REG_SYS_FUNC_EN + 1, (byte)(u1bTmp & (NotBIT2)));
 
         /* Enable MCU IO Wrapper */
 
-        u1bTmp2 = rtw_read8(padapter, REG_RSV_CTRL);
-        rtw_write8(padapter, REG_RSV_CTRL, (byte)(u1bTmp2 & (NotBIT1)));
-        u1bTmp2 = rtw_read8(padapter, REG_RSV_CTRL + 1);
-        rtw_write8(padapter, REG_RSV_CTRL + 1, (byte)(u1bTmp2 | (BIT3)));
+        u1bTmp2 = padapter.Device.rtw_read8(REG_RSV_CTRL);
+        padapter.Device.rtw_write8(REG_RSV_CTRL, (byte)(u1bTmp2 & (NotBIT1)));
+        u1bTmp2 = padapter.Device.rtw_read8(REG_RSV_CTRL + 1);
+        padapter.Device.rtw_write8(REG_RSV_CTRL + 1, (byte)(u1bTmp2 | (BIT3)));
 
 
-        rtw_write8(padapter, REG_SYS_FUNC_EN + 1, (byte)(u1bTmp | (BIT2)));
+        padapter.Device.rtw_write8(REG_SYS_FUNC_EN + 1, (byte)(u1bTmp | (BIT2)));
 
         RTW_INFO("=====> _8051Reset8812(): 8051 reset success .");
     }
@@ -3366,8 +3365,8 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         registry_priv pregistrypriv = adapterState.registrypriv;
 
         // Check if MAC has already power on. by tynli. 2011.05.27.
-        value8 = rtw_read8(adapterState, REG_SYS_CLKR + 1);
-        u1bRegCR = rtw_read8(adapterState, REG_CR);
+        value8 = adapterState.Device.rtw_read8(REG_SYS_CLKR + 1);
+        u1bRegCR = adapterState.Device.rtw_read8(REG_CR);
         RTW_INFO(" power-on :REG_SYS_CLKR 0x09=0x%02x. REG_CR 0x100=0x%02x.\n", value8, u1bRegCR);
         if ((value8 & BIT3) != 0 && (u1bRegCR != 0 && u1bRegCR != 0xEA))
         {
@@ -3383,10 +3382,10 @@ WLAN_PWR_CFG[] PwrSeqCmd)
             RTW_INFO(" MAC has not been powered on yet.\n");
         }
 
-        rtw_write8(adapterState, REG_RF_CTRL, 5);
-        rtw_write8(adapterState, REG_RF_CTRL, 7);
-        rtw_write8(adapterState, REG_RF_B_CTRL_8812, 5);
-        rtw_write8(adapterState, REG_RF_B_CTRL_8812, 7);
+        adapterState.Device.rtw_write8(REG_RF_CTRL, 5);
+        adapterState.Device.rtw_write8(REG_RF_CTRL, 7);
+        adapterState.Device.rtw_write8(REG_RF_B_CTRL_8812, 5);
+        adapterState.Device.rtw_write8(REG_RF_B_CTRL_8812, 7);
 
         // If HW didn't go through a complete de-initial procedure,
         // it probably occurs some problem for double initial procedure.
@@ -3450,11 +3449,11 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         // Init CR MACTXEN, MACRXEN after setting RxFF boundary REG_TRXFF_BNDY to patch
         // Hw bug which Hw initials RxFF boundry size to a value which is larger than the real Rx buffer size in 88E.
         // 2011.08.05. by tynli.
-        value8 = rtw_read8(adapterState, REG_CR);
-        rtw_write8(adapterState, REG_CR, (byte)(value8 | MACTXEN | MACRXEN));
+        value8 = adapterState.Device.rtw_read8(REG_CR);
+        adapterState.Device.rtw_write8(REG_CR, (byte)(value8 | MACTXEN | MACRXEN));
 
-        rtw_write16(adapterState, REG_PKT_VO_VI_LIFE_TIME, 0x0400); /* unit: 256us. 256ms */
-        rtw_write16(adapterState, REG_PKT_BE_BK_LIFE_TIME, 0x0400); /* unit: 256us. 256ms */
+        adapterState.Device.rtw_write16(REG_PKT_VO_VI_LIFE_TIME, 0x0400); /* unit: 256us. 256ms */
+        adapterState.Device.rtw_write16(REG_PKT_BE_BK_LIFE_TIME, 0x0400); /* unit: 256us. 256ms */
 
         status = PHY_BBConfig8812(adapterState);
         if (status == false)
@@ -3491,46 +3490,46 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
         // HW SEQ CTRL
         // set 0x0 to 0xFF by tynli. Default enable HW SEQ NUM.
-        rtw_write8(adapterState, REG_HWSEQ_CTRL, 0xFF);
+        adapterState.Device.rtw_write8(REG_HWSEQ_CTRL, 0xFF);
 
 
         // Disable BAR, suggested by Scott
         // 2010.04.09 add by hpfan
-        rtw_write32(adapterState, REG_BAR_MODE_CTRL, 0x0201ffff);
+        adapterState.Device.rtw_write32(REG_BAR_MODE_CTRL, 0x0201ffff);
 
         if (pregistrypriv.wifi_spec)
         {
-            rtw_write16(adapterState, REG_FAST_EDCA_CTRL, 0);
+            adapterState.Device.rtw_write16(REG_FAST_EDCA_CTRL, 0);
         }
 
         // Nav limit , suggest by scott
-        rtw_write8(adapterState, 0x652, 0x0);
+        adapterState.Device.rtw_write8(0x652, 0x0);
 
         init_phydm_info(adapterState);
 
 
         /* 0x4c6[3] 1: RTS BW = Data BW */
         /* 0: RTS BW depends on CCA / secondary CCA result. */
-        rtw_write8(adapterState, REG_QUEUE_CTRL, (byte)(rtw_read8(adapterState, REG_QUEUE_CTRL) & 0xF7));
+        adapterState.Device.rtw_write8(REG_QUEUE_CTRL, (byte)(adapterState.Device.rtw_read8(REG_QUEUE_CTRL) & 0xF7));
 
         /* enable Tx report. */
-        rtw_write8(adapterState, REG_FWHW_TXQ_CTRL + 1, 0x0F);
+        adapterState.Device.rtw_write8(REG_FWHW_TXQ_CTRL + 1, 0x0F);
 
         /* Suggested by SD1 pisa. Added by tynli. 2011.10.21. */
-        rtw_write8(adapterState, REG_EARLY_MODE_CONTROL_8812 + 3, 0x01); /* Pretx_en, for WEP/TKIP SEC */
+        adapterState.Device.rtw_write8(REG_EARLY_MODE_CONTROL_8812 + 3, 0x01); /* Pretx_en, for WEP/TKIP SEC */
 
         /* tynli_test_tx_report. */
-        rtw_write16(adapterState, REG_TX_RPT_TIME, 0x3DF0);
+        adapterState.Device.rtw_write16(REG_TX_RPT_TIME, 0x3DF0);
 
         /* Reset USB mode switch setting */
-        rtw_write8(adapterState, REG_SDIO_CTRL_8812, 0x0);
-        rtw_write8(adapterState, REG_ACLK_MON, 0x0);
+        adapterState.Device.rtw_write8(REG_SDIO_CTRL_8812, 0x0);
+        adapterState.Device.rtw_write8(REG_ACLK_MON, 0x0);
 
-        rtw_write8(adapterState, REG_USB_HRPWM, 0);
+        adapterState.Device.rtw_write8(REG_USB_HRPWM, 0);
 
         // TODO:
         ///* ack for xmit mgmt frames. */
-        rtw_write32(adapterState, REG_FWHW_TXQ_CTRL, rtw_read32(adapterState, REG_FWHW_TXQ_CTRL) | BIT12);
+        adapterState.Device.rtw_write32(REG_FWHW_TXQ_CTRL, adapterState.Device.rtw_read32(REG_FWHW_TXQ_CTRL) | BIT12);
     exit:
 
         return status;
@@ -3569,10 +3568,10 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
         /* Suggested by Filen. If 8051 is running in RAM code, driver should inform Fw to reset by itself, */
         /* or it will cause download Fw fail. 2010.02.01. by tynli. */
-        if ((rtw_read8(adapterState, REG_MCUFWDL) & BIT7) != 0)
+        if ((adapterState.Device.rtw_read8(REG_MCUFWDL) & BIT7) != 0)
         {
             /* 8051 RAM code */
-            rtw_write8(adapterState, REG_MCUFWDL, 0x00);
+            adapterState.Device.rtw_write8(REG_MCUFWDL, 0x00);
             _8051Reset8812(adapterState);
         }
 
@@ -3581,7 +3580,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         while ((write_fw++ < 3 || (fwdl_start_time.ElapsedMilliseconds) < 500))
         {
             /* reset FWDL chksum */
-            rtw_write8(adapterState, REG_MCUFWDL, (byte)(rtw_read8(adapterState, REG_MCUFWDL) | FWDL_ChkSum_rpt));
+            adapterState.Device.rtw_write8(REG_MCUFWDL, (byte)(adapterState.Device.rtw_read8(REG_MCUFWDL) | FWDL_ChkSum_rpt));
 
             rtStatus = WriteFW8812(adapterState, pFirmwareBuf, FirmwareLen);
             if (rtStatus != true)
@@ -3618,7 +3617,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
     static void InitializeFirmwareVars8812(AdapterState padapter)
     {
         /* Init H2C cmd. */
-        rtw_write8(padapter, REG_HMETFR, 0x0f);
+        padapter.Device.rtw_write8(REG_HMETFR, 0x0f);
     }
 
     static bool _FWFreeToGo8812(AdapterState adapterState, u32 min_cnt, u32 timeout_ms)
@@ -3627,10 +3626,10 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         u32 value32;
         u32 cnt = 0;
 
-        value32 = rtw_read32(adapterState, REG_MCUFWDL);
+        value32 = adapterState.Device.rtw_read32(REG_MCUFWDL);
         value32 |= MCUFWDL_RDY;
         value32 = (u32)(value32 & ~WINTINI_RDY);
-        rtw_write32(adapterState, REG_MCUFWDL, value32);
+        adapterState.Device.rtw_write32(REG_MCUFWDL, value32);
 
         _8051Reset8812(adapterState);
 
@@ -3639,7 +3638,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         do
         {
             cnt++;
-            value32 = rtw_read32(adapterState, REG_MCUFWDL);
+            value32 = adapterState.Device.rtw_read32(REG_MCUFWDL);
             if ((value32 & WINTINI_RDY) != 0)
             {
                 break;
@@ -3676,7 +3675,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         do
         {
             cnt++;
-            value32 = rtw_read32(adapterState, REG_MCUFWDL);
+            value32 = adapterState.Device.rtw_read32(REG_MCUFWDL);
             if ((value32 & Firmware.FWDL_ChkSum_rpt) != 0)
             {
                 break;
@@ -3739,8 +3738,8 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         byte value8;
         byte u8Page = (byte)(page & 0x07);
 
-        value8 = (byte)((Read8(adapterState, (REG_MCUFWDL + 2)) & 0xF8) | u8Page);
-        Write8(adapterState, (REG_MCUFWDL + 2), value8);
+        value8 = (byte)((adapterState.Device.Read8((REG_MCUFWDL + 2)) & 0xF8) | u8Page);
+        adapterState.Device.Write8((REG_MCUFWDL + 2), value8);
 
         return BlockWrite(adapterState, buffer, size);
     }
@@ -3768,7 +3767,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
         for (i = 0; i < blockCount_p1; i++)
         {
-            WriteBytes(adapterState, (ushort)(FW_START_ADDRESS + i * blockSize_p1),
+            adapterState.Device.WriteBytes((ushort)(FW_START_ADDRESS + i * blockSize_p1),
                 buffer.Slice((int)(i * blockSize_p1), (int)blockSize_p1));
         }
 
@@ -3782,7 +3781,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
             for (i = 0; i < blockCount_p2; i++)
             {
-                WriteBytes(adapterState, (ushort)(FW_START_ADDRESS + offset + i * blockSize_p2),
+                adapterState.Device.WriteBytes((ushort)(FW_START_ADDRESS + offset + i * blockSize_p2),
                     buffer.Slice((int)(offset + i * blockSize_p2), (int)blockSize_p2));
             }
 
@@ -3798,7 +3797,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
             for (i = 0; i < blockCount_p3; i++)
             {
-                Write8(adapterState, (ushort)(FW_START_ADDRESS + offset + i), buffer[(int)(offset + i)]);
+                adapterState.Device.Write8((ushort)(FW_START_ADDRESS + offset + i), buffer[(int)(offset + i)]);
             }
         }
 
@@ -3812,19 +3811,19 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         if (enable)
         {
             /* MCU firmware download enable. */
-            tmp = rtw_read8(padapter, REG_MCUFWDL);
-            rtw_write8(padapter, REG_MCUFWDL, (byte)(tmp | 0x01));
+            tmp = padapter.Device.rtw_read8(REG_MCUFWDL);
+            padapter.Device.rtw_write8(REG_MCUFWDL, (byte)(tmp | 0x01));
 
             /* 8051 reset */
-            tmp = rtw_read8(padapter, REG_MCUFWDL + 2);
-            rtw_write8(padapter, REG_MCUFWDL + 2, (byte)(tmp & 0xf7));
+            tmp = padapter.Device.rtw_read8(REG_MCUFWDL + 2);
+            padapter.Device.rtw_write8(REG_MCUFWDL + 2, (byte)(tmp & 0xf7));
         }
         else
         {
 
             /* MCU firmware download disable. */
-            tmp = rtw_read8(padapter, REG_MCUFWDL);
-            rtw_write8(padapter, REG_MCUFWDL, (byte)(tmp & 0xfe));
+            tmp = padapter.Device.rtw_read8(REG_MCUFWDL);
+            padapter.Device.rtw_write8(REG_MCUFWDL, (byte)(tmp & 0xfe));
         }
     }
 
@@ -3862,7 +3861,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         PHAL_DATA_TYPE pHalData;
         pHalData = GET_HAL_DATA(adapterState);
 
-        value32 = rtw_read32(adapterState, REG_SYS_CFG);
+        value32 = adapterState.Device.rtw_read32(REG_SYS_CFG);
         RTW_INFO($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
 
         pHalData.version_id.RFType = HalRFType.RF_TYPE_2T2R; /* RF_2T2R; */
@@ -3876,7 +3875,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
         /* For multi-function consideration. Added by Roger, 2010.10.06. */
         pHalData.MultiFunc = RT_MULTI_FUNC.RT_MULTI_FUNC_NONE;
-        value32 = rtw_read32(adapterState, REG_MULTI_FUNC_CTRL);
+        value32 = adapterState.Device.rtw_read32(REG_MULTI_FUNC_CTRL);
         pHalData.MultiFunc |= ((value32 & WL_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_WIFI : 0);
         pHalData.MultiFunc |= ((value32 & BT_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_BT : 0);
 
@@ -3977,11 +3976,11 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         numPubQ = TX_TOTAL_PAGE_NUMBER_8812 - numHQ - numLQ - numNQ;
 
         value8 = (u8)_NPQ(numNQ);
-        rtw_write8(adapterState, REG_RQPN_NPQ, value8);
+        adapterState.Device.rtw_write8(REG_RQPN_NPQ, value8);
 
 /* TX DMA */
         value32 = _HPQ(numHQ) | _LPQ(numLQ) | _PUBQ(numPubQ) | LD_RQPN();
-        rtw_write32(adapterState, REG_RQPN, value32);
+        adapterState.Device.rtw_write32(REG_RQPN, value32);
     }
 
     static u32 _NPQ(u32 x) => ((x) & 0xFF);
@@ -4003,11 +4002,11 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
         if (pHalData.UsbTxAggMode)
         {
-            value32 = rtw_read32(adapterState, REG_TDECTRL);
+            value32 = adapterState.Device.rtw_read32(REG_TDECTRL);
             value32 = value32 & ~(BLK_DESC_NUM_MASK << BLK_DESC_NUM_SHIFT);
             value32 |= ((pHalData.UsbTxAggDescNum & BLK_DESC_NUM_MASK) << BLK_DESC_NUM_SHIFT);
 
-            rtw_write32(adapterState, REG_DWBCN0_CTRL_8812, value32);
+            adapterState.Device.rtw_write32(REG_DWBCN0_CTRL_8812, value32);
             //if (IS_HARDWARE_TYPE_8821U(adapterState))   /* page added for Jaguar */
             //    rtw_write8(adapterState, REG_DWBCN1_CTRL_8812, pHalData.UsbTxAggDescNum << 1);
         }
@@ -4019,7 +4018,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
         HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
 
-        uint valueDMA = rtw_read8(adapterState, REG_TRXDMA_CTRL);
+        uint valueDMA = adapterState.Device.rtw_read8(REG_TRXDMA_CTRL);
         switch (pHalData.rxagg_mode)
         {
             case RX_AGG_MODE.RX_AGG_DMA:
@@ -4030,8 +4029,8 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
                 /* Adjust DMA page and thresh. */
                 temp = (u16)(pHalData.rxagg_dma_size | (pHalData.rxagg_dma_timeout << 8));
-                rtw_write16(adapterState, REG_RXDMA_AGG_PG_TH, temp);
-                rtw_write8(adapterState, REG_RXDMA_AGG_PG_TH + 3, (byte)BIT7); /* for dma agg , 0x280[31]GBIT_RXDMA_AGG_OLD_MOD, set 1 */
+                adapterState.Device.rtw_write16(REG_RXDMA_AGG_PG_TH, temp);
+                adapterState.Device.rtw_write8(REG_RXDMA_AGG_PG_TH + 3, (byte)BIT7); /* for dma agg , 0x280[31]GBIT_RXDMA_AGG_OLD_MOD, set 1 */
             }
                 break;
             case RX_AGG_MODE.RX_AGG_USB:
@@ -4041,7 +4040,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
                 /* Adjust DMA page and thresh. */
                 temp = (u16)(pHalData.rxagg_usb_size | (pHalData.rxagg_usb_timeout << 8));
-                rtw_write16(adapterState, REG_RXDMA_AGG_PG_TH, temp);
+                adapterState.Device.rtw_write16(REG_RXDMA_AGG_PG_TH, temp);
             }
                 break;
             case RX_AGG_MODE.RX_AGG_MIX:
@@ -4051,6 +4050,6 @@ WLAN_PWR_CFG[] PwrSeqCmd)
                 break;
         }
 
-        rtw_write8(adapterState, REG_TRXDMA_CTRL, (byte)valueDMA);
+        adapterState.Device.rtw_write8(REG_TRXDMA_CTRL, (byte)valueDMA);
     }
 }

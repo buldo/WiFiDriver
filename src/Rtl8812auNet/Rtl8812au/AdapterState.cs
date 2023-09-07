@@ -1,10 +1,8 @@
-﻿using Rtl8812auNet.Abstractions;
-
-namespace Rtl8812auNet.Rtl8812au;
+﻿namespace Rtl8812auNet.Rtl8812au;
 
 public class AdapterState
 {
-    public AdapterState(DvObj dvObj, HwPort hwPort, IRtlUsbDevice rtlUsbDevice)
+    public AdapterState(DvObj dvObj, HwPort hwPort, RtlUsbAdapter rtlUsbDevice)
     {
         DvObj = dvObj;
         HwPort = hwPort;
@@ -17,7 +15,7 @@ public class AdapterState
 
     public hal_com_data HalData { get; } = new();
 
-    public IRtlUsbDevice Device { get; }
+    public RtlUsbAdapter Device { get; }
 
     public HwPort HwPort { get; }
 }

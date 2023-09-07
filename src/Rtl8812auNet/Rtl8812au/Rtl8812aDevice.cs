@@ -5,13 +5,13 @@ namespace Rtl8812auNet.Rtl8812au;
 
 public class Rtl8812aDevice
 {
-    private readonly IRtlUsbDevice _usbDevice;
+    private readonly RtlUsbAdapter _usbDevice;
     private readonly AdapterState _adapterState;
     private readonly StatefulFrameParser _frameParser = new();
     private Task _readTask;
     private Task _parseTask;
 
-    public Rtl8812aDevice(IRtlUsbDevice usbDevice)
+    public Rtl8812aDevice(RtlUsbAdapter usbDevice)
     {
         _usbDevice = usbDevice;
         var dvobj = InitDvObj(_usbDevice);
@@ -37,7 +37,7 @@ public class Rtl8812aDevice
             cur_channel = 36
         });
 
-        _readTask = Task.Run(() => _usbDevice.InfinityRead());
+        _readTask = Task.Run(() => _usbDevice.UsbDevice.InfinityRead());
         _parseTask = Task.Run(() => ParseUsbData());
     }
 
@@ -69,7 +69,7 @@ public class Rtl8812aDevice
 
     private async Task ParseUsbData()
     {
-        await foreach (var transfer in _usbDevice.BulkTransfersReader.ReadAllAsync())
+        await foreach (var transfer in _usbDevice.UsbDevice.BulkTransfersReader.ReadAllAsync())
         {
             var packet = _frameParser.ParsedRadioPacket(transfer);
             foreach (var radioPacket in packet)

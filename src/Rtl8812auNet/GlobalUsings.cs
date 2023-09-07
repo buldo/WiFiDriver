@@ -14,7 +14,6 @@ global using static Rtl8812auNet.Rtl8812au.libusb_speed;
 global using static Rtl8812auNet.Rtl8812au.Bits;
 global using static Rtl8812auNet.Rtl8812au.hal_com_data_defs;
 global using static Rtl8812auNet.Rtl8812au.hal_data;
-global using static Rtl8812auNet.Rtl8812au.rtw_io;
 global using static Rtl8812auNet.Rtl8812au.CommonConsts;
 global using static Rtl8812auNet.Rtl8812au.odm_board_type;
 global using static Rtl8812auNet.Rtl8812au.usb_intf;

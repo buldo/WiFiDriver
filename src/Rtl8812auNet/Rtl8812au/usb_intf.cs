@@ -4,7 +4,7 @@ namespace Rtl8812auNet.Rtl8812au;
 
 public static class usb_intf
 {
-    public static AdapterState InitAdapter(DvObj dvobj, IRtlUsbDevice pusb_intf)
+    public static AdapterState InitAdapter(DvObj dvobj, RtlUsbAdapter pusb_intf)
     {
         var adapterState = new AdapterState(dvobj, HwPort.HW_PORT0, pusb_intf);
 
@@ -24,11 +24,11 @@ public static class usb_intf
         return adapterState;
     }
 
-    public static DvObj InitDvObj(IRtlUsbDevice usbInterface)
+    public static DvObj InitDvObj(RtlUsbAdapter usbInterface)
     {
         u8 numOutPipes = 0;
 
-        foreach (var endpoint in usbInterface.GetEndpoints())
+        foreach (var endpoint in usbInterface.UsbDevice.GetEndpoints())
         {
             var type = endpoint.Type;
             var direction = endpoint.Direction;
@@ -39,7 +39,7 @@ public static class usb_intf
             }
         }
 
-        var usbSpeed = usbInterface.Speed switch
+        var usbSpeed = usbInterface.UsbDevice.Speed switch
         {
             USB_SPEED_LOW => RTW_USB_SPEED_1_1,
             USB_SPEED_FULL => RTW_USB_SPEED_1_1,

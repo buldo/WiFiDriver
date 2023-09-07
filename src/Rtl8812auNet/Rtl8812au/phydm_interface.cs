@@ -4,7 +4,7 @@ public static class phydm_interface
 {
     public static void odm_write_1byte(AdapterState adapterState, u16 reg_addr, u8 data)
     {
-        rtw_write8(adapterState, reg_addr, data);
+        adapterState.Device.rtw_write8(reg_addr, data);
     }
 
     public static void odm_set_bb_reg(AdapterState dm, u32 reg_addr, u32 bit_mask, u32 data)

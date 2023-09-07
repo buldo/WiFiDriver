@@ -25,12 +25,12 @@ public static class rtl8812a_phycfg
         if (BitMask != bMaskDWord)
         {
             /* if not "double word" write */
-            var OriginalValue = rtw_read32(adapterState, RegAddr);
+            var OriginalValue = adapterState.Device.rtw_read32(RegAddr);
             var BitShift = PHY_CalculateBitShift(BitMask);
             Data = ((OriginalValue) & (~BitMask)) | (((DataOriginal << (int)BitShift)) & BitMask);
         }
 
-        rtw_write32(adapterState, RegAddr, Data);
+        adapterState.Device.rtw_write32(RegAddr, Data);
 
         /* RTW_INFO("BBW MASK=0x%x Addr[0x%x]=0x%x\n", BitMask, RegAddr, Data); */
     }
@@ -363,7 +363,7 @@ public static class rtl8812a_phycfg
         BandType Band = BandType.BAND_ON_5G;
         BandType BandToSW;
 
-        u1Btmp = rtw_read8(pAdapterState, REG_CCK_CHECK_8812);
+        u1Btmp = pAdapterState.Device.rtw_read8(REG_CCK_CHECK_8812);
         if ((u1Btmp & BIT7) != 0)
         {
             Band = BandType.BAND_ON_5G;
@@ -473,7 +473,7 @@ public static class rtl8812a_phycfg
 
         /* RTW_INFO("--.PHY_QueryBBReg8812(): RegAddr(%#x), BitMask(%#x)\n", RegAddr, BitMask); */
 
-        OriginalValue = rtw_read32(adapterState, RegAddr);
+        OriginalValue = adapterState.Device.rtw_read32(RegAddr);
         BitShift = PHY_CalculateBitShift(BitMask);
         ReturnValue = (OriginalValue & BitMask) >> (int)BitShift;
 
@@ -506,22 +506,22 @@ public static class rtl8812a_phycfg
     static void phy_SetRegBW_8812(PADAPTER adapterState, ChannelWidth CurrentBW)
     {
         u16 RegRfMod_BW, u2tmp = 0;
-        RegRfMod_BW = rtw_read16(adapterState, REG_WMAC_TRXPTCL_CTL);
+        RegRfMod_BW = adapterState.Device.rtw_read16(REG_WMAC_TRXPTCL_CTL);
 
         switch (CurrentBW)
         {
             case ChannelWidth.CHANNEL_WIDTH_20:
-                rtw_write16(adapterState, REG_WMAC_TRXPTCL_CTL, (ushort)(RegRfMod_BW & 0xFE7F)); /* BIT 7 = 0, BIT 8 = 0 */
+                adapterState.Device.rtw_write16(REG_WMAC_TRXPTCL_CTL, (ushort)(RegRfMod_BW & 0xFE7F)); /* BIT 7 = 0, BIT 8 = 0 */
                 break;
 
             case ChannelWidth.CHANNEL_WIDTH_40:
                 u2tmp = (ushort)(RegRfMod_BW | BIT7);
-                rtw_write16(adapterState, REG_WMAC_TRXPTCL_CTL, (ushort)(u2tmp & 0xFEFF)); /* BIT 7 = 1, BIT 8 = 0 */
+                adapterState.Device.rtw_write16(REG_WMAC_TRXPTCL_CTL, (ushort)(u2tmp & 0xFEFF)); /* BIT 7 = 1, BIT 8 = 0 */
                 break;
 
             case ChannelWidth.CHANNEL_WIDTH_80:
                 u2tmp = (ushort)(RegRfMod_BW | BIT8);
-                rtw_write16(adapterState, REG_WMAC_TRXPTCL_CTL, (ushort)(u2tmp & 0xFF7F)); /* BIT 7 = 0, BIT 8 = 1 */
+                adapterState.Device.rtw_write16(REG_WMAC_TRXPTCL_CTL, (ushort)(u2tmp & 0xFF7F)); /* BIT 7 = 0, BIT 8 = 1 */
                 break;
 
             default:
@@ -610,7 +610,7 @@ public static class rtl8812a_phycfg
 
         /* 3 Set Reg483 */
         SubChnlNum = phy_GetSecondaryChnl_8812(adapterState);
-        rtw_write8(adapterState, REG_DATA_SC_8812, SubChnlNum);
+        adapterState.Device.rtw_write8(REG_DATA_SC_8812, SubChnlNum);
 
         if (pHalData.rf_chip == RF_CHIP_E.RF_PSEUDO_11N)
         {
@@ -618,7 +618,7 @@ public static class rtl8812a_phycfg
             return;
         }
 
-        reg_837 = rtw_read8(adapterState, rBWIndication_Jaguar + 3);
+        reg_837 = adapterState.Device.rtw_read8(rBWIndication_Jaguar + 3);
         /* 3 Set Reg848 Reg864 Reg8AC Reg8C4 RegA00 */
         switch (pHalData.current_channel_bw)
         {
