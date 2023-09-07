@@ -7,7 +7,6 @@ public class WLAN_PWR_CFG
         CutMsk cutMsk,
         FabMsk fabMsk,
         InterfaceMask interfaceMsk,
-        PwrBaseaddr @base,
         PwrCmd cmd,
         uint msk,
         uint value)
@@ -16,7 +15,6 @@ public class WLAN_PWR_CFG
         cut_msk = cutMsk;
         fab_msk = fabMsk;
         interface_msk = interfaceMsk;
-        base_ = @base;
         this.cmd = cmd;
         this.msk = msk;
         this.value = value;
@@ -26,7 +24,6 @@ public class WLAN_PWR_CFG
     public CutMsk cut_msk { get; init; }
     public FabMsk fab_msk { get; init; }
     public InterfaceMask interface_msk { get; init; }
-    public PwrBaseaddr base_ { get; init; }
     public PwrCmd cmd { get; init; }
     public uint msk { get; init; }
     public uint value { get; init; }

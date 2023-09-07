@@ -1,7 +1,4 @@
-﻿using Rtl8812auNet.Abstractions;
-using Rtl8812auNet.Rtl8812au;
-
-namespace Rtl8812auNet.Rtl8812au;
+﻿namespace Rtl8812auNet.Rtl8812au;
 
 public class Rtl8812aDevice
 {
