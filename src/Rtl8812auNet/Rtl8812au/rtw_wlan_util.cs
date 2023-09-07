@@ -78,7 +78,7 @@ public static class rtw_wlan_util
     public static void rtw_hal_set_chnl_bw(AdapterState padapter, u8 channel, ChannelWidth Bandwidth, u8 Offset40,
         u8 Offset80)
     {
-        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
+        PHAL_DATA_TYPE pHalData = padapter.HalData;
         u8 cch_160 = Bandwidth == ChannelWidth.CHANNEL_WIDTH_160 ? channel : (u8)0;
         u8 cch_80 = Bandwidth == ChannelWidth.CHANNEL_WIDTH_80 ? channel : (u8)0;
         u8 cch_40 = Bandwidth == ChannelWidth.CHANNEL_WIDTH_40 ? channel : (u8)0;

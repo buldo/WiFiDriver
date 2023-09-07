@@ -15,13 +15,7 @@ public static class usb_ops_linux
 
         do
         {
-            recv_frame precvframe = new();
-            precvframe.hdr.precvbuf = null; /* can't access the precvbuf for new arch. */
-            precvframe.hdr.len = 0;
-
             var pattrib = rtl8812_query_rx_desc_status(pbuf);
-
-            precvframe.hdr.attrib = pattrib;
 
             if ((pattrib.crc_err) || (pattrib.icv_err))
             {

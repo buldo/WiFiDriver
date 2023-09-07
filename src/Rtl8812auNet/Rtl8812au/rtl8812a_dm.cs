@@ -4,7 +4,7 @@ public static class rtl8812a_dm
 {
     public static void Init_ODM_ComInfo_8812(AdapterState adapterState)
     {
-        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
+        PHAL_DATA_TYPE pHalData = adapterState.HalData;
 
         dm_struct pDM_Odm = (pHalData.odmpriv);
         odm_cut_version cut_ver;
@@ -45,7 +45,7 @@ public static class rtl8812a_dm
 
     static void Init_ODM_ComInfo(AdapterState adapterState)
     {
-        PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
+        PHAL_DATA_TYPE pHalData = adapterState.HalData;
         dm_struct pDM_Odm = (pHalData.odmpriv);
 
         rtw_odm_init_ic_type(adapterState);

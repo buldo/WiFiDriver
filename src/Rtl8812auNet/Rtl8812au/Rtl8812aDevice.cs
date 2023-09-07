@@ -25,16 +25,16 @@ public class Rtl8812aDevice
         {
             cur_bwmode = ChannelWidth.CHANNEL_WIDTH_20,
             cur_ch_offset = 0,
-            //cur_channel = 140,
-            cur_channel = 36
+            cur_channel = 140,
+            //cur_channel = 36
         });
 
         SetMonitorChannel(_adapterState, new InitChannel()
         {
             cur_bwmode = ChannelWidth.CHANNEL_WIDTH_20,
             cur_ch_offset = 0,
-            //cur_channel = 140,
-            cur_channel = 36
+            cur_channel = 140,
+            //cur_channel = 36
         });
 
         _readTask = Task.Run(() => _usbDevice.UsbDevice.InfinityRead());
@@ -79,44 +79,6 @@ public class Rtl8812aDevice
         }
     }
 }
-
-public class recv_frame_hdr
-{
-    //_list list;
-    public sk_buff pkt;
-
-    //_adapter* adapter;
-
-    u8 fragcnt;
-
-    int frame_tag;
-
-    public rx_pkt_attrib attrib = new rx_pkt_attrib();
-
-    public uint len;
-    u8[] rx_head;
-    public u8[] rx_data;
-    u8[] rx_tail;
-    u8[] rx_end;
-
-    public byte[] precvbuf;
-
-
-    /*  */
-    //sta_info psta;
-
-    /* for A-MPDU Rx reordering buffer control */
-    //struct recv_reorder_ctrl *preorder_ctrl;
-
-//#ifdef CONFIG_WAPI_SUPPORT
-//    u8 UserPriority;
-//    u8 WapiTempPN[16];
-//    u8 WapiSrcAddr[6];
-//    u8 bWapiCheckPNInDecrypt;
-//    u8 bIsWaiPacket;
-//#endif
-
-};
 
 public class rx_pkt_attrib
 {
@@ -180,110 +142,3 @@ public class rx_pkt_attrib
 //    u8 csum_err;		/* Checksum Error occurs */
 //#endif /* CONFIG_TCP_CSUM_OFFLOAD_RX */
 }
-
-public class sk_buff
-{
-//    /* These two members must be first. */
-//    struct sk_buff      *next;
-//	struct sk_buff      *prev;
-
-//	ktime_t tstamp;
-
-//    struct sock     *sk;
-//	//struct net_device	*dev;
-//	struct ifnet *dev;
-
-//	/*
-//	 * This is the control buffer. It is free to use for every
-//	 * layer. Please put your private variables there. If you
-//	 * want to keep them across layers you have to do a skb_clone()
-//	 * first. This is owned by whoever has the skb queued ATM.
-//	 */
-//	char cb[48] __aligned(8);
-
-//    unsigned long _skb_refdst;
-//# ifdef CONFIG_XFRM
-//    struct sec_path    *sp;
-//#endif
-public uint len,data_len;
-//    u16 mac_len,
-//                hdr_len;
-//    union {
-//		u32 csum;
-//    struct {
-
-//            u16 csum_start;
-//    u16 csum_offset;
-//}
-//smbol2;
-//	}smbol1;
-//u32 priority;
-//kmemcheck_bitfield_begin(flags1);
-//u8 local_df:1,
-//				cloned: 1,
-//				ip_summed: 2,
-//				nohdr: 1,
-//				nfctinfo: 3;
-//u8 pkt_type:3,
-//				fclone: 2,
-//				ipvs_property: 1,
-//				peeked: 1,
-//				nf_trace: 1;
-//kmemcheck_bitfield_end(flags1);
-//u16 protocol;
-
-//void(*destructor)(struct sk_buff *skb);
-//#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
-//	struct nf_conntrack	*nfct;
-//	struct sk_buff		*nfct_reasm;
-//#endif
-//# ifdef CONFIG_BRIDGE_NETFILTER
-//struct nf_bridge_info   *nf_bridge;
-//#endif
-
-//int skb_iif;
-//# ifdef CONFIG_NET_SCHED
-//u16 tc_index;   /* traffic control index */
-//# ifdef CONFIG_NET_CLS_ACT
-//u16 tc_verd;    /* traffic control verdict */
-//#endif
-//#endif
-
-//u32 rxhash;
-
-//kmemcheck_bitfield_begin(flags2);
-//u16 queue_mapping:16;
-//# ifdef CONFIG_IPV6_NDISC_NODETYPE
-//u8 ndisc_nodetype:2,
-//				deliver_no_wcard: 1;
-//#else
-//u8 deliver_no_wcard:1;
-//#endif
-//kmemcheck_bitfield_end(flags2);
-
-///* 0/14 bit hole */
-
-//# ifdef CONFIG_NET_DMA
-//dma_cookie_t dma_cookie;
-//#endif
-//# ifdef CONFIG_NETWORK_SECMARK
-//u32 secmark;
-//#endif
-//union {
-//		u32		mark;
-//u32 dropcount;
-//	}symbol3;
-
-//u16 vlan_tci;
-
-//sk_buff_data_t transport_header;
-//sk_buff_data_t network_header;
-//sk_buff_data_t mac_header;
-///* These elements must be at the end, see alloc_skb() for details.  */
-//sk_buff_data_t tail;
-//sk_buff_data_t end;
-//unsigned char		*head,
-//				*data;
-//unsigned int		truesize;
-//atomic_t users;
-};

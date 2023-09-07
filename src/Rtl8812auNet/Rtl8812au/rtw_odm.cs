@@ -29,5 +29,5 @@ public static class rtw_odm
         odm_cmn_info_init(odm, odm_cmninfo.ODM_CMNINFO_IC_TYPE, ic_type);
     }
 
-    public static dm_struct adapter_to_phydm(AdapterState adapterState) => (GET_HAL_DATA(adapterState).odmpriv);
+    public static dm_struct adapter_to_phydm(AdapterState adapterState) => (adapterState.HalData.odmpriv);
 }

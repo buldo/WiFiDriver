@@ -62,7 +62,7 @@ public static class rtw_mlme_ext
     {
 
         //struct mlme_ext_priv *pmlmeext = &padapter.mlmeextpriv;
-        HAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
+        HAL_DATA_TYPE pHalData = padapter.HalData;
         bool rx_bar_enble = true;
 
         /*
