@@ -2,12 +2,32 @@
 
 public class hal_com_data
 {
-    public HAL_VERSION version_id { get; } = new HAL_VERSION();
+    public hal_com_data(
+        HAL_VERSION versionId,
+        RT_MULTI_FUNC rtMultiFunc,
+        RfType rfType,
+        byte numTotalRfPath)
+    {
+        version_id = versionId;
+        MultiFunc = rtMultiFunc;
+        rf_type = rfType;
+        NumTotalRFPath = numTotalRfPath;
+    }
+
+    public HAL_VERSION version_id { get; }
     public u8 current_channel { get; set; }
+
+    /// <summary>
+    /// It strange but this value has 2 source of truth
+    /// </summary>
     public RfType rf_type { get; set; } /*enum RfType*/
+
+    /// <summary>
+    /// It strange but this value has 2 source of truth
+    /// </summary>
     public u8 NumTotalRFPath { get; set; }
     public bool AutoloadFailFlag { get; set; }
-    public RT_MULTI_FUNC MultiFunc { get; set; }
+    public RT_MULTI_FUNC MultiFunc { get; }
     public ChannelWidth current_channel_bw { get; set; }
     public bool bSwChnl { get; set; }
     public bool bChnlBWInitialized { get; set; }

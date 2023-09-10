@@ -6,8 +6,8 @@ namespace Rtl8812auNet.Rtl8812au;
 
 public static class UsbHalInit
 {
-    private const byte BOOT_FROM_EEPROM = (byte)BIT4;
-    private const byte EEPROM_EN = (byte)BIT5;
+    public const byte BOOT_FROM_EEPROM = (byte)BIT4;
+    public const byte EEPROM_EN = (byte)BIT5;
     private const UInt32 HWSET_MAX_SIZE_JAGUAR = 512;
     private const byte EFUSE_WIFI = 0;
     private const UInt16 EEPROM_TX_PWR_INX_8812 = 0x10;
@@ -21,55 +21,8 @@ public static class UsbHalInit
     private const byte EEPROM_XTAL_8812 = 0xB9;
     private const byte EEPROM_DEFAULT_CRYSTAL_CAP_8812 = 0x20;
 
-    public static void rtl8812au_interface_configure(AdapterState padapter)
-    {
-        var pHalData = padapter.HalData;
-
-        DvObj pdvobjpriv = padapter.DvObj;
-
-        pHalData.UsbTxAggMode = true;
-        pHalData.UsbTxAggDescNum = 6; /* only 4 bits */
-        pHalData.UsbTxAggDescNum = 0x01; /* adjust value for OQT  Overflow issue */ /* 0x3;	 */ /* only 4 bits */
-        pHalData.rxagg_mode = RX_AGG_MODE.RX_AGG_USB;
-        pHalData.rxagg_usb_size = 8; /* unit: 512b */
-        pHalData.rxagg_usb_timeout = 0x6;
-        pHalData.rxagg_dma_size = 16; /* uint: 128b, 0x0A = 10 = MAX_RX_DMA_BUFFER_SIZE/2/pHalData.UsbBulkOutSize */
-        pHalData.rxagg_dma_timeout = 0x6; /* 6, absolute time = 34ms/(2^6) */
-
-        if (padapter.DvObj.UsbSpeed == RTW_USB_SPEED_3)
-        {
-            pHalData.rxagg_usb_size = 0x7;
-            pHalData.rxagg_usb_timeout = 0x1a;
-        }
-        else
-        {
-            /* the setting to reduce RX FIFO overflow on USB2.0 and increase rx throughput */
-            pHalData.rxagg_usb_size = 0x5;
-            pHalData.rxagg_usb_timeout = 0x20;
-        }
-
-        var chipOut = GetChipOutEP8812(pdvobjpriv.OutPipesCount);
-        pHalData.OutEpQueueSel = chipOut.OutEpQueueSel;
-        pHalData.OutEpNumber = chipOut.OutEpNumber;
-    }
-
     public static void ReadAdapterInfo8812AU(AdapterState adapterState)
     {
-        /* Read all content in Efuse/EEPROM. */
-        Hal_ReadPROMContent_8812A(adapterState);
-    }
-
-    static void Hal_ReadPROMContent_8812A(AdapterState adapterState)
-    {
-        var pHalData = adapterState.HalData;
-
-        /* check system boot selection */
-        var eeValue = adapterState.Device.rtw_read8(REG_9346CR);
-        pHalData.EepromOrEfuse = (eeValue & BOOT_FROM_EEPROM) != 0;
-        pHalData.AutoloadFailFlag = (eeValue & EEPROM_EN) == 0;
-
-        RTW_INFO($"Boot from {(pHalData.EepromOrEfuse ? "EEPROM" : "EFUSE")}, Autoload {(pHalData.AutoloadFailFlag ? "Fail" : "OK")} !");
-
         InitAdapterVariablesByPROM_8812AU(adapterState);
     }
 
@@ -966,37 +919,6 @@ public static class UsbHalInit
     /// <remarks>
     /// _ConfigChipOutEP_8812
     /// </remarks>
-    static (TxSele OutEpQueueSel, byte OutEpNumber) GetChipOutEP8812(u8 NumOutPipe)
-    {
-        TxSele OutEpQueueSel = 0;
-        byte OutEpNumber = 0;
-
-        switch (NumOutPipe)
-        {
-            case 4:
-                OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_LQ | TxSele.TX_SELE_NQ | TxSele.TX_SELE_EQ;
-                OutEpNumber = 4;
-                break;
-            case 3:
-                OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_LQ | TxSele.TX_SELE_NQ;
-                OutEpNumber = 3;
-                break;
-            case 2:
-                OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_NQ;
-                OutEpNumber = 2;
-                break;
-            case 1:
-                OutEpQueueSel = TxSele.TX_SELE_HQ;
-                OutEpNumber = 1;
-                break;
-            default:
-                break;
-        }
-
-        RTW_INFO($"OutEpQueueSel({OutEpQueueSel}), OutEpNumber({OutEpNumber})");
-
-        return (OutEpQueueSel,  OutEpNumber);
-    }
 
     private static bool is_boot_from_eeprom(AdapterState adapterState) => (adapterState.HalData.EepromOrEfuse);
 
@@ -1021,65 +943,7 @@ public static class UsbHalInit
 
     private static UInt32 BIT_LEN_MASK_32(int __BitLen) => ((u32)(0xFFFFFFFF >> (32 - (__BitLen))));
 
-    public static void read_chip_version_8812a(AdapterState adapterState)
-    {
-        u32 value32 = adapterState.Device.rtw_read32(REG_SYS_CFG);
-        RTW_INFO($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
 
-        var pHalData = adapterState.HalData;
-        pHalData.version_id.RFType = HalRFType.RF_TYPE_2T2R; /* RF_2T2R; */
-
-        if (registry_priv.special_rf_path == 1)
-        {
-            pHalData.version_id.RFType = HalRFType.RF_TYPE_1T1R; /* RF_1T1R; */
-        }
-
-        pHalData.version_id.CUTVersion = (CutVersion)((value32 & CHIP_VER_RTL_MASK) >> CHIP_VER_RTL_SHIFT); /* IC version (CUT) */
-        pHalData.version_id.CUTVersion += 1;
-
-        /* For multi-function consideration. Added by Roger, 2010.10.06. */
-        pHalData.MultiFunc = RT_MULTI_FUNC.RT_MULTI_FUNC_NONE;
-        value32 = adapterState.Device.rtw_read32(REG_MULTI_FUNC_CTRL);
-        pHalData.MultiFunc |= ((value32 & WL_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_WIFI : 0);
-        pHalData.MultiFunc |= ((value32 & BT_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_BT : 0);
-
-        var (rfType, numTotalRfPath) = GetRfType(pHalData.version_id);
-        pHalData.rf_type = rfType;
-        pHalData.NumTotalRFPath = numTotalRfPath;
-        RTW_INFO($"rtw_hal_config_rftype RF_Type is {pHalData.rf_type} TotalTxPath is {pHalData.NumTotalRFPath}");
-        //dump_chip_info(pHalData.version_id);
-    }
-
-    static (RfType rf_type, u8 NumTotalRFPath) GetRfType(HAL_VERSION version)
-    {
-        if (IS_1T1R(version))
-        {
-            return (RfType.RF_1T1R, 1);
-        }
-
-        if (IS_2T2R(version))
-        {
-            return (RfType.RF_2T2R, 2);
-        }
-
-        if (IS_1T2R(version))
-        {
-            return (RfType.RF_1T2R, 2);
-        }
-
-        if (IS_3T3R(version))
-        {
-            return (RfType.RF_3T3R, 3);
-        }
-
-        if (IS_4T4R(version))
-        {
-            return (RfType.RF_4T4R, 4);
-        }
-
-
-        return (RfType.RF_1T1R, 1);
-    }
 
 
 

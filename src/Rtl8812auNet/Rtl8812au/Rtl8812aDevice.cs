@@ -8,7 +8,7 @@ namespace Rtl8812auNet.Rtl8812au;
 
 public class Rtl8812aDevice
 {
-    private readonly RtlUsbAdapter _usbDevice;
+    private readonly RtlUsbAdapter _device;
     private readonly AdapterState _adapterState;
     private readonly StatefulFrameParser _frameParser = new();
     private readonly UdpClient _client = new UdpClient();
@@ -19,15 +19,15 @@ public class Rtl8812aDevice
     private Task _parseTask;
     private readonly HalModule _halModule;
 
-    public Rtl8812aDevice(RtlUsbAdapter usbDevice)
+    public Rtl8812aDevice(RtlUsbAdapter device)
     {
-        _usbDevice = usbDevice;
-        var powerManagement = new RfPowerManagementModule(_usbDevice);
-        _radioManagement = new RadioManagementModule(usbDevice, powerManagement);
-        _halModule = new HalModule(_usbDevice, _radioManagement);
+        _device = device;
+        var powerManagement = new RfPowerManagementModule(_device);
+        _radioManagement = new RadioManagementModule(device, powerManagement);
+        _halModule = new HalModule(_device, _radioManagement);
 
-        var dvobj = InitDvObj(_usbDevice);
-        _adapterState = InitAdapter(dvobj, _usbDevice);
+        var dvobj = InitDvObj(_device);
+        _adapterState = InitAdapter(dvobj, _device);
     }
 
     public void Init()
@@ -49,7 +49,7 @@ public class Rtl8812aDevice
             //cur_channel = 36
         });
 
-        _readTask = Task.Run(() => _usbDevice.UsbDevice.InfinityRead());
+        _readTask = Task.Run(() => _device.UsbDevice.InfinityRead());
         _parseTask = Task.Run(() => ParseUsbData());
     }
 
@@ -89,13 +89,50 @@ public class Rtl8812aDevice
 
     private AdapterState InitAdapter(DvObj dvobj, RtlUsbAdapter pusb_intf)
     {
-        var adapterState = new AdapterState(dvobj, HwPort.HW_PORT0, pusb_intf);
+        u8 rxagg_usb_size;
+        u8 rxagg_usb_timeout;
+        if (dvobj.UsbSpeed == RTW_USB_SPEED_3)
+        {
+            rxagg_usb_size = 0x7;
+            rxagg_usb_timeout = 0x1a;
+        }
+        else
+        {
+            /* the setting to reduce RX FIFO overflow on USB2.0 and increase rx throughput */
+            rxagg_usb_size = 0x5;
+            rxagg_usb_timeout = 0x20;
+        }
 
-        /* step read_chip_version */
-        read_chip_version_8812a(adapterState);
+        var chipVersionResult = read_chip_version_8812a();
+        var chipOut = GetChipOutEP8812(dvobj.OutPipesCount);
 
-        /* step usb endpoint mapping */
-        rtl8812au_interface_configure(adapterState);
+        var eeValue = _device.rtw_read8(REG_9346CR);
+        var eepromOrEfuse = (eeValue & BOOT_FROM_EEPROM) != 0;
+        var autoloadFailFlag = (eeValue & EEPROM_EN) == 0;
+
+        RTW_INFO($"Boot from {(eepromOrEfuse ? "EEPROM" : "EFUSE")}, Autoload {(autoloadFailFlag ? "Fail" : "OK")} !");
+
+        var halData = new hal_com_data(
+            chipVersionResult.version_id,
+            chipVersionResult.MultiFunc,
+            chipVersionResult.rf_type,
+            chipVersionResult.numTotalRfPath)
+        {
+            UsbTxAggMode = true,
+            UsbTxAggDescNum = 0x01, // adjust value for OQT Overflow issue 0x3; only 4 bits
+            rxagg_mode = RX_AGG_MODE.RX_AGG_USB,
+            rxagg_usb_size = rxagg_usb_size, /* unit: 512b */
+            rxagg_usb_timeout = rxagg_usb_timeout,
+            rxagg_dma_size = 16, /* uint: 128b, 0x0A = 10 = MAX_RX_DMA_BUFFER_SIZE/2/pHalData.UsbBulkOutSize */
+            rxagg_dma_timeout = 0x6, /* 6, absolute time = 34ms/(2^6) */
+            OutEpQueueSel = chipOut.OutEpQueueSel,
+            OutEpNumber = chipOut.OutEpNumber,
+            EepromOrEfuse = eepromOrEfuse,
+            AutoloadFailFlag = autoloadFailFlag
+        };
+
+        var adapterState = new AdapterState(dvobj, HwPort.HW_PORT0, pusb_intf, halData);
+
 
         /* step read efuse/eeprom data and get mac_addr */
         ReadAdapterInfo8812AU(adapterState);
@@ -106,6 +143,69 @@ public class Rtl8812aDevice
         return adapterState;
     }
 
+    private (TxSele OutEpQueueSel, byte OutEpNumber) GetChipOutEP8812(u8 NumOutPipe)
+    {
+        TxSele OutEpQueueSel = 0;
+        byte OutEpNumber = 0;
+
+        switch (NumOutPipe)
+        {
+            case 4:
+                OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_LQ | TxSele.TX_SELE_NQ | TxSele.TX_SELE_EQ;
+                OutEpNumber = 4;
+                break;
+            case 3:
+                OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_LQ | TxSele.TX_SELE_NQ;
+                OutEpNumber = 3;
+                break;
+            case 2:
+                OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_NQ;
+                OutEpNumber = 2;
+                break;
+            case 1:
+                OutEpQueueSel = TxSele.TX_SELE_HQ;
+                OutEpNumber = 1;
+                break;
+            default:
+                break;
+        }
+
+        RTW_INFO($"OutEpQueueSel({OutEpQueueSel}), OutEpNumber({OutEpNumber})");
+
+        return (OutEpQueueSel, OutEpNumber);
+    }
+
+
+    private (HAL_VERSION version_id, RT_MULTI_FUNC MultiFunc, RfType rf_type, byte numTotalRfPath) read_chip_version_8812a()
+    {
+        u32 value32 = _device.rtw_read32(REG_SYS_CFG);
+        RTW_INFO($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
+
+        var version_id = new HAL_VERSION();
+        version_id.RFType = HalRFType.RF_TYPE_2T2R; /* RF_2T2R; */
+
+        if (registry_priv.special_rf_path == 1)
+        {
+            version_id.RFType = HalRFType.RF_TYPE_1T1R; /* RF_1T1R; */
+        }
+
+        version_id.CUTVersion = (CutVersion)((value32 & CHIP_VER_RTL_MASK) >> CHIP_VER_RTL_SHIFT); /* IC version (CUT) */
+        version_id.CUTVersion += 1;
+
+        /* For multi-function consideration. Added by Roger, 2010.10.06. */
+        var MultiFunc = RT_MULTI_FUNC.RT_MULTI_FUNC_NONE;
+        value32 = _device.rtw_read32(REG_MULTI_FUNC_CTRL);
+        MultiFunc |= ((value32 & WL_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_WIFI : 0);
+        MultiFunc |= ((value32 & BT_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_BT : 0);
+
+        var (rfType, numTotalRfPath) = version_id.GetRfType();
+        var rf_type = rfType;
+        var NumTotalRFPath = numTotalRfPath;
+        RTW_INFO($"rtw_hal_config_rftype RF_Type is {rf_type} TotalTxPath is {NumTotalRFPath}");
+        //dump_chip_info(pHalData.version_id);
+
+        return(version_id, MultiFunc, rf_type, numTotalRfPath);
+    }
 
     private void StartWithMonitorMode(InitChannel initChannel)
     {
@@ -135,7 +235,7 @@ public class Rtl8812aDevice
 
     private async Task ParseUsbData()
     {
-        await foreach (var transfer in _usbDevice.UsbDevice.BulkTransfersReader.ReadAllAsync())
+        await foreach (var transfer in _device.UsbDevice.BulkTransfersReader.ReadAllAsync())
         {
             var packet = _frameParser.ParsedRadioPacket(transfer);
             foreach (var radioPacket in packet)
