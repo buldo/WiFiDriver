@@ -1,6 +1,9 @@
-﻿namespace Rtl8812auNet.Rtl8812au;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Rtl8812auNet.Rtl8812au;
 
 [Flags]
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public enum CrBit : short
 {
     HCI_TXDMA_EN = 1 << (0),

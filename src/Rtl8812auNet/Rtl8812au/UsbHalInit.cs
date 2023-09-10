@@ -110,7 +110,6 @@ public static class UsbHalInit
         {
             var pHalData = adapterState.HalData;
 
-            hal_spec_t hal_spc = GET_HAL_SPEC(adapterState);
             u8 reg_tmp, i, j, antenna = 0, wmode = 0;
             /* Read anenna type from EFUSE 1019/1018 */
             for (i = 0; i < 2; i++)
@@ -190,10 +189,6 @@ public static class UsbHalInit
                     /* UsbModeSwitch_SetUsbModeMechOn(adapterState, FALSE); */
                     /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU_VN; */
                     RTW_INFO("%s(): EFUSE_HIDDEN_8812AU_VN");
-
-                    var PROTO_CAP_11AC = BIT3;
-                    //hal_spc.proto_cap &= ~PROTO_CAP_11AC;
-                    hal_spc.proto_cap = (byte)(hal_spc.proto_cap & ~PROTO_CAP_11AC);
                 }
             }
         }

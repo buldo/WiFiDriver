@@ -76,7 +76,5 @@ public class hal_com_data
 
     public u8 rxagg_usb_timeout { get; set; }
 
-    public hal_spec_t hal_spec { get; } = new();
-
     public BandType current_band_type { get; set; }
 }

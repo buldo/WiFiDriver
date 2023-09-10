@@ -236,7 +236,7 @@ public static class rtl8812a_phycfg
         }
 
         if (RateSection == RATE_SECTION.CCK && pHalData.current_band_type != BandType.BAND_ON_2_4G)
-            goto exit;
+            return;
 
         PHY_SetTxPowerIndexByRateArray(
             pAdapterState,
@@ -244,9 +244,6 @@ public static class rtl8812a_phycfg
             pHalData.current_channel_bw,
             Channel,
             rates_by_sections[(int)RateSection].rates);
-
-        exit:
-        return;
     }
 
     static void PHY_SetTxPowerIndexByRateArray(

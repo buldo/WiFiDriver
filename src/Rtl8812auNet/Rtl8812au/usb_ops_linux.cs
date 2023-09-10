@@ -29,7 +29,7 @@ public static class usb_ops_linux
                 break;
             }
 
-            if (pattrib.mfrag == true)
+            if (pattrib.mfrag)
             {
                 // !!! We skips this packages because ohd not use fragmentation
                 RTW_WARN("mfrag scipping");
