@@ -97,7 +97,8 @@ public static class UsbHalInit
         Hal_ReadRFEType_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
 
 
-        hal_ReadUsbModeSwitch_8812AU(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
+        pHalData.EEPROMUsbSwitch = ReadUsbModeSwitch8812AU(pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
+        RTW_INFO("Usb Switch: %d", pHalData.EEPROMUsbSwitch);
 
         /* 2013/04/15 MH Add for different board type recognize. */
         hal_ReadUsbType_8812AU(adapterState, pHalData.efuse_eeprom_data);
@@ -117,7 +118,7 @@ public static class UsbHalInit
                   Check efuse address 1019
                   Check efuse address 1018
                 */
-                efuse_OneByteRead(adapterState, (ushort)(1019 - i), out reg_tmp);
+                adapterState.Device.efuse_OneByteRead((ushort)(1019 - i), out reg_tmp);
                 /*
                   CHeck bit 7-5
                   Check bit 3-1
@@ -143,7 +144,7 @@ public static class UsbHalInit
                   Check efuse address 1021
                   Check efuse address 1020
                 */
-                efuse_OneByteRead(adapterState, (ushort)(1021 - i), out reg_tmp);
+                adapterState.Device.efuse_OneByteRead((ushort)(1021 - i), out reg_tmp);
 
                 /* CHeck bit 3-2 */
                 if (((reg_tmp >> 2) & 0x3) != 0)
@@ -193,20 +194,16 @@ public static class UsbHalInit
         }
     }
 
-    private static void hal_ReadUsbModeSwitch_8812AU(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
+    private static bool ReadUsbModeSwitch8812AU(u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        var pHalData = adapterState.HalData;
-
         if (AutoloadFail)
         {
-            pHalData.EEPROMUsbSwitch = false;
+            return false;
         }
         else /* check efuse 0x08 bit2 */
         {
-            pHalData.EEPROMUsbSwitch = ((PROMContent[EEPROM_USB_MODE_8812] & BIT1) >> 1) != 0;
+            return ((PROMContent[EEPROM_USB_MODE_8812] & BIT1) >> 1) != 0;
         }
-
-        RTW_INFO("Usb Switch: %d", pHalData.EEPROMUsbSwitch);
     }
 
     private static void Hal_ReadRFEType_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
@@ -586,10 +583,10 @@ public static class UsbHalInit
                 /* 2013/03/08 MH Add for 8812A HW limitation, ROM code can only */
                 /*  */
                 var efuse_content = new byte[4];
-                efuse_OneByteRead(padapter, 0x200, out efuse_content[0]);
-                efuse_OneByteRead(padapter, 0x202, out efuse_content[1]);
-                efuse_OneByteRead(padapter, 0x204, out efuse_content[2]);
-                efuse_OneByteRead(padapter, 0x210, out efuse_content[3]);
+                padapter.Device.efuse_OneByteRead(0x200, out efuse_content[0]);
+                padapter.Device.efuse_OneByteRead(0x202, out efuse_content[1]);
+                padapter.Device.efuse_OneByteRead(0x204, out efuse_content[2]);
+                padapter.Device.efuse_OneByteRead(0x210, out efuse_content[3]);
                 if (efuse_content[0] != 0xFF ||
                     efuse_content[1] != 0xFF ||
                     efuse_content[2] != 0xFF ||
@@ -611,10 +608,10 @@ public static class UsbHalInit
             /* 2013/03/08 MH Add for 8812A HW limitation, ROM code can only */
             /*  */
             var efuse_content = new byte[4];
-            efuse_OneByteRead(padapter, 0x200, out efuse_content[0]);
-            efuse_OneByteRead(padapter, 0x202, out efuse_content[1]);
-            efuse_OneByteRead(padapter, 0x204, out efuse_content[2]);
-            efuse_OneByteRead(padapter, 0x210, out efuse_content[3]);
+            padapter.Device.efuse_OneByteRead(0x200, out efuse_content[0]);
+            padapter.Device.efuse_OneByteRead(0x202, out efuse_content[1]);
+            padapter.Device.efuse_OneByteRead(0x204, out efuse_content[2]);
+            padapter.Device.efuse_OneByteRead(0x210, out efuse_content[3]);
             if (efuse_content[0] != 0xFF ||
                 efuse_content[1] != 0xFF ||
                 efuse_content[2] != 0xFF ||
@@ -631,26 +628,23 @@ public static class UsbHalInit
         }
 
 
-        if (check_phy_efuse_tx_power_info_valid(padapter) == false)
+        if (IsEfuseTxPowerInfoValid(padapter.HalData.efuse_eeprom_data) == false)
         {
             throw new NotImplementedException("Hal_readPGDataFromConfigFile");
         }
 
     }
 
-    private static bool check_phy_efuse_tx_power_info_valid(AdapterState adapterState)
+    /// <remarks>
+    /// check_phy_efuse_tx_power_info_valid
+    /// </remarks>
+    private static bool IsEfuseTxPowerInfoValid(byte[] efuseEepromData)
     {
-        var pContent = adapterState.HalData.efuse_eeprom_data;
-        int index = 0;
-        UInt16 tx_index_offset = 0x0000;
-
         // Just because single chip support
-        tx_index_offset = EEPROM_TX_PWR_INX_8812;
-
-        /* TODO: chacking length by ICs */
-        for (index = 0; index < 11; index++)
+        UInt16 tx_index_offset = EEPROM_TX_PWR_INX_8812;
+        for (int index = 0; index < 11; index++)
         {
-            if (pContent[tx_index_offset + index] == 0xFF)
+            if (efuseEepromData[tx_index_offset + index] == 0xFF)
             {
                 return false;
             }
@@ -764,7 +758,7 @@ public static class UsbHalInit
         /* 1. Read the first byte to check if efuse is empty!!! */
         /*  */
         /*  */
-        ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
+        adapterState.Device.ReadEFuseByte(eFuse_Addr, rtemp8);
         if (rtemp8[0] != 0xFF)
         {
             /* RTW_INFO("efuse_Addr-%d efuse_data=%x\n", eFuse_Addr, *rtemp8); */
@@ -793,14 +787,14 @@ public static class UsbHalInit
 
                 /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("extended header u1temp=%x\n", u1temp)); */
 
-                ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
+                adapterState.Device.ReadEFuseByte(eFuse_Addr, rtemp8);
 
                 /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("extended header efuse_Addr-%d efuse_data=%x\n", eFuse_Addr, *rtemp8));	 */
 
                 if ((rtemp8[0] & 0x0F) == 0x0F)
                 {
                     eFuse_Addr++;
-                    ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
+                    adapterState.Device.ReadEFuseByte(eFuse_Addr, rtemp8);
 
                     if (rtemp8[0] != 0xFF && (eFuse_Addr < EFUSE_REAL_CONTENT_LEN_JAGUAR))
                         eFuse_Addr++;
@@ -830,7 +824,7 @@ public static class UsbHalInit
                     if (!((wren & 0x01) == 0x01))
                     {
                         /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("Addr=%d\n", eFuse_Addr)); */
-                        ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
+                        adapterState.Device.ReadEFuseByte(eFuse_Addr, rtemp8);
                         eFuse_Addr++;
                         eFuseWord[offset][i] = (ushort)(rtemp8[0] & 0xff);
 
@@ -839,7 +833,7 @@ public static class UsbHalInit
                             break;
 
                         /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("Addr=%d", eFuse_Addr)); */
-                        ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
+                        adapterState.Device.ReadEFuseByte(eFuse_Addr, rtemp8);
                         eFuse_Addr++;
 
                         eFuseWord[offset][i] |= (ushort)(((rtemp8[0]) << 8) & 0xff00);
@@ -872,7 +866,7 @@ public static class UsbHalInit
             }
 
             /* Read next PG header */
-            ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
+            adapterState.Device.ReadEFuseByte(eFuse_Addr, rtemp8);
             /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("Addr=%d rtemp 0x%x\n", eFuse_Addr, *rtemp8)); */
 
             if (rtemp8[0] != 0xFF && (eFuse_Addr < EFUSE_REAL_CONTENT_LEN_JAGUAR))
@@ -969,79 +963,6 @@ public static class UsbHalInit
 
     }
 
-    static void efuse_OneByteRead(AdapterState pAdapterState, UInt16 addr, out byte data)
-    {
-        /* -----------------e-fuse reg ctrl --------------------------------- */
-        /* address			 */
-        var addressBytes = new byte[2];
-        BinaryPrimitives.TryWriteUInt16LittleEndian(addressBytes, addr);
-        pAdapterState.Device.rtw_write8(EFUSE_CTRL + 1, addressBytes[0]);
-        var tmpRead = pAdapterState.Device.rtw_read8(EFUSE_CTRL + 2);
-        var secondAddr = (addressBytes[1] & 0x03) | (tmpRead & 0xFC);
-        pAdapterState.Device.rtw_write8(EFUSE_CTRL + (2), (byte)secondAddr);
-
-        /* Write8(pAdapterState, EFUSE_CTRL+3,  0x72); */
-        /* read cmd	 */
-        /* Write bit 32 0 */
-        var readbyte = pAdapterState.Device.rtw_read8(EFUSE_CTRL + 3);
-        pAdapterState.Device.rtw_write8(EFUSE_CTRL + 3, (byte)(readbyte & 0x7f));
-
-
-        UInt32 tmpidx = 0;
-        while ((0x80 & pAdapterState.Device.rtw_read8(EFUSE_CTRL + (3))) == 0 && (tmpidx < 1000))
-        {
-            Thread.Sleep(1);
-            tmpidx++;
-        }
-
-        if (tmpidx < 100)
-        {
-            data = pAdapterState.Device.rtw_read8(EFUSE_CTRL);
-        }
-        else
-        {
-            data = 0xff;
-            //RTW_INFO("%s: [ERROR] addr=0x%x bResult=%d time out 1s !!!\n", __FUNCTION__, addr, bResult);
-            //RTW_INFO("%s: [ERROR] EFUSE_CTRL =0x%08x !!!\n", __FUNCTION__, rtw_read32(pAdapterState, EFUSE_CTRL));
-        }
-    }
-
-    static void ReadEFuseByte(AdapterState adapterState, UInt16 _offset, byte[] pbuf)
-    {
-        u32 value32;
-        u8 readbyte;
-        u16 retry;
-
-        /* Write Address */
-        adapterState.Device.rtw_write8(EFUSE_CTRL + 1, (byte)(_offset & 0xff));
-        readbyte = adapterState.Device.rtw_read8(EFUSE_CTRL + 2);
-        adapterState.Device.rtw_write8(EFUSE_CTRL + 2, (byte)(((_offset >> 8) & 0x03) | (readbyte & 0xfc)));
-
-        /* Write bit 32 0 */
-        readbyte = adapterState.Device.rtw_read8(EFUSE_CTRL + 3);
-        adapterState.Device.rtw_write8(EFUSE_CTRL + 3, (byte)(readbyte & 0x7f));
-
-        /* Check bit 32 read-ready */
-        retry = 0;
-        value32 = adapterState.Device.rtw_read32(EFUSE_CTRL);
-        /* while(!(((value32 >> 24) & 0xff) & 0x80)  && (retry<10)) */
-        while ((((value32 >> 24) & 0xff) & 0x80) == 0 && (retry < 10000))
-        {
-            value32 = adapterState.Device.rtw_read32(EFUSE_CTRL);
-            retry++;
-        }
-
-        /* 20100205 Joseph: Add delay suggested by SD1 Victor. */
-        /* This fix the problem that Efuse read error in high temperature condition. */
-        /* Designer says that there shall be some delay after ready bit is set, or the */
-        /* result will always stay on last data we read. */
-        Thread.Sleep(50);
-        value32 = adapterState.Device.rtw_read32(EFUSE_CTRL);
-
-        pbuf[0] = (u8)(value32 & 0xff);
-
-    }
-
     /// <remarks>
     /// _ConfigChipOutEP_8812
     /// </remarks>
@@ -1079,9 +1000,6 @@ public static class UsbHalInit
 
     private static bool is_boot_from_eeprom(AdapterState adapterState) => (adapterState.HalData.EepromOrEfuse);
 
-    public static void phy_set_bb_reg(AdapterState adapterState, u16 RegAddr, u32 BitMask, u32 Data) =>
-        PHY_SetBBReg8812(adapterState, RegAddr, BitMask, Data);
-
     static void init_phydm_info(AdapterState adapterState)
     {
         var hal_data = adapterState.HalData;
@@ -1104,12 +1022,12 @@ public static class UsbHalInit
         {
             /* 2.4G band */
 
-            phy_set_bb_reg(adapterState, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
+            adapterState.Device.phy_set_bb_reg(rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
 
             /* <20131128, VincentL> Remove 0x830[3:1] setting when switching 2G/5G, requested by Yn. */
-            phy_set_bb_reg(adapterState, rBWIndication_Jaguar, 0x3, 0x1); /* 0x834[1:0] = 0x1 */
+            adapterState.Device.phy_set_bb_reg(rBWIndication_Jaguar, 0x3, 0x1); /* 0x834[1:0] = 0x1 */
             /* set PD_TH_20M for BB Yn user guide R27 */
-            phy_set_bb_reg(adapterState, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17,
+            adapterState.Device.phy_set_bb_reg(rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17,
                 0x17); /* 0x830[17:13]=5'b10111 */
 
 
@@ -1120,25 +1038,25 @@ public static class UsbHalInit
                 && eLNA_2g == false)
             {
                 /* 0x830[3:1]=3'b010 */
-                phy_set_bb_reg(adapterState, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x02);
+                adapterState.Device.phy_set_bb_reg(rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x02);
             }
             else
             {
                 /* 0x830[3:1]=3'b100 */
-                phy_set_bb_reg(adapterState, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
+                adapterState.Device.phy_set_bb_reg(rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
             }
 
 
             /* AGC table select */
-            phy_set_bb_reg(adapterState, rAGC_table_Jaguar, 0x3, 0); /* 0x82C[1:0] = 2b'00 */
+            adapterState.Device.phy_set_bb_reg(rAGC_table_Jaguar, 0x3, 0); /* 0x82C[1:0] = 2b'00 */
 
             phy_SetRFEReg8812(adapterState, Band);
 
             /* <20131106, Kordan> Workaround to fix CCK FA for scan issue. */
             /* if( pHalData.bMPMode == FALSE) */
 
-            phy_set_bb_reg(adapterState, rTxPath_Jaguar, 0xf0, 0x1);
-            phy_set_bb_reg(adapterState, rCCK_RX_Jaguar, 0x0f000000, 0x1);
+            adapterState.Device.phy_set_bb_reg(rTxPath_Jaguar, 0xf0, 0x1);
+            adapterState.Device.phy_set_bb_reg(rCCK_RX_Jaguar, 0x0f000000, 0x1);
 
             /* CCK_CHECK_en */
             adapterState.Device.rtw_write8(REG_CCK_CHECK_8812, (byte)(adapterState.Device.rtw_read8(REG_CCK_CHECK_8812) & (NotBIT7)));
@@ -1171,28 +1089,28 @@ public static class UsbHalInit
                 RTW_INFO("PHY_SwitchWirelessBand8812(): Switch to 5G Band. Count = %d reg41A=0x%x\n", count, reg41A);
 
             /* 2012/02/01, Sinda add registry to switch workaround without long-run verification for scan issue. */
-            phy_set_bb_reg(adapterState, rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
+            adapterState.Device.phy_set_bb_reg(rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
 
             /* <20131128, VincentL> Remove 0x830[3:1] setting when switching 2G/5G, requested by Yn. */
-            phy_set_bb_reg(adapterState, rBWIndication_Jaguar, 0x3, 0x2); /* 0x834[1:0] = 0x2 */
+            adapterState.Device.phy_set_bb_reg(rBWIndication_Jaguar, 0x3, 0x2); /* 0x834[1:0] = 0x2 */
             /* set PD_TH_20M for BB Yn user guide R27 */
-            phy_set_bb_reg(adapterState, rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17,
+            adapterState.Device.phy_set_bb_reg(rPwed_TH_Jaguar, BIT13 | BIT14 | BIT15 | BIT16 | BIT17,
                 0x15); /* 0x830[17:13]=5'b10101 */
 
 
             /* set PWED_TH for BB Yn user guide R29 */
             /* 0x830[3:1]=3'b100 */
-            phy_set_bb_reg(adapterState, rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
+            adapterState.Device.phy_set_bb_reg(rPwed_TH_Jaguar, BIT1 | BIT2 | BIT3, 0x04);
 
             /* AGC table select */
-            phy_set_bb_reg(adapterState, rAGC_table_Jaguar, 0x3, 1); /* 0x82C[1:0] = 2'b00 */
+            adapterState.Device.phy_set_bb_reg(rAGC_table_Jaguar, 0x3, 1); /* 0x82C[1:0] = 2'b00 */
 
             phy_SetRFEReg8812(adapterState, Band);
 
             /* <20131106, Kordan> Workaround to fix CCK FA for scan issue. */
             /* if( pHalData.bMPMode == FALSE) */
-            phy_set_bb_reg(adapterState, rTxPath_Jaguar, 0xf0, 0x0);
-            phy_set_bb_reg(adapterState, rCCK_RX_Jaguar, 0x0f000000, 0xF);
+            adapterState.Device.phy_set_bb_reg(rTxPath_Jaguar, 0xf0, 0x0);
+            adapterState.Device.phy_set_bb_reg(rCCK_RX_Jaguar, 0x0f000000, 0xF);
         }
 
         phy_SetBBSwingByBand_8812A(adapterState, Band);
@@ -1200,9 +1118,9 @@ public static class UsbHalInit
 
     static void phy_SetBBSwingByBand_8812A(AdapterState adapterState, BandType Band)
     {
-        phy_set_bb_reg(adapterState, rA_TxScale_Jaguar, 0xFFE00000,
+        adapterState.Device.phy_set_bb_reg(rA_TxScale_Jaguar, 0xFFE00000,
             phy_get_tx_bb_swing_8812a(adapterState, (BandType)Band, RfPath.RF_PATH_A)); /* 0xC1C[31:21] */
-        phy_set_bb_reg(adapterState, rB_TxScale_Jaguar, 0xFFE00000,
+        adapterState.Device.phy_set_bb_reg(rB_TxScale_Jaguar, 0xFFE00000,
             phy_get_tx_bb_swing_8812a(adapterState, (BandType)Band, RfPath.RF_PATH_B)); /* 0xE1C[31:21] */
     }
 
@@ -1344,46 +1262,46 @@ public static class UsbHalInit
             {
                 case 0:
                 case 2:
-                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
-                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    adapterState.Device.phy_set_bb_reg( rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    adapterState.Device.phy_set_bb_reg( rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    adapterState.Device.phy_set_bb_reg( rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    adapterState.Device.phy_set_bb_reg( rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
                     break;
                 case 1:
                 {
-                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
-                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
                 }
                     break;
                 case 3:
-                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337770);
-                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337770);
-                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
-                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
-                    phy_set_bb_reg(adapterState, r_ANTSEL_SW_Jaguar, 0x00000303, 0x1);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337770);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337770);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    adapterState.Device.phy_set_bb_reg(r_ANTSEL_SW_Jaguar, 0x00000303, 0x1);
                     break;
                 case 4:
-                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
-                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x001);
-                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x001);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x001);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x001);
                     break;
                 case 5:
                     adapterState.Device.rtw_write8(rA_RFE_Pinmux_Jaguar + 2, 0x77);
 
-                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77777777);
                     u1tmp = adapterState.Device.rtw_read8(rA_RFE_Inv_Jaguar + 3);
                     u1tmp &= NotBIT0;
                     adapterState.Device.rtw_write8(rA_RFE_Inv_Jaguar + 3, (byte)(u1tmp));
-                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
                     break;
                 case 6:
-                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x07772770);
-                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x07772770);
-                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
-                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x07772770);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x07772770);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
                     break;
                 default:
                     break;
@@ -1394,45 +1312,45 @@ public static class UsbHalInit
             switch (pHalData.rfe_type)
             {
                 case 0:
-                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
-                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
-                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
-                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
                     break;
                 case 1:
                 {
-                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
-                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
-                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
-                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x000);
                 }
                     break;
                 case 2:
                 case 4:
-                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
-                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
-                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
-                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
                     break;
                 case 3:
-                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337717);
-                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337717);
-                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
-                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
-                    phy_set_bb_reg(adapterState, r_ANTSEL_SW_Jaguar, 0x00000303, 0x1);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337717);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x54337717);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    adapterState.Device.phy_set_bb_reg(r_ANTSEL_SW_Jaguar, 0x00000303, 0x1);
                     break;
                 case 5:
                     adapterState.Device.rtw_write8(rA_RFE_Pinmux_Jaguar + 2, 0x33);
-                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337777);
                     u1tmp = adapterState.Device.rtw_read8(rA_RFE_Inv_Jaguar + 3);
                     adapterState.Device.rtw_write8(rA_RFE_Inv_Jaguar + 3, (byte)(u1tmp |= BIT0));
-                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Inv_Jaguar, bMask_RFEInv_Jaguar, 0x010);
                     break;
                 case 6:
-                    phy_set_bb_reg(adapterState, rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x07737717);
-                    phy_set_bb_reg(adapterState, rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x07737717);
-                    phy_set_bb_reg(adapterState, rA_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
-                    phy_set_bb_reg(adapterState, rB_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x07737717);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Pinmux_Jaguar, bMaskDWord, 0x07737717);
+                    adapterState.Device.phy_set_bb_reg(rA_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
+                    adapterState.Device.phy_set_bb_reg(rB_RFE_Inv_Jaguar, bMaskDWord, 0x00000077);
                     break;
                 default:
                     break;
@@ -1443,20 +1361,20 @@ public static class UsbHalInit
     static void PHY_BB8812_Config_1T(AdapterState adapterState)
     {
         /* BB OFDM RX Path_A */
-        phy_set_bb_reg(adapterState, rRxPath_Jaguar, bRxPath_Jaguar, 0x11);
+        adapterState.Device.phy_set_bb_reg(rRxPath_Jaguar, bRxPath_Jaguar, 0x11);
         /* BB OFDM TX Path_A */
-        phy_set_bb_reg(adapterState, rTxPath_Jaguar, bMaskLWord, 0x1111);
+        adapterState.Device.phy_set_bb_reg(rTxPath_Jaguar, bMaskLWord, 0x1111);
         /* BB CCK R/Rx Path_A */
-        phy_set_bb_reg(adapterState, rCCK_RX_Jaguar, bCCK_RX_Jaguar, 0x0);
+        adapterState.Device.phy_set_bb_reg(rCCK_RX_Jaguar, bCCK_RX_Jaguar, 0x0);
         /* MCS support */
-        phy_set_bb_reg(adapterState, 0x8bc, 0xc0000060, 0x4);
+        adapterState.Device.phy_set_bb_reg(0x8bc, 0xc0000060, 0x4);
         /* RF Path_B HSSI OFF */
-        phy_set_bb_reg(adapterState, 0xe00, 0xf, 0x4);
+        adapterState.Device.phy_set_bb_reg(0xe00, 0xf, 0x4);
         /* RF Path_B Power Down */
-        phy_set_bb_reg(adapterState, 0xe90, bMaskDWord, 0);
+        adapterState.Device.phy_set_bb_reg(0xe90, bMaskDWord, 0);
         /* ADDA Path_B OFF */
-        phy_set_bb_reg(adapterState, 0xe60, bMaskDWord, 0);
-        phy_set_bb_reg(adapterState, 0xe64, bMaskDWord, 0);
+        adapterState.Device.phy_set_bb_reg(0xe60, bMaskDWord, 0);
+        adapterState.Device.phy_set_bb_reg(0xe64, bMaskDWord, 0);
     }
 
     static void PHY_RF6052_Config_8812(AdapterState adapterState)
@@ -1562,7 +1480,7 @@ public static class UsbHalInit
         crystal_cap = (byte)(crystal_cap & 0x3F);
 
         /* write 0x2C[30:25] = 0x2C[24:19] = CrystalCap */
-        phy_set_bb_reg(adapterState, REG_MAC_PHY_CTRL, 0x7FF80000u, (byte)(crystal_cap | (crystal_cap << 6)));
+        adapterState.Device.phy_set_bb_reg(REG_MAC_PHY_CTRL, 0x7FF80000u, (byte)(crystal_cap | (crystal_cap << 6)));
     }
 
     static void phy_InitBBRFRegisterDefinition(AdapterState adapterState)
@@ -2494,7 +2412,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
         if (adapterState.registrypriv.rf_config == RfType.RF_1T2R)
         {
-            phy_set_bb_reg(adapterState, rTxPath_Jaguar, bMaskLWord, 0x1111);
+            adapterState.Device.phy_set_bb_reg(rTxPath_Jaguar, bMaskLWord, 0x1111);
         }
 
 
@@ -2877,19 +2795,18 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
     public static void read_chip_version_8812a(AdapterState adapterState)
     {
-        u32 value32;
-        var pHalData = adapterState.HalData;
-
-        value32 = adapterState.Device.rtw_read32(REG_SYS_CFG);
+        u32 value32 = adapterState.Device.rtw_read32(REG_SYS_CFG);
         RTW_INFO($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
 
+        var pHalData = adapterState.HalData;
         pHalData.version_id.RFType = HalRFType.RF_TYPE_2T2R; /* RF_2T2R; */
 
         if (adapterState.registrypriv.special_rf_path == 1)
+        {
             pHalData.version_id.RFType = HalRFType.RF_TYPE_1T1R; /* RF_1T1R; */
+        }
 
-        pHalData.version_id.CUTVersion =
-            (CutVersion)((value32 & CHIP_VER_RTL_MASK) >> CHIP_VER_RTL_SHIFT); /* IC version (CUT) */
+        pHalData.version_id.CUTVersion = (CutVersion)((value32 & CHIP_VER_RTL_MASK) >> CHIP_VER_RTL_SHIFT); /* IC version (CUT) */
         pHalData.version_id.CUTVersion += 1;
 
         /* For multi-function consideration. Added by Roger, 2010.10.06. */
@@ -2898,47 +2815,42 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         pHalData.MultiFunc |= ((value32 & WL_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_WIFI : 0);
         pHalData.MultiFunc |= ((value32 & BT_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_BT : 0);
 
-        rtw_hal_config_rftype(adapterState);
-
+        var (rfType, numTotalRfPath) = GetRfType(pHalData.version_id);
+        pHalData.rf_type = rfType;
+        pHalData.NumTotalRFPath = numTotalRfPath;
+        RTW_INFO($"rtw_hal_config_rftype RF_Type is {pHalData.rf_type} TotalTxPath is {pHalData.NumTotalRFPath}");
         //dump_chip_info(pHalData.version_id);
     }
 
-    static void rtw_hal_config_rftype(AdapterState padapter)
+    static (RfType rf_type, u8 NumTotalRFPath) GetRfType(HAL_VERSION version)
     {
-        var pHalData = padapter.HalData;
-
-        if (IS_1T1R(pHalData.version_id))
+        if (IS_1T1R(version))
         {
-            pHalData.rf_type = RfType.RF_1T1R;
-            pHalData.NumTotalRFPath = 1;
-        }
-        else if (IS_2T2R(pHalData.version_id))
-        {
-            pHalData.rf_type = RfType.RF_2T2R;
-            pHalData.NumTotalRFPath = 2;
-        }
-        else if (IS_1T2R(pHalData.version_id))
-        {
-            pHalData.rf_type = RfType.RF_1T2R;
-            pHalData.NumTotalRFPath = 2;
-        }
-        else if (IS_3T3R(pHalData.version_id))
-        {
-            pHalData.rf_type = RfType.RF_3T3R;
-            pHalData.NumTotalRFPath = 3;
-        }
-        else if (IS_4T4R(pHalData.version_id))
-        {
-            pHalData.rf_type = RfType.RF_4T4R;
-            pHalData.NumTotalRFPath = 4;
-        }
-        else
-        {
-            pHalData.rf_type = RfType.RF_1T1R;
-            pHalData.NumTotalRFPath = 1;
+            return (RfType.RF_1T1R, 1);
         }
 
-        RTW_INFO($"rtw_hal_config_rftype RF_Type is {pHalData.rf_type} TotalTxPath is {pHalData.NumTotalRFPath}");
+        if (IS_2T2R(version))
+        {
+            return (RfType.RF_2T2R, 2);
+        }
+
+        if (IS_1T2R(version))
+        {
+            return (RfType.RF_1T2R, 2);
+        }
+
+        if (IS_3T3R(version))
+        {
+            return (RfType.RF_3T3R, 3);
+        }
+
+        if (IS_4T4R(version))
+        {
+            return (RfType.RF_4T4R, 4);
+        }
+
+
+        return (RfType.RF_1T1R, 1);
     }
 
     static void _InitQueueReservedPage_8812AUsb(AdapterState adapterState)
@@ -2949,7 +2861,6 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         u32 numHQ = 0;
         u32 numLQ = 0;
         u32 numNQ = 0;
-        u32 numPubQ = 0;
         u32 value32;
         u8 value8;
         BOOLEAN bWiFiConfig = pregistrypriv.wifi_spec;
@@ -2992,7 +2903,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
             }
         }
 
-        numPubQ = TX_TOTAL_PAGE_NUMBER_8812 - numHQ - numLQ - numNQ;
+        u32 numPubQ = TX_TOTAL_PAGE_NUMBER_8812 - numHQ - numLQ - numNQ;
 
         value8 = (u8)_NPQ(numNQ);
         adapterState.Device.rtw_write8(REG_RQPN_NPQ, value8);
@@ -3008,11 +2919,9 @@ WLAN_PWR_CFG[] PwrSeqCmd)
     static u32 _PUBQ(u32 x) => (((x) & 0xFF) << 16);
     static u32 LD_RQPN() => BIT31;
 
-    static void usb_AggSettingTxUpdate_8812A(AdapterState            adapterState)
+    static void usb_AggSettingTxUpdate_8812A(AdapterState adapterState)
     {
-
         var pHalData = adapterState.HalData;
-        u32 value32;
 
         if (adapterState.registrypriv.wifi_spec)
         {
@@ -3021,7 +2930,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
         if (pHalData.UsbTxAggMode)
         {
-            value32 = adapterState.Device.rtw_read32(REG_TDECTRL);
+            u32 value32 = adapterState.Device.rtw_read32(REG_TDECTRL);
             value32 = value32 & ~(BLK_DESC_NUM_MASK << BLK_DESC_NUM_SHIFT);
             value32 |= ((pHalData.UsbTxAggDescNum & BLK_DESC_NUM_MASK) << BLK_DESC_NUM_SHIFT);
 

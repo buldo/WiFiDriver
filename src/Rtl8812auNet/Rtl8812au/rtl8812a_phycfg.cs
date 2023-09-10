@@ -12,27 +12,7 @@ public static class rtl8812a_phycfg
         PHY_HandleSwChnlAndSetBW8812(adapterState, true, true, channel, Bandwidth, Offset40, Offset80, channel);
     }
 
-    public static void PHY_SetBBReg8812(
-        AdapterState adapterState,
-        u16 RegAddr,
-        u32 BitMask,
-        u32 DataOriginal)
-    {
-        u32 Data = DataOriginal;
-        if (BitMask != bMaskDWord)
-        {
-            /* if not "double word" write */
-            var OriginalValue = adapterState.Device.rtw_read32(RegAddr);
-            var BitShift = PHY_CalculateBitShift(BitMask);
-            Data = ((OriginalValue) & (~BitMask)) | (((DataOriginal << (int)BitShift)) & BitMask);
-        }
-
-        adapterState.Device.rtw_write32(RegAddr, Data);
-
-        /* RTW_INFO("BBW MASK=0x%x Addr[0x%x]=0x%x\n", BitMask, RegAddr, Data); */
-    }
-
-    static u32 PHY_CalculateBitShift(u32 BitMask)
+    public static u32 PHY_CalculateBitShift(u32 BitMask)
     {
         int i;
 
@@ -192,7 +172,7 @@ public static class rtl8812a_phycfg
             writeData |= (((powerLevel > 2) ? (powerLevel) : 2) << (i * 8));
         }
 
-        phy_set_bb_reg(adapterState, writeOffset, 0xffffff, writeData);
+        adapterState.Device.phy_set_bb_reg(writeOffset, 0xffffff, writeData);
     }
 
     static u8 phy_get_tx_power_index()
@@ -275,27 +255,27 @@ public static class rtl8812a_phycfg
         /* fc_area		 */
         if (36 <= channelToSW && channelToSW <= 48)
         {
-            phy_set_bb_reg(pAdapterState, rFc_area_Jaguar, 0x1ffe0000, 0x494);
+            pAdapterState.Device.phy_set_bb_reg(rFc_area_Jaguar, 0x1ffe0000, 0x494);
         }
         else if (15 <= channelToSW && channelToSW <= 35)
         {
-            phy_set_bb_reg(pAdapterState, rFc_area_Jaguar, 0x1ffe0000, 0x494);
+            pAdapterState.Device.phy_set_bb_reg(rFc_area_Jaguar, 0x1ffe0000, 0x494);
         }
         else if (50 <= channelToSW && channelToSW <= 80)
         {
-            phy_set_bb_reg(pAdapterState, rFc_area_Jaguar, 0x1ffe0000, 0x453);
+            pAdapterState.Device.phy_set_bb_reg(rFc_area_Jaguar, 0x1ffe0000, 0x453);
         }
         else if (82 <= channelToSW && channelToSW <= 116)
         {
-            phy_set_bb_reg(pAdapterState, rFc_area_Jaguar, 0x1ffe0000, 0x452);
+            pAdapterState.Device.phy_set_bb_reg(rFc_area_Jaguar, 0x1ffe0000, 0x452);
         }
         else if (118 <= channelToSW)
         {
-            phy_set_bb_reg(pAdapterState, rFc_area_Jaguar, 0x1ffe0000, 0x412);
+            pAdapterState.Device.phy_set_bb_reg(rFc_area_Jaguar, 0x1ffe0000, 0x412);
         }
         else
         {
-            phy_set_bb_reg(pAdapterState, rFc_area_Jaguar, 0x1ffe0000, 0x96a);
+            pAdapterState.Device.phy_set_bb_reg(rFc_area_Jaguar, 0x1ffe0000, 0x96a);
         }
 
         for (RfPath eRFPath = 0; (byte)eRFPath < pHalData.NumTotalRFPath; eRFPath++)
@@ -399,7 +379,7 @@ public static class rtl8812a_phycfg
         /* <20120809, Kordan> CCA OFF(when entering), asked by James to avoid reading the wrong value. */
         /* <20120828, Kordan> Toggling CCA would affect RF 0x0, skip it! */
         if (Offset != 0x0 && !(IS_VENDOR_8812A_C_CUT(adapterState)))
-            phy_set_bb_reg(adapterState, rCCAonSec_Jaguar, 0x8, 1);
+            adapterState.Device.phy_set_bb_reg(rCCAonSec_Jaguar, 0x8, 1);
 
         Offset &= 0xff;
 
@@ -412,7 +392,7 @@ public static class rtl8812a_phycfg
             bIsPIMode = phy_query_bb_reg(adapterState, 0xE00, 0x4) != 0;
         }
 
-        phy_set_bb_reg(adapterState, (ushort)pPhyReg.RfHSSIPara2, bHSSIRead_addr_Jaguar, Offset);
+        adapterState.Device.phy_set_bb_reg((ushort)pPhyReg.RfHSSIPara2, bHSSIRead_addr_Jaguar, Offset);
 
         if (IS_VENDOR_8812A_C_CUT(adapterState))
         {
@@ -434,7 +414,7 @@ public static class rtl8812a_phycfg
         /* <20120828, Kordan> Toggling CCA would affect RF 0x0, skip it! */
         if (Offset != 0x0 && !(IS_VENDOR_8812A_C_CUT(adapterState)))
         {
-            phy_set_bb_reg(adapterState, rCCAonSec_Jaguar, 0x8, 0);
+            adapterState.Device.phy_set_bb_reg(rCCAonSec_Jaguar, 0x8, 0);
         }
 
 
@@ -472,7 +452,7 @@ public static class rtl8812a_phycfg
 
         /* Write Operation */
         /* TODO: Dynamically determine whether using PI or SI to write RF registers. */
-        phy_set_bb_reg(adapterState, (ushort)pPhyReg.Rf3WireOffset, bMaskDWord, dataAndAddr);
+        adapterState.Device.phy_set_bb_reg((ushort)pPhyReg.Rf3WireOffset, bMaskDWord, dataAndAddr);
         /* RTW_INFO("RFW-%d Addr[0x%x]=0x%x\n", eRFPath, pPhyReg.Rf3WireOffset, DataAndAddr); */
 
     }
@@ -590,25 +570,25 @@ public static class rtl8812a_phycfg
         switch (pHalData.current_channel_bw)
         {
             case ChannelWidth.CHANNEL_WIDTH_20:
-                phy_set_bb_reg(adapterState, rRFMOD_Jaguar, 0x003003C3, 0x00300200); /* 0x8ac[21,20,9:6,1,0]=8'b11100000 */
-                phy_set_bb_reg(adapterState, rADC_Buf_Clk_Jaguar, BIT30, 0); /* 0x8c4[30] = 1'b0 */
+                adapterState.Device.phy_set_bb_reg(rRFMOD_Jaguar, 0x003003C3, 0x00300200); /* 0x8ac[21,20,9:6,1,0]=8'b11100000 */
+                adapterState.Device.phy_set_bb_reg(rADC_Buf_Clk_Jaguar, BIT30, 0); /* 0x8c4[30] = 1'b0 */
 
                 if (pHalData.rf_type == RfType.RF_2T2R)
                 {
-                    phy_set_bb_reg(adapterState, rL1PeakTH_Jaguar, 0x03C00000, 7); /* 2R 0x848[25:22] = 0x7 */
+                    adapterState.Device.phy_set_bb_reg(rL1PeakTH_Jaguar, 0x03C00000, 7); /* 2R 0x848[25:22] = 0x7 */
                 }
                 else
                 {
-                    phy_set_bb_reg(adapterState, rL1PeakTH_Jaguar, 0x03C00000, 8); /* 1R 0x848[25:22] = 0x8 */
+                    adapterState.Device.phy_set_bb_reg(rL1PeakTH_Jaguar, 0x03C00000, 8); /* 1R 0x848[25:22] = 0x8 */
                 }
 
                 break;
 
             case ChannelWidth.CHANNEL_WIDTH_40:
-                phy_set_bb_reg(adapterState, rRFMOD_Jaguar, 0x003003C3, 0x00300201); /* 0x8ac[21,20,9:6,1,0]=8'b11100000		 */
-                phy_set_bb_reg(adapterState, rADC_Buf_Clk_Jaguar, BIT30, 0); /* 0x8c4[30] = 1'b0 */
-                phy_set_bb_reg(adapterState, rRFMOD_Jaguar, 0x3C, SubChnlNum);
-                phy_set_bb_reg(adapterState, rCCAonSec_Jaguar, 0xf0000000, SubChnlNum);
+                adapterState.Device.phy_set_bb_reg(rRFMOD_Jaguar, 0x003003C3, 0x00300201); /* 0x8ac[21,20,9:6,1,0]=8'b11100000		 */
+                adapterState.Device.phy_set_bb_reg(rADC_Buf_Clk_Jaguar, BIT30, 0); /* 0x8c4[30] = 1'b0 */
+                adapterState.Device.phy_set_bb_reg(rRFMOD_Jaguar, 0x3C, SubChnlNum);
+                adapterState.Device.phy_set_bb_reg(rCCAonSec_Jaguar, 0xf0000000, SubChnlNum);
 
                 if ((reg_837 & BIT2) != 0)
                     L1pkVal = 6;
@@ -620,24 +600,24 @@ public static class rtl8812a_phycfg
                         L1pkVal = 8;
                 }
 
-                phy_set_bb_reg(adapterState, rL1PeakTH_Jaguar, 0x03C00000, L1pkVal); /* 0x848[25:22] = 0x6 */
+                adapterState.Device.phy_set_bb_reg(rL1PeakTH_Jaguar, 0x03C00000, L1pkVal); /* 0x848[25:22] = 0x6 */
 
                 if (SubChnlNum == (byte)VHT_DATA_SC.VHT_DATA_SC_20_UPPER_OF_80MHZ)
                 {
-                    phy_set_bb_reg(adapterState, rCCK_System_Jaguar, bCCK_System_Jaguar, 1);
+                    adapterState.Device.phy_set_bb_reg(rCCK_System_Jaguar, bCCK_System_Jaguar, 1);
                 }
                 else
                 {
-                    phy_set_bb_reg(adapterState, rCCK_System_Jaguar, bCCK_System_Jaguar, 0);
+                    adapterState.Device.phy_set_bb_reg(rCCK_System_Jaguar, bCCK_System_Jaguar, 0);
                 }
 
                 break;
 
             case ChannelWidth.CHANNEL_WIDTH_80:
-                phy_set_bb_reg(adapterState, rRFMOD_Jaguar, 0x003003C3, 0x00300202); /* 0x8ac[21,20,9:6,1,0]=8'b11100010 */
-                phy_set_bb_reg(adapterState, rADC_Buf_Clk_Jaguar, BIT30, 1); /* 0x8c4[30] = 1 */
-                phy_set_bb_reg(adapterState, rRFMOD_Jaguar, 0x3C, SubChnlNum);
-                phy_set_bb_reg(adapterState, rCCAonSec_Jaguar, 0xf0000000, SubChnlNum);
+                adapterState.Device.phy_set_bb_reg(rRFMOD_Jaguar, 0x003003C3, 0x00300202); /* 0x8ac[21,20,9:6,1,0]=8'b11100010 */
+                adapterState.Device.phy_set_bb_reg(rADC_Buf_Clk_Jaguar, BIT30, 1); /* 0x8c4[30] = 1 */
+                adapterState.Device.phy_set_bb_reg(rRFMOD_Jaguar, 0x3C, SubChnlNum);
+                adapterState.Device.phy_set_bb_reg(rCCAonSec_Jaguar, 0xf0000000, SubChnlNum);
 
                 if ((reg_837 & BIT2) != 0)
                     L1pkVal = 5;
@@ -653,7 +633,7 @@ public static class rtl8812a_phycfg
                     }
                 }
 
-                phy_set_bb_reg(adapterState, rL1PeakTH_Jaguar, 0x03C00000, L1pkVal); /* 0x848[25:22] = 0x5 */
+                adapterState.Device.phy_set_bb_reg(rL1PeakTH_Jaguar, 0x03C00000, L1pkVal); /* 0x848[25:22] = 0x5 */
 
                 break;
 
@@ -707,31 +687,31 @@ public static class rtl8812a_phycfg
         if (IS_VENDOR_8812A_C_CUT(pAdapterState))
         {
             if (Bandwidth == ChannelWidth.CHANNEL_WIDTH_40 && Channel == 11)
-                phy_set_bb_reg(pAdapterState, rRFMOD_Jaguar, 0xC00, 0x3); /* 0x8AC[11:10] = 2'b11 */
+                pAdapterState.Device.phy_set_bb_reg(rRFMOD_Jaguar, 0xC00, 0x3); /* 0x8AC[11:10] = 2'b11 */
             else
-                phy_set_bb_reg(pAdapterState, rRFMOD_Jaguar, 0xC00, 0x2); /* 0x8AC[11:10] = 2'b10 */
+                pAdapterState.Device.phy_set_bb_reg(rRFMOD_Jaguar, 0xC00, 0x2); /* 0x8AC[11:10] = 2'b10 */
 
             /* <20120914, Kordan> A workarould to resolve 2480Mhz spur by setting ADC clock as 160M. (Asked by Binson) */
             if (Bandwidth == ChannelWidth.CHANNEL_WIDTH_20 &&
                 (Channel == 13 || Channel == 14))
             {
 
-                phy_set_bb_reg(pAdapterState, rRFMOD_Jaguar, 0x300, 0x3); /* 0x8AC[9:8] = 2'b11 */
-                phy_set_bb_reg(pAdapterState, rADC_Buf_Clk_Jaguar, BIT30, 1); /* 0x8C4[30] = 1 */
+                pAdapterState.Device.phy_set_bb_reg(rRFMOD_Jaguar, 0x300, 0x3); /* 0x8AC[9:8] = 2'b11 */
+                pAdapterState.Device.phy_set_bb_reg(rADC_Buf_Clk_Jaguar, BIT30, 1); /* 0x8C4[30] = 1 */
 
             }
             else if (Bandwidth == ChannelWidth.CHANNEL_WIDTH_40 &&
                      Channel == 11)
             {
 
-                phy_set_bb_reg(pAdapterState, rADC_Buf_Clk_Jaguar, BIT30, 1); /* 0x8C4[30] = 1 */
+                pAdapterState.Device.phy_set_bb_reg(rADC_Buf_Clk_Jaguar, BIT30, 1); /* 0x8C4[30] = 1 */
 
             }
             else if (Bandwidth != ChannelWidth.CHANNEL_WIDTH_80)
             {
 
-                phy_set_bb_reg(pAdapterState, rRFMOD_Jaguar, 0x300, 0x2); /* 0x8AC[9:8] = 2'b10	 */
-                phy_set_bb_reg(pAdapterState, rADC_Buf_Clk_Jaguar, BIT30, 0); /* 0x8C4[30] = 0 */
+                pAdapterState.Device.phy_set_bb_reg(rRFMOD_Jaguar, 0x300, 0x2); /* 0x8AC[9:8] = 2'b10	 */
+                pAdapterState.Device.phy_set_bb_reg(rADC_Buf_Clk_Jaguar, BIT30, 0); /* 0x8C4[30] = 0 */
 
             }
         }
@@ -740,348 +720,29 @@ public static class rtl8812a_phycfg
             /* <20120914, Kordan> A workarould to resolve 2480Mhz spur by setting ADC clock as 160M. (Asked by Binson) */
             if (Bandwidth == ChannelWidth.CHANNEL_WIDTH_20 &&
                 (Channel == 13 || Channel == 14))
-                phy_set_bb_reg(pAdapterState, rRFMOD_Jaguar, 0x300, 0x3); /* 0x8AC[9:8] = 11 */
+                pAdapterState.Device.phy_set_bb_reg(rRFMOD_Jaguar, 0x300, 0x3); /* 0x8AC[9:8] = 11 */
             else if (Channel <= 14) /* 2.4G only */
-                phy_set_bb_reg(pAdapterState, rRFMOD_Jaguar, 0x300, 0x2); /* 0x8AC[9:8] = 10 */
+                pAdapterState.Device.phy_set_bb_reg(rRFMOD_Jaguar, 0x300, 0x2); /* 0x8AC[9:8] = 10 */
         }
 
     }
 
     public static void PHY_SetTxPowerIndex_8812A(AdapterState adapterState, u32 PowerIndex, RfPath RFPath, MGN_RATE Rate)
     {
-        if (RFPath == RfPath.RF_PATH_A)
+        if (PowerIndexDescription.SetTable.TryGetValue(RFPath, out var rfTable))
         {
-            switch (Rate)
+            if (rfTable.TryGetValue(Rate, out var values))
             {
-                case MGN_RATE.MGN_1M:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_CCK11_CCK1_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_2M:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_CCK11_CCK1_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_5_5M:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_CCK11_CCK1_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_11M:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_CCK11_CCK1_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_6M:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Ofdm18_Ofdm6_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_9M:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Ofdm18_Ofdm6_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_12M:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Ofdm18_Ofdm6_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_18M:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Ofdm18_Ofdm6_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_24M:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Ofdm54_Ofdm24_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_36M:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Ofdm54_Ofdm24_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_48M:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Ofdm54_Ofdm24_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_54M:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Ofdm54_Ofdm24_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_MCS0:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS3_MCS0_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS1:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS3_MCS0_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS2:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS3_MCS0_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS3:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS3_MCS0_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_MCS4:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS7_MCS4_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS5:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS7_MCS4_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS6:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS7_MCS4_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS7:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS7_MCS4_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_MCS8:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS11_MCS8_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS9:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS11_MCS8_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS10:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS11_MCS8_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS11:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS11_MCS8_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_MCS12:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS15_MCS12_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS13:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS15_MCS12_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS14:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS15_MCS12_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS15:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_MCS15_MCS12_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_VHT1SS_MCS0:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss1Index3_Nss1Index0_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS1:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss1Index3_Nss1Index0_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS2:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss1Index3_Nss1Index0_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS3:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss1Index3_Nss1Index0_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_VHT1SS_MCS4:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss1Index7_Nss1Index4_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS5:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss1Index7_Nss1Index4_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS6:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss1Index7_Nss1Index4_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS7:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss1Index7_Nss1Index4_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_VHT1SS_MCS8:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss2Index1_Nss1Index8_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS9:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss2Index1_Nss1Index8_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS0:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss2Index1_Nss1Index8_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS1:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss2Index1_Nss1Index8_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_VHT2SS_MCS2:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss2Index5_Nss2Index2_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS3:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss2Index5_Nss2Index2_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS4:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss2Index5_Nss2Index2_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS5:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss2Index5_Nss2Index2_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_VHT2SS_MCS6:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss2Index9_Nss2Index6_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS7:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss2Index9_Nss2Index6_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS8:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss2Index9_Nss2Index6_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS9:
-                    phy_set_bb_reg(adapterState, rTxAGC_A_Nss2Index9_Nss2Index6_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                default:
-                    RTW_INFO("Invalid Rate!!\n");
-                    break;
+                adapterState.Device.phy_set_bb_reg(values.RegAddress, values.BitMask, PowerIndex);
             }
-        }
-        else if (RFPath == RfPath.RF_PATH_B)
-        {
-            switch (Rate)
+            else
             {
-                case MGN_RATE.MGN_1M:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_CCK11_CCK1_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_2M:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_CCK11_CCK1_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_5_5M:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_CCK11_CCK1_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_11M:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_CCK11_CCK1_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_6M:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Ofdm18_Ofdm6_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_9M:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Ofdm18_Ofdm6_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_12M:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Ofdm18_Ofdm6_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_18M:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Ofdm18_Ofdm6_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_24M:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Ofdm54_Ofdm24_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_36M:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Ofdm54_Ofdm24_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_48M:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Ofdm54_Ofdm24_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_54M:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Ofdm54_Ofdm24_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_MCS0:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS3_MCS0_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS1:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS3_MCS0_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS2:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS3_MCS0_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS3:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS3_MCS0_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_MCS4:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS7_MCS4_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS5:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS7_MCS4_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS6:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS7_MCS4_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS7:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS7_MCS4_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_MCS8:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS11_MCS8_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS9:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS11_MCS8_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS10:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS11_MCS8_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS11:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS11_MCS8_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_MCS12:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS15_MCS12_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS13:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS15_MCS12_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS14:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS15_MCS12_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_MCS15:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_MCS15_MCS12_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_VHT1SS_MCS0:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss1Index3_Nss1Index0_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS1:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss1Index3_Nss1Index0_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS2:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss1Index3_Nss1Index0_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS3:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss1Index3_Nss1Index0_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_VHT1SS_MCS4:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss1Index7_Nss1Index4_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS5:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss1Index7_Nss1Index4_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS6:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss1Index7_Nss1Index4_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS7:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss1Index7_Nss1Index4_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_VHT1SS_MCS8:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss2Index1_Nss1Index8_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT1SS_MCS9:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss2Index1_Nss1Index8_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS0:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss2Index1_Nss1Index8_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS1:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss2Index1_Nss1Index8_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_VHT2SS_MCS2:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss2Index5_Nss2Index2_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS3:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss2Index5_Nss2Index2_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS4:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss2Index5_Nss2Index2_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS5:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss2Index5_Nss2Index2_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                case MGN_RATE.MGN_VHT2SS_MCS6:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss2Index9_Nss2Index6_JAguar, bMaskByte0, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS7:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss2Index9_Nss2Index6_JAguar, bMaskByte1, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS8:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss2Index9_Nss2Index6_JAguar, bMaskByte2, PowerIndex);
-                    break;
-                case MGN_RATE.MGN_VHT2SS_MCS9:
-                    phy_set_bb_reg(adapterState, rTxAGC_B_Nss2Index9_Nss2Index6_JAguar, bMaskByte3, PowerIndex);
-                    break;
-
-                default:
-                    RTW_INFO("Invalid Rate!!");
-                    break;
+                RTW_INFO("Invalid Rate!!");
             }
         }
         else
         {
-            RTW_INFO("Invalid RFPath!!");
+            RTW_WARN("Invalid RFPath!!");
         }
     }
 }
