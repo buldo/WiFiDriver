@@ -4,12 +4,10 @@ public class hal_com_data
 {
     public hal_com_data(
         HAL_VERSION versionId,
-        RT_MULTI_FUNC rtMultiFunc,
         RfType rfType,
         byte numTotalRfPath)
     {
         version_id = versionId;
-        MultiFunc = rtMultiFunc;
         rf_type = rfType;
         NumTotalRFPath = numTotalRfPath;
     }
@@ -27,7 +25,6 @@ public class hal_com_data
     /// </summary>
     public u8 NumTotalRFPath { get; set; }
     public bool AutoloadFailFlag { get; set; }
-    public RT_MULTI_FUNC MultiFunc { get; }
     public ChannelWidth current_channel_bw { get; set; }
     public bool bSwChnl { get; set; }
     public bool bChnlBWInitialized { get; set; }
@@ -75,23 +72,23 @@ public class hal_com_data
 
     public bool bMacPwrCtrlOn { get; set; }
 
-    public TxSele OutEpQueueSel { get; set; }
-    public u8 OutEpNumber { get; set; }
+    public TxSele OutEpQueueSel { get; init; }
+    public u8 OutEpNumber { get; init; }
 
-    public RX_AGG_MODE rxagg_mode { get; set; }
+    public RX_AGG_MODE rxagg_mode { get; init; }
 
-    public u8 rxagg_dma_size { get; set; }
+    public u8 rxagg_dma_size { get; init; }
 
-    public u8 rxagg_dma_timeout { get; set; }
+    public u8 rxagg_dma_timeout { get; init; }
 
     public u32[] IntrMask { get; } = new u32[3];
 
     public bool UsbTxAggMode { get; set; }
-    public u8 UsbTxAggDescNum { get; set; }
+    public u8 UsbTxAggDescNum { get; init; }
 
-    public u8 rxagg_usb_size { get; set; }
+    public u8 rxagg_usb_size { get; init; }
 
-    public u8 rxagg_usb_timeout { get; set; }
+    public u8 rxagg_usb_timeout { get; init; }
 
     public BandType current_band_type { get; set; }
 }

@@ -114,7 +114,6 @@ public class Rtl8812aDevice
 
         var halData = new hal_com_data(
             chipVersionResult.version_id,
-            chipVersionResult.MultiFunc,
             chipVersionResult.rf_type,
             chipVersionResult.numTotalRfPath)
         {
@@ -176,35 +175,31 @@ public class Rtl8812aDevice
     }
 
 
-    private (HAL_VERSION version_id, RT_MULTI_FUNC MultiFunc, RfType rf_type, byte numTotalRfPath) read_chip_version_8812a()
+    private (HAL_VERSION version_id, RfType rf_type, byte numTotalRfPath) read_chip_version_8812a()
     {
         u32 value32 = _device.rtw_read32(REG_SYS_CFG);
         RTW_INFO($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
 
-        var version_id = new HAL_VERSION();
-        version_id.RFType = HalRFType.RF_TYPE_2T2R; /* RF_2T2R; */
+        var versionId = new HAL_VERSION
+        {
+            RFType = HalRFType.RF_TYPE_2T2R /* RF_2T2R; */
+        };
 
         if (registry_priv.special_rf_path == 1)
         {
-            version_id.RFType = HalRFType.RF_TYPE_1T1R; /* RF_1T1R; */
+            versionId.RFType = HalRFType.RF_TYPE_1T1R; /* RF_1T1R; */
         }
 
-        version_id.CUTVersion = (CutVersion)((value32 & CHIP_VER_RTL_MASK) >> CHIP_VER_RTL_SHIFT); /* IC version (CUT) */
-        version_id.CUTVersion += 1;
+        versionId.CUTVersion = (CutVersion)((value32 & CHIP_VER_RTL_MASK) >> CHIP_VER_RTL_SHIFT); /* IC version (CUT) */
+        versionId.CUTVersion += 1;
 
         /* For multi-function consideration. Added by Roger, 2010.10.06. */
-        var MultiFunc = RT_MULTI_FUNC.RT_MULTI_FUNC_NONE;
-        value32 = _device.rtw_read32(REG_MULTI_FUNC_CTRL);
-        MultiFunc |= ((value32 & WL_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_WIFI : 0);
-        MultiFunc |= ((value32 & BT_FUNC_EN) != 0 ? RT_MULTI_FUNC.RT_MULTI_FUNC_BT : 0);
 
-        var (rfType, numTotalRfPath) = version_id.GetRfType();
-        var rf_type = rfType;
-        var NumTotalRFPath = numTotalRfPath;
-        RTW_INFO($"rtw_hal_config_rftype RF_Type is {rf_type} TotalTxPath is {NumTotalRFPath}");
-        //dump_chip_info(pHalData.version_id);
+        var (rfType, numTotalRfPath) = versionId.GetRfType();
 
-        return(version_id, MultiFunc, rf_type, numTotalRfPath);
+        RTW_INFO($"rtw_hal_config_rftype RF_Type is {rfType} TotalTxPath is {numTotalRfPath}");
+
+        return(versionId, rfType, numTotalRfPath);
     }
 
     private void StartWithMonitorMode(InitChannel initChannel)

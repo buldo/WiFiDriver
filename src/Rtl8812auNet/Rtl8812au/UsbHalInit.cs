@@ -1,5 +1,4 @@
 ﻿using System.Buffers.Binary;
-using System.Diagnostics;
 using System.Text;
 
 namespace Rtl8812auNet.Rtl8812au;
