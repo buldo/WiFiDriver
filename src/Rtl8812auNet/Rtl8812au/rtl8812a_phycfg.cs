@@ -418,7 +418,7 @@ public static class rtl8812a_phycfg
             bIsPIMode = phy_query_bb_reg(adapterState, 0xE00, 0x4) != 0;
         }
 
-        phy_set_bb_reg(adapterState, (ushort)pPhyReg.rfHSSIPara2, bHSSIRead_addr_Jaguar, Offset);
+        phy_set_bb_reg(adapterState, (ushort)pPhyReg.RfHSSIPara2, bHSSIRead_addr_Jaguar, Offset);
 
         if (IS_VENDOR_8812A_C_CUT(adapterState))
         {
@@ -427,13 +427,13 @@ public static class rtl8812a_phycfg
 
         if (bIsPIMode)
         {
-            retValue = phy_query_bb_reg(adapterState, pPhyReg.rfLSSIReadBackPi, rRead_data_Jaguar);
+            retValue = phy_query_bb_reg(adapterState, pPhyReg.RfLSSIReadBackPi, rRead_data_Jaguar);
             /* RTW_INFO("[PI mode] RFR-%d Addr[0x%x]=0x%x\n", eRFPath, pPhyReg.rfLSSIReadBackPi, retValue); */
         }
         else
         {
-            retValue = phy_query_bb_reg(adapterState, pPhyReg.rfLSSIReadBack, rRead_data_Jaguar);
-            /* RTW_INFO("[SI mode] RFR-%d Addr[0x%x]=0x%x\n", eRFPath, pPhyReg.rfLSSIReadBack, retValue); */
+            retValue = phy_query_bb_reg(adapterState, pPhyReg.RfLSSIReadBack, rRead_data_Jaguar);
+            /* RTW_INFO("[SI mode] RFR-%d Addr[0x%x]=0x%x\n", eRFPath, pPhyReg.RfLSSIReadBack, retValue); */
         }
 
         /* <20120809, Kordan> CCA ON(when exiting), asked by James to avoid reading the wrong value. */
@@ -478,8 +478,8 @@ public static class rtl8812a_phycfg
 
         /* Write Operation */
         /* TODO: Dynamically determine whether using PI or SI to write RF registers. */
-        phy_set_bb_reg(adapterState, (ushort)pPhyReg.rf3wireOffset, bMaskDWord, dataAndAddr);
-        /* RTW_INFO("RFW-%d Addr[0x%x]=0x%x\n", eRFPath, pPhyReg.rf3wireOffset, DataAndAddr); */
+        phy_set_bb_reg(adapterState, (ushort)pPhyReg.Rf3WireOffset, bMaskDWord, dataAndAddr);
+        /* RTW_INFO("RFW-%d Addr[0x%x]=0x%x\n", eRFPath, pPhyReg.Rf3WireOffset, DataAndAddr); */
 
     }
 

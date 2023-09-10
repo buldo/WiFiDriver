@@ -2,11 +2,23 @@
 
 public class BbRegisterDefinition
 {
-    public u32 rf3wireOffset;  /* LSSI data: */
+    /// <summary>
+    /// LSSI data
+    /// </summary>
+    public u32 Rf3WireOffset { get; set; }
 
-    public u32 rfHSSIPara2;    /* wire parameter control2 :  */
+    /// <summary>
+    /// wire parameter control2
+    /// </summary>
+    public u32 RfHSSIPara2 { get; set; }
 
-    public u16 rfLSSIReadBack; /* LSSI RF readback data SI mode */
+    /// <summary>
+    /// LSSI RF readback data SI mode
+    /// </summary>
+    public u16 RfLSSIReadBack { get; set; }
 
-    public u16 rfLSSIReadBackPi;	/* LSSI RF readback data PI mode 0x8b8-8bc for Path A and B */
+    /// <summary>
+    /// LSSI RF readback data PI mode 0x8b8-8bc for Path A and B
+    /// </summary>
+    public u16 RfLSSIReadBackPi { get; set; }
 }

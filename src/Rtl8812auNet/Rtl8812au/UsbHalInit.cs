@@ -1673,17 +1673,17 @@ public static class UsbHalInit
 
         /* RF Interface Sowrtware Control */
 
-        pHalData.PHYRegDef[RfPath.RF_PATH_A].rf3wireOffset = rA_LSSIWrite_Jaguar; /* LSSI Parameter */
-        pHalData.PHYRegDef[RfPath.RF_PATH_B].rf3wireOffset = rB_LSSIWrite_Jaguar;
+        pHalData.PHYRegDef[RfPath.RF_PATH_A].Rf3WireOffset = rA_LSSIWrite_Jaguar; /* LSSI Parameter */
+        pHalData.PHYRegDef[RfPath.RF_PATH_B].Rf3WireOffset = rB_LSSIWrite_Jaguar;
 
-        pHalData.PHYRegDef[RfPath.RF_PATH_A].rfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
-        pHalData.PHYRegDef[RfPath.RF_PATH_B].rfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
+        pHalData.PHYRegDef[RfPath.RF_PATH_A].RfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
+        pHalData.PHYRegDef[RfPath.RF_PATH_B].RfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
 
         /* Tranceiver Readback LSSI/HSPI mode */
-        pHalData.PHYRegDef[RfPath.RF_PATH_A].rfLSSIReadBack = rA_SIRead_Jaguar;
-        pHalData.PHYRegDef[RfPath.RF_PATH_B].rfLSSIReadBack = rB_SIRead_Jaguar;
-        pHalData.PHYRegDef[RfPath.RF_PATH_A].rfLSSIReadBackPi = rA_PIRead_Jaguar;
-        pHalData.PHYRegDef[RfPath.RF_PATH_B].rfLSSIReadBackPi = rB_PIRead_Jaguar;
+        pHalData.PHYRegDef[RfPath.RF_PATH_A].RfLSSIReadBack = rA_SIRead_Jaguar;
+        pHalData.PHYRegDef[RfPath.RF_PATH_B].RfLSSIReadBack = rB_SIRead_Jaguar;
+        pHalData.PHYRegDef[RfPath.RF_PATH_A].RfLSSIReadBackPi = rA_PIRead_Jaguar;
+        pHalData.PHYRegDef[RfPath.RF_PATH_B].RfLSSIReadBackPi = rB_PIRead_Jaguar;
     }
 
     static void _InitBurstPktLen(AdapterState adapterState)
