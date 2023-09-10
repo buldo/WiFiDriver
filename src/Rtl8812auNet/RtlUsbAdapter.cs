@@ -15,6 +15,78 @@ public class RtlUsbAdapter
 
     public IRtlUsbDevice UsbDevice => _usbDevice;
 
+    public void rtl8812au_hw_reset()
+    {
+        uint reg_val = 0;
+        if ((rtw_read8(REG_MCUFWDL) & BIT7) != 0)
+        {
+            _8051Reset8812();
+            rtw_write8(REG_MCUFWDL, 0x00);
+            /* before BB reset should do clock gated */
+            rtw_write32(rFPGA0_XCD_RFPara,
+                rtw_read32(rFPGA0_XCD_RFPara) | (BIT6));
+            /* reset BB */
+            reg_val = rtw_read8(REG_SYS_FUNC_EN);
+            reg_val = (byte)(reg_val & ~(BIT0 | BIT1));
+            rtw_write8(REG_SYS_FUNC_EN, (byte)reg_val);
+            /* reset RF */
+            rtw_write8(REG_RF_CTRL, 0);
+            /* reset TRX path */
+            rtw_write16(REG_CR, 0);
+            /* reset MAC */
+            reg_val = rtw_read8(REG_APS_FSMCO + 1);
+            reg_val |= BIT1;
+            rtw_write8(REG_APS_FSMCO + 1, (byte)reg_val); /* reg0x5[1] ,auto FSM off */
+
+            reg_val = rtw_read8(REG_APS_FSMCO + 1);
+
+            /* check if   reg0x5[1] auto cleared */
+            while ((reg_val & BIT1) != 0)
+            {
+                Thread.Sleep(1);
+                reg_val = rtw_read8(REG_APS_FSMCO + 1);
+            }
+
+            reg_val |= BIT0;
+            rtw_write8(REG_APS_FSMCO + 1, (byte)reg_val); /* reg0x5[0] ,auto FSM on */
+
+            reg_val = rtw_read8(REG_SYS_FUNC_EN + 1);
+            reg_val = (byte)(reg_val & ~(BIT4 | BIT7));
+            rtw_write8(REG_SYS_FUNC_EN + 1, (byte)reg_val);
+            reg_val = rtw_read8(REG_SYS_FUNC_EN + 1);
+            reg_val = (byte)(reg_val | BIT4 | BIT7);
+            rtw_write8(REG_SYS_FUNC_EN + 1, (byte)reg_val);
+        }
+    }
+
+    public void _8051Reset8812()
+    {
+        u8 u1bTmp, u1bTmp2;
+
+        /* Reset MCU IO Wrapper- sugggest by SD1-Gimmy */
+
+        u1bTmp2 = rtw_read8(REG_RSV_CTRL);
+        rtw_write8(REG_RSV_CTRL, (byte)(u1bTmp2 & (NotBIT1)));
+        u1bTmp2 = rtw_read8(REG_RSV_CTRL + 1);
+        rtw_write8(REG_RSV_CTRL + 1, (byte)(u1bTmp2 & (NotBIT3)));
+
+
+        u1bTmp = rtw_read8(REG_SYS_FUNC_EN + 1);
+        rtw_write8(REG_SYS_FUNC_EN + 1, (byte)(u1bTmp & (NotBIT2)));
+
+        /* Enable MCU IO Wrapper */
+
+        u1bTmp2 = rtw_read8(REG_RSV_CTRL);
+        rtw_write8(REG_RSV_CTRL, (byte)(u1bTmp2 & (NotBIT1)));
+        u1bTmp2 = rtw_read8(REG_RSV_CTRL + 1);
+        rtw_write8(REG_RSV_CTRL + 1, (byte)(u1bTmp2 | (BIT3)));
+
+
+        rtw_write8(REG_SYS_FUNC_EN + 1, (byte)(u1bTmp | (BIT2)));
+
+        RTW_INFO("=====> _8051Reset8812(): 8051 reset success .");
+    }
+
     public void efuse_OneByteRead(UInt16 addr, out byte data)
     {
         /* -----------------e-fuse reg ctrl --------------------------------- */

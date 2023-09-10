@@ -1,87 +1,8 @@
 ﻿namespace Rtl8812auNet.Rtl8812au;
 
-public static class halhwimg8812a_mac
+public static class HalHwImg8812aMac
 {
-    public static void odm_read_and_config_mp_8812a_mac_reg(AdapterState adapterState, dm_struct dm)
-    {
-        u32 i = 0;
-        u8 c_cond;
-        bool is_matched = true, is_skipped = false;
-        var array_len = array_mp_8812a_mac_reg.Length;
-        var array = array_mp_8812a_mac_reg;
-
-        u32 pre_v1 = 0, pre_v2 = 0;
-
-        //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
-
-        while ((i + 1) < array_len)
-        {
-            var v1 = array[i];
-            var v2 = array[i + 1];
-
-            if ((v1 & (BIT31 | BIT30))!=0)
-            {
-                /*positive & negative condition*/
-                if ((v1 & BIT31)!=0)
-                {
-                    /* positive condition*/
-                    c_cond = (u8)((v1 & (BIT29 | BIT28)) >> 28);
-                    if (c_cond == COND_ENDIF)
-                    {
-                        /*end*/
-                        is_matched = true;
-                        is_skipped = false;
-                        //PHYDM_DBG(dm, ODM_COMP_INIT, "ENDIF\n");
-                    }
-                    else if (c_cond == COND_ELSE)
-                    {
-                        /*else*/
-                        is_matched = is_skipped ? false : true;
-                        //PHYDM_DBG(dm, ODM_COMP_INIT, "ELSE\n");
-                    }
-                    else
-                    {
-                        /*if , else if*/
-                        pre_v1 = v1;
-                        pre_v2 = v2;
-                        //PHYDM_DBG(dm, ODM_COMP_INIT, "IF or ELSE IF\n");
-                    }
-                }
-                else if ((v1 & BIT30)!=0)
-                {
-                    /*negative condition*/
-                    if (is_skipped == false)
-                    {
-                        if (check_positive(dm, pre_v1, pre_v2, v2))
-                        {
-                            is_matched = true;
-                            is_skipped = true;
-                        }
-                        else
-                        {
-                            is_matched = false;
-                            is_skipped = false;
-                        }
-                    }
-                    else
-                        is_matched = false;
-                }
-            }
-            else
-            {
-                if (is_matched)
-                {
-                    ushort addr = (u16)v1;
-                    byte data = (u8)v2;
-                    odm_write_1byte(adapterState, addr, data);
-                }
-            }
-
-            i = i + 2;
-        }
-    }
-
-    private static u32[] array_mp_8812a_mac_reg =
+    public static u32[] Mp8812aMacReg =
     {
         0x010, 0x0000000C,
         0x80000200, 0x00000000, 0x40000000, 0x00000000,

@@ -2,150 +2,11 @@
 
 public static class halhwimg8812a_rf
 {
-    public static void odm_read_and_config_mp_8812a_radioa(AdapterState dm)
-    {
-        u32 i = 0;
-        u8 c_cond;
-        bool is_matched = true, is_skipped = false;
-        var array_len = array_mp_8812a_radioa.Length;
-        u32[] array = array_mp_8812a_radioa;
 
-        u32 pre_v1 = 0, pre_v2 = 0;
-
-        //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
-
-        while ((i + 1) < array_len)
-        {
-            var v1 = array[i];
-            var v2 = array[i + 1];
-
-            if ((v1 & (BIT31 | BIT30)) != 0)
-            {/*positive & negative condition*/
-                if ((v1 & BIT31) != 0)
-                {/* positive condition*/
-                    c_cond = (u8)((v1 & (BIT29 | BIT28)) >>> 28);
-                    if (c_cond == COND_ENDIF)
-                    {/*end*/
-                        is_matched = true;
-                        is_skipped = false;
-                        //PHYDM_DBG(dm, ODM_COMP_INIT, "ENDIF\n");
-                    }
-                    else if (c_cond == COND_ELSE)
-                    { /*else*/
-                        is_matched = is_skipped ? false : true;
-                        //PHYDM_DBG(dm, ODM_COMP_INIT, "ELSE\n");
-                    }
-                    else
-                    {/*if , else if*/
-                        pre_v1 = v1;
-                        pre_v2 = v2;
-                        //PHYDM_DBG(dm, ODM_COMP_INIT, "IF or ELSE IF\n");
-                    }
-                }
-                else if ((v1 & BIT30) != 0)
-                { /*negative condition*/
-                    if (is_skipped == false)
-                    {
-                        if (check_positive(dm.HalData.odmpriv, pre_v1, pre_v2, v2))
-                        {
-                            is_matched = true;
-                            is_skipped = true;
-                        }
-                        else
-                        {
-                            is_matched = false;
-                            is_skipped = false;
-                        }
-                    }
-                    else
-                        is_matched = false;
-                }
-            }
-            else
-            {
-                if (is_matched)
-                {
-                    odm_config_rf_radio_a_8812a(dm, v1, v2);
-                }
-            }
-            i = i + 2;
-        }
-    }
-
-    public static void odm_read_and_config_mp_8812a_radiob(AdapterState dm)
-    {
-
-        u32 i = 0;
-        u8 c_cond;
-        bool is_matched = true, is_skipped = false;
-        var array_len = array_mp_8812a_radiob.Length;
-        u32[] array = array_mp_8812a_radiob;
-
-        u32 pre_v1 = 0, pre_v2 = 0;
-
-        //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
-
-        while ((i + 1) < array_len)
-        {
-            var v1 = array[i];
-            var v2 = array[i + 1];
-
-            if ((v1 & (BIT31 | BIT30)) != 0)
-            {/*positive & negative condition*/
-                if ((v1 & BIT31) != 0)
-                {/* positive condition*/
-                    c_cond = (u8)((v1 & (BIT29 | BIT28)) >>> 28);
-                    if (c_cond == COND_ENDIF)
-                    {/*end*/
-                        is_matched = true;
-                        is_skipped = false;
-                        // PHYDM_DBG(dm, ODM_COMP_INIT, "ENDIF\n");
-                    }
-                    else if (c_cond == COND_ELSE)
-                    { /*else*/
-                        is_matched = is_skipped ? false : true;
-                        // PHYDM_DBG(dm, ODM_COMP_INIT, "ELSE\n");
-                    }
-                    else
-                    {/*if , else if*/
-                        pre_v1 = v1;
-                        pre_v2 = v2;
-                        //PHYDM_DBG(dm, ODM_COMP_INIT, "IF or ELSE IF\n");
-                    }
-                }
-                else if ((v1 & BIT30) != 0)
-                { /*negative condition*/
-                    if (is_skipped == false)
-                    {
-                        if (check_positive(dm.HalData.odmpriv, pre_v1, pre_v2, v2))
-                        {
-                            is_matched = true;
-                            is_skipped = true;
-                        }
-                        else
-                        {
-                            is_matched = false;
-                            is_skipped = false;
-                        }
-                    }
-                    else
-                        is_matched = false;
-                }
-            }
-            else
-            {
-                if (is_matched)
-                {
-                    odm_config_rf_radio_b_8812a(dm, v1, v2);
-                }
-            }
-            i = i + 2;
-        }
-    }
 
     #region Arrays
 
-    private static u32[] array_mp_8812a_radioa =
+    public static u32[] array_mp_8812a_radioa =
     {
         0x000, 0x00010000,
         0x018, 0x0001712A,
@@ -562,7 +423,7 @@ public static class halhwimg8812a_rf
 
     };
 
-    private static u32[] array_mp_8812a_radiob =
+    public static u32[] array_mp_8812a_radiob =
     {
         0x056, 0x00051CF2,
         0x066, 0x00040000,

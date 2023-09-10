@@ -11,8 +11,6 @@ public class AdapterState
 
     public DvObj DvObj { get; }
 
-    public registry_priv registrypriv { get; } = new ();
-
     public hal_com_data HalData { get; } = new();
 
     public RtlUsbAdapter Device { get; }

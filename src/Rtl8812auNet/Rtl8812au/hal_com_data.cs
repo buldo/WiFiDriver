@@ -3,9 +3,6 @@
 public class hal_com_data
 {
     public HAL_VERSION version_id { get; } = new HAL_VERSION();
-    public u16 firmware_version { get; set; }
-    public u16 firmware_sub_version { get; set; }
-    public u16 FirmwareSignature { get; set; }
     public u8 current_channel { get; set; }
     public RfType rf_type { get; set; } /*enum RfType*/
     public u8 NumTotalRFPath { get; set; }
