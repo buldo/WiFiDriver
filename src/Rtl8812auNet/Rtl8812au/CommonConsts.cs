@@ -3,47 +3,25 @@
 public static class CommonConsts
 {
     public const ushort REG_9346CR = 0x000A;
-    public const ushort REG_EFUSE_CTRL = 0x0030;
+    private const ushort REG_EFUSE_CTRL = 0x0030;
     public const ushort EFUSE_CTRL = REG_EFUSE_CTRL;
     public const ushort REG_EFUSE_BURN_GNT_8812 = 0x00CF;
     public const ushort REG_SYS_ISO_CTRL = 0x0000;
     public const ushort REG_SYS_FUNC_EN = 0x0002;
     public const ushort REG_EFUSE_TEST = 0x0034;
     public const ushort REG_SYS_CLKR = 0x0008;
-    public const int MAX_RF_PATH = 4;
-    public const int RF_PATH_MAX = MAX_RF_PATH;
-    public const int MAX_CHNL_GROUP_5G = 14;
-    public const int MAX_CHNL_GROUP_24G = 6;
-    public const int MAX_TX_COUNT = 4;
     public const byte EEPROM_DEFAULT_BOARD_OPTION = 0x00;
     public const byte EEPROM_RF_BOARD_OPTION_8812 = 0xC1;
-    public const int CENTER_CH_5G_20M_NUM = (28 + 16);	/* 20M center channels */
-    public const int CENTER_CH_5G_40M_NUM = 14;	/* 40M center channels */
-    public const int CENTER_CH_5G_80M_NUM = 7; /* 80M center channels */
-    public const int CENTER_CH_5G_ALL_NUM = (CENTER_CH_5G_20M_NUM + CENTER_CH_5G_40M_NUM + CENTER_CH_5G_80M_NUM);
-    public const int CENTER_CH_2G_NUM = 14;
-    public const byte PG_TXPWR_SRC_PG_DATA = 0;
-    public const byte PG_TXPWR_SRC_IC_DEF = 1;
-    public const byte PG_TXPWR_SRC_DEF = 2;
-    public const byte PG_TXPWR_SRC_NUM = 3;
-    public const sbyte PG_TXPWR_INVALID_DIFF = 8;
-    public const byte PG_TXPWR_INVALID_BASE = 255;
     public const byte EEPROM_THERMAL_METER_8812 = 0xBA;
     public const byte EEPROM_Default_ThermalMeter_8812 = 0x18;
-    public const byte EEPROM_USB_OPTIONAL_FUNCTION0 = 0xD4;
     public const byte EEPROM_USB_MODE_8812 = 0x08;
     public const byte EEPROM_RFE_OPTION_8812 = 0xCA;
-    public const byte PG_TXPWR_1PATH_BYTE_NUM_2G = 18;
-    public const byte PG_TXPWR_1PATH_BYTE_NUM_5G = 24;
-    public const bool DBG_PG_TXPWR_READ = true;
     public const byte BAND_CAP_2G = 0;
     public const byte BAND_CAP_5G = 1;
     public const uint PROTO_CAP_11B = BIT0;
     public const uint PROTO_CAP_11G = BIT1;
     public const uint PROTO_CAP_11N = BIT2;
     public const uint PROTO_CAP_11AC = BIT3;
-    public const byte EFUSE_WIFI = 0;
-    public const int EFUSE_MAP_LEN_JAGUAR = 512;
     public const ushort REG_USB_HRPWM = 0xFE58;
     public const ushort REG_BAR_MODE_CTRL = 0x04CC;
     public const ushort REG_FAST_EDCA_CTRL = 0x0460;
@@ -63,9 +41,9 @@ public static class CommonConsts
     public const ushort REG_RF_CTRL = 0x001F;
     public const ushort REG_APS_FSMCO = 0x0004;
     public const ushort REG_RSV_CTRL = 0x001C;
-    public const byte WOWLAN_PAGE_NUM_8812 = 0x00;
-    public const byte BCNQ_PAGE_NUM_8812 = 0x07;
-    public const byte FW_NDPA_PAGE_NUM = 0x02; // MAYBE 0x00 because CONFIG_BEAMFORMER_FW_NDPA
+    private const byte WOWLAN_PAGE_NUM_8812 = 0x00;
+    private const byte BCNQ_PAGE_NUM_8812 = 0x07;
+    private const byte FW_NDPA_PAGE_NUM = 0x02; // MAYBE 0x00 because CONFIG_BEAMFORMER_FW_NDPA
     public const byte TX_TOTAL_PAGE_NUMBER_8812 = (0xFF - BCNQ_PAGE_NUM_8812 - WOWLAN_PAGE_NUM_8812 - FW_NDPA_PAGE_NUM);
     public const byte TX_PAGE_BOUNDARY_8812 = (TX_TOTAL_PAGE_NUMBER_8812 + 1);
     public const uint LAST_ENTRY_OF_TX_PKT_BUFFER_8812 = 255;
@@ -113,9 +91,9 @@ public static class CommonConsts
 
     /* for 8812
  * TX 128K, RX 16K, Page size 512B for TX, 128B for RX */
-    public const ushort MAX_RX_DMA_BUFFER_SIZE_8812 = 0x3E80;/* RX 16K */
+    private const ushort MAX_RX_DMA_BUFFER_SIZE_8812 = 0x3E80;/* RX 16K */
     public const ushort RX_DMA_BOUNDARY_8812 = (MAX_RX_DMA_BUFFER_SIZE_8812 - RX_DMA_RESERVED_SIZE_8812 - 1);
-    public const ushort RX_DMA_RESERVED_SIZE_8812 = 0x0; /* 0B */
+    private const ushort RX_DMA_RESERVED_SIZE_8812 = 0x0; /* 0B */
     public const ushort REG_MAR = 0x0620;
     public const ushort REG_HIMR0_8812 = 0x00B0;
     public const ushort REG_HIMR1_8812 = 0x00B8;
@@ -174,7 +152,6 @@ public static class CommonConsts
     public const ushort REG_RX_PKT_LIMIT = 0x060C;
     public const ushort REG_PIFS = 0x0512;
     public const ushort REG_MAX_AGGR_NUM = 0x04CA;
-    public const ushort REG_AMPDU_BURST_MODE_8812 = 0x04BC;
     public const ushort rA_TxScale_Jaguar = 0xc1c;/* Pah_A TX scaling factor */
     public const ushort rB_TxScale_Jaguar = 0xe1c;/* Path_B TX scaling factor */
     public const ushort rA_RFE_Pinmux_Jaguar = 0xcb0; /* Path_A RFE cotrol pinmux */
@@ -215,9 +192,6 @@ public static class CommonConsts
     public const u16 QUEUE_HIGH = 3;
     public const u16 QUEUE_EXTRA = 0;
 
-    public const uint rFPGA0_XAB_RFInterfaceSW = 0x870;/* RF Interface Software Control */
-    public const uint rFPGA0_XA_RFInterfaceOE = 0x860;/* RF Channel switch */
-    public const uint rFPGA0_XB_RFInterfaceOE = 0x864;
     public const uint rA_LSSIWrite_Jaguar = 0xc90; /* RF write addr */
     public const uint rB_LSSIWrite_Jaguar = 0xe90; /* RF write addr */
     public const uint rHSSIRead_Jaguar = 0x8b0;  /* RF read addr */
@@ -285,10 +259,5 @@ public static class CommonConsts
 
     public const uint RFREGOFFSETMASK = 0xfffff;
 
-    public const uint USB_SUPER_SPEED_BULK_SIZE = 1024; /* usb 3.0 */
-    public const uint USB_HIGH_SPEED_BULK_SIZE = 512; /* usb 2.0 */
-    public const uint USB_FULL_SPEED_BULK_SIZE = 64; /* usb 1.1 */
-
     public const int RXDESC_SIZE = 24;
-    public const int RXDESC_OFFSET = RXDESC_SIZE;
 }

@@ -1153,29 +1153,6 @@ public static class UsbHalInit
 
     private static bool is_boot_from_eeprom(AdapterState adapterState) => (adapterState.HalData.EepromOrEfuse);
 
-    private static map_seg_t MAPSEG_PTR_ENT(UInt16 _sa, u8[] _p)
-    {
-        return new map_seg_t()
-        {
-            sa = _sa,
-            c = _p
-        };
-
-    }
-
-    private static map_t MAP_ENT(ushort _len, ushort _seg_num, byte _init_v, map_seg_t _seg)
-    {
-        var t = new map_t()
-        {
-            len = _len,
-            init_value = _init_v,
-            segs = new map_seg_t[_seg_num]
-        };
-
-        t.segs[0] = _seg;
-        return t;
-    }
-
     public static void phy_set_bb_reg(AdapterState adapterState, u16 RegAddr, u32 BitMask, u32 Data) =>
         PHY_SetBBReg8812(adapterState, RegAddr, BitMask, Data);
 
