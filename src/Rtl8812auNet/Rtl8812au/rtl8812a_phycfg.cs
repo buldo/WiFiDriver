@@ -3,7 +3,7 @@
 public static class rtl8812a_phycfg
 {
     public static void PHY_SetSwChnlBWMode8812(
-        PADAPTER adapterState,
+        AdapterState adapterState,
         u8 channel,
         ChannelWidth Bandwidth,
         u8 Offset40,
@@ -13,7 +13,7 @@ public static class rtl8812a_phycfg
     }
 
     public static void PHY_SetBBReg8812(
-        PADAPTER adapterState,
+        AdapterState adapterState,
         u16 RegAddr,
         u32 BitMask,
         u32 DataOriginal)
@@ -46,7 +46,7 @@ public static class rtl8812a_phycfg
     }
 
     static void PHY_HandleSwChnlAndSetBW8812(
-        PADAPTER adapterState,
+        AdapterState adapterState,
         BOOLEAN bSwitchChannel,
         BOOLEAN bSetBandWidth,
         u8 ChannelNum,
@@ -121,7 +121,7 @@ public static class rtl8812a_phycfg
         phy_SwChnlAndSetBwMode8812(adapterState);
     }
 
-    static void phy_SwChnlAndSetBwMode8812(PADAPTER adapterState)
+    static void phy_SwChnlAndSetBwMode8812(AdapterState adapterState)
     {
         var pHalData = adapterState.HalData;
 
@@ -142,7 +142,7 @@ public static class rtl8812a_phycfg
         pHalData.bNeedIQK = false;
     }
 
-    static void PHY_SetTxPowerLevel8812(PADAPTER adapterState, u8 Channel)
+    static void PHY_SetTxPowerLevel8812(AdapterState adapterState, u8 Channel)
     {
         PHAL_DATA_TYPE pHalData = adapterState.HalData;
 
@@ -153,7 +153,7 @@ public static class rtl8812a_phycfg
         }
     }
 
-    static void PHY_TxPowerTrainingByPath_8812(PADAPTER adapterState, ChannelWidth BandWidth, u8 Channel, RfPath RfPath)
+    static void PHY_TxPowerTrainingByPath_8812(AdapterState adapterState, ChannelWidth BandWidth, u8 Channel, RfPath RfPath)
     {
         HAL_DATA_TYPE pHalData = adapterState.HalData;
 
@@ -192,14 +192,14 @@ public static class rtl8812a_phycfg
         phy_set_bb_reg(adapterState, writeOffset, 0xffffff, writeData);
     }
 
-    static u8 phy_get_tx_power_index(PADAPTER pAdapterState, RfPath RFPath, MGN_RATE Rate, ChannelWidth BandWidth,
+    static u8 phy_get_tx_power_index(AdapterState pAdapterState, RfPath RFPath, MGN_RATE Rate, ChannelWidth BandWidth,
         u8 Channel)
     {
         return 16;
     }
 
 
-    static void phy_set_tx_power_level_by_path(PADAPTER adapterState, u8 channel, RfPath path)
+    static void phy_set_tx_power_level_by_path(AdapterState adapterState, u8 channel, RfPath path)
     {
         PHAL_DATA_TYPE pHalData = adapterState.HalData;
         BOOLEAN bIsIn24G = (pHalData.current_band_type == BandType.BAND_ON_2_4G);
@@ -222,7 +222,7 @@ public static class rtl8812a_phycfg
     }
 
     static void phy_set_tx_power_index_by_rate_section(
-        PADAPTER pAdapterState,
+        AdapterState pAdapterState,
         RfPath RFPath,
         u8 Channel,
         RATE_SECTION RateSection)
@@ -250,7 +250,7 @@ public static class rtl8812a_phycfg
     }
 
     static void PHY_SetTxPowerIndexByRateArray(
-        PADAPTER pAdapterState,
+        AdapterState pAdapterState,
         RfPath RFPath,
         ChannelWidth BandWidth,
         u8 Channel,
@@ -264,7 +264,7 @@ public static class rtl8812a_phycfg
         }
     }
 
-    static void phy_SwChnl8812(PADAPTER pAdapterState)
+    static void phy_SwChnl8812(AdapterState pAdapterState)
     {
 
         HAL_DATA_TYPE pHalData = pAdapterState.HalData;
@@ -339,7 +339,7 @@ public static class rtl8812a_phycfg
         }
     }
 
-    static BOOLEAN phy_SwBand8812(PADAPTER pAdapterState, u8 channelToSW)
+    static BOOLEAN phy_SwBand8812(AdapterState pAdapterState, u8 channelToSW)
     {
         u8 u1Btmp;
         BOOLEAN ret_value = true;
@@ -393,7 +393,7 @@ public static class rtl8812a_phycfg
         phy_RFSerialWrite(adapterState, eRFPath, RegAddr, data);
     }
 
-    static u32 phy_RFSerialRead(PADAPTER adapterState, RfPath eRFPath, u32 Offset)
+    static u32 phy_RFSerialRead(AdapterState adapterState, RfPath eRFPath, u32 Offset)
     {
         u32 retValue;
         HAL_DATA_TYPE pHalData = adapterState.HalData;
@@ -450,7 +450,7 @@ public static class rtl8812a_phycfg
     private static u32 phy_query_bb_reg(AdapterState adapterState, u16 RegAddr, u32 BitMask) =>
         PHY_QueryBBReg8812(adapterState, RegAddr, BitMask);
 
-    private static u32 PHY_QueryBBReg8812(PADAPTER    adapterState,u16         RegAddr,u32         BitMask)
+    private static u32 PHY_QueryBBReg8812(AdapterState adapterState,u16         RegAddr,u32         BitMask)
     {
         u32 ReturnValue, OriginalValue, BitShift;
 
@@ -465,7 +465,7 @@ public static class rtl8812a_phycfg
     }
 
 
-    static void phy_RFSerialWrite(PADAPTER adapterState, RfPath eRFPath, u32 Offset, u32 Data)
+    static void phy_RFSerialWrite(AdapterState adapterState, RfPath eRFPath, u32 Offset, u32 Data)
     {
         HAL_DATA_TYPE pHalData = adapterState.HalData;
         BbRegisterDefinition pPhyReg = pHalData.PHYRegDef[eRFPath];
@@ -483,7 +483,7 @@ public static class rtl8812a_phycfg
 
     }
 
-    static void phy_SetRegBW_8812(PADAPTER adapterState, ChannelWidth CurrentBW)
+    static void phy_SetRegBW_8812(AdapterState adapterState, ChannelWidth CurrentBW)
     {
         u16 RegRfMod_BW, u2tmp;
         RegRfMod_BW = adapterState.Device.rtw_read16(REG_WMAC_TRXPTCL_CTL);
@@ -510,7 +510,7 @@ public static class rtl8812a_phycfg
         }
     }
 
-    static byte phy_GetSecondaryChnl_8812(PADAPTER adapterState)
+    static byte phy_GetSecondaryChnl_8812(AdapterState adapterState)
     {
         VHT_DATA_SC SCSettingOf40 = 0, SCSettingOf20 = 0;
         PHAL_DATA_TYPE pHalData = adapterState.HalData;
@@ -578,7 +578,7 @@ public static class rtl8812a_phycfg
         return (byte)(((byte)SCSettingOf40 << 4) | (byte)SCSettingOf20);
     }
 
-    static void phy_PostSetBwMode8812(PADAPTER adapterState)
+    static void phy_PostSetBwMode8812(AdapterState adapterState)
     {
         u8 L1pkVal = 0, reg_837 = 0;
         HAL_DATA_TYPE pHalData = adapterState.HalData;
@@ -679,7 +679,7 @@ public static class rtl8812a_phycfg
         PHY_RF6052SetBandwidth8812(adapterState, pHalData.current_channel_bw);
     }
 
-    static void PHY_RF6052SetBandwidth8812(PADAPTER adapterState, ChannelWidth Bandwidth) /* 20M or 40M */
+    static void PHY_RF6052SetBandwidth8812(AdapterState adapterState, ChannelWidth Bandwidth) /* 20M or 40M */
     {
         HAL_DATA_TYPE pHalData = adapterState.HalData;
 
@@ -709,7 +709,7 @@ public static class rtl8812a_phycfg
         }
     }
 
-    static void phy_FixSpur_8812A(PADAPTER pAdapterState, ChannelWidth Bandwidth, u8 Channel)
+    static void phy_FixSpur_8812A(AdapterState pAdapterState, ChannelWidth Bandwidth, u8 Channel)
     {
         /* C cut Item12 ADC FIFO CLOCK */
         if (IS_VENDOR_8812A_C_CUT(pAdapterState))
@@ -755,7 +755,7 @@ public static class rtl8812a_phycfg
 
     }
 
-    public static void PHY_SetTxPowerIndex_8812A(PADAPTER adapterState, u32 PowerIndex, RfPath RFPath, MGN_RATE Rate)
+    public static void PHY_SetTxPowerIndex_8812A(AdapterState adapterState, u32 PowerIndex, RfPath RFPath, MGN_RATE Rate)
     {
         HAL_DATA_TYPE pHalData = adapterState.HalData;
 

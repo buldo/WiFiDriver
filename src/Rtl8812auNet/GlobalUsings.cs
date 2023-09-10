@@ -6,7 +6,6 @@ global using s8 = System.SByte;
 global using s32 = System.Int32;
 global using PHAL_DATA_TYPE = Rtl8812auNet.Rtl8812au.hal_com_data;
 global using HAL_DATA_TYPE = Rtl8812auNet.Rtl8812au.hal_com_data;
-global using PADAPTER = Rtl8812auNet.Rtl8812au.AdapterState;
 global using BOOLEAN = System.Boolean;
 global using static Rtl8812auNet.Rtl8812au.Logging;
 global using static Rtl8812auNet.Rtl8812au.RTW_USB_SPEED;
