@@ -31,25 +31,6 @@ public class hal_com_data
     public u8 eeprom_thermal_meter { get; set; }
     public bool EEPROMBluetoothCoexist { get; set; }
 
-    //    /*---------------------------------------------------------------------------------*/
-    //    /* 2.4G TX power info for target TX power*/
-    public u8[,] Index24G_CCK_Base { get; } = new byte[MAX_RF_PATH, CENTER_CH_2G_NUM];
-    public u8[,] Index24G_BW40_Base { get; } = new byte[MAX_RF_PATH, CENTER_CH_2G_NUM];
-    public u8[,] CCK_24G_Diff { get; } = new byte[MAX_RF_PATH, MAX_TX_COUNT];
-    public s8[,] OFDM_24G_Diff { get; } = new s8[MAX_RF_PATH, MAX_TX_COUNT];
-    public s8[,] BW20_24G_Diff { get; } = new s8[MAX_RF_PATH, MAX_TX_COUNT];
-    public s8[,] BW40_24G_Diff { get; } = new s8[MAX_RF_PATH, MAX_TX_COUNT];
-
-    //	/* 5G TX power info for target TX power*/
-    //#ifdef CONFIG_IEEE80211_BAND_5GHZ
-    public u8[,] Index5G_BW40_Base { get; } = new byte[MAX_RF_PATH, CENTER_CH_5G_ALL_NUM];
-    public u8[,] Index5G_BW80_Base { get; } = new byte[MAX_RF_PATH, CENTER_CH_5G_80M_NUM];
-    public s8[,] OFDM_5G_Diff { get; } = new s8[MAX_RF_PATH, MAX_TX_COUNT];
-    public s8[,] BW20_5G_Diff { get; } = new s8[MAX_RF_PATH, MAX_TX_COUNT];
-    public s8[,] BW40_5G_Diff { get; } = new s8[MAX_RF_PATH, MAX_TX_COUNT];
-
-    public s8[,] BW80_5G_Diff { get; } = new s8[MAX_RF_PATH, MAX_TX_COUNT];
-
     public u8 crystal_cap { get; set; }
 
     public u8 PAType_2G { get; set; }
