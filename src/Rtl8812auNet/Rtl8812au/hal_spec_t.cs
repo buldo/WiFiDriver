@@ -12,4 +12,4 @@ public class hal_spec_t
 
     public u8 pg_txpwr_saddr => 0x10; /* starting address of PG tx power info */
     public u8 pg_txgi_diff_factor => 1; /* PG tx power gain index diff to tx power gain index */
-};
+}

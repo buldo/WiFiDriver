@@ -75,25 +75,13 @@ public static class rtw_wlan_util
         return center_ch;
     }
 
-    public static void rtw_hal_set_chnl_bw(AdapterState padapter, u8 channel, ChannelWidth Bandwidth, u8 Offset40,
+    public static void rtw_hal_set_chnl_bw(
+        AdapterState padapter,
+        u8 channel,
+        ChannelWidth Bandwidth,
+        u8 Offset40,
         u8 Offset80)
     {
-        PHAL_DATA_TYPE pHalData = padapter.HalData;
-        u8 cch_160 = Bandwidth == ChannelWidth.CHANNEL_WIDTH_160 ? channel : (u8)0;
-        u8 cch_80 = Bandwidth == ChannelWidth.CHANNEL_WIDTH_80 ? channel : (u8)0;
-        u8 cch_40 = Bandwidth == ChannelWidth.CHANNEL_WIDTH_40 ? channel : (u8)0;
-        u8 cch_20 = Bandwidth == ChannelWidth.CHANNEL_WIDTH_20 ? channel : (u8)0;
-
-        if (cch_80 != 0)
-        {
-            cch_40 = rtw_get_scch_by_cch_offset(cch_80, ChannelWidth.CHANNEL_WIDTH_80, Offset80);
-        }
-
-        if (cch_40 != 0)
-        {
-            cch_20 = rtw_get_scch_by_cch_offset(cch_40, ChannelWidth.CHANNEL_WIDTH_40, Offset40);
-        }
-
         PHY_SetSwChnlBWMode8812(padapter, channel, Bandwidth, Offset40, Offset80);
     }
 }

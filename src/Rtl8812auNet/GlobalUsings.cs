@@ -28,7 +28,6 @@ global using static Rtl8812auNet.Rtl8812au.rtw_mlme_ext;
 global using static Rtl8812auNet.Rtl8812au.rtw_wlan_util;
 global using static Rtl8812auNet.Rtl8812au.hal_com;
 global using static Rtl8812auNet.Rtl8812au.RcrBits;
-global using static Rtl8812auNet.Rtl8812au.rtw_rf;
 global using static Rtl8812auNet.Rtl8812au.rtl8812a_phycfg;
 global using static Rtl8812auNet.Rtl8812au.UsbHalInit;
 global using static Rtl8812auNet.Rtl8812au.rtw_efuse;

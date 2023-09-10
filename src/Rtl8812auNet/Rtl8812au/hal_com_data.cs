@@ -7,7 +7,6 @@ public class hal_com_data
     public u16 firmware_sub_version { get; set; }
     public u16 FirmwareSignature { get; set; }
     public u8 current_channel { get; set; }
-    public RF_CHIP_E rf_chip = RF_CHIP_E.RF_6052;
     public RfType rf_type { get; set; } /*enum RfType*/
     public u8 NumTotalRFPath { get; set; }
     public bool bautoload_fail_flag { get; set; }
@@ -20,8 +19,6 @@ public class hal_com_data
     public bool bSetChnlBW { get; set; }
     public byte CurrentCenterFrequencyIndex1 { get; set; }
     public bool bNeedIQK { get; set; }
-    public bool AMPDUBurstMode { get; set; }
-
     public bool EepromOrEfuse { get; set; }
     public u8[] efuse_eeprom_data { get; } = new u8[1024]; /*92C:256bytes, 88E:512bytes, we use union set (512bytes)*/
 
@@ -88,8 +85,6 @@ public class hal_com_data
     public u8 rxagg_dma_size { get; set; }
 
     public u8 rxagg_dma_timeout { get; set; }
-
-    public u32 UsbBulkOutSize { get; set; }
 
     public u32[] IntrMask { get; } = new u32[3];
 

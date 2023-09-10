@@ -10,14 +10,14 @@ public static class halhwimg8812a_rf
         var array_len = array_mp_8812a_radioa.Length;
         u32[] array = array_mp_8812a_radioa;
 
-        u32 v1 = 0, v2 = 0, pre_v1 = 0, pre_v2 = 0;
+        u32 pre_v1 = 0, pre_v2 = 0;
 
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
 
         while ((i + 1) < array_len)
         {
-            v1 = array[i];
-            v2 = array[i + 1];
+            var v1 = array[i];
+            var v2 = array[i + 1];
 
             if ((v1 & (BIT31 | BIT30)) != 0)
             {/*positive & negative condition*/
@@ -81,14 +81,14 @@ public static class halhwimg8812a_rf
         var array_len = array_mp_8812a_radiob.Length;
         u32[] array = array_mp_8812a_radiob;
 
-        u32 v1 = 0, v2 = 0, pre_v1 = 0, pre_v2 = 0;
+        u32 pre_v1 = 0, pre_v2 = 0;
 
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
 
         while ((i + 1) < array_len)
         {
-            v1 = array[i];
-            v2 = array[i + 1];
+            var v1 = array[i];
+            var v2 = array[i + 1];
 
             if ((v1 & (BIT31 | BIT30)) != 0)
             {/*positive & negative condition*/

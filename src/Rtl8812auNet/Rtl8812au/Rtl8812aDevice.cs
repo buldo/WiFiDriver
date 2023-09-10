@@ -1,4 +1,7 @@
-﻿namespace Rtl8812auNet.Rtl8812au;
+﻿using System.Net;
+using System.Net.Sockets;
+
+namespace Rtl8812auNet.Rtl8812au;
 
 public class Rtl8812aDevice
 {
@@ -64,6 +67,9 @@ public class Rtl8812aDevice
         return true;
     }
 
+    private readonly UdpClient _client = new UdpClient();
+    private readonly IPEndPoint _address = new IPEndPoint(IPAddress.Parse("172.23.97.127"), 4321);
+
     private async Task ParseUsbData()
     {
         await foreach (var transfer in _usbDevice.UsbDevice.BulkTransfersReader.ReadAllAsync())
@@ -71,7 +77,9 @@ public class Rtl8812aDevice
             var packet = _frameParser.ParsedRadioPacket(transfer);
             foreach (var radioPacket in packet)
             {
-                Console.WriteLine(Convert.ToHexString(radioPacket.Data));
+                //await _client.SendAsync(radioPacket.Data, _address);
+                //Console.WriteLine(Convert.ToHexString(radioPacket.Data));
+                //Console.WriteLine();
             }
         }
     }

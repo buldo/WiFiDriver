@@ -4,17 +4,14 @@ public static class rtw_mlme_ext
 {
     public static bool setopmode_hdl(AdapterState padapter)
     {
-        SetMonitorMode(padapter, NDIS_802_11_NETWORK_INFRASTRUCTURE.Ndis802_11Monitor);
+        SetMonitorMode(padapter);
         return true;
     }
 
-    private static void SetMonitorMode(AdapterState adapterState, NDIS_802_11_NETWORK_INFRASTRUCTURE val)
+    private static void SetMonitorMode(AdapterState adapterState)
     {
-        if (val == NDIS_802_11_NETWORK_INFRASTRUCTURE.Ndis802_11Monitor)
-        {
-            rtw_hal_set_msr(adapterState, _HW_STATE_NOLINK_);
-            hw_var_set_monitor(adapterState);
-        }
+        rtw_hal_set_msr(adapterState, _HW_STATE_NOLINK_);
+        hw_var_set_monitor(adapterState);
     }
 
     private static void rtw_hal_set_msr(AdapterState adapterState, u8 net_type)
@@ -83,7 +80,7 @@ public static class rtw_mlme_ext
 
     private static void Set_HW_VAR_ENABLE_RX_BAR(AdapterState adapterState, bool val)
     {
-        if (val == true)
+        if (val)
         {
             /* enable RX BAR */
             u32 val16 = adapterState.Device.rtw_read16(REG_RXFLTMAP1);

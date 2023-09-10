@@ -5,14 +5,11 @@ public static class rtl8812a_phycfg
     public static void PHY_SetSwChnlBWMode8812(
         PADAPTER adapterState,
         u8 channel,
-        ChannelWidth Bandwidth, u8 Offset40,
+        ChannelWidth Bandwidth,
+        u8 Offset40,
         u8 Offset80)
     {
-        /* RTW_INFO("%s()===>\n",__FUNCTION__); */
-
         PHY_HandleSwChnlAndSetBW8812(adapterState, true, true, channel, Bandwidth, Offset40, Offset80, channel);
-
-        /* RTW_INFO("<==%s()\n",__FUNCTION__); */
     }
 
     public static void PHY_SetBBReg8812(
@@ -59,13 +56,7 @@ public static class rtl8812a_phycfg
         u8 CenterFrequencyIndex1
     )
     {
-        PADAPTER pDefAdapterState = adapterState;
-        PHAL_DATA_TYPE pHalData = pDefAdapterState.HalData;
-        u8 tmpChannel = pHalData.current_channel;
-        ChannelWidth tmpBW = pHalData.current_channel_bw;
-        u8 tmpnCur40MhzPrimeSC = pHalData.nCur40MhzPrimeSC;
-        u8 tmpnCur80MhzPrimeSC = pHalData.nCur80MhzPrimeSC;
-        u8 tmpCenterFrequencyIndex1 = pHalData.CurrentCenterFrequencyIndex1;
+        PHAL_DATA_TYPE pHalData = adapterState.HalData;
 
         /* RTW_INFO("=> PHY_HandleSwChnlAndSetBW8812: bSwitchChannel %d, bSetBandWidth %d\n",bSwitchChannel,bSetBandWidth); */
 
@@ -167,7 +158,7 @@ public static class rtl8812a_phycfg
         HAL_DATA_TYPE pHalData = adapterState.HalData;
 
         u8 i;
-        u32 PowerLevel, writeData;
+        u32 PowerLevel;
         u16 writeOffset;
 
         if ((u8)RfPath >= pHalData.NumTotalRFPath)
@@ -175,7 +166,7 @@ public static class rtl8812a_phycfg
             return;
         }
 
-        writeData = 0;
+        u32 writeData = 0;
         if (RfPath == RfPath.RF_PATH_A)
         {
             PowerLevel = phy_get_tx_power_index(adapterState, RfPath.RF_PATH_A, MGN_RATE.MGN_MCS7, BandWidth, Channel);
@@ -285,14 +276,6 @@ public static class rtl8812a_phycfg
             RTW_INFO("error Chnl %d !", channelToSW);
         }
 
-        /* <20130313, Kordan> Sample code to demonstrate how to configure AGC_TAB_DIFF.(Disabled by now) */
-
-        if (pHalData.rf_chip == RF_CHIP_E.RF_PSEUDO_11N)
-        {
-            RTW_INFO("phy_SwChnl8812: return for PSEUDO\n");
-            return;
-        }
-
         /* RTW_INFO("[BW:CHNL], phy_SwChnl8812(), switch to channel %d !!\n", channelToSW); */
 
         /* fc_area		 */
@@ -360,7 +343,7 @@ public static class rtl8812a_phycfg
     {
         u8 u1Btmp;
         BOOLEAN ret_value = true;
-        BandType Band = BandType.BAND_ON_5G;
+        BandType Band;
         BandType BandToSW;
 
         u1Btmp = pAdapterState.Device.rtw_read8(REG_CCK_CHECK_8812);
@@ -412,7 +395,7 @@ public static class rtl8812a_phycfg
 
     static u32 phy_RFSerialRead(PADAPTER adapterState, RfPath eRFPath, u32 Offset)
     {
-        u32 retValue = 0;
+        u32 retValue;
         HAL_DATA_TYPE pHalData = adapterState.HalData;
         BbRegisterDefinition pPhyReg = pHalData.PHYRegDef[eRFPath];
         BOOLEAN bIsPIMode = false;
@@ -469,7 +452,7 @@ public static class rtl8812a_phycfg
 
     private static u32 PHY_QueryBBReg8812(PADAPTER    adapterState,u16         RegAddr,u32         BitMask)
     {
-        u32 ReturnValue = 0, OriginalValue, BitShift;
+        u32 ReturnValue, OriginalValue, BitShift;
 
         /* RTW_INFO("--.PHY_QueryBBReg8812(): RegAddr(%#x), BitMask(%#x)\n", RegAddr, BitMask); */
 
@@ -484,28 +467,25 @@ public static class rtl8812a_phycfg
 
     static void phy_RFSerialWrite(PADAPTER adapterState, RfPath eRFPath, u32 Offset, u32 Data)
     {
-        u32 DataAndAddr = 0;
         HAL_DATA_TYPE pHalData = adapterState.HalData;
         BbRegisterDefinition pPhyReg = pHalData.PHYRegDef[eRFPath];
 
         Offset &= 0xff;
-
         /* Shadow Update */
         /* PHY_RFShadowWrite(adapterState, eRFPath, Offset, Data); */
-
         /* Put write addr in [27:20]  and write data in [19:00] */
-        DataAndAddr = ((Offset << 20) | (Data & 0x000fffff)) & 0x0fffffff;
+        var dataAndAddr = ((Offset << 20) | (Data & 0x000fffff)) & 0x0fffffff;
 
         /* Write Operation */
         /* TODO: Dynamically determine whether using PI or SI to write RF registers. */
-        phy_set_bb_reg(adapterState, (ushort)pPhyReg.rf3wireOffset, bMaskDWord, DataAndAddr);
+        phy_set_bb_reg(adapterState, (ushort)pPhyReg.rf3wireOffset, bMaskDWord, dataAndAddr);
         /* RTW_INFO("RFW-%d Addr[0x%x]=0x%x\n", eRFPath, pPhyReg.rf3wireOffset, DataAndAddr); */
 
     }
 
     static void phy_SetRegBW_8812(PADAPTER adapterState, ChannelWidth CurrentBW)
     {
-        u16 RegRfMod_BW, u2tmp = 0;
+        u16 RegRfMod_BW, u2tmp;
         RegRfMod_BW = adapterState.Device.rtw_read16(REG_WMAC_TRXPTCL_CTL);
 
         switch (CurrentBW)
@@ -600,7 +580,6 @@ public static class rtl8812a_phycfg
 
     static void phy_PostSetBwMode8812(PADAPTER adapterState)
     {
-        byte SubChnlNum = 0;
         u8 L1pkVal = 0, reg_837 = 0;
         HAL_DATA_TYPE pHalData = adapterState.HalData;
 
@@ -609,14 +588,8 @@ public static class rtl8812a_phycfg
         phy_SetRegBW_8812(adapterState, pHalData.current_channel_bw);
 
         /* 3 Set Reg483 */
-        SubChnlNum = phy_GetSecondaryChnl_8812(adapterState);
+        var SubChnlNum = phy_GetSecondaryChnl_8812(adapterState);
         adapterState.Device.rtw_write8(REG_DATA_SC_8812, SubChnlNum);
-
-        if (pHalData.rf_chip == RF_CHIP_E.RF_PSEUDO_11N)
-        {
-            RTW_INFO("phy_PostSetBwMode8812: return for PSEUDO\n");
-            return;
-        }
 
         reg_837 = adapterState.Device.rtw_read8(rBWIndication_Jaguar + 3);
         /* 3 Set Reg848 Reg864 Reg8AC Reg8C4 RegA00 */

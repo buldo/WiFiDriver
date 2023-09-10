@@ -108,14 +108,14 @@ public static class halhwimg8812a_bb
         int array_len = array_mp_8812a_phy_reg.Length;
         u32[] array = array_mp_8812a_phy_reg;
 
-        u32 v1 = 0, v2 = 0, pre_v1 = 0, pre_v2 = 0;
+        u32 pre_v1 = 0, pre_v2 = 0;
 
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
 
         while ((i + 1) < array_len)
         {
-            v1 = array[i];
-            v2 = array[i + 1];
+            var v1 = array[i];
+            var v2 = array[i + 1];
 
             if ((v1 & (BIT31 | BIT30))!=0)
             {/*positive & negative condition*/
@@ -179,14 +179,14 @@ public static class halhwimg8812a_bb
         u32 array_len = (u32)array_mp_8812a_phy_reg_mp.Length;
         u32[] array = array_mp_8812a_phy_reg_mp;
 
-        u32 v1 = 0, v2 = 0, pre_v1 = 0, pre_v2 = 0;
+        u32 pre_v1 = 0, pre_v2 = 0;
 
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
 
         while ((i + 1) < array_len)
         {
-            v1 = array[i];
-            v2 = array[i + 1];
+            var v1 = array[i];
+            var v2 = array[i + 1];
 
             if ((v1 & (BIT31 | BIT30))!=0)
             {
@@ -256,14 +256,14 @@ public static class halhwimg8812a_bb
         u32 array_len = (u32)array_mp_8812a_agc_tab.Length;
         u32[] array = array_mp_8812a_agc_tab;
 
-        u32 v1 = 0, v2 = 0, pre_v1 = 0, pre_v2 = 0;
+        u32 pre_v1 = 0, pre_v2 = 0;
 
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
 
         while ((i + 1) < array_len)
         {
-            v1 = array[i];
-            v2 = array[i + 1];
+            var v1 = array[i];
+            var v2 = array[i + 1];
 
             if ((v1 & (BIT31 | BIT30))!=0)
             {

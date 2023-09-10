@@ -70,19 +70,6 @@ public static class UsbHalInit
 
         DvObj pdvobjpriv = padapter.DvObj;
 
-        if (padapter.DvObj.UsbSpeed == RTW_USB_SPEED_3)
-        {
-            pHalData.UsbBulkOutSize = USB_SUPER_SPEED_BULK_SIZE; /* 1024 bytes */
-        }
-        else if (padapter.DvObj.UsbSpeed == RTW_USB_SPEED_2)
-        {
-            pHalData.UsbBulkOutSize = USB_HIGH_SPEED_BULK_SIZE; /* 512 bytes */
-        }
-        else
-        {
-            pHalData.UsbBulkOutSize = USB_FULL_SPEED_BULK_SIZE; /* 64 bytes */
-        }
-
         pHalData.UsbTxAggMode = true;
         pHalData.UsbTxAggDescNum = 6; /* only 4 bits */
         pHalData.UsbTxAggDescNum = 0x01; /* adjust value for OQT  Overflow issue */ /* 0x3;	 */ /* only 4 bits */
@@ -2023,7 +2010,6 @@ public static class UsbHalInit
         var t = new map_t()
         {
             len = _len,
-            seg_num = _seg_num,
             init_value = _init_v,
             segs = new map_seg_t[_seg_num]
         };
@@ -2528,20 +2514,6 @@ public static class UsbHalInit
         HAL_DATA_TYPE pHalData = adapterState.HalData;
 
         /* RF Interface Sowrtware Control */
-        pHalData.PHYRegDef[RfPath.RF_PATH_A].rfintfs =
-            rFPGA0_XAB_RFInterfaceSW; /* 16 LSBs if read 32-bit from 0x870 */
-        pHalData.PHYRegDef[RfPath.RF_PATH_B].rfintfs =
-            rFPGA0_XAB_RFInterfaceSW; /* 16 MSBs if read 32-bit from 0x870 (16-bit for 0x872) */
-
-        /* RF Interface Output (and Enable) */
-        pHalData.PHYRegDef[RfPath.RF_PATH_A].rfintfo = rFPGA0_XA_RFInterfaceOE; /* 16 LSBs if read 32-bit from 0x860 */
-        pHalData.PHYRegDef[RfPath.RF_PATH_B].rfintfo = rFPGA0_XB_RFInterfaceOE; /* 16 LSBs if read 32-bit from 0x864 */
-
-        /* RF Interface (Output and)  Enable */
-        pHalData.PHYRegDef[RfPath.RF_PATH_A].rfintfe =
-            rFPGA0_XA_RFInterfaceOE; /* 16 MSBs if read 32-bit from 0x860 (16-bit for 0x862) */
-        pHalData.PHYRegDef[RfPath.RF_PATH_B].rfintfe =
-            rFPGA0_XB_RFInterfaceOE; /* 16 MSBs if read 32-bit from 0x864 (16-bit for 0x866) */
 
         pHalData.PHYRegDef[RfPath.RF_PATH_A].rf3wireOffset = rA_LSSIWrite_Jaguar; /* LSSI Parameter */
         pHalData.PHYRegDef[RfPath.RF_PATH_B].rf3wireOffset = rB_LSSIWrite_Jaguar;
@@ -2580,13 +2552,11 @@ public static class UsbHalInit
             temp = adapterState.Device.rtw_read8(0xfe17);
             if (((temp >> 4) & 0x03) == 0)
             {
-                pHalData.UsbBulkOutSize = USB_HIGH_SPEED_BULK_SIZE;
                 provalue = adapterState.Device.rtw_read8(REG_RXDMA_PRO_8812);
                 adapterState.Device.rtw_write8(REG_RXDMA_PRO_8812,(byte)((provalue | BIT4 | BIT3 | BIT2 | BIT1) & (NotBIT5))); /* set burst pkt len=512B */
             }
             else
             {
-                pHalData.UsbBulkOutSize = 64;
                 provalue = adapterState.Device.rtw_read8(REG_RXDMA_PRO_8812);
                 adapterState.Device.rtw_write8(REG_RXDMA_PRO_8812,
                     (byte)((provalue | BIT5 | BIT3 | BIT2 | BIT1) & (NotBIT4))); /* set burst pkt len=64B */
@@ -2595,7 +2565,6 @@ public static class UsbHalInit
         else
         {
             /* USB3 Mode */
-            pHalData.UsbBulkOutSize = USB_SUPER_SPEED_BULK_SIZE;
             provalue = adapterState.Device.rtw_read8(REG_RXDMA_PRO_8812);
             adapterState.Device.rtw_write8(REG_RXDMA_PRO_8812,
                 //((provalue | BIT3 | BIT2 | BIT1) & (~(BIT5 | BIT4)))); /* set burst pkt len=1k */
@@ -2616,10 +2585,11 @@ public static class UsbHalInit
         adapterState.Device.rtw_write16(REG_MAX_AGGR_NUM, 0x1f1f);
         adapterState.Device.rtw_write8(REG_FWHW_TXQ_CTRL, (byte)(adapterState.Device.rtw_read8(REG_FWHW_TXQ_CTRL) & (NotBIT7)));
 
-        if (pHalData.AMPDUBurstMode)
-        {
-            adapterState.Device.rtw_write8(REG_AMPDU_BURST_MODE_8812, 0x5F);
-        }
+        // AMPDUBurstMode is always false
+        //if (pHalData.AMPDUBurstMode)
+        //{
+        //    adapterState.Device.rtw_write8(REG_AMPDU_BURST_MODE_8812, 0x5F);
+        //}
 
         adapterState.Device.rtw_write8(0x1c,
             (byte)(adapterState.Device.rtw_read8(0x1c) | BIT5 | BIT6)); /* to prevent mac is reseted by bus. 20111208, by Page */
