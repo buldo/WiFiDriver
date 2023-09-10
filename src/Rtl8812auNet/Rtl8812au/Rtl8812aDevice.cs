@@ -136,7 +136,7 @@ public class Rtl8812aDevice
         ReadAdapterInfo8812AU(adapterState);
 
         /* step 5. */
-        Init_ODM_ComInfo_8812(adapterState);
+        Init_ODM_ComInfo_8812(halData);
 
         return adapterState;
     }

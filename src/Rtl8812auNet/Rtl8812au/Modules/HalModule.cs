@@ -94,7 +94,7 @@ public class HalModule
         var fwManager = new FirmwareManager(_device);
         fwManager.FirmwareDownload8812();
 
-        PHY_MACConfig8812(pHalData.odmpriv);
+        PHY_MACConfig8812(pHalData, pHalData.odmpriv);
 
         _InitQueueReservedPage_8812AUsb(pHalData);
         _InitTxBufferBoundary_8812AUsb();
@@ -354,7 +354,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm.odmpriv, pre_v1, pre_v2, v2))
+                        if (check_positive(dm, dm.odmpriv, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -432,7 +432,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm.odmpriv, pre_v1, pre_v2, v2))
+                        if (check_positive(dm, dm.odmpriv, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -518,7 +518,7 @@ public class HalModule
         /*  */
         /* Config BB and AGC */
         /*  */
-        var rtStatus = phy_BB8812_Config_ParaFile(pHalData.odmpriv);
+        var rtStatus = phy_BB8812_Config_ParaFile(pHalData, pHalData.odmpriv);
 
         hal_set_crystal_cap(pHalData.crystal_cap);
 
@@ -551,9 +551,9 @@ public class HalModule
         pHalData.PHYRegDef[RfPath.RF_PATH_B].RfLSSIReadBackPi = rB_PIRead_Jaguar;
     }
 
-    private bool phy_BB8812_Config_ParaFile(dm_struct dm)
+    private bool phy_BB8812_Config_ParaFile(hal_com_data hal, dm_struct dm)
     {
-        bool rtStatus = odm_config_bb_with_header_file(dm, odm_bb_config_type.CONFIG_BB_PHY_REG);
+        bool rtStatus = odm_config_bb_with_header_file(hal, dm, odm_bb_config_type.CONFIG_BB_PHY_REG);
 
         /* Read PHY_REG.TXT BB INIT!! */
 
@@ -563,7 +563,7 @@ public class HalModule
             goto phy_BB_Config_ParaFile_Fail;
         }
 
-        rtStatus = odm_config_bb_with_header_file(dm, odm_bb_config_type.CONFIG_BB_AGC_TAB);
+        rtStatus = odm_config_bb_with_header_file(hal, dm, odm_bb_config_type.CONFIG_BB_AGC_TAB);
 
         if (rtStatus != true)
         {
@@ -575,7 +575,7 @@ public class HalModule
         return rtStatus;
     }
 
-    private bool odm_config_bb_with_header_file(dm_struct dm, odm_bb_config_type config_type)
+    private bool odm_config_bb_with_header_file(hal_com_data hal, dm_struct dm, odm_bb_config_type config_type)
     {
         bool result = true;
 
@@ -584,12 +584,12 @@ public class HalModule
         if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG)
         {
             //READ_AND_CONFIG_MP(8812a, _phy_reg);
-            odm_read_and_config_mp_8812a_phy_reg(dm);
+            odm_read_and_config_mp_8812a_phy_reg(hal, dm);
         }
         else if (config_type == odm_bb_config_type.CONFIG_BB_AGC_TAB)
         {
             //READ_AND_CONFIG_MP(8812a, _agc_tab);
-            odm_read_and_config_mp_8812a_agc_tab(dm);
+            odm_read_and_config_mp_8812a_agc_tab(hal, dm);
         }
         else if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG_PG)
         {
@@ -599,7 +599,7 @@ public class HalModule
         else if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG_MP)
         {
             //READ_AND_CONFIG_MP(8812a, _phy_reg_mp);
-            odm_read_and_config_mp_8812a_phy_reg_mp(dm);
+            odm_read_and_config_mp_8812a_phy_reg_mp(hal, dm);
         }
         else if (config_type == odm_bb_config_type.CONFIG_BB_AGC_TAB_DIFF)
         {
@@ -629,7 +629,7 @@ public class HalModule
         return result;
     }
 
-    private void odm_read_and_config_mp_8812a_agc_tab(dm_struct dm)
+    private void odm_read_and_config_mp_8812a_agc_tab(hal_com_data hal,dm_struct dm)
     {
         u32 i = 0;
         u8 c_cond;
@@ -679,7 +679,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm, pre_v1, pre_v2, v2))
+                        if (check_positive(hal,dm, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -713,7 +713,7 @@ public class HalModule
         ODM_delay_us(1);
     }
 
-    private void odm_read_and_config_mp_8812a_phy_reg_mp(dm_struct dm)
+    private void odm_read_and_config_mp_8812a_phy_reg_mp(hal_com_data hal, dm_struct dm)
     {
         u32 i = 0;
         u8 c_cond;
@@ -763,7 +763,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm, pre_v1, pre_v2, v2))
+                        if (check_positive(hal,dm, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -790,7 +790,7 @@ public class HalModule
         }
     }
 
-    private void odm_read_and_config_mp_8812a_phy_reg(dm_struct dm)
+    private void odm_read_and_config_mp_8812a_phy_reg(hal_com_data hal, dm_struct dm)
     {
         u32 i = 0;
         u8 c_cond;
@@ -840,7 +840,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm, pre_v1, pre_v2, v2))
+                        if (check_positive(hal,dm, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -1280,9 +1280,9 @@ public class HalModule
     }
 
 
-    private void PHY_MACConfig8812(dm_struct dm)
+    private void PHY_MACConfig8812(hal_com_data hal,dm_struct dm)
     {
-        odm_read_and_config_mp_8812a_mac_reg(dm);
+        odm_read_and_config_mp_8812a_mac_reg(hal, dm);
     }
 
     private bool InitPowerOn(hal_com_data pHalData)
@@ -1550,7 +1550,7 @@ public class HalModule
         _device.rtw_write32(REG_TXDMA_OFFSET_CHK, value32);
     }
 
-    private void odm_read_and_config_mp_8812a_mac_reg(dm_struct dm)
+    private void odm_read_and_config_mp_8812a_mac_reg(hal_com_data hal, dm_struct dm)
     {
         u32 i = 0;
         u8 c_cond;
@@ -1600,7 +1600,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm, pre_v1, pre_v2, v2))
+                        if (check_positive(hal, dm, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;

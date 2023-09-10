@@ -14,7 +14,6 @@ global using static Rtl8812auNet.Rtl8812au.odm_board_type;
 global using static Rtl8812auNet.Rtl8812au.halhwimg8812a_bb;
 global using static Rtl8812auNet.Rtl8812au.rtl8812a_dm;
 global using static Rtl8812auNet.Rtl8812au.HalVerDef;
-global using static Rtl8812auNet.Rtl8812au.phydm;
 global using static Rtl8812auNet.Rtl8812au.RcrBits;
 global using static Rtl8812auNet.Rtl8812au.rtl8812a_phycfg;
 global using static Rtl8812auNet.Rtl8812au.UsbHalInit;

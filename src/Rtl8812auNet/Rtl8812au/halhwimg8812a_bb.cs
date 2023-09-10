@@ -2,24 +2,24 @@
 
 public static class halhwimg8812a_bb
 {
-    public static bool check_positive(dm_struct dm, u32 condition1, u32 condition2, u32 condition4)
+    public static bool check_positive(hal_com_data hal, dm_struct d, u32 condition1, u32 condition2, u32 condition4)
     {
         uint _board_type =
-            ((dm.board_type & BIT4) >>> 4) << 0 | /* _GLNA*/
-            ((dm.board_type & BIT3) >>> 3) << 1 | /* _GPA*/
-            ((dm.board_type & BIT7) >>> 7) << 2 | /* _ALNA*/
-            ((dm.board_type & BIT6) >>> 6) << 3 | /* _APA */
-            ((dm.board_type & BIT2) >>> 2) << 4 | /* _BT*/
-            ((dm.board_type & BIT1) >>> 1) << 5 | /* _NGFF*/
-            ((dm.board_type & BIT5) >>> 5) << 6;  /* _TRSWT*/
+            ((d.board_type & BIT4) >>> 4) << 0 | /* _GLNA*/
+            ((d.board_type & BIT3) >>> 3) << 1 | /* _GPA*/
+            ((d.board_type & BIT7) >>> 7) << 2 | /* _ALNA*/
+            ((d.board_type & BIT6) >>> 6) << 3 | /* _APA */
+            ((d.board_type & BIT2) >>> 2) << 4 | /* _BT*/
+            ((d.board_type & BIT1) >>> 1) << 5 | /* _NGFF*/
+            ((d.board_type & BIT5) >>> 5) << 6;  /* _TRSWT*/
 
 
         u32 cond1 = condition1;
         u32 cond2 = condition2;
         u32 cond4 = condition4;
 
-        uint cut_version_for_para = (dm.cut_version == odm_cut_version.ODM_CUT_A) ? (uint)15 : (uint)dm.cut_version;
-        uint pkg_type_for_para = (dm.package_type == 0) ? (u8)15 : dm.package_type;
+        uint cut_version_for_para = (d.cut_version == odm_cut_version.ODM_CUT_A) ? (uint)15 : (uint)d.cut_version;
+        uint pkg_type_for_para = (u8)15 ;
 
         u32 driver1 = cut_version_for_para << 24 |
                       ((uint)RTL871X_HCI_TYPE.RTW_USB & 0xF0) << 16 |
@@ -28,16 +28,16 @@ public static class halhwimg8812a_bb
                       _board_type;
 
         u32 driver2 =
-            ((uint)dm.type_glna & 0xFF) << 0 |
-            ((uint)dm.type_gpa & 0xFF) << 8 |
-            ((uint)dm.type_alna & 0xFF) << 16 |
-            ((uint)dm.type_apa & 0xFF) << 24;
+            ((uint)hal.TypeGLNA & 0xFF) << 0 |
+            ((uint)hal.TypeGPA & 0xFF) << 8 |
+            ((uint)hal.TypeALNA & 0xFF) << 16 |
+            ((uint)hal.TypeAPA & 0xFF) << 24;
 
         u32 driver4 =
-            ((uint)dm.type_glna & 0xFF00) >> 8 |
-            ((uint)dm.type_gpa & 0xFF00) |
-            ((uint)dm.type_alna & 0xFF00) << 8 |
-            ((uint)dm.type_apa & 0xFF00) << 16;
+            ((uint)hal.TypeGLNA & 0xFF00) >> 8 |
+            ((uint)hal.TypeGPA & 0xFF00) |
+            ((uint)hal.TypeALNA & 0xFF00) << 8 |
+            ((uint)hal.TypeAPA & 0xFF00) << 16;
 
         /*============== value Defined Check ===============*/
         /*QFN type [15:12] and cut version [27:24] need to do value check*/

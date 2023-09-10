@@ -2,10 +2,6 @@
 
 public static class halhwimg8812a_rf
 {
-
-
-    #region Arrays
-
     public static u32[] array_mp_8812a_radioa =
     {
         0x000, 0x00010000,
@@ -830,6 +826,4 @@ public static class halhwimg8812a_rf
         0x008, 0x00008400,
 
     };
-
-    #endregion
 }

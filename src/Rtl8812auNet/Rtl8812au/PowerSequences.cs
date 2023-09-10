@@ -2,7 +2,7 @@
 
 public static class PowerSequences
 {
-    public static WLAN_PWR_CFG[] RTL8812_TRANS_CARDDIS_TO_CARDEMU { get; } =
+    private static WLAN_PWR_CFG[] RTL8812_TRANS_CARDDIS_TO_CARDEMU { get; } =
     {
         /* format */
         /* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value }, // comments here*/
@@ -21,7 +21,7 @@ public static class PowerSequences
 
     };
 
-    public static WLAN_PWR_CFG[] RTL8812_TRANS_CARDEMU_TO_ACT { get; } =
+    private static WLAN_PWR_CFG[] RTL8812_TRANS_CARDEMU_TO_ACT { get; } =
     {
         /* format */
         /* { offset, cut_msk, fab_msk|interface_msk, base|cmd, msk, value }, // comments here*/
@@ -36,7 +36,7 @@ public static class PowerSequences
 
     };
 
-    public static WLAN_PWR_CFG[] RTL8812_TRANS_END { get; } =
+    private static WLAN_PWR_CFG[] RTL8812_TRANS_END { get; } =
     {
         new(0xFFFF, CutMsk.PWR_CUT_ALL_MSK, FabMsk.PWR_FAB_ALL_MSK, InterfaceMask.PWR_INTF_ALL_MSK, PwrCmd.PWR_CMD_END, 0, 0)
     };
