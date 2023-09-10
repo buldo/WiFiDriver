@@ -16,12 +16,6 @@ public static class CommonConsts
     public const byte EEPROM_Default_ThermalMeter_8812 = 0x18;
     public const byte EEPROM_USB_MODE_8812 = 0x08;
     public const byte EEPROM_RFE_OPTION_8812 = 0xCA;
-    public const byte BAND_CAP_2G = 0;
-    public const byte BAND_CAP_5G = 1;
-    public const uint PROTO_CAP_11B = BIT0;
-    public const uint PROTO_CAP_11G = BIT1;
-    public const uint PROTO_CAP_11N = BIT2;
-    public const uint PROTO_CAP_11AC = BIT3;
     public const ushort REG_USB_HRPWM = 0xFE58;
     public const ushort REG_BAR_MODE_CTRL = 0x04CC;
     public const ushort REG_FAST_EDCA_CTRL = 0x0460;

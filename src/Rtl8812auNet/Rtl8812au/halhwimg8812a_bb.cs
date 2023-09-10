@@ -2,7 +2,7 @@
 
 public static class halhwimg8812a_bb
 {
-    public static bool check_positive(dm_struct dm, u32 condition1, u32 condition2, u32 condition3, u32 condition4)
+    public static bool check_positive(dm_struct dm, u32 condition1, u32 condition2, u32 condition4)
     {
         uint _board_type =
             ((dm.board_type & BIT4) >>> 4) << 0 | /* _GLNA*/
@@ -144,7 +144,7 @@ public static class halhwimg8812a_bb
                 { /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm.HalData.odmpriv, pre_v1, pre_v2, v1, v2))
+                        if (check_positive(dm.HalData.odmpriv, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -221,7 +221,7 @@ public static class halhwimg8812a_bb
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm.HalData.odmpriv, pre_v1, pre_v2, v1, v2))
+                        if (check_positive(dm.HalData.odmpriv, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -298,7 +298,7 @@ public static class halhwimg8812a_bb
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm.HalData.odmpriv, pre_v1, pre_v2, v1, v2))
+                        if (check_positive(dm.HalData.odmpriv, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;

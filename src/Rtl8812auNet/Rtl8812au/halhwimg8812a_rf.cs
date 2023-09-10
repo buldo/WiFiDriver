@@ -46,7 +46,7 @@ public static class halhwimg8812a_rf
                 { /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm.HalData.odmpriv, pre_v1, pre_v2, v1, v2))
+                        if (check_positive(dm.HalData.odmpriv, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -117,7 +117,7 @@ public static class halhwimg8812a_rf
                 { /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm.HalData.odmpriv, pre_v1, pre_v2, v1, v2))
+                        if (check_positive(dm.HalData.odmpriv, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;

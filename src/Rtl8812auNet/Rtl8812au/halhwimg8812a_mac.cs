@@ -52,7 +52,7 @@ public static class halhwimg8812a_mac
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm, pre_v1, pre_v2, v1, v2))
+                        if (check_positive(dm, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
