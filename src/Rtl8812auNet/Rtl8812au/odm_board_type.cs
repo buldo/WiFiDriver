@@ -1,5 +1,8 @@
-﻿namespace Rtl8812auNet.Rtl8812au;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Rtl8812auNet.Rtl8812au;
+
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public static class odm_board_type
 {
     public static uint ODM_BOARD_DEFAULT = 0;    /* The DEFAULT case. */

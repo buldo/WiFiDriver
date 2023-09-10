@@ -2,10 +2,9 @@
 
 public static class rtw_mlme_ext
 {
-    public static bool setopmode_hdl(AdapterState padapter)
+    public static void setopmode_hdl(AdapterState padapter)
     {
         SetMonitorMode(padapter);
-        return true;
     }
 
     private static void SetMonitorMode(AdapterState adapterState)
@@ -55,7 +54,7 @@ public static class rtw_mlme_ext
         adapterState.Device.rtw_write16(REG_RXFLTMAP2, value_rxfltmap2);
     }
 
-    public static bool init_hw_mlme_ext(AdapterState padapter, InitChannel pmlmeext)
+    public static void init_hw_mlme_ext(AdapterState padapter, InitChannel pmlmeext)
     {
 
         //struct mlme_ext_priv *pmlmeext = &padapter.mlmeextpriv;
@@ -74,8 +73,6 @@ public static class rtw_mlme_ext
         /* set_opmode_cmd(padapter, infra_client_with_mlme); */ /* removed */
         Set_HW_VAR_ENABLE_RX_BAR(padapter, rx_bar_enble);
         set_channel_bwmode(padapter, pmlmeext.cur_channel, pmlmeext.cur_ch_offset, pmlmeext.cur_bwmode);
-
-        return true;
     }
 
     private static void Set_HW_VAR_ENABLE_RX_BAR(AdapterState adapterState, bool val)

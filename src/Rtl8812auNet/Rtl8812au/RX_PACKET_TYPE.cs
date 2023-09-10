@@ -1,5 +1,8 @@
-﻿namespace Rtl8812auNet.Rtl8812au;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Rtl8812auNet.Rtl8812au;
+
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public enum RX_PACKET_TYPE
 {
     NORMAL_RX,/* Normal rx packet */

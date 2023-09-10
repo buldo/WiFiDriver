@@ -77,12 +77,11 @@ public static class UsbHalInit
     {
         var pHalData = adapterState.HalData;
 
-        hal_InitPGData_8812A(adapterState, pHalData.efuse_eeprom_data);
+        hal_InitPGData_8812A(adapterState);
 
         Hal_EfuseParseIDCode8812A(adapterState, pHalData.efuse_eeprom_data);
 
         Hal_ReadPROMVersion8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
-        hal_ReadIDs_8812AU(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
         Hal_ReadTxPowerInfo8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
         Hal_ReadBoardType8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
 
@@ -545,60 +544,6 @@ public static class UsbHalInit
         RTW_INFO("pHalData.EEPROMVersion is 0x%x", pHalData.EEPROMVersion);
     }
 
-    private static void hal_ReadIDs_8812AU(AdapterState adapterState, byte[] PROMContent, bool AutoloadFail)
-    {
-        // TODO: Looks like not needed
-        // var pHalData = GET_HAL_DATA(adapterState);
-        //
-        // if (!AutoloadFail)
-        // {
-        //     /* VID, PID */
-        //     if (IS_HARDWARE_TYPE_8812AU(adapterState))
-        //     {
-        //         pHalData.EEPROMVID = ReadLE2Byte(&PROMContent[EEPROM_VID_8812AU]);
-        //         pHalData.EEPROMPID = ReadLE2Byte(&PROMContent[EEPROM_PID_8812AU]);
-        //     }
-        //
-        //
-        //     /* Customer ID, 0x00 and 0xff are reserved for Realtek.		 */
-        //     pHalData.EEPROMCustomerID = *(u8*)&PROMContent[EEPROM_CustomID_8812];
-        //     pHalData.EEPROMSubCustomerID = EEPROM_Default_SubCustomerID;
-        //
-        // }
-        // else
-        // {
-        //     pHalData.EEPROMVID = EEPROM_Default_VID;
-        //     pHalData.EEPROMPID = EEPROM_Default_PID;
-        //
-        //     /* Customer ID, 0x00 and 0xff are reserved for Realtek.		 */
-        //     pHalData.EEPROMCustomerID = EEPROM_Default_CustomerID;
-        //     pHalData.EEPROMSubCustomerID = EEPROM_Default_SubCustomerID;
-        //
-        // }
-        //
-        // if ((pHalData.EEPROMVID == 0x050D) && (pHalData.EEPROMPID == 0x1106)) /* SerComm for Belkin. */
-        //     pHalData.CustomerID = RT_CID_819x_Sercomm_Belkin;
-        // else if ((pHalData.EEPROMVID == 0x0846) && (pHalData.EEPROMPID == 0x9051)) /* SerComm for Netgear. */
-        //     pHalData.CustomerID = RT_CID_819x_Sercomm_Netgear;
-        // else if ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x330e)) /* add by ylb 20121012 for customer led for alpha */
-        //     pHalData.CustomerID = RT_CID_819x_ALPHA_Dlink;
-        // else if ((pHalData.EEPROMVID == 0x0B05) && (pHalData.EEPROMPID == 0x17D2)) /* Edimax for ASUS */
-        //     pHalData.CustomerID = RT_CID_819x_Edimax_ASUS;
-        // else if ((pHalData.EEPROMVID == 0x0846) && (pHalData.EEPROMPID == 0x9052))
-        //     pHalData.CustomerID = RT_CID_NETGEAR;
-        // else if ((pHalData.EEPROMVID == 0x0411) && ((pHalData.EEPROMPID == 0x0242) || (pHalData.EEPROMPID == 0x025D)))
-        //     pHalData.CustomerID = RT_CID_DNI_BUFFALO;
-        // else if (((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3314)) ||
-        //     ((pHalData.EEPROMVID == 0x20F4) && (pHalData.EEPROMPID == 0x804B)) ||
-        //     ((pHalData.EEPROMVID == 0x20F4) && (pHalData.EEPROMPID == 0x805B)) ||
-        //     ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3315)) ||
-        //     ((pHalData.EEPROMVID == 0x2001) && (pHalData.EEPROMPID == 0x3316)))
-        //     pHalData.CustomerID = RT_CID_DLINK;
-        //
-        // RTW_INFO("VID = 0x%04X, PID = 0x%04X\n", pHalData.EEPROMVID, pHalData.EEPROMPID);
-        // RTW_INFO("Customer ID: 0x%02X, SubCustomer ID: 0x%02X\n", pHalData.EEPROMCustomerID, pHalData.EEPROMSubCustomerID);
-    }
-
     static void Hal_EfuseParseIDCode8812A(AdapterState padapter, u8[] hwinfo)
     {
         var pHalData = padapter.HalData;
@@ -618,7 +563,7 @@ public static class UsbHalInit
         RTW_INFO($"EEPROM ID=0x{EEPROMId}");
     }
 
-    static void hal_InitPGData_8812A(AdapterState padapter, u8[] PROMContent)
+    static void hal_InitPGData_8812A(AdapterState padapter)
     {
         var pHalData = padapter.HalData;
         u32 i;
@@ -786,8 +731,6 @@ public static class UsbHalInit
         byte offset, wren;
         UInt16 i, j;
         UInt16[][] eFuseWord = null;
-        UInt16 efuse_utilized = 0;
-        byte efuse_usage = 0;
         byte u1temp = 0;
 
         /*  */
@@ -824,7 +767,6 @@ public static class UsbHalInit
         ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
         if (rtemp8[0] != 0xFF)
         {
-            efuse_utilized++;
             /* RTW_INFO("efuse_Addr-%d efuse_data=%x\n", eFuse_Addr, *rtemp8); */
             eFuse_Addr++;
         }
@@ -890,7 +832,6 @@ public static class UsbHalInit
                         /* RTPRINT(FEEPROM, EFUSE_READ_ALL, ("Addr=%d\n", eFuse_Addr)); */
                         ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
                         eFuse_Addr++;
-                        efuse_utilized++;
                         eFuseWord[offset][i] = (ushort)(rtemp8[0] & 0xff);
 
 
@@ -901,7 +842,6 @@ public static class UsbHalInit
                         ReadEFuseByte(adapterState, eFuse_Addr, rtemp8);
                         eFuse_Addr++;
 
-                        efuse_utilized++;
                         eFuseWord[offset][i] |= (ushort)(((rtemp8[0]) << 8) & 0xff00);
 
                         if (eFuse_Addr >= EFUSE_REAL_CONTENT_LEN_JAGUAR)
@@ -922,11 +862,9 @@ public static class UsbHalInit
                     if (!((wren & 0x01) == 0x01))
                     {
                         eFuse_Addr++;
-                        efuse_utilized++;
                         if (eFuse_Addr >= EFUSE_REAL_CONTENT_LEN_JAGUAR)
                             break;
                         eFuse_Addr++;
-                        efuse_utilized++;
                         if (eFuse_Addr >= EFUSE_REAL_CONTENT_LEN_JAGUAR)
                             break;
                     }
@@ -939,7 +877,6 @@ public static class UsbHalInit
 
             if (rtemp8[0] != 0xFF && (eFuse_Addr < EFUSE_REAL_CONTENT_LEN_JAGUAR))
             {
-                efuse_utilized++;
                 eFuse_Addr++;
             }
         }
@@ -968,7 +905,6 @@ public static class UsbHalInit
         /*  */
         /* 5. Calculate Efuse utilization. */
         /*  */
-        efuse_usage = (byte)((eFuse_Addr * 100) / EFUSE_REAL_CONTENT_LEN_JAGUAR);
         // TODO: SetHwReg8812AU(HW_VARIABLES.HW_VAR_EFUSE_BYTES, (u8*)&eFuse_Addr);
         RTW_INFO($"Hal_EfuseReadEFuse8812A: eFuse_Addr offset(0x{eFuse_Addr:X}) !!");
     }
@@ -1033,7 +969,7 @@ public static class UsbHalInit
 
     }
 
-    static bool efuse_OneByteRead(AdapterState pAdapterState, UInt16 addr, out byte data)
+    static void efuse_OneByteRead(AdapterState pAdapterState, UInt16 addr, out byte data)
     {
         /* -----------------e-fuse reg ctrl --------------------------------- */
         /* address			 */
@@ -1058,21 +994,16 @@ public static class UsbHalInit
             tmpidx++;
         }
 
-        bool bResult;
         if (tmpidx < 100)
         {
             data = pAdapterState.Device.rtw_read8(EFUSE_CTRL);
-            bResult = true;
         }
         else
         {
             data = 0xff;
-            bResult = false;
             //RTW_INFO("%s: [ERROR] addr=0x%x bResult=%d time out 1s !!!\n", __FUNCTION__, addr, bResult);
             //RTW_INFO("%s: [ERROR] EFUSE_CTRL =0x%08x !!!\n", __FUNCTION__, rtw_read32(pAdapterState, EFUSE_CTRL));
         }
-
-        return bResult;
     }
 
     static void ReadEFuseByte(AdapterState adapterState, UInt16 _offset, byte[] pbuf)
@@ -1269,8 +1200,6 @@ public static class UsbHalInit
 
     static void phy_SetBBSwingByBand_8812A(AdapterState adapterState, BandType Band)
     {
-        var pHalData = adapterState.HalData;
-
         phy_set_bb_reg(adapterState, rA_TxScale_Jaguar, 0xFFE00000,
             phy_get_tx_bb_swing_8812a(adapterState, (BandType)Band, RfPath.RF_PATH_A)); /* 0xC1C[31:21] */
         phy_set_bb_reg(adapterState, rB_TxScale_Jaguar, 0xFFE00000,
@@ -1280,13 +1209,11 @@ public static class UsbHalInit
     static u32 phy_get_tx_bb_swing_8812a(AdapterState adapterState, BandType Band, RfPath RFPath)
     {
         var pHalData = adapterState.HalData;
-        dm_struct pDM_Odm = pHalData.odmpriv;
 
         s8 bbSwing_2G = (s8)(-1 * adapterState.registrypriv.TxBBSwing_2G);
         s8 bbSwing_5G = (s8)(-1 * adapterState.registrypriv.TxBBSwing_5G);
         u32 _out = 0x200;
         const s8 AUTO = -1;
-
 
         if (pHalData.AutoloadFailFlag)
         {
@@ -1576,7 +1503,6 @@ public static class UsbHalInit
 
     static bool phy_BB8812_Config_ParaFile(AdapterState adapterState)
     {
-        var pHalData = adapterState.HalData;
         bool rtStatus = odm_config_bb_with_header_file(adapterState, odm_bb_config_type.CONFIG_BB_PHY_REG);
 
         /* Read PHY_REG.TXT BB INIT!! */
@@ -1661,7 +1587,6 @@ public static class UsbHalInit
     static void _InitBurstPktLen(AdapterState adapterState)
     {
         u8 speedvalue, provalue, temp;
-        var pHalData = adapterState.HalData;
 
         adapterState.Device.rtw_write8(0xf050, 0x01); /* usb3 rx interval */
         adapterState.Device.rtw_write16(REG_RXDMA_STATUS, 0x7400); /* burset lenght=4, set 0x3400 for burset length=2 */
@@ -2104,12 +2029,11 @@ public static class UsbHalInit
         adapterState.Device.rtw_write32(REG_TXDMA_OFFSET_CHK, value32);
     }
 
-    public static bool InitLLTTable8812A(AdapterState padapter, u8 txpktbuf_bndy)
+    private static bool InitLLTTable8812A(AdapterState padapter, u8 txpktbuf_bndy)
     {
         bool status = false;
         u32 i;
         u32 Last_Entry_Of_TxPktBuf = LAST_ENTRY_OF_TX_PKT_BUFFER_8812;
-        var pHalData = padapter.HalData;
 
         for (i = 0; i < (txpktbuf_bndy - 1); i++)
         {
@@ -2636,7 +2560,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
     }
 
 
-    private static bool FirmwareDownload8812(AdapterState adapterState)
+    private static void FirmwareDownload8812(AdapterState adapterState)
     {
         bool rtStatus = true;
         u8 write_fw = 0;
@@ -2698,20 +2622,16 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         _FWDownloadEnable_8812(adapterState, false);
         if (true != rtStatus)
         {
-            goto exit;
+            return;
         }
 
         rtStatus = _FWFreeToGo8812(adapterState, 10, 200);
         if (true != rtStatus)
         {
-            goto exit;
+            return;
         }
 
-        exit:
-
         InitializeFirmwareVars8812(adapterState);
-
-        return rtStatus;
     }
 
     static void InitializeFirmwareVars8812(AdapterState padapter)

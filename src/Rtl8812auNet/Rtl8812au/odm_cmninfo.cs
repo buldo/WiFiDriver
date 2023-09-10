@@ -1,5 +1,8 @@
-﻿namespace Rtl8812auNet.Rtl8812au;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Rtl8812auNet.Rtl8812au;
+
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public enum odm_cmninfo
 {
     /*@Fixed value*/

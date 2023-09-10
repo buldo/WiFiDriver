@@ -149,51 +149,53 @@ public static class rtl8812a_phycfg
         for (var path = (u8)RfPath.RF_PATH_A; (byte)path < pHalData.NumTotalRFPath; ++path)
         {
             phy_set_tx_power_level_by_path(adapterState, Channel, (RfPath)path);
-            PHY_TxPowerTrainingByPath_8812(adapterState, pHalData.current_channel_bw, Channel, (RfPath)path);
+            PHY_TxPowerTrainingByPath_8812(adapterState, (RfPath)path);
         }
     }
 
-    static void PHY_TxPowerTrainingByPath_8812(AdapterState adapterState, ChannelWidth BandWidth, u8 Channel, RfPath RfPath)
+    static void PHY_TxPowerTrainingByPath_8812(AdapterState adapterState, RfPath rfPath)
     {
         var pHalData = adapterState.HalData;
-
-        u8 i;
-        u32 PowerLevel;
-        u16 writeOffset;
-
-        if ((u8)RfPath >= pHalData.NumTotalRFPath)
+        if ((u8)rfPath >= pHalData.NumTotalRFPath)
         {
             return;
         }
 
-        u32 writeData = 0;
-        if (RfPath == RfPath.RF_PATH_A)
+        u16 writeOffset;
+        u32 powerLevel;
+        if (rfPath == RfPath.RF_PATH_A)
         {
-            PowerLevel = phy_get_tx_power_index(adapterState, RfPath.RF_PATH_A, MGN_RATE.MGN_MCS7, BandWidth, Channel);
+            powerLevel = phy_get_tx_power_index();
             writeOffset = rA_TxPwrTraing_Jaguar;
         }
         else
         {
-            PowerLevel = phy_get_tx_power_index(adapterState, RfPath.RF_PATH_B, MGN_RATE.MGN_MCS7, BandWidth, Channel);
+            powerLevel = phy_get_tx_power_index();
             writeOffset = rB_TxPwrTraing_Jaguar;
         }
 
-        for (i = 0; i < 3; i++)
+        u32 writeData = 0;
+        for (u8 i = 0; i < 3; i++)
         {
             if (i == 0)
-                PowerLevel = PowerLevel - 10;
+            {
+                powerLevel = powerLevel - 10;
+            }
             else if (i == 1)
-                PowerLevel = PowerLevel - 8;
+            {
+                powerLevel = powerLevel - 8;
+            }
             else
-                PowerLevel = PowerLevel - 6;
-            writeData |= (((PowerLevel > 2) ? (PowerLevel) : 2) << (i * 8));
+            {
+                powerLevel = powerLevel - 6;
+            }
+            writeData |= (((powerLevel > 2) ? (powerLevel) : 2) << (i * 8));
         }
 
         phy_set_bb_reg(adapterState, writeOffset, 0xffffff, writeData);
     }
 
-    static u8 phy_get_tx_power_index(AdapterState pAdapterState, RfPath RFPath, MGN_RATE Rate, ChannelWidth BandWidth,
-        u8 Channel)
+    static u8 phy_get_tx_power_index()
     {
         return 16;
     }
@@ -241,21 +243,17 @@ public static class rtl8812a_phycfg
         PHY_SetTxPowerIndexByRateArray(
             pAdapterState,
             RFPath,
-            pHalData.current_channel_bw,
-            Channel,
             rates_by_sections[(int)RateSection].rates);
     }
 
     static void PHY_SetTxPowerIndexByRateArray(
         AdapterState pAdapterState,
         RfPath RFPath,
-        ChannelWidth BandWidth,
-        u8 Channel,
         MGN_RATE[] Rates)
     {
         for (int i = 0; i < Rates.Length; ++i)
         {
-            var powerIndex = phy_get_tx_power_index(pAdapterState, RFPath, Rates[i], BandWidth, Channel);
+            var powerIndex = phy_get_tx_power_index();
             MGN_RATE rate = Rates[i];
             PHY_SetTxPowerIndex_8812A(pAdapterState, powerIndex, RFPath, rate);
         }
@@ -266,7 +264,6 @@ public static class rtl8812a_phycfg
 
         var pHalData = pAdapterState.HalData;
         u8 channelToSW = pHalData.current_channel;
-        var bandwidthToSw = pHalData.current_channel_bw;
 
         if (phy_SwBand8812(pAdapterState, channelToSW) == false)
         {
@@ -752,10 +749,6 @@ public static class rtl8812a_phycfg
 
     public static void PHY_SetTxPowerIndex_8812A(AdapterState adapterState, u32 PowerIndex, RfPath RFPath, MGN_RATE Rate)
     {
-        var pHalData = adapterState.HalData;
-
-        /* <20120928, Kordan> A workaround in 8812A/8821A testchip, to fix the bug of odd Tx power indexes. */
-
         if (RFPath == RfPath.RF_PATH_A)
         {
             switch (Rate)

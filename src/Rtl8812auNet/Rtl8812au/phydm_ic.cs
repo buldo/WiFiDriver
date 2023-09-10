@@ -1,5 +1,8 @@
-﻿namespace Rtl8812auNet.Rtl8812au;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Rtl8812auNet.Rtl8812au;
+
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public enum phydm_ic : uint
 {
     ODM_RTL8188E = BIT0,

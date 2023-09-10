@@ -1,6 +1,9 @@
-﻿namespace Rtl8812auNet.Rtl8812au;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Rtl8812auNet.Rtl8812au;
 
 [Flags]
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public enum RT_MULTI_FUNC
 {
     RT_MULTI_FUNC_NONE = 0x00,

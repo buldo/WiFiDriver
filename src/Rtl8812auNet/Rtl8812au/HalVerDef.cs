@@ -20,18 +20,6 @@ public static class HalVerDef
     public static bool IS_E_CUT(HAL_VERSION version) =>
         ((GET_CVID_CUT_VERSION(version) == CutVersion.E_CUT_VERSION) ? true : false);
 
-    public static bool IS_F_CUT(HAL_VERSION version) =>
-        ((GET_CVID_CUT_VERSION(version) == CutVersion.F_CUT_VERSION) ? true : false);
-
-    public static bool IS_I_CUT(HAL_VERSION version) =>
-        ((GET_CVID_CUT_VERSION(version) == CutVersion.I_CUT_VERSION) ? true : false);
-
-    public static bool IS_J_CUT(HAL_VERSION version) =>
-        ((GET_CVID_CUT_VERSION(version) == CutVersion.J_CUT_VERSION) ? true : false);
-
-    public static bool IS_K_CUT(HAL_VERSION version) =>
-        ((GET_CVID_CUT_VERSION(version) == CutVersion.K_CUT_VERSION) ? true : false);
-
     public static bool IS_1T1R(HAL_VERSION version) =>
         ((GET_CVID_RF_TYPE(version) == HalRFType.RF_TYPE_1T1R) ? true : false);
 
@@ -43,9 +31,6 @@ public static class HalVerDef
 
     public static bool IS_3T3R(HAL_VERSION version) =>
         ((GET_CVID_RF_TYPE(version) == HalRFType.RF_TYPE_3T3R) ? true : false);
-
-    public static bool IS_3T4R(HAL_VERSION version) =>
-        ((GET_CVID_RF_TYPE(version) == HalRFType.RF_TYPE_3T4R) ? true : false);
 
     public static bool IS_4T4R(HAL_VERSION version) =>
         ((GET_CVID_RF_TYPE(version) == HalRFType.RF_TYPE_4T4R) ? true : false);
