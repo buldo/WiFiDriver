@@ -19,7 +19,6 @@ global using static Rtl8812auNet.Rtl8812au.halhwimg8812a_bb;
 global using static Rtl8812auNet.Rtl8812au.rtl8812a_dm;
 global using static Rtl8812auNet.Rtl8812au.HalVerDef;
 global using static Rtl8812auNet.Rtl8812au.phydm;
-global using static Rtl8812auNet.Rtl8812au.rtw_odm;
 global using static Rtl8812auNet.Rtl8812au.rtw_mlme_ext;
 global using static Rtl8812auNet.Rtl8812au.rtw_wlan_util;
 global using static Rtl8812auNet.Rtl8812au.hal_com;

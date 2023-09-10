@@ -10,7 +10,6 @@ public static class usb_intf
 
         /* step read_chip_version */
         read_chip_version_8812a(adapterState);
-        rtw_odm_init_ic_type(adapterState);
 
         /* step usb endpoint mapping */
         rtl8812au_interface_configure(adapterState);

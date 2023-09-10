@@ -48,8 +48,6 @@ public static class rtl8812a_dm
         var pHalData = adapterState.HalData;
         dm_struct pDM_Odm = (pHalData.odmpriv);
 
-        rtw_odm_init_ic_type(adapterState);
-
         odm_cmn_info_init(pDM_Odm, odm_cmninfo.ODM_CMNINFO_RF_TYPE, (ulong)pHalData.rf_type);
         {
             /* 1 ======= BoardType: ODM_CMNINFO_BOARD_TYPE ======= */
