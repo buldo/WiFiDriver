@@ -9,7 +9,7 @@ public class hal_com_data
     public u8 current_channel { get; set; }
     public RfType rf_type { get; set; } /*enum RfType*/
     public u8 NumTotalRFPath { get; set; }
-    public bool bautoload_fail_flag { get; set; }
+    public bool AutoloadFailFlag { get; set; }
     public RT_MULTI_FUNC MultiFunc { get; set; }
     public ChannelWidth current_channel_bw { get; set; }
     public bool bSwChnl { get; set; }

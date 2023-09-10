@@ -91,7 +91,9 @@ public static class UsbHalInit
             pHalData.rxagg_usb_timeout = 0x20;
         }
 
-        _ConfigChipOutEP_8812(padapter, pdvobjpriv.OutPipesCount);
+        var chipOut = GetChipOutEP8812(pdvobjpriv.OutPipesCount);
+        pHalData.OutEpQueueSel = chipOut.OutEpQueueSel;
+        pHalData.OutEpNumber = chipOut.OutEpNumber;
     }
 
     public static void ReadAdapterInfo8812AU(AdapterState adapterState)
@@ -103,17 +105,13 @@ public static class UsbHalInit
     static void Hal_ReadPROMContent_8812A(AdapterState adapterState)
     {
         var pHalData = adapterState.HalData;
-        u8 eeValue;
 
         /* check system boot selection */
-        eeValue = adapterState.Device.rtw_read8(REG_9346CR);
-        pHalData.EepromOrEfuse = (eeValue & BOOT_FROM_EEPROM) != 0 ? true : false;
-        pHalData.bautoload_fail_flag = (eeValue & EEPROM_EN) != 0 ? false : true;
+        var eeValue = adapterState.Device.rtw_read8(REG_9346CR);
+        pHalData.EepromOrEfuse = (eeValue & BOOT_FROM_EEPROM) != 0;
+        pHalData.AutoloadFailFlag = (eeValue & EEPROM_EN) == 0;
 
-        RTW_INFO(
-            $"Boot from {(pHalData.EepromOrEfuse ? "EEPROM" : "EFUSE")}, Autoload {(pHalData.bautoload_fail_flag ? "Fail" : "OK")} !");
-
-        /* pHalData.EEType = IS_BOOT_FROM_EEPROM(adapterState) ? EEPROM_93C46 : EEPROM_BOOT_EFUSE; */
+        RTW_INFO($"Boot from {(pHalData.EepromOrEfuse ? "EEPROM" : "EFUSE")}, Autoload {(pHalData.AutoloadFailFlag ? "Fail" : "OK")} !");
 
         InitAdapterVariablesByPROM_8812AU(adapterState);
     }
@@ -126,24 +124,24 @@ public static class UsbHalInit
 
         Hal_EfuseParseIDCode8812A(adapterState, pHalData.efuse_eeprom_data);
 
-        Hal_ReadPROMVersion8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        hal_ReadIDs_8812AU(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        Hal_ReadTxPowerInfo8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        Hal_ReadBoardType8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        Hal_ReadPROMVersion8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
+        hal_ReadIDs_8812AU(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
+        Hal_ReadTxPowerInfo8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
+        Hal_ReadBoardType8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
 
         /*  */
         /* Read Bluetooth co-exist and initialize */
         /*  */
-        Hal_EfuseParseBTCoexistInfo8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        Hal_EfuseParseBTCoexistInfo8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
 
-        Hal_EfuseParseXtal_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        Hal_ReadThermalMeter_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        Hal_EfuseParseXtal_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
+        Hal_ReadThermalMeter_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
 
-        Hal_ReadAmplifierType_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
-        Hal_ReadRFEType_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        Hal_ReadAmplifierType_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
+        Hal_ReadRFEType_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
 
 
-        hal_ReadUsbModeSwitch_8812AU(adapterState, pHalData.efuse_eeprom_data, pHalData.bautoload_fail_flag);
+        hal_ReadUsbModeSwitch_8812AU(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
 
         /* 2013/04/15 MH Add for different board type recognize. */
         hal_ReadUsbType_8812AU(adapterState, pHalData.efuse_eeprom_data);
@@ -1456,10 +1454,10 @@ public static class UsbHalInit
         if (EEPROMId != RTL_EEPROM_ID)
         {
             RTW_INFO($"EEPROM ID(0x{EEPROMId:X}) is invalid!!");
-            pHalData.bautoload_fail_flag = true;
+            pHalData.AutoloadFailFlag = true;
         }
         else
-            pHalData.bautoload_fail_flag = false;
+            pHalData.AutoloadFailFlag = false;
 
         RTW_INFO($"EEPROM ID=0x{EEPROMId}");
     }
@@ -1469,7 +1467,7 @@ public static class UsbHalInit
         var pHalData = padapter.HalData;
         u32 i;
 
-        if (false == pHalData.bautoload_fail_flag)
+        if (false == pHalData.AutoloadFailFlag)
         {
             /* autoload OK. */
             if (is_boot_from_eeprom(padapter))
@@ -1521,7 +1519,7 @@ public static class UsbHalInit
                 efuse_content[2] != 0xFF ||
                 efuse_content[3] != 0xFF)
             {
-                pHalData.bautoload_fail_flag = false;
+                pHalData.AutoloadFailFlag = false;
             }
 
             /* update to default value 0xFF */
@@ -1565,7 +1563,7 @@ public static class UsbHalInit
         var pHalData = pAdapterState.HalData;
         UInt16 mapLen = 0;
 
-        if (pHalData.bautoload_fail_flag == true)
+        if (pHalData.AutoloadFailFlag == true)
         {
             for (int i = 0; i < pHalData.efuse_eeprom_data.Length; i++)
             {
@@ -1957,40 +1955,39 @@ public static class UsbHalInit
 
     }
 
-    static void _ConfigChipOutEP_8812(AdapterState pAdapterState, u8 NumOutPipe)
+    /// <remarks>
+    /// _ConfigChipOutEP_8812
+    /// </remarks>
+    static (TxSele OutEpQueueSel, byte OutEpNumber) GetChipOutEP8812(u8 NumOutPipe)
     {
-        var pHalData = pAdapterState.HalData;
-
-
-        pHalData.OutEpQueueSel = 0;
-        pHalData.OutEpNumber = 0;
+        TxSele OutEpQueueSel = 0;
+        byte OutEpNumber = 0;
 
         switch (NumOutPipe)
         {
             case 4:
-                pHalData.OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_LQ | TxSele.TX_SELE_NQ | TxSele.TX_SELE_EQ;
-                pHalData.OutEpNumber = 4;
+                OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_LQ | TxSele.TX_SELE_NQ | TxSele.TX_SELE_EQ;
+                OutEpNumber = 4;
                 break;
             case 3:
-                pHalData.OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_LQ | TxSele.TX_SELE_NQ;
-                pHalData.OutEpNumber = 3;
+                OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_LQ | TxSele.TX_SELE_NQ;
+                OutEpNumber = 3;
                 break;
             case 2:
-                pHalData.OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_NQ;
-                pHalData.OutEpNumber = 2;
+                OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_NQ;
+                OutEpNumber = 2;
                 break;
             case 1:
-                pHalData.OutEpQueueSel = TxSele.TX_SELE_HQ;
-                pHalData.OutEpNumber = 1;
+                OutEpQueueSel = TxSele.TX_SELE_HQ;
+                OutEpNumber = 1;
                 break;
             default:
                 break;
-
         }
 
-        RTW_INFO("%s OutEpQueueSel(0x%02x), OutEpNumber(%d)", "_ConfigChipOutEP_8812", pHalData.OutEpQueueSel,
-            pHalData.OutEpNumber);
+        RTW_INFO($"OutEpQueueSel({OutEpQueueSel}), OutEpNumber({OutEpNumber})");
 
+        return (OutEpQueueSel,  OutEpNumber);
     }
 
     private static bool is_boot_from_eeprom(AdapterState adapterState) => (adapterState.HalData.EepromOrEfuse);
@@ -2158,7 +2155,7 @@ public static class UsbHalInit
         const s8 AUTO = -1;
 
 
-        if (pHalData.bautoload_fail_flag)
+        if (pHalData.AutoloadFailFlag)
         {
             if (Band == BandType.BAND_ON_2_4G)
             {
