@@ -56,7 +56,7 @@ public static class rtl8812a_phycfg
         u8 CenterFrequencyIndex1
     )
     {
-        PHAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         /* RTW_INFO("=> PHY_HandleSwChnlAndSetBW8812: bSwitchChannel %d, bSetBandWidth %d\n",bSwitchChannel,bSetBandWidth); */
 
@@ -144,7 +144,7 @@ public static class rtl8812a_phycfg
 
     static void PHY_SetTxPowerLevel8812(AdapterState adapterState, u8 Channel)
     {
-        PHAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         for (var path = (u8)RfPath.RF_PATH_A; (byte)path < pHalData.NumTotalRFPath; ++path)
         {
@@ -155,7 +155,7 @@ public static class rtl8812a_phycfg
 
     static void PHY_TxPowerTrainingByPath_8812(AdapterState adapterState, ChannelWidth BandWidth, u8 Channel, RfPath RfPath)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         u8 i;
         u32 PowerLevel;
@@ -201,7 +201,7 @@ public static class rtl8812a_phycfg
 
     static void phy_set_tx_power_level_by_path(AdapterState adapterState, u8 channel, RfPath path)
     {
-        PHAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
         BOOLEAN bIsIn24G = (pHalData.current_band_type == BandType.BAND_ON_2_4G);
 
         if (bIsIn24G)
@@ -228,7 +228,7 @@ public static class rtl8812a_phycfg
         RATE_SECTION RateSection)
     {
         Console.WriteLine($"SET_TX_POWER {RFPath}; {Channel}; {RateSection}");
-        PHAL_DATA_TYPE pHalData = pAdapterState.HalData;
+        var pHalData = pAdapterState.HalData;
 
         if (RateSection >= RATE_SECTION.RATE_SECTION_NUM)
         {
@@ -267,7 +267,7 @@ public static class rtl8812a_phycfg
     static void phy_SwChnl8812(AdapterState pAdapterState)
     {
 
-        HAL_DATA_TYPE pHalData = pAdapterState.HalData;
+        var pHalData = pAdapterState.HalData;
         u8 channelToSW = pHalData.current_channel;
         var bandwidthToSw = pHalData.current_channel_bw;
 
@@ -396,7 +396,7 @@ public static class rtl8812a_phycfg
     static u32 phy_RFSerialRead(AdapterState adapterState, RfPath eRFPath, u32 Offset)
     {
         u32 retValue;
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
         BbRegisterDefinition pPhyReg = pHalData.PHYRegDef[eRFPath];
         BOOLEAN bIsPIMode = false;
 
@@ -467,7 +467,7 @@ public static class rtl8812a_phycfg
 
     static void phy_RFSerialWrite(AdapterState adapterState, RfPath eRFPath, u32 Offset, u32 Data)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
         BbRegisterDefinition pPhyReg = pHalData.PHYRegDef[eRFPath];
 
         Offset &= 0xff;
@@ -513,7 +513,7 @@ public static class rtl8812a_phycfg
     static byte phy_GetSecondaryChnl_8812(AdapterState adapterState)
     {
         VHT_DATA_SC SCSettingOf40 = 0, SCSettingOf20 = 0;
-        PHAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         /* RTW_INFO("SCMapping: Case: pHalData.current_channel_bw %d, pHalData.nCur80MhzPrimeSC %d, pHalData.nCur40MhzPrimeSC %d\n",pHalData.current_channel_bw,pHalData.nCur80MhzPrimeSC,pHalData.nCur40MhzPrimeSC); */
         if (pHalData.current_channel_bw == ChannelWidth.CHANNEL_WIDTH_80)
@@ -581,7 +581,7 @@ public static class rtl8812a_phycfg
     static void phy_PostSetBwMode8812(AdapterState adapterState)
     {
         u8 L1pkVal = 0, reg_837 = 0;
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
 
         /* 3 Set Reg668 BW */
@@ -681,8 +681,6 @@ public static class rtl8812a_phycfg
 
     static void PHY_RF6052SetBandwidth8812(AdapterState adapterState, ChannelWidth Bandwidth) /* 20M or 40M */
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
-
         switch (Bandwidth)
         {
             case ChannelWidth.CHANNEL_WIDTH_20:
@@ -757,7 +755,7 @@ public static class rtl8812a_phycfg
 
     public static void PHY_SetTxPowerIndex_8812A(AdapterState adapterState, u32 PowerIndex, RfPath RFPath, MGN_RATE Rate)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         /* <20120928, Kordan> A workaround in 8812A/8821A testchip, to fix the bug of odd Tx power indexes. */
 

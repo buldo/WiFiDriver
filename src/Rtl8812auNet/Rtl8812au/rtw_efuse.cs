@@ -7,7 +7,7 @@ public static class rtw_efuse
         u16 Offset,
         out u8 Value)
     {
-        PHAL_DATA_TYPE pHalData = pAdapter.HalData;
+        var pHalData = pAdapter.HalData;
         Value = pHalData.efuse_eeprom_data[Offset];
     }
 }

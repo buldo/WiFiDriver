@@ -4,8 +4,6 @@ global using u16 = System.UInt16;
 global using u8 = System.Byte;
 global using s8 = System.SByte;
 global using s32 = System.Int32;
-global using PHAL_DATA_TYPE = Rtl8812auNet.Rtl8812au.hal_com_data;
-global using HAL_DATA_TYPE = Rtl8812auNet.Rtl8812au.hal_com_data;
 global using BOOLEAN = System.Boolean;
 global using static Rtl8812auNet.Rtl8812au.Logging;
 global using static Rtl8812auNet.Rtl8812au.RTW_USB_SPEED;

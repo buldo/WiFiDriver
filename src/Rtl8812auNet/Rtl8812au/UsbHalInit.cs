@@ -66,7 +66,7 @@ public static class UsbHalInit
 
     public static void rtl8812au_interface_configure(AdapterState padapter)
     {
-        HAL_DATA_TYPE pHalData = padapter.HalData;
+        var pHalData = padapter.HalData;
 
         DvObj pdvobjpriv = padapter.DvObj;
 
@@ -102,7 +102,7 @@ public static class UsbHalInit
 
     static void Hal_ReadPROMContent_8812A(AdapterState adapterState)
     {
-        PHAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
         u8 eeValue;
 
         /* check system boot selection */
@@ -120,7 +120,7 @@ public static class UsbHalInit
 
     private static void InitAdapterVariablesByPROM_8812AU(AdapterState adapterState)
     {
-        PHAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         hal_InitPGData_8812A(adapterState, pHalData.efuse_eeprom_data);
 
@@ -153,7 +153,7 @@ public static class UsbHalInit
     {
         /* if (IS_HARDWARE_TYPE_8812AU(adapterState) && adapterState.UsbModeMechanism.RegForcedUsbMode == 5) */
         {
-            PHAL_DATA_TYPE pHalData = adapterState.HalData;
+            var pHalData = adapterState.HalData;
 
             hal_spec_t hal_spc = GET_HAL_SPEC(adapterState);
             u8 reg_tmp, i, j, antenna = 0, wmode = 0;
@@ -246,7 +246,7 @@ public static class UsbHalInit
 
     private static void hal_ReadUsbModeSwitch_8812AU(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         if (AutoloadFail)
         {
@@ -262,7 +262,7 @@ public static class UsbHalInit
 
     private static void Hal_ReadRFEType_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         if (!AutoloadFail)
         {
@@ -326,7 +326,7 @@ public static class UsbHalInit
 
     static void Hal_ReadThermalMeter_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
         /* u8	tempval; */
 
         /*  */
@@ -351,7 +351,7 @@ public static class UsbHalInit
 
     static void Hal_EfuseParseBTCoexistInfo8812A(AdapterState adapterState, u8[] hwinfo, BOOLEAN AutoLoadFail)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         if (!AutoLoadFail)
         {
@@ -369,7 +369,7 @@ public static class UsbHalInit
 
     static void Hal_ReadBoardType8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         if (!AutoloadFail)
         {
@@ -390,7 +390,7 @@ public static class UsbHalInit
 
     private static void Hal_ReadTxPowerInfo8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoLoadFail)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
         TxPowerInfo24G pwrInfo24G = new TxPowerInfo24G();
         TxPowerInfo5G pwrInfo5G = new TxPowerInfo5G();
 
@@ -422,7 +422,7 @@ public static class UsbHalInit
     private static void hal_load_txpwr_info(AdapterState adapterState, TxPowerInfo24G pwr_info_2g, TxPowerInfo5G pwr_info_5g,
         u8[] pg_data)
     {
-        HAL_DATA_TYPE hal_data = adapterState.HalData;
+        var hal_data = adapterState.HalData;
 
         var hal_spec = GET_HAL_SPEC(adapterState);
         u8 max_tx_cnt = hal_spec.max_tx_cnt;
@@ -1213,7 +1213,7 @@ public static class UsbHalInit
 
     private static void Hal_ReadAmplifierType_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         u8 extTypePA_2G_A = (byte)((PROMContent[0xBD] & BIT2) >> 2); /* 0xBD[2] */
         u8 extTypePA_2G_B = (byte)((PROMContent[0xBD] & BIT6) >> 6); /* 0xBD[6] */
@@ -1258,7 +1258,7 @@ public static class UsbHalInit
 
     private static void hal_ReadPAType_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         if (!AutoloadFail)
         {
@@ -1371,7 +1371,7 @@ public static class UsbHalInit
 
     static void Hal_ReadPROMVersion8812A(AdapterState adapterState, u8[] PROMContent, bool AutoloadFail)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         if (AutoloadFail)
         {
@@ -1394,7 +1394,7 @@ public static class UsbHalInit
     private static void hal_ReadIDs_8812AU(AdapterState adapterState, byte[] PROMContent, bool AutoloadFail)
     {
         // TODO: Looks like not needed
-        // HAL_DATA_TYPE pHalData = GET_HAL_DATA(adapterState);
+        // var pHalData = GET_HAL_DATA(adapterState);
         //
         // if (!AutoloadFail)
         // {
@@ -1447,7 +1447,7 @@ public static class UsbHalInit
 
     static void Hal_EfuseParseIDCode8812A(AdapterState padapter, u8[] hwinfo)
     {
-        PHAL_DATA_TYPE pHalData = padapter.HalData;
+        var pHalData = padapter.HalData;
         u16 EEPROMId;
 
 
@@ -1466,7 +1466,7 @@ public static class UsbHalInit
 
     static void hal_InitPGData_8812A(AdapterState padapter, u8[] PROMContent)
     {
-        HAL_DATA_TYPE pHalData = padapter.HalData;
+        var pHalData = padapter.HalData;
         u32 i;
 
         if (false == pHalData.bautoload_fail_flag)
@@ -1562,7 +1562,7 @@ public static class UsbHalInit
 
     private static void EFUSE_ShadowMapUpdate(AdapterState pAdapterState, byte efuseType)
     {
-        PHAL_DATA_TYPE pHalData = pAdapterState.HalData;
+        var pHalData = pAdapterState.HalData;
         UInt16 mapLen = 0;
 
         if (pHalData.bautoload_fail_flag == true)
@@ -1582,7 +1582,7 @@ public static class UsbHalInit
 
     static void rtw_dump_cur_efuse(AdapterState padapter)
     {
-        HAL_DATA_TYPE hal_data = padapter.HalData;
+        var hal_data = padapter.HalData;
 
         var mapsize = EFUSE_MAP_LEN_JAGUAR;
 
@@ -1959,7 +1959,7 @@ public static class UsbHalInit
 
     static void _ConfigChipOutEP_8812(AdapterState pAdapterState, u8 NumOutPipe)
     {
-        HAL_DATA_TYPE pHalData = pAdapterState.HalData;
+        var pHalData = pAdapterState.HalData;
 
 
         pHalData.OutEpQueueSel = 0;
@@ -2023,7 +2023,7 @@ public static class UsbHalInit
 
     static void init_phydm_info(AdapterState adapterState)
     {
-        PHAL_DATA_TYPE hal_data = adapterState.HalData;
+        var hal_data = adapterState.HalData;
         dm_struct phydm = (hal_data.odmpriv);
         odm_cmn_info_init(phydm, odm_cmninfo.ODM_CMNINFO_FW_VER, hal_data.firmware_version);
         odm_cmn_info_init(phydm, odm_cmninfo.ODM_CMNINFO_FW_SUB_VER, hal_data.firmware_sub_version);
@@ -2031,7 +2031,7 @@ public static class UsbHalInit
 
     public static void PHY_SwitchWirelessBand8812(AdapterState adapterState, BandType Band)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
         ChannelWidth current_bw = pHalData.current_channel_bw;
         bool eLNA_2g = pHalData.ExternalLNA_2G;
 
@@ -2139,7 +2139,7 @@ public static class UsbHalInit
 
     static void phy_SetBBSwingByBand_8812A(AdapterState adapterState, BandType Band)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         phy_set_bb_reg(adapterState, rA_TxScale_Jaguar, 0xFFE00000,
             phy_get_tx_bb_swing_8812a(adapterState, (BandType)Band, RfPath.RF_PATH_A)); /* 0xC1C[31:21] */
@@ -2149,7 +2149,7 @@ public static class UsbHalInit
 
     static u32 phy_get_tx_bb_swing_8812a(AdapterState adapterState, BandType Band, RfPath RFPath)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
         dm_struct pDM_Odm = pHalData.odmpriv;
 
         s8 bbSwing_2G = (s8)(-1 * adapterState.registrypriv.TxBBSwing_2G);
@@ -2279,7 +2279,7 @@ public static class UsbHalInit
     static void phy_SetRFEReg8812(AdapterState adapterState, BandType Band)
     {
         uint u1tmp = 0;
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         if (Band == BandType.BAND_ON_2_4G)
         {
@@ -2404,7 +2404,7 @@ public static class UsbHalInit
 
     static void PHY_RF6052_Config_8812(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         /* Initialize general global value */
         if (pHalData.rf_type == RfType.RF_1T1R)
@@ -2425,7 +2425,7 @@ public static class UsbHalInit
     static void phy_RF6052_Config_ParaFile_8812(AdapterState adapterState)
     {
         RfPath eRFPath;
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         for (eRFPath = 0; (byte)eRFPath < pHalData.NumTotalRFPath; eRFPath++)
         {
@@ -2446,7 +2446,7 @@ public static class UsbHalInit
 
     static bool phy_BB8812_Config_ParaFile(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
         bool rtStatus = odm_config_bb_with_header_file(adapterState, odm_bb_config_type.CONFIG_BB_PHY_REG);
 
         /* Read PHY_REG.TXT BB INIT!! */
@@ -2471,7 +2471,7 @@ public static class UsbHalInit
 
     static bool PHY_BBConfig8812(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         phy_InitBBRFRegisterDefinition(adapterState);
 
@@ -2511,7 +2511,7 @@ public static class UsbHalInit
 
     static void phy_InitBBRFRegisterDefinition(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         /* RF Interface Sowrtware Control */
 
@@ -2531,7 +2531,7 @@ public static class UsbHalInit
     static void _InitBurstPktLen(AdapterState adapterState)
     {
         u8 speedvalue, provalue, temp;
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         adapterState.Device.rtw_write8(0xf050, 0x01); /* usb3 rx interval */
         adapterState.Device.rtw_write16(REG_RXDMA_STATUS, 0x7400); /* burset lenght=4, set 0x3400 for burset length=2 */
@@ -2869,7 +2869,7 @@ public static class UsbHalInit
 
     static void _InitNormalChipTwoOutEpPriority_8812AUsb(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         registry_priv pregistrypriv = adapterState.registrypriv;
         u16 beQ, bkQ, viQ, voQ, mgtQ, hiQ;
@@ -2962,7 +2962,7 @@ public static class UsbHalInit
 
     static void PHY_MACConfig8812(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
         odm_read_and_config_mp_8812a_mac_reg(adapterState, pHalData.odmpriv);
     }
 
@@ -2979,7 +2979,7 @@ public static class UsbHalInit
         bool status = false;
         u32 i;
         u32 Last_Entry_Of_TxPktBuf = LAST_ENTRY_OF_TX_PKT_BUFFER_8812;
-        HAL_DATA_TYPE pHalData = padapter.HalData;
+        var pHalData = padapter.HalData;
 
         for (i = 0; i < (txpktbuf_bndy - 1); i++)
         {
@@ -3330,7 +3330,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
         u16 value16;
         u8 txpktbuf_bndy;
         bool status = false;
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         registry_priv pregistrypriv = adapterState.registrypriv;
 
@@ -3510,7 +3510,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
     {
         bool rtStatus = true;
         u8 write_fw = 0;
-        PHAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         var pFirmware = new RT_FIRMWARE_8812
         {
@@ -3828,8 +3828,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
     public static void read_chip_version_8812a(AdapterState adapterState)
     {
         u32 value32;
-        PHAL_DATA_TYPE pHalData;
-        pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         value32 = adapterState.Device.rtw_read32(REG_SYS_CFG);
         RTW_INFO($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
@@ -3856,7 +3855,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
     static void rtw_hal_config_rftype(AdapterState padapter)
     {
-        HAL_DATA_TYPE pHalData = padapter.HalData;
+        var pHalData = padapter.HalData;
 
         if (IS_1T1R(pHalData.version_id))
         {
@@ -3894,7 +3893,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
 
     static void _InitQueueReservedPage_8812AUsb(AdapterState adapterState)
     {
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         registry_priv pregistrypriv = adapterState.registrypriv;
         u32 numHQ = 0;
@@ -3962,7 +3961,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
     static void usb_AggSettingTxUpdate_8812A(AdapterState            adapterState)
     {
 
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
         u32 value32;
 
         if (adapterState.registrypriv.wifi_spec)
@@ -3986,7 +3985,7 @@ WLAN_PWR_CFG[] PwrSeqCmd)
     static void usb_AggSettingRxUpdate_8812A(AdapterState adapterState)
     {
 
-        HAL_DATA_TYPE pHalData = adapterState.HalData;
+        var pHalData = adapterState.HalData;
 
         uint valueDMA = adapterState.Device.rtw_read8(REG_TRXDMA_CTRL);
         switch (pHalData.rxagg_mode)
