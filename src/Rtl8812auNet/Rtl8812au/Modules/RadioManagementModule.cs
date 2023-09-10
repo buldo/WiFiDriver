@@ -2,13 +2,16 @@
 
 public class RadioManagementModule
 {
+    private readonly HwPort _hwPort;
     private readonly RtlUsbAdapter _device;
     private readonly RfPowerManagementModule _rfPowerManagement;
 
     public RadioManagementModule(
+        HwPort hwPort,
         RtlUsbAdapter device,
         RfPowerManagementModule rfPowerManagement)
     {
+        _hwPort = hwPort;
         _device = device;
         _rfPowerManagement = rfPowerManagement;
     }
@@ -29,20 +32,20 @@ public class RadioManagementModule
             pmlmeext.cur_bwmode);
     }
 
-    public void setopmode_hdl(HwPort HwPort)
+    public void setopmode_hdl()
     {
-        SetMonitorMode(HwPort);
+        SetMonitorMode();
     }
 
-    private void SetMonitorMode(HwPort HwPort)
+    private void SetMonitorMode()
     {
-        rtw_hal_set_msr(HwPort, _HW_STATE_NOLINK_);
+        rtw_hal_set_msr(_HW_STATE_NOLINK_);
         hw_var_set_monitor();
     }
 
-    private void rtw_hal_set_msr(HwPort HwPort, u8 net_type)
+    private void rtw_hal_set_msr(u8 net_type)
     {
-        switch (HwPort)
+        switch (_hwPort)
         {
             case HwPort.HW_PORT0:
                 /*REG_CR - BIT[17:16]-Network Type for port 0*/

@@ -310,7 +310,6 @@ public static class UsbHalInit
         }
 
         RTW_INFO("EEPROMRegulatory = 0x%x", pHalData.EEPROMRegulatory);
-
     }
 
     private static void Hal_ReadAmplifierType_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
@@ -584,7 +583,6 @@ public static class UsbHalInit
         {
             throw new NotImplementedException("Hal_readPGDataFromConfigFile");
         }
-
     }
 
     /// <remarks>
@@ -669,7 +667,8 @@ public static class UsbHalInit
         }
     }
 
-    private static void Hal_EfuseReadEFuse8812A(AdapterState adapterState, UInt16 _offset, UInt16 _size_byte, byte[] pbuf)
+    private static void Hal_EfuseReadEFuse8812A(AdapterState adapterState, UInt16 _offset, UInt16 _size_byte,
+        byte[] pbuf)
     {
         byte[] efuseTbl = null;
         byte[] rtemp8 = new byte[1];
@@ -912,23 +911,9 @@ public static class UsbHalInit
                 adapterState.Device.rtw_write8(REG_EFUSE_TEST + 3, (byte)(tempval & 0x7F));
             }
         }
-
     }
 
-    /// <remarks>
-    /// _ConfigChipOutEP_8812
-    /// </remarks>
-
     private static bool is_boot_from_eeprom(AdapterState adapterState) => (adapterState.HalData.EepromOrEfuse);
-
-
-
-
-
-
-
-
-
 
     public static UInt32 LE_BITS_TO_4BYTE(Span<byte> __pStart, int __BitOffset, int __BitLen)
     {
@@ -941,12 +926,4 @@ public static class UsbHalInit
     }
 
     private static UInt32 BIT_LEN_MASK_32(int __BitLen) => ((u32)(0xFFFFFFFF >> (32 - (__BitLen))));
-
-
-
-
-
-
-
-
 }

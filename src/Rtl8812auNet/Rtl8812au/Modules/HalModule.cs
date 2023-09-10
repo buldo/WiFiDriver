@@ -15,14 +15,14 @@ public class HalModule
         _radioManagementModule = radioManagementModule;
     }
 
-    public bool rtw_hal_init(hal_com_data pHalData, HwPort HwPort, InitChannel initChannel)
+    public bool rtw_hal_init(hal_com_data pHalData, InitChannel initChannel)
     {
         var status = rtl8812au_hal_init(pHalData);
 
         if (status)
         {
             _radioManagementModule.init_hw_mlme_ext(pHalData, initChannel);
-            _radioManagementModule.setopmode_hdl(HwPort);
+            _radioManagementModule.setopmode_hdl();
         }
         else
         {
@@ -322,30 +322,36 @@ public class HalModule
             var v2 = array[i + 1];
 
             if ((v1 & (BIT31 | BIT30)) != 0)
-            {/*positive & negative condition*/
+            {
+                /*positive & negative condition*/
                 if ((v1 & BIT31) != 0)
-                {/* positive condition*/
+                {
+                    /* positive condition*/
                     c_cond = (u8)((v1 & (BIT29 | BIT28)) >>> 28);
                     if (c_cond == COND_ENDIF)
-                    {/*end*/
+                    {
+                        /*end*/
                         is_matched = true;
                         is_skipped = false;
                         // PHYDM_DBG(dm, ODM_COMP_INIT, "ENDIF\n");
                     }
                     else if (c_cond == COND_ELSE)
-                    { /*else*/
+                    {
+                        /*else*/
                         is_matched = is_skipped ? false : true;
                         // PHYDM_DBG(dm, ODM_COMP_INIT, "ELSE\n");
                     }
                     else
-                    {/*if , else if*/
+                    {
+                        /*if , else if*/
                         pre_v1 = v1;
                         pre_v2 = v2;
                         //PHYDM_DBG(dm, ODM_COMP_INIT, "IF or ELSE IF\n");
                     }
                 }
                 else if ((v1 & BIT30) != 0)
-                { /*negative condition*/
+                {
+                    /*negative condition*/
                     if (is_skipped == false)
                     {
                         if (check_positive(dm.odmpriv, pre_v1, pre_v2, v2))
@@ -370,6 +376,7 @@ public class HalModule
                     odm_config_rf_radio_b_8812a(dm, v1, v2);
                 }
             }
+
             i = i + 2;
         }
     }
@@ -393,30 +400,36 @@ public class HalModule
             var v2 = array[i + 1];
 
             if ((v1 & (BIT31 | BIT30)) != 0)
-            {/*positive & negative condition*/
+            {
+                /*positive & negative condition*/
                 if ((v1 & BIT31) != 0)
-                {/* positive condition*/
+                {
+                    /* positive condition*/
                     c_cond = (u8)((v1 & (BIT29 | BIT28)) >>> 28);
                     if (c_cond == COND_ENDIF)
-                    {/*end*/
+                    {
+                        /*end*/
                         is_matched = true;
                         is_skipped = false;
                         //PHYDM_DBG(dm, ODM_COMP_INIT, "ENDIF\n");
                     }
                     else if (c_cond == COND_ELSE)
-                    { /*else*/
+                    {
+                        /*else*/
                         is_matched = is_skipped ? false : true;
                         //PHYDM_DBG(dm, ODM_COMP_INIT, "ELSE\n");
                     }
                     else
-                    {/*if , else if*/
+                    {
+                        /*if , else if*/
                         pre_v1 = v1;
                         pre_v2 = v2;
                         //PHYDM_DBG(dm, ODM_COMP_INIT, "IF or ELSE IF\n");
                     }
                 }
                 else if ((v1 & BIT30) != 0)
-                { /*negative condition*/
+                {
+                    /*negative condition*/
                     if (is_skipped == false)
                     {
                         if (check_positive(dm.odmpriv, pre_v1, pre_v2, v2))
@@ -441,6 +454,7 @@ public class HalModule
                     odm_config_rf_radio_a_8812a(dm, v1, v2);
                 }
             }
+
             i = i + 2;
         }
     }
@@ -794,30 +808,36 @@ public class HalModule
             var v2 = array[i + 1];
 
             if ((v1 & (BIT31 | BIT30)) != 0)
-            {/*positive & negative condition*/
+            {
+                /*positive & negative condition*/
                 if ((v1 & BIT31) != 0)
-                {/* positive condition*/
+                {
+                    /* positive condition*/
                     c_cond = (u8)((v1 & (BIT29 | BIT28)) >> 28);
                     if (c_cond == COND_ENDIF)
-                    {/*end*/
+                    {
+                        /*end*/
                         is_matched = true;
                         is_skipped = false;
                         //PHYDM_DBG(dm, ODM_COMP_INIT, "ENDIF\n");
                     }
                     else if (c_cond == COND_ELSE)
-                    { /*else*/
+                    {
+                        /*else*/
                         is_matched = is_skipped ? false : true;
                         //PHYDM_DBG(dm, ODM_COMP_INIT, "ELSE\n");
                     }
                     else
-                    {/*if , else if*/
+                    {
+                        /*if , else if*/
                         pre_v1 = v1;
                         pre_v2 = v2;
                         //PHYDM_DBG(dm, ODM_COMP_INIT, "IF or ELSE IF\n");
                     }
                 }
                 else if ((v1 & BIT30) != 0)
-                { /*negative condition*/
+                {
+                    /*negative condition*/
                     if (is_skipped == false)
                     {
                         if (check_positive(dm, pre_v1, pre_v2, v2))
@@ -843,6 +863,7 @@ public class HalModule
                     odm_config_bb_phy_8812a(v1, MASKDWORD, v2);
                 }
             }
+
             i = i + 2;
         }
     }
@@ -931,7 +952,8 @@ public class HalModule
             if (((temp >> 4) & 0x03) == 0)
             {
                 provalue = _device.rtw_read8(REG_RXDMA_PRO_8812);
-                _device.rtw_write8(REG_RXDMA_PRO_8812, (byte)((provalue | BIT4 | BIT3 | BIT2 | BIT1) & (NotBIT5))); /* set burst pkt len=512B */
+                _device.rtw_write8(REG_RXDMA_PRO_8812,
+                    (byte)((provalue | BIT4 | BIT3 | BIT2 | BIT1) & (NotBIT5))); /* set burst pkt len=512B */
             }
             else
             {
@@ -1059,7 +1081,8 @@ public class HalModule
                 /* Adjust DMA page and thresh. */
                 temp = (u16)(pHalData.rxagg_dma_size | (pHalData.rxagg_dma_timeout << 8));
                 _device.rtw_write16(REG_RXDMA_AGG_PG_TH, temp);
-                _device.rtw_write8(REG_RXDMA_AGG_PG_TH + 3, (byte)BIT7); /* for dma agg , 0x280[31]GBIT_RXDMA_AGG_OLD_MOD, set 1 */
+                _device.rtw_write8(REG_RXDMA_AGG_PG_TH + 3,
+                    (byte)BIT7); /* for dma agg , 0x280[31]GBIT_RXDMA_AGG_OLD_MOD, set 1 */
             }
                 break;
             case RX_AGG_MODE.RX_AGG_USB:

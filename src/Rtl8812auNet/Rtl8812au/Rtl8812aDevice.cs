@@ -23,7 +23,7 @@ public class Rtl8812aDevice
     {
         _device = device;
         var powerManagement = new RfPowerManagementModule(_device);
-        _radioManagement = new RadioManagementModule(device, powerManagement);
+        _radioManagement = new RadioManagementModule(HwPort.HW_PORT0, device, powerManagement);
         _halModule = new HalModule(_device, _radioManagement);
 
         var dvobj = InitDvObj(_device);
@@ -130,8 +130,7 @@ public class Rtl8812aDevice
             AutoloadFailFlag = autoloadFailFlag
         };
 
-        var adapterState = new AdapterState(dvobj, HwPort.HW_PORT0, pusb_intf, halData);
-
+        var adapterState = new AdapterState(pusb_intf, halData);
 
         /* step read efuse/eeprom data and get mac_addr */
         ReadAdapterInfo8812AU(adapterState);
@@ -209,7 +208,7 @@ public class Rtl8812aDevice
             throw new Exception("StartWithMonitorMode failed NetDevOpen");
         }
 
-        _radioManagement.setopmode_hdl(_adapterState.HwPort);
+        _radioManagement.setopmode_hdl();
     }
 
     private void SetMonitorChannel(hal_com_data pHalData, InitChannel chandef)
@@ -219,7 +218,7 @@ public class Rtl8812aDevice
 
     private bool NetDevOpen(InitChannel initChannel)
     {
-        var status = _halModule.rtw_hal_init(_adapterState.HalData, _adapterState.HwPort, initChannel);
+        var status = _halModule.rtw_hal_init(_adapterState.HalData, initChannel);
         if (status == false)
         {
             return false;
