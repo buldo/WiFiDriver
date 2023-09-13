@@ -1292,7 +1292,6 @@ public class HalModule
         }
 
         if (!HalPwrSeqCmdParsing(
-                CutMsk.PWR_CUT_ALL_MSK,
                 FabMsk.PWR_FAB_ALL_MSK,
                 InterfaceMask.PWR_INTF_USB_MSK,
                 PowerSequences.Rtl8812_NIC_ENABLE_FLOW))
@@ -1326,10 +1325,9 @@ public class HalModule
     }
 
     private bool HalPwrSeqCmdParsing(
-        CutMsk CutVersion,
         FabMsk FabVersion,
         InterfaceMask InterfaceType,
-        WLAN_PWR_CFG[] PwrSeqCmd)
+        WlanPowerConfig[] PwrSeqCmd)
     {
         bool bHWICSupport = false;
         UInt32 AryIdx = 0;
@@ -1344,23 +1342,22 @@ public class HalModule
             //if ((GET_PWR_CFG_FAB_MASK(PwrCfgCmd) & FabVersion) &&
             //    (GET_PWR_CFG_CUT_MASK(PwrCfgCmd) & CutVersion) &&
             //    (GET_PWR_CFG_INTF_MASK(PwrCfgCmd) & InterfaceType))
-            if (((PwrCfgCmd.fab_msk & FabVersion) != 0) &&
-                ((PwrCfgCmd.cut_msk & CutVersion) != 0) &&
-                ((PwrCfgCmd.interface_msk & InterfaceType) != 0))
+            if (((PwrCfgCmd.FabMask & FabVersion) != 0) &&
+                ((PwrCfgCmd.InterfaceMask & InterfaceType) != 0))
             {
-                switch (PwrCfgCmd.cmd)
+                switch (PwrCfgCmd.Command)
                 {
                     case PwrCmd.PWR_CMD_READ:
                         break;
 
                     case PwrCmd.PWR_CMD_WRITE:
                     {
-                        var offset = PwrCfgCmd.offset;
+                        var offset = PwrCfgCmd.Offset;
                         /* Read the value from system register */
                         var currentOffsetValue = _device.Read8(offset);
 
-                        currentOffsetValue = (byte)(currentOffsetValue & unchecked((byte)(~PwrCfgCmd.msk)));
-                        currentOffsetValue = (byte)(currentOffsetValue | ((PwrCfgCmd.value) & (PwrCfgCmd.msk)));
+                        currentOffsetValue = (byte)(currentOffsetValue & unchecked((byte)(~PwrCfgCmd.Mask)));
+                        currentOffsetValue = (byte)(currentOffsetValue | ((PwrCfgCmd.Value) & (PwrCfgCmd.Mask)));
 
                         /* Write the value back to sytem register */
                         _device.Write8(offset, currentOffsetValue);
@@ -1371,7 +1368,7 @@ public class HalModule
 
                     {
                         var bPollingBit = false;
-                        var offset = (PwrCfgCmd.offset);
+                        var offset = (PwrCfgCmd.Offset);
                         UInt32 maxPollingCnt = 5000;
                         bool flag = false;
 
@@ -1381,8 +1378,8 @@ public class HalModule
                         {
                             var value = _device.Read8(offset);
 
-                            value = (byte)(value & PwrCfgCmd.msk);
-                            if (value == ((PwrCfgCmd.value) & PwrCfgCmd.msk))
+                            value = (byte)(value & PwrCfgCmd.Mask);
+                            if (value == ((PwrCfgCmd.Value) & PwrCfgCmd.Mask))
                             {
                                 bPollingBit = true;
                             }
@@ -1420,13 +1417,13 @@ public class HalModule
 
                     case PwrCmd.PWR_CMD_DELAY:
                     {
-                        if (PwrCfgCmd.value == (byte)PWRSEQ_DELAY_UNIT.PWRSEQ_DELAY_US)
+                        if (PwrCfgCmd.Value == (byte)PWRSEQ_DELAY_UNIT.PWRSEQ_DELAY_US)
                         {
-                            Thread.Sleep((PwrCfgCmd.offset));
+                            Thread.Sleep((PwrCfgCmd.Offset));
                         }
                         else
                         {
-                            Thread.Sleep((PwrCfgCmd.offset) * 1000);
+                            Thread.Sleep((PwrCfgCmd.Offset) * 1000);
                         }
                     }
                         break;
