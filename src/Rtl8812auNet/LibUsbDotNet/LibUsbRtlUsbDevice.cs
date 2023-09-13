@@ -2,10 +2,9 @@
 using LibUsbDotNet;
 using LibUsbDotNet.LibUsb;
 using LibUsbDotNet.Main;
-
 using Rtl8812auNet.Abstractions;
 
-namespace Rtl8812auNet.LibUsb;
+namespace Rtl8812auNet.LibUsbDotNet;
 
 public class LibUsbRtlUsbDevice : IRtlUsbDevice
 {

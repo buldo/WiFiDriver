@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rtl8812auNet.Abstractions\Rtl8812auNet.Abstractions.csproj" />
+    <PackageReference Include="LibUsbDotNet" Version="3.0.102-alpha" />
   </ItemGroup>
 
 </Project>

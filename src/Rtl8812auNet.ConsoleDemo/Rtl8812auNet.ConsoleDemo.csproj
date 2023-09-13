@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rtl8812auNet.LibUsb\Rtl8812auNet.LibUsb.csproj" />
     <ProjectReference Include="..\Rtl8812auNet\Rtl8812auNet.csproj" />
   </ItemGroup>
 

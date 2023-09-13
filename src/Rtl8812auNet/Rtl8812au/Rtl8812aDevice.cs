@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-
 using Rtl8812auNet.Abstractions;
 using Rtl8812auNet.Rtl8812au.Modules;
 

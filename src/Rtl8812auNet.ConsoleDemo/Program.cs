@@ -1,6 +1,6 @@
 ﻿using LibUsbDotNet.LibUsb;
 using LibUsbDotNet;
-using Rtl8812auNet.LibUsb;
+using Rtl8812auNet.LibUsbDotNet;
 using Rtl8812auNet.Rtl8812au;
 
 namespace Rtl8812auNet.ConsoleDemo;
