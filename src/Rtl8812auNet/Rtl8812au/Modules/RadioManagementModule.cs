@@ -100,11 +100,8 @@ public class RadioManagementModule
 
     void hw_var_set_monitor()
     {
-        u32 rcr_bits;
-        u16 value_rxfltmap2;
-
         /* Receive all type */
-        rcr_bits = RCR_AAP | RCR_APM | RCR_AM | RCR_AB | RCR_APWRMGT | RCR_ADF | RCR_ACF | RCR_AMF | RCR_APP_PHYST_RXFF;
+        u32 rcr_bits = RCR_AAP | RCR_APM | RCR_AM | RCR_AB | RCR_APWRMGT | RCR_ADF | RCR_ACF | RCR_AMF | RCR_APP_PHYST_RXFF;
 
         /* Append FCS */
         rcr_bits |= RCR_APPFCS;
@@ -113,7 +110,7 @@ public class RadioManagementModule
         hw_var_rcr_config(rcr_bits);
 
         /* Receive all data frames */
-        value_rxfltmap2 = 0xFFFF;
+        u16 value_rxfltmap2 = 0xFFFF;
         _device.rtw_write16(REG_RXFLTMAP2, value_rxfltmap2);
     }
 
@@ -250,14 +247,12 @@ public class RadioManagementModule
         else
         {
             /* 5G band */
-            u16 count = 0, reg41A = 0;
-
 
             /* CCK_CHECK_en */
             _device.rtw_write8(REG_CCK_CHECK_8812, (byte)(_device.rtw_read8(REG_CCK_CHECK_8812) | BIT7));
 
-            count = 0;
-            reg41A = _device.rtw_read16(REG_TXPKT_EMPTY);
+            u16 count = 0;
+            u16 reg41A = _device.rtw_read16(REG_TXPKT_EMPTY);
             /* RTW_INFO("Reg41A value %d", reg41A); */
             reg41A &= 0x30;
             while ((reg41A != 0x30) && (count < 50))
@@ -854,7 +849,7 @@ public class RadioManagementModule
         phy_SetRegBW_8812(_currentChannelBw);
 
         /* 3 Set Reg483 */
-        var SubChnlNum = phy_GetSecondaryChnl_8812(pHalData);
+        var SubChnlNum = phy_GetSecondaryChnl_8812();
         _device.rtw_write8(REG_DATA_SC_8812, SubChnlNum);
 
         reg_837 = _device.rtw_read8(rBWIndication_Jaguar + 3);
@@ -1106,7 +1101,7 @@ public class RadioManagementModule
         }
     }
 
-    private byte phy_GetSecondaryChnl_8812(hal_com_data pHalData)
+    private byte phy_GetSecondaryChnl_8812()
     {
         VHT_DATA_SC SCSettingOf40 = 0, SCSettingOf20 = 0;
 
