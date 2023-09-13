@@ -4,14 +4,12 @@ public class WlanPowerConfig
 {
     public WlanPowerConfig(
         ushort offset,
-        FabMsk fabMask,
         InterfaceMask interfaceMask,
         PwrCmd command,
         uint mask,
         uint value)
     {
         Offset = offset;
-        FabMask = fabMask;
         InterfaceMask = interfaceMask;
         Command = command;
         Mask = mask;
@@ -19,7 +17,6 @@ public class WlanPowerConfig
     }
 
     public UInt16 Offset { get; }
-    public FabMsk FabMask { get; }
     public InterfaceMask InterfaceMask { get; }
     public PwrCmd Command { get; }
     public uint Mask { get; }

@@ -1292,7 +1292,6 @@ public class HalModule
         }
 
         if (!HalPwrSeqCmdParsing(
-                FabMsk.PWR_FAB_ALL_MSK,
                 InterfaceMask.PWR_INTF_USB_MSK,
                 PowerSequences.Rtl8812_NIC_ENABLE_FLOW))
         {
@@ -1325,7 +1324,6 @@ public class HalModule
     }
 
     private bool HalPwrSeqCmdParsing(
-        FabMsk FabVersion,
         InterfaceMask InterfaceType,
         WlanPowerConfig[] PwrSeqCmd)
     {
@@ -1342,8 +1340,7 @@ public class HalModule
             //if ((GET_PWR_CFG_FAB_MASK(PwrCfgCmd) & FabVersion) &&
             //    (GET_PWR_CFG_CUT_MASK(PwrCfgCmd) & CutVersion) &&
             //    (GET_PWR_CFG_INTF_MASK(PwrCfgCmd) & InterfaceType))
-            if (((PwrCfgCmd.FabMask & FabVersion) != 0) &&
-                ((PwrCfgCmd.InterfaceMask & InterfaceType) != 0))
+            if (((PwrCfgCmd.InterfaceMask & InterfaceType) != 0))
             {
                 switch (PwrCfgCmd.Command)
                 {
