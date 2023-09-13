@@ -112,13 +112,8 @@ public class Rtl8812aDevice
             chipVersionResult.rf_type,
             chipVersionResult.numTotalRfPath)
         {
-            UsbTxAggMode = true,
-            UsbTxAggDescNum = 0x01, // adjust value for OQT Overflow issue 0x3; only 4 bits
-            rxagg_mode = RX_AGG_MODE.RX_AGG_USB,
             rxagg_usb_size = rxagg_usb_size, /* unit: 512b */
             rxagg_usb_timeout = rxagg_usb_timeout,
-            rxagg_dma_size = 16, /* uint: 128b, 0x0A = 10 = MAX_RX_DMA_BUFFER_SIZE/2/pHalData.UsbBulkOutSize */
-            rxagg_dma_timeout = 0x6, /* 6, absolute time = 34ms/(2^6) */
             OutEpQueueSel = chipOut.OutEpQueueSel,
             OutEpNumber = chipOut.OutEpNumber,
             EepromOrEfuse = eepromOrEfuse,

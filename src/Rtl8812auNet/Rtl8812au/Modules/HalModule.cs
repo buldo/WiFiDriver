@@ -4,6 +4,13 @@ public class HalModule
 {
     private readonly RtlUsbAdapter _device;
     private readonly RadioManagementModule _radioManagementModule;
+    private readonly bool _usbTxAggMode = true;
+    private readonly u8 _usbTxAggDescNum = 0x01; // adjust value for OQT Overflow issue 0x3; only 4 bits
+    private readonly RX_AGG_MODE _rxAggMode = RX_AGG_MODE.RX_AGG_USB;
+    private readonly u8 _rxAggDmaTimeout = 0x6; /* 6, absolute time = 34ms/(2^6) */
+    private readonly u8 _rxAggDmaSize = 16; /* uint: 128b, 0x0A = 10 = MAX_RX_DMA_BUFFER_SIZE/2/pHalData.UsbBulkOutSize */
+
+    private bool _macPwrCtrlOn;
 
     public HalModule(
         RtlUsbAdapter device,
@@ -32,15 +39,11 @@ public class HalModule
 
     private bool rtl8812au_hal_init(hal_com_data pHalData)
     {
-        u8 value8 = 0, u1bRegCR;
-        u16 value16;
-        u8 txpktbuf_bndy;
-
         // Check if MAC has already power on. by tynli. 2011.05.27.
-        value8 = _device.rtw_read8(REG_SYS_CLKR + 1);
-        u1bRegCR = _device.rtw_read8(REG_CR);
-        RTW_INFO(" power-on :REG_SYS_CLKR 0x09=0x%02x. REG_CR 0x100=0x%02x.\n", value8, u1bRegCR);
-        if ((value8 & BIT3) != 0 && (u1bRegCR != 0 && u1bRegCR != 0xEA))
+        var value8 = _device.rtw_read8(REG_SYS_CLKR + 1);
+        var regCr = _device.rtw_read8(REG_CR);
+        RTW_INFO(" power-on :REG_SYS_CLKR 0x09=0x%02x. REG_CR 0x100=0x%02x.\n", value8, regCr);
+        if ((value8 & BIT3) != 0 && (regCr != 0 && regCr != 0xEA))
         {
             /* pHalData.bMACFuncEnable = TRUE; */
             RTW_INFO(" MAC has already power on.\n");
@@ -64,27 +67,17 @@ public class HalModule
         // Like "CONFIG_DEINIT_BEFORE_INIT" in 92du chip
         _device.rtl8812au_hw_reset();
 
-        var status = InitPowerOn(pHalData);
-        if (status == false)
+        var initPowerOnStatus = InitPowerOn();
+        if (initPowerOnStatus == false)
         {
-            goto exit;
+            return false;
         }
 
-        if (!registry_priv.wifi_spec)
+        // ATTENTION!! BOUNDARY size depends on wifi_spec aka WMM or not WMM
+        var initLltTable8812AStatus = InitLLTTable8812A(TX_PAGE_BOUNDARY_8812);
+        if (initLltTable8812AStatus == false)
         {
-            txpktbuf_bndy = TX_PAGE_BOUNDARY_8812;
-        }
-        else
-        {
-            throw new NotImplementedException();
-            /* for WMM */
-            //txpktbuf_bndy = WMM_NORMAL_TX_PAGE_BOUNDARY_8812;
-        }
-
-        status = InitLLTTable8812A(txpktbuf_bndy);
-        if (status == false)
-        {
-            goto exit;
+            return false;
         }
 
         _InitHardwareDropIncorrectBulkOut_8812A();
@@ -128,10 +121,10 @@ public class HalModule
         _device.rtw_write16(REG_PKT_VO_VI_LIFE_TIME, 0x0400); /* unit: 256us. 256ms */
         _device.rtw_write16(REG_PKT_BE_BK_LIFE_TIME, 0x0400); /* unit: 256us. 256ms */
 
-        status = PHY_BBConfig8812(pHalData);
-        if (status == false)
+        var bbConfig8812Status = PHY_BBConfig8812(pHalData);
+        if (bbConfig8812Status == false)
         {
-            goto exit;
+            return false;
         }
 
         PHY_RF6052_Config_8812(pHalData);
@@ -204,9 +197,8 @@ public class HalModule
         // TODO:
         ///* ack for xmit mgmt frames. */
         _device.rtw_write32(REG_FWHW_TXQ_CTRL, _device.rtw_read32(REG_FWHW_TXQ_CTRL) | BIT12);
-        exit:
 
-        return status;
+        return true;
     }
 
     private static u32 _NPQ(u32 x) => ((x) & 0xFF);
@@ -379,7 +371,6 @@ public class HalModule
         }
     }
 
-
     private void odm_read_and_config_mp_8812a_radioa(hal_com_data dm)
     {
         u32 i = 0;
@@ -464,7 +455,6 @@ public class HalModule
 
         odm_config_rf_reg_8812a(dm, addr, data, RfPath.RF_PATH_A, (u16)(addr | maskfor_phy_set));
     }
-
 
     private void odm_config_rf_radio_b_8812a(hal_com_data dm, u32 addr, u32 data)
     {
@@ -1048,27 +1038,22 @@ public class HalModule
 
     private void usb_AggSettingTxUpdate_8812A(hal_com_data pHalData)
     {
-        if (registry_priv.wifi_spec)
-        {
-            pHalData.UsbTxAggMode = false;
-        }
-
-        if (pHalData.UsbTxAggMode)
+        if (_usbTxAggMode)
         {
             u32 value32 = _device.rtw_read32(REG_TDECTRL);
             value32 = value32 & ~(BLK_DESC_NUM_MASK << BLK_DESC_NUM_SHIFT);
-            value32 |= ((pHalData.UsbTxAggDescNum & BLK_DESC_NUM_MASK) << BLK_DESC_NUM_SHIFT);
+            value32 |= ((_usbTxAggDescNum & BLK_DESC_NUM_MASK) << BLK_DESC_NUM_SHIFT);
 
             _device.rtw_write32(REG_DWBCN0_CTRL_8812, value32);
             //if (IS_HARDWARE_TYPE_8821U(adapterState))   /* page added for Jaguar */
-            //    rtw_write8(adapterState, REG_DWBCN1_CTRL_8812, pHalData.UsbTxAggDescNum << 1);
+            //    rtw_write8(adapterState, REG_DWBCN1_CTRL_8812, pHalData._usbTxAggDescNum << 1);
         }
     }
 
     private void usb_AggSettingRxUpdate_8812A(hal_com_data pHalData)
     {
         uint valueDMA = _device.rtw_read8(REG_TRXDMA_CTRL);
-        switch (pHalData.rxagg_mode)
+        switch (_rxAggMode)
         {
             case RX_AGG_MODE.RX_AGG_DMA:
                 valueDMA |= RXDMA_AGG_EN;
@@ -1077,7 +1062,7 @@ public class HalModule
                 u16 temp;
 
                 /* Adjust DMA page and thresh. */
-                temp = (u16)(pHalData.rxagg_dma_size | (pHalData.rxagg_dma_timeout << 8));
+                temp = (u16)(_rxAggDmaSize | (_rxAggDmaTimeout << 8));
                 _device.rtw_write16(REG_RXDMA_AGG_PG_TH, temp);
                 _device.rtw_write8(REG_RXDMA_AGG_PG_TH + 3,
                     (byte)BIT7); /* for dma agg , 0x280[31]GBIT_RXDMA_AGG_OLD_MOD, set 1 */
@@ -1283,10 +1268,9 @@ public class HalModule
         odm_read_and_config_mp_8812a_mac_reg(hal, dm);
     }
 
-    private bool InitPowerOn(hal_com_data pHalData)
+    private bool InitPowerOn()
     {
-        bool bMacPwrCtrlOn = pHalData.bMacPwrCtrlOn;
-        if (bMacPwrCtrlOn == true)
+        if (_macPwrCtrlOn)
         {
             return true;
         }
@@ -1312,12 +1296,7 @@ public class HalModule
             CrBit.CALTMR_EN);
         _device.rtw_write16(REG_CR, u2btmp);
 
-        /* Need remove below furture, suggest by Jackie. */
-        /* if 0xF0[24] =1 (LDO), need to set the 0x7C[6] to 1. */
-
-        bMacPwrCtrlOn = true;
-        pHalData.bMacPwrCtrlOn = bMacPwrCtrlOn;
-
+        _macPwrCtrlOn = true;
         return true;
     }
 
@@ -1436,46 +1415,44 @@ public class HalModule
 
     private bool InitLLTTable8812A(u8 txpktbuf_bndy)
     {
-        bool status = false;
-        u32 i;
-        u32 Last_Entry_Of_TxPktBuf = LAST_ENTRY_OF_TX_PKT_BUFFER_8812;
-
-        for (i = 0; i < (txpktbuf_bndy - 1); i++)
+        bool status;
+        for (uint i = 0; i < (txpktbuf_bndy - 1); i++)
         {
             status = _LLTWrite_8812A(i, i + 1);
             if (true != status)
             {
-                return status;
+                return false;
             }
         }
 
         /* end of list */
         status = _LLTWrite_8812A((uint)(txpktbuf_bndy - 1), 0xFF);
-        if (true != status)
+        if (status == false)
         {
-            return status;
+            return false;
         }
 
         /* Make the other pages as ring buffer */
         /* This ring buffer is used as beacon buffer if we config this MAC as two MAC transfer. */
         /* Otherwise used as local loopback buffer. */
-        for (i = txpktbuf_bndy; i < Last_Entry_Of_TxPktBuf; i++)
+        u32 Last_Entry_Of_TxPktBuf = LAST_ENTRY_OF_TX_PKT_BUFFER_8812;
+        for (uint i = txpktbuf_bndy; i < Last_Entry_Of_TxPktBuf; i++)
         {
             status = _LLTWrite_8812A(i, (i + 1));
-            if (true != status)
+            if (status == false)
             {
-                return status;
+                return false;
             }
         }
 
         /* Let last entry point to the start entry of ring buffer */
         status = _LLTWrite_8812A(Last_Entry_Of_TxPktBuf, txpktbuf_bndy);
-        if (true != status)
+        if (status == false)
         {
-            return status;
+            return false;
         }
 
-        return status;
+        return true;
     }
 
     private static UInt32 _LLT_INIT_DATA(UInt32 x)

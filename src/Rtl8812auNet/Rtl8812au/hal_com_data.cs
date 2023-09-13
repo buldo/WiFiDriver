@@ -70,21 +70,10 @@ public class hal_com_data
 
     public dm_struct odmpriv { get; } = new dm_struct();
 
-    public bool bMacPwrCtrlOn { get; set; }
-
     public TxSele OutEpQueueSel { get; init; }
     public u8 OutEpNumber { get; init; }
 
-    public RX_AGG_MODE rxagg_mode { get; init; }
-
-    public u8 rxagg_dma_size { get; init; }
-
-    public u8 rxagg_dma_timeout { get; init; }
-
     public u32[] IntrMask { get; } = new u32[3];
-
-    public bool UsbTxAggMode { get; set; }
-    public u8 UsbTxAggDescNum { get; init; }
 
     public u8 rxagg_usb_size { get; init; }
 
