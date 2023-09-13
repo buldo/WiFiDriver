@@ -1291,9 +1291,7 @@ public class HalModule
             return true;
         }
 
-        if (!HalPwrSeqCmdParsing(
-                InterfaceMask.PWR_INTF_USB_MSK,
-                PowerSequences.Rtl8812_NIC_ENABLE_FLOW))
+        if (!HalPwrSeqCmdParsing(PowerSequences.Rtl8812_NIC_ENABLE_FLOW))
         {
             RTW_ERR("InitPowerOn: run power on flow fail");
             return false;
@@ -1323,9 +1321,7 @@ public class HalModule
         return true;
     }
 
-    private bool HalPwrSeqCmdParsing(
-        InterfaceMask InterfaceType,
-        WlanPowerConfig[] PwrSeqCmd)
+    private bool HalPwrSeqCmdParsing(WlanPowerConfig[] PwrSeqCmd)
     {
         bool bHWICSupport = false;
         UInt32 AryIdx = 0;
@@ -1340,99 +1336,96 @@ public class HalModule
             //if ((GET_PWR_CFG_FAB_MASK(PwrCfgCmd) & FabVersion) &&
             //    (GET_PWR_CFG_CUT_MASK(PwrCfgCmd) & CutVersion) &&
             //    (GET_PWR_CFG_INTF_MASK(PwrCfgCmd) & InterfaceType))
-            if (((PwrCfgCmd.InterfaceMask & InterfaceType) != 0))
+            switch (PwrCfgCmd.Command)
             {
-                switch (PwrCfgCmd.Command)
+                case PwrCmd.PWR_CMD_READ:
+                    break;
+
+                case PwrCmd.PWR_CMD_WRITE:
                 {
-                    case PwrCmd.PWR_CMD_READ:
-                        break;
+                    var offset = PwrCfgCmd.Offset;
+                    /* Read the value from system register */
+                    var currentOffsetValue = _device.Read8(offset);
 
-                    case PwrCmd.PWR_CMD_WRITE:
+                    currentOffsetValue = (byte)(currentOffsetValue & unchecked((byte)(~PwrCfgCmd.Mask)));
+                    currentOffsetValue = (byte)(currentOffsetValue | ((PwrCfgCmd.Value) & (PwrCfgCmd.Mask)));
+
+                    /* Write the value back to sytem register */
+                    _device.Write8(offset, currentOffsetValue);
+                }
+                    break;
+
+                case PwrCmd.PWR_CMD_POLLING:
+
+                {
+                    var bPollingBit = false;
+                    var offset = (PwrCfgCmd.Offset);
+                    UInt32 maxPollingCnt = 5000;
+                    bool flag = false;
+
+                    maxPollingCnt = 5000;
+
+                    do
                     {
-                        var offset = PwrCfgCmd.Offset;
-                        /* Read the value from system register */
-                        var currentOffsetValue = _device.Read8(offset);
+                        var value = _device.Read8(offset);
 
-                        currentOffsetValue = (byte)(currentOffsetValue & unchecked((byte)(~PwrCfgCmd.Mask)));
-                        currentOffsetValue = (byte)(currentOffsetValue | ((PwrCfgCmd.Value) & (PwrCfgCmd.Mask)));
-
-                        /* Write the value back to sytem register */
-                        _device.Write8(offset, currentOffsetValue);
-                    }
-                        break;
-
-                    case PwrCmd.PWR_CMD_POLLING:
-
-                    {
-                        var bPollingBit = false;
-                        var offset = (PwrCfgCmd.Offset);
-                        UInt32 maxPollingCnt = 5000;
-                        bool flag = false;
-
-                        maxPollingCnt = 5000;
-
-                        do
+                        value = (byte)(value & PwrCfgCmd.Mask);
+                        if (value == ((PwrCfgCmd.Value) & PwrCfgCmd.Mask))
                         {
-                            var value = _device.Read8(offset);
-
-                            value = (byte)(value & PwrCfgCmd.Mask);
-                            if (value == ((PwrCfgCmd.Value) & PwrCfgCmd.Mask))
-                            {
-                                bPollingBit = true;
-                            }
-                            else
-                            {
-                                Thread.Sleep(10);
-                            }
-
-                            if (pollingCount++ > maxPollingCnt)
-                            {
-                                // TODO: RTW_ERR("HalPwrSeqCmdParsing: Fail to polling Offset[%#x]=%02x\n", offset, value);
-
-                                /* For PCIE + USB package poll power bit timeout issue only modify 8821AE and 8723BE */
-                                if (bHWICSupport && offset == 0x06 && flag == false)
-                                {
-
-                                    // TODO: RTW_ERR("[WARNING] PCIE polling(0x%X) timeout(%d), Toggle 0x04[3] and try again.\n", offset, maxPollingCnt);
-
-                                    _device.Write8(0x04, (byte)(_device.Read8(0x04) | BIT3));
-                                    _device.Write8(0x04, (byte)(_device.Read8(0x04) & NotBIT3));
-
-                                    /* Retry Polling Process one more time */
-                                    pollingCount = 0;
-                                    flag = true;
-                                }
-                                else
-                                {
-                                    return false;
-                                }
-                            }
-                        } while (!bPollingBit);
-                    }
-
-                        break;
-
-                    case PwrCmd.PWR_CMD_DELAY:
-                    {
-                        if (PwrCfgCmd.Value == (byte)PWRSEQ_DELAY_UNIT.PWRSEQ_DELAY_US)
-                        {
-                            Thread.Sleep((PwrCfgCmd.Offset));
+                            bPollingBit = true;
                         }
                         else
                         {
-                            Thread.Sleep((PwrCfgCmd.Offset) * 1000);
+                            Thread.Sleep(10);
                         }
-                    }
-                        break;
 
-                    case PwrCmd.PWR_CMD_END:
-                        /* When this command is parsed, end the process */
-                        return true;
-                        break;
+                        if (pollingCount++ > maxPollingCnt)
+                        {
+                            // TODO: RTW_ERR("HalPwrSeqCmdParsing: Fail to polling Offset[%#x]=%02x\n", offset, value);
 
-                    default:
-                        break;
+                            /* For PCIE + USB package poll power bit timeout issue only modify 8821AE and 8723BE */
+                            if (bHWICSupport && offset == 0x06 && flag == false)
+                            {
+
+                                // TODO: RTW_ERR("[WARNING] PCIE polling(0x%X) timeout(%d), Toggle 0x04[3] and try again.\n", offset, maxPollingCnt);
+
+                                _device.Write8(0x04, (byte)(_device.Read8(0x04) | BIT3));
+                                _device.Write8(0x04, (byte)(_device.Read8(0x04) & NotBIT3));
+
+                                /* Retry Polling Process one more time */
+                                pollingCount = 0;
+                                flag = true;
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
+                    } while (!bPollingBit);
                 }
+
+                    break;
+
+                case PwrCmd.PWR_CMD_DELAY:
+                {
+                    if (PwrCfgCmd.Value == (byte)PWRSEQ_DELAY_UNIT.PWRSEQ_DELAY_US)
+                    {
+                        Thread.Sleep((PwrCfgCmd.Offset));
+                    }
+                    else
+                    {
+                        Thread.Sleep((PwrCfgCmd.Offset) * 1000);
+                    }
+                }
+                    break;
+
+                case PwrCmd.PWR_CMD_END:
+                    /* When this command is parsed, end the process */
+                    return true;
+                    break;
+
+                default:
+                    break;
             }
 
             AryIdx++; /* Add Array Index */
