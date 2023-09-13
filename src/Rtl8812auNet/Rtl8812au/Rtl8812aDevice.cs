@@ -1,4 +1,5 @@
-﻿using Rtl8812auNet.Abstractions;
+﻿using Microsoft.Extensions.Logging;
+using Rtl8812auNet.Abstractions;
 using Rtl8812auNet.Rtl8812au.Modules;
 
 namespace Rtl8812auNet.Rtl8812au;
@@ -6,6 +7,7 @@ namespace Rtl8812auNet.Rtl8812au;
 public class Rtl8812aDevice
 {
     private readonly RtlUsbAdapter _device;
+    private readonly ILogger _logger;
     private readonly AdapterState _adapterState;
     private readonly StatefulFrameParser _frameParser = new();
     private readonly RadioManagementModule _radioManagement;
@@ -15,15 +17,16 @@ public class Rtl8812aDevice
     private readonly HalModule _halModule;
     private Func<ParsedRadioPacket, Task> _packetProcessor;
 
-    public Rtl8812aDevice(RtlUsbAdapter device)
+    public Rtl8812aDevice(RtlUsbAdapter device, ILogger<Rtl8812aDevice> logger)
     {
         _device = device;
-        var powerManagement = new RfPowerManagementModule(_device);
-        _radioManagement = new RadioManagementModule(HwPort.HW_PORT0, device, powerManagement);
+        _logger = logger;
+
+        var powerManagement = new RfPowerManagementModule(_device, _logger);
+        _radioManagement = new RadioManagementModule(HwPort.HW_PORT0, device, powerManagement, _logger);
         _halModule = new HalModule(_device, _radioManagement);
 
-        var dvobj = InitDvObj(_device);
-        _adapterState = InitAdapter(dvobj, _device);
+        _adapterState = InitAdapter(_device);
     }
 
     public void Init(
@@ -77,8 +80,10 @@ public class Rtl8812aDevice
         return new DvObj(numOutPipes, usbSpeed);
     }
 
-    private AdapterState InitAdapter(DvObj dvobj, RtlUsbAdapter pusb_intf)
+    private AdapterState InitAdapter(RtlUsbAdapter pusb_intf)
     {
+        var dvobj = InitDvObj(_device);
+
         u8 rxagg_usb_size;
         u8 rxagg_usb_timeout;
         if (dvobj.UsbSpeed == RTW_USB_SPEED_3)

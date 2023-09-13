@@ -1,4 +1,6 @@
-﻿using Rtl8812auNet.Rtl8812au;
+﻿using Microsoft.Extensions.Logging;
+
+using Rtl8812auNet.Rtl8812au;
 
 namespace Rtl8812auNet.ConsoleDemo;
 
@@ -8,7 +10,12 @@ internal class Program
     {
         Console.WriteLine("Hello, World!");
 
-        using var driver = new WiFiDriver();
+        var loggerFactory = LoggerFactory.Create(builder =>
+            builder
+                .SetMinimumLevel(LogLevel.Trace)
+                .AddConsole());
+
+        using var driver = new WiFiDriver(loggerFactory);
         var devices = driver.GetUsbDevices();
         var device = devices.First();
 

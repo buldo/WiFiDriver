@@ -1,12 +1,16 @@
-﻿namespace Rtl8812auNet.Rtl8812au.Modules;
+﻿using Microsoft.Extensions.Logging;
+
+namespace Rtl8812auNet.Rtl8812au.Modules;
 
 public class RfPowerManagementModule
 {
     private readonly RtlUsbAdapter _device;
+    private readonly ILogger _logger;
 
-    public RfPowerManagementModule(RtlUsbAdapter device)
+    public RfPowerManagementModule(RtlUsbAdapter device, ILogger logger)
     {
         _device = device;
+        _logger = logger;
     }
 
     static u8 phy_get_tx_power_index()
@@ -46,21 +50,24 @@ public class RfPowerManagementModule
 
     private void phy_set_tx_power_index_by_rate_section(
         hal_com_data pHalData,
-        RfPath RFPath,
-        u8 Channel,
-        RATE_SECTION RateSection)
+        RfPath rfPath,
+        u8 channel,
+        RATE_SECTION rateSection)
     {
-        Console.WriteLine($"SET_TX_POWER {RFPath}; {Channel}; {RateSection}");
+        _logger.LogDebug("SET_TX_POWER {RfPath}; {Channel}; {RateSection}", rfPath, channel, rateSection);
 
-        if (RateSection >= RATE_SECTION.RATE_SECTION_NUM)
+        if (rateSection >= RATE_SECTION.RATE_SECTION_NUM)
         {
             throw new Exception("RateSection >= RATE_SECTION.RATE_SECTION_NUM");
         }
 
-        if (RateSection == RATE_SECTION.CCK && pHalData.current_band_type != BandType.BAND_ON_2_4G)
+        // TODO: WTF is going on?
+        if (rateSection == RATE_SECTION.CCK && pHalData.current_band_type != BandType.BAND_ON_2_4G)
+        {
             return;
+        }
 
-        PHY_SetTxPowerIndexByRateArray(RFPath, rates_by_sections[(int)RateSection].rates);
+        PHY_SetTxPowerIndexByRateArray(rfPath, rates_by_sections[(int)rateSection].rates);
     }
 
     private void PHY_TxPowerTrainingByPath_8812(hal_com_data pHalData, RfPath rfPath)
@@ -105,14 +112,14 @@ public class RfPowerManagementModule
     }
 
     private void PHY_SetTxPowerIndexByRateArray(
-        RfPath RFPath,
-        MGN_RATE[] Rates)
+        RfPath rfPath,
+        MGN_RATE[] rates)
     {
-        for (int i = 0; i < Rates.Length; ++i)
+        for (int i = 0; i < rates.Length; ++i)
         {
             var powerIndex = phy_get_tx_power_index();
-            MGN_RATE rate = Rates[i];
-            PHY_SetTxPowerIndex_8812A(powerIndex, RFPath, rate);
+            MGN_RATE rate = rates[i];
+            PHY_SetTxPowerIndex_8812A(powerIndex, rfPath, rate);
         }
     }
 
@@ -126,12 +133,12 @@ public class RfPowerManagementModule
             }
             else
             {
-                RTW_INFO("Invalid rate!!");
+                _logger.LogError("Invalid rate! RfPath: {RfPath} Rate:{Rate}", rfPath, rate);
             }
         }
         else
         {
-            RTW_WARN("Invalid rfPath!!");
+            _logger.LogError("Invalid RfPath! RfPath: {RfPath} Rate:{Rate}", rfPath, rate);
         }
     }
 }

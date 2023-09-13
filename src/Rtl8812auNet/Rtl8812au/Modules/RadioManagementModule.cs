@@ -1,19 +1,23 @@
-﻿namespace Rtl8812auNet.Rtl8812au.Modules;
+﻿using Microsoft.Extensions.Logging;
+
+namespace Rtl8812auNet.Rtl8812au.Modules;
 
 public class RadioManagementModule
 {
     private readonly HwPort _hwPort;
     private readonly RtlUsbAdapter _device;
     private readonly RfPowerManagementModule _rfPowerManagement;
+    private readonly ILogger _logger;
 
-    public RadioManagementModule(
-        HwPort hwPort,
+    public RadioManagementModule(HwPort hwPort,
         RtlUsbAdapter device,
-        RfPowerManagementModule rfPowerManagement)
+        RfPowerManagementModule rfPowerManagement,
+        ILogger logger)
     {
         _hwPort = hwPort;
         _device = device;
         _rfPowerManagement = rfPowerManagement;
+        _logger = logger;
     }
 
     public void init_hw_mlme_ext(hal_com_data pHalData, SelectedChannel pmlmeext)
@@ -103,7 +107,8 @@ public class RadioManagementModule
             val16 &= NotBIT8;
             _device.rtw_write16(REG_RXFLTMAP1, (u16)val16);
         }
-        RTW_INFO($"[HW_VAR_ENABLE_RX_BAR] 0x{REG_RXFLTMAP1:X4}=0x{_device.rtw_read16(REG_RXFLTMAP1):X4}");
+
+        _logger.LogInformation($"[HW_VAR_ENABLE_RX_BAR] 0x{REG_RXFLTMAP1:X4}=0x{_device.rtw_read16(REG_RXFLTMAP1):X4}");
     }
 
 
@@ -234,7 +239,9 @@ public class RadioManagementModule
             }
 
             if (count != 0)
-                RTW_INFO("PHY_SwitchWirelessBand8812(): Switch to 5G Band. Count = %d reg41A=0x%x\n", count, reg41A);
+            {
+                _logger.LogInformation($"PHY_SwitchWirelessBand8812(): Switch to 5G Band. Count = {count:X4} reg41A={reg41A:X4}");
+            }
 
             /* 2012/02/01, Sinda add registry to switch workaround without long-run verification for scan issue. */
             _device.phy_set_bb_reg(rOFDMCCKEN_Jaguar, bOFDMEN_Jaguar | bCCKEN_Jaguar, 0x03);
@@ -299,7 +306,9 @@ public class RadioManagementModule
             }
         }
         else if (chnl_bw == ChannelWidth.CHANNEL_WIDTH_20)
+        {
             center_ch = channel;
+        }
         else
         {
             throw new Exception();
@@ -413,9 +422,13 @@ public class RadioManagementModule
             }
 
             if (RFPath == RfPath.RF_PATH_A)
+            {
                 onePathSwing = (byte)((swing & 0x3) >> 0); /* 0xC6/C7[1:0] */
+            }
             else if (RFPath == RfPath.RF_PATH_B)
+            {
                 onePathSwing = (byte)((swing & 0xC) >> 2); /* 0xC6/C7[3:2] */
+            }
 
             if (onePathSwing == 0x0)
             {
@@ -464,7 +477,7 @@ public class RadioManagementModule
         /* check is swchnl or setbw */
         if (!bSwitchChannel && !bSetBandWidth)
         {
-            RTW_INFO("PHY_HandleSwChnlAndSetBW8812:  not switch channel and not set bandwidth\n");
+            _logger.LogError("PHY_HandleSwChnlAndSetBW8812:  not switch channel and not set bandwidth");
             return;
         }
 
@@ -495,7 +508,7 @@ public class RadioManagementModule
 
         if (!pHalData.bSetChnlBW && !pHalData.bSwChnl && pHalData.bNeedIQK != true)
         {
-            /* RTW_INFO("<= PHY_HandleSwChnlAndSetBW8812: bSwChnl %d, bSetChnlBW %d\n",pHalData.bSwChnl,pHalData.bSetChnlBW); */
+            _logger.LogError($"<= PHY_HandleSwChnlAndSetBW8812: bSwChnl {pHalData.bSwChnl}, bSetChnlBW {pHalData.bSetChnlBW}");
             return;
         }
 
@@ -547,7 +560,7 @@ public class RadioManagementModule
 
         if (phy_SwBand8812(pHalData, channelToSW) == false)
         {
-            RTW_INFO("error Chnl %d !", channelToSW);
+            _logger.LogError("error Chnl {ChannelToSW} !", channelToSW);
         }
 
         /* RTW_INFO("[BW:CHNL], phy_SwChnl8812(), switch to channel %d !!\n", channelToSW); */
@@ -636,7 +649,9 @@ public class RadioManagementModule
             BandToSW = BandType.BAND_ON_5G;
         }
         else
+        {
             BandToSW = BandType.BAND_ON_2_4G;
+        }
 
         if (BandToSW != Band)
         {
@@ -1058,7 +1073,7 @@ public class RadioManagementModule
                 break;
 
             default:
-                RTW_INFO($"phy_PostSetBWMode8812():	unknown Bandwidth: {CurrentBW}");
+                _logger.LogError($"phy_PostSetBWMode8812():	unknown Bandwidth: {CurrentBW}");
                 break;
         }
     }
@@ -1080,7 +1095,7 @@ public class RadioManagementModule
             }
             else
             {
-                RTW_INFO("SCMapping: DONOT CARE Mode Setting");
+                _logger.LogError("SCMapping: DONOT CARE Mode Setting");
             }
 
             if ((pHalData.nCur40MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_LOWER) &&
@@ -1105,7 +1120,7 @@ public class RadioManagementModule
             }
             else
             {
-                RTW_INFO("SCMapping: DONOT CARE Mode Setting");
+                _logger.LogError("SCMapping: DONOT CARE Mode Setting");
             }
         }
         else if (pHalData.current_channel_bw == ChannelWidth.CHANNEL_WIDTH_40)
@@ -1122,7 +1137,7 @@ public class RadioManagementModule
             }
             else
             {
-                RTW_INFO("SCMapping: DONOT CARE Mode Setting");
+                _logger.LogError("SCMapping: DONOT CARE Mode Setting");
             }
         }
 
