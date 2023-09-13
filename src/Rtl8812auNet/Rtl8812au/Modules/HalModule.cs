@@ -485,8 +485,6 @@ public class HalModule
 
     private bool PHY_BBConfig8812(hal_com_data pHalData)
     {
-        phy_InitBBRFRegisterDefinition(pHalData);
-
         /* tangw check start 20120412 */
         /* . APLL_EN,,APLL_320_GATEB,APLL_320BIAS,  auto config by hw fsm after pfsm_go (0x4 bit 8) set */
         uint TmpU1B = _device.rtw_read8(REG_SYS_FUNC_EN);
@@ -519,24 +517,6 @@ public class HalModule
 
         /* write 0x2C[30:25] = 0x2C[24:19] = CrystalCap */
         _device.phy_set_bb_reg(REG_MAC_PHY_CTRL, 0x7FF80000u, (byte)(crystal_cap | (crystal_cap << 6)));
-    }
-
-
-    private void phy_InitBBRFRegisterDefinition(hal_com_data pHalData)
-    {
-        /* RF Interface Sowrtware Control */
-
-        pHalData.PHYRegDef[RfPath.RF_PATH_A].Rf3WireOffset = rA_LSSIWrite_Jaguar; /* LSSI Parameter */
-        pHalData.PHYRegDef[RfPath.RF_PATH_B].Rf3WireOffset = rB_LSSIWrite_Jaguar;
-
-        pHalData.PHYRegDef[RfPath.RF_PATH_A].RfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
-        pHalData.PHYRegDef[RfPath.RF_PATH_B].RfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
-
-        /* Tranceiver Readback LSSI/HSPI mode */
-        pHalData.PHYRegDef[RfPath.RF_PATH_A].RfLSSIReadBack = rA_SIRead_Jaguar;
-        pHalData.PHYRegDef[RfPath.RF_PATH_B].RfLSSIReadBack = rB_SIRead_Jaguar;
-        pHalData.PHYRegDef[RfPath.RF_PATH_A].RfLSSIReadBackPi = rA_PIRead_Jaguar;
-        pHalData.PHYRegDef[RfPath.RF_PATH_B].RfLSSIReadBackPi = rB_PIRead_Jaguar;
     }
 
     private bool phy_BB8812_Config_ParaFile(hal_com_data hal, dm_struct dm)
@@ -998,7 +978,6 @@ public class HalModule
         _device.rtw_write32(REG_ARFR3_8812 + 4, 0xffcff000);
     }
 
-
     private void _InitBeaconMaxError_8812A()
     {
         _device.rtw_write8(REG_BCN_MAX_ERR, 0xFF);
@@ -1030,13 +1009,13 @@ public class HalModule
     private void init_UsbAggregationSetting_8812A(hal_com_data halData)
     {
         ///* Tx aggregation setting */
-        usb_AggSettingTxUpdate_8812A(halData);
+        usb_AggSettingTxUpdate_8812A();
 
         ///* Rx aggregation setting */
         usb_AggSettingRxUpdate_8812A(halData);
     }
 
-    private void usb_AggSettingTxUpdate_8812A(hal_com_data pHalData)
+    private void usb_AggSettingTxUpdate_8812A()
     {
         if (_usbTxAggMode)
         {

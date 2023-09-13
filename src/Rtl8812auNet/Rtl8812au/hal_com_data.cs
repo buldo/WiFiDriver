@@ -62,12 +62,6 @@ public class hal_com_data
     public u16 TypeAPA { get; set; }
     public u16 rfe_type { get; set; }
 
-    public Dictionary<RfPath, BbRegisterDefinition> PHYRegDef { get; } = new()
-    {
-        { RfPath.RF_PATH_A, new BbRegisterDefinition() },
-        { RfPath.RF_PATH_B, new BbRegisterDefinition() }
-    }; /* Radio A/B/C/D */
-
     public dm_struct odmpriv { get; } = new dm_struct();
 
     public TxSele OutEpQueueSel { get; init; }

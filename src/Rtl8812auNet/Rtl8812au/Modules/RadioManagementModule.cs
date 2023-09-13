@@ -4,10 +4,33 @@ namespace Rtl8812auNet.Rtl8812au.Modules;
 
 public class RadioManagementModule
 {
+    private static readonly Dictionary<RfPath, BbRegisterDefinition> PHYRegDef = new()
+    {
+        { RfPath.RF_PATH_A, new BbRegisterDefinition() },
+        { RfPath.RF_PATH_B, new BbRegisterDefinition() }
+    }; /* Radio A/B/C/D */
+
     private readonly HwPort _hwPort;
     private readonly RtlUsbAdapter _device;
     private readonly RfPowerManagementModule _rfPowerManagement;
     private readonly ILogger _logger;
+
+    static RadioManagementModule()
+    {
+        // InitBbRfRegisterDefinition
+        /* RF Interface Sowrtware Control */
+        PHYRegDef[RfPath.RF_PATH_A].Rf3WireOffset = rA_LSSIWrite_Jaguar; /* LSSI Parameter */
+        PHYRegDef[RfPath.RF_PATH_B].Rf3WireOffset = rB_LSSIWrite_Jaguar;
+
+        PHYRegDef[RfPath.RF_PATH_A].RfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
+        PHYRegDef[RfPath.RF_PATH_B].RfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
+
+        /* Tranceiver Readback LSSI/HSPI mode */
+        PHYRegDef[RfPath.RF_PATH_A].RfLSSIReadBack = rA_SIRead_Jaguar;
+        PHYRegDef[RfPath.RF_PATH_B].RfLSSIReadBack = rB_SIRead_Jaguar;
+        PHYRegDef[RfPath.RF_PATH_A].RfLSSIReadBackPi = rA_PIRead_Jaguar;
+        PHYRegDef[RfPath.RF_PATH_B].RfLSSIReadBackPi = rB_PIRead_Jaguar;
+    }
 
     public RadioManagementModule(HwPort hwPort,
         RtlUsbAdapter device,
@@ -963,13 +986,13 @@ public class RadioManagementModule
             data = ((Original_Value) & (~BitMask)) | (data << (int)BitShift);
         }
 
-        phy_RFSerialWrite(pHalData, eRFPath, RegAddr, data);
+        phy_RFSerialWrite(eRFPath, RegAddr, data);
     }
 
     private u32 phy_RFSerialRead(hal_com_data pHalData, RfPath eRFPath, u32 Offset)
     {
         u32 retValue;
-        BbRegisterDefinition pPhyReg = pHalData.PHYRegDef[eRFPath];
+        BbRegisterDefinition pPhyReg = PHYRegDef[eRFPath];
         BOOLEAN bIsPIMode = false;
 
         /* <20120809, Kordan> CCA OFF(when entering), asked by James to avoid reading the wrong value. */
@@ -1035,9 +1058,9 @@ public class RadioManagementModule
         return ReturnValue;
     }
 
-    private void phy_RFSerialWrite(hal_com_data pHalData, RfPath eRFPath, u32 Offset, u32 Data)
+    private void phy_RFSerialWrite(RfPath eRFPath, u32 Offset, u32 Data)
     {
-        BbRegisterDefinition pPhyReg = pHalData.PHYRegDef[eRFPath];
+        BbRegisterDefinition pPhyReg = PHYRegDef[eRFPath];
 
         Offset &= 0xff;
         /* Shadow Update */
