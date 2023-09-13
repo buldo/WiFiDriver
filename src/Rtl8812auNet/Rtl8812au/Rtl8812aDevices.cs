@@ -1,6 +1,6 @@
 ﻿namespace Rtl8812auNet.Rtl8812au;
 
-public static class Rtl8812aDevices
+internal static class Rtl8812aDevices
 {
     private const UInt16 USB_VENDER_ID_REALTEK = 0x0BDA;
 

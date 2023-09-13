@@ -1,7 +1,4 @@
-﻿using LibUsbDotNet.LibUsb;
-using LibUsbDotNet;
-using Rtl8812auNet.LibUsbDotNet;
-using Rtl8812auNet.Rtl8812au;
+﻿using Rtl8812auNet.Rtl8812au;
 
 namespace Rtl8812auNet.ConsoleDemo;
 
@@ -11,24 +8,22 @@ internal class Program
     {
         Console.WriteLine("Hello, World!");
 
-        using var context = new UsbContext();
-        context.StartHandlingEvents();
-        context.SetDebugLevel(LogLevel.Info);
-        var devices = context.FindAll(SearchPredicate);
-
+        using var driver = new WiFiDriver();
+        var devices = driver.GetUsbDevices();
         var device = devices.First();
-        var usb = new LibUsbRtlUsbDevice((UsbDevice)device);
-        var rtlAdapter = new RtlUsbAdapter(usb);
-        var rtlDevice = new Rtl8812aDevice(rtlAdapter);
 
-        rtlDevice.Init();
+        var rtlDevice = driver.CreateRtlDevice(device);
+
+        rtlDevice.Init(PacketProcessor);
 
         Console.ReadLine();
         Console.WriteLine("End");
     }
 
-    private static bool SearchPredicate(IUsbDevice device)
+    private static Task PacketProcessor(ParsedRadioPacket packet)
     {
-        return Rtl8812aDevices.Devices.Contains(new UsbDeviceVidPid(device.VendorId, device.ProductId));
+        Console.WriteLine($"Packet received. Data len: {packet.Data.Length}");
+
+        return Task.CompletedTask;
     }
 }

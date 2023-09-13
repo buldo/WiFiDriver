@@ -17,6 +17,7 @@ public class Rtl8812aDevice
     private Task _readTask;
     private Task _parseTask;
     private readonly HalModule _halModule;
+    private Func<ParsedRadioPacket, Task> _packetProcessor;
 
     public Rtl8812aDevice(RtlUsbAdapter device)
     {
@@ -29,8 +30,9 @@ public class Rtl8812aDevice
         _adapterState = InitAdapter(dvobj, _device);
     }
 
-    public void Init()
+    public void Init(Func<ParsedRadioPacket, Task> packetProcessor)
     {
+        _packetProcessor = packetProcessor;
 
         StartWithMonitorMode(new()
         {
@@ -49,7 +51,7 @@ public class Rtl8812aDevice
         });
 
         _readTask = Task.Run(() => _device.UsbDevice.InfinityRead());
-        _parseTask = Task.Run(() => ParseUsbData());
+        _parseTask = Task.Run(ParseUsbData);
     }
 
     private DvObj InitDvObj(RtlUsbAdapter usbInterface)
@@ -84,7 +86,6 @@ public class Rtl8812aDevice
 
         return new DvObj(numOutPipes, usbSpeed);
     }
-
 
     private AdapterState InitAdapter(DvObj dvobj, RtlUsbAdapter pusb_intf)
     {
@@ -172,7 +173,6 @@ public class Rtl8812aDevice
         return (OutEpQueueSel, OutEpNumber);
     }
 
-
     private (HAL_VERSION version_id, RfType rf_type, byte numTotalRfPath) read_chip_version_8812a()
     {
         u32 value32 = _device.rtw_read32(REG_SYS_CFG);
@@ -233,9 +233,14 @@ public class Rtl8812aDevice
             var packet = _frameParser.ParsedRadioPacket(transfer);
             foreach (var radioPacket in packet)
             {
-                //await _client.SendAsync(radioPacket.Data, _address);
-                //Console.WriteLine(Convert.ToHexString(radioPacket.Data));
-                //Console.WriteLine();
+                try
+                {
+                    await _packetProcessor(radioPacket);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
         }
     }
