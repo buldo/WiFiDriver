@@ -16,7 +16,7 @@ public class RadioManagementModule
         _rfPowerManagement = rfPowerManagement;
     }
 
-    public void init_hw_mlme_ext(hal_com_data pHalData, InitChannel pmlmeext)
+    public void init_hw_mlme_ext(hal_com_data pHalData, SelectedChannel pmlmeext)
     {
         /* Modify to make sure first time change channel(band) would be done properly */
         pHalData.current_channel = 0;
@@ -27,17 +27,12 @@ public class RadioManagementModule
         Set_HW_VAR_ENABLE_RX_BAR(true);
         set_channel_bwmode(
             pHalData,
-            pmlmeext.cur_channel,
-            pmlmeext.cur_ch_offset,
-            pmlmeext.cur_bwmode);
+            pmlmeext.Channel,
+            pmlmeext.ChannelOffset,
+            pmlmeext.ChannelWidth);
     }
 
-    public void setopmode_hdl()
-    {
-        SetMonitorMode();
-    }
-
-    private void SetMonitorMode()
+    public void SetMonitorMode()
     {
         rtw_hal_set_msr(_HW_STATE_NOLINK_);
         hw_var_set_monitor();

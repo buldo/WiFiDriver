@@ -1,6 +1,4 @@
-﻿using System.Net;
-using System.Net.Sockets;
-using Rtl8812auNet.Abstractions;
+﻿using Rtl8812auNet.Abstractions;
 using Rtl8812auNet.Rtl8812au.Modules;
 
 namespace Rtl8812auNet.Rtl8812au;
@@ -10,8 +8,6 @@ public class Rtl8812aDevice
     private readonly RtlUsbAdapter _device;
     private readonly AdapterState _adapterState;
     private readonly StatefulFrameParser _frameParser = new();
-    private readonly UdpClient _client = new UdpClient();
-    private readonly IPEndPoint _address = new IPEndPoint(IPAddress.Parse("172.23.97.127"), 4321);
     private readonly RadioManagementModule _radioManagement;
 
     private Task _readTask;
@@ -30,28 +26,22 @@ public class Rtl8812aDevice
         _adapterState = InitAdapter(dvobj, _device);
     }
 
-    public void Init(Func<ParsedRadioPacket, Task> packetProcessor)
+    public void Init(
+        Func<ParsedRadioPacket, Task> packetProcessor,
+        SelectedChannel channel)
     {
         _packetProcessor = packetProcessor;
 
-        StartWithMonitorMode(new()
-        {
-            cur_bwmode = ChannelWidth.CHANNEL_WIDTH_20,
-            cur_ch_offset = 0,
-            cur_channel = 140,
-            //cur_channel = 36
-        });
-
-        SetMonitorChannel(_adapterState.HalData, new()
-        {
-            cur_bwmode = ChannelWidth.CHANNEL_WIDTH_20,
-            cur_ch_offset = 0,
-            cur_channel = 140,
-            //cur_channel = 36
-        });
+        StartWithMonitorMode(channel);
+        SetMonitorChannel(channel);
 
         _readTask = Task.Run(() => _device.UsbDevice.InfinityRead());
         _parseTask = Task.Run(ParseUsbData);
+    }
+
+    public void SetMonitorChannel(SelectedChannel channel)
+    {
+        _radioManagement.set_channel_bwmode(_adapterState.HalData, channel.Channel, channel.ChannelOffset, channel.ChannelWidth);
     }
 
     private DvObj InitDvObj(RtlUsbAdapter usbInterface)
@@ -200,24 +190,19 @@ public class Rtl8812aDevice
         return(versionId, rfType, numTotalRfPath);
     }
 
-    private void StartWithMonitorMode(InitChannel initChannel)
+    private void StartWithMonitorMode(SelectedChannel selectedChannel)
     {
-        if (NetDevOpen(initChannel) == false)
+        if (NetDevOpen(selectedChannel) == false)
         {
             throw new Exception("StartWithMonitorMode failed NetDevOpen");
         }
 
-        _radioManagement.setopmode_hdl();
+        _radioManagement.SetMonitorMode();
     }
 
-    private void SetMonitorChannel(hal_com_data pHalData, InitChannel chandef)
+    private bool NetDevOpen(SelectedChannel selectedChannel)
     {
-        _radioManagement.set_channel_bwmode(pHalData, chandef.cur_channel, chandef.cur_ch_offset, chandef.cur_bwmode);
-    }
-
-    private bool NetDevOpen(InitChannel initChannel)
-    {
-        var status = _halModule.rtw_hal_init(_adapterState.HalData, initChannel);
+        var status = _halModule.rtw_hal_init(_adapterState.HalData, selectedChannel);
         if (status == false)
         {
             return false;

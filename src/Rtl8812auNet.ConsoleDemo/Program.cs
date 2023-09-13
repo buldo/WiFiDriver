@@ -14,7 +14,15 @@ internal class Program
 
         var rtlDevice = driver.CreateRtlDevice(device);
 
-        rtlDevice.Init(PacketProcessor);
+        rtlDevice.Init(
+            PacketProcessor,
+            new()
+            {
+                ChannelWidth = ChannelWidth.CHANNEL_WIDTH_20,
+                ChannelOffset = 0,
+                Channel = 140,
+                //Channel = 36
+            });
 
         Console.ReadLine();
         Console.WriteLine("End");

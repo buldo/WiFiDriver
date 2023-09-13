@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Rtl8812auNet.Rtl8812au.Modules;
+﻿namespace Rtl8812auNet.Rtl8812au.Modules;
 
 public class HalModule
 {
@@ -15,14 +13,14 @@ public class HalModule
         _radioManagementModule = radioManagementModule;
     }
 
-    public bool rtw_hal_init(hal_com_data pHalData, InitChannel initChannel)
+    public bool rtw_hal_init(hal_com_data pHalData, SelectedChannel selectedChannel)
     {
         var status = rtl8812au_hal_init(pHalData);
 
         if (status)
         {
-            _radioManagementModule.init_hw_mlme_ext(pHalData, initChannel);
-            _radioManagementModule.setopmode_hdl();
+            _radioManagementModule.init_hw_mlme_ext(pHalData, selectedChannel);
+            _radioManagementModule.SetMonitorMode();
         }
         else
         {
