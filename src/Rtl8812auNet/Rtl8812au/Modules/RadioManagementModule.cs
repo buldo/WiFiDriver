@@ -4,32 +4,42 @@ namespace Rtl8812auNet.Rtl8812au.Modules;
 
 public class RadioManagementModule
 {
-    private static readonly Dictionary<RfPath, BbRegisterDefinition> PHYRegDef = new()
+    private static readonly Dictionary<RfPath, BbRegisterDefinition> PhyRegDef = new()
     {
         { RfPath.RF_PATH_A, new BbRegisterDefinition() },
         { RfPath.RF_PATH_B, new BbRegisterDefinition() }
-    }; /* Radio A/B/C/D */
+    };
 
     private readonly HwPort _hwPort;
     private readonly RtlUsbAdapter _device;
     private readonly RfPowerManagementModule _rfPowerManagement;
     private readonly ILogger _logger;
 
+    private bool _needIQK;
+    private bool _swChannel;
+    private bool _setChannelBw;
+    private bool _channelBwInitialized;
+    private byte _cur40MhzPrimeSc;
+    private byte _cur80MhzPrimeSc;
+    private ChannelWidth _currentChannelBw;
+    private byte _currentCenterFrequencyIndex;
+    private u8 _currentChannel;
+
     static RadioManagementModule()
     {
         // InitBbRfRegisterDefinition
         /* RF Interface Sowrtware Control */
-        PHYRegDef[RfPath.RF_PATH_A].Rf3WireOffset = rA_LSSIWrite_Jaguar; /* LSSI Parameter */
-        PHYRegDef[RfPath.RF_PATH_B].Rf3WireOffset = rB_LSSIWrite_Jaguar;
+        PhyRegDef[RfPath.RF_PATH_A].Rf3WireOffset = rA_LSSIWrite_Jaguar; /* LSSI Parameter */
+        PhyRegDef[RfPath.RF_PATH_B].Rf3WireOffset = rB_LSSIWrite_Jaguar;
 
-        PHYRegDef[RfPath.RF_PATH_A].RfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
-        PHYRegDef[RfPath.RF_PATH_B].RfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
+        PhyRegDef[RfPath.RF_PATH_A].RfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
+        PhyRegDef[RfPath.RF_PATH_B].RfHSSIPara2 = rHSSIRead_Jaguar; /* wire control parameter2 */
 
         /* Tranceiver Readback LSSI/HSPI mode */
-        PHYRegDef[RfPath.RF_PATH_A].RfLSSIReadBack = rA_SIRead_Jaguar;
-        PHYRegDef[RfPath.RF_PATH_B].RfLSSIReadBack = rB_SIRead_Jaguar;
-        PHYRegDef[RfPath.RF_PATH_A].RfLSSIReadBackPi = rA_PIRead_Jaguar;
-        PHYRegDef[RfPath.RF_PATH_B].RfLSSIReadBackPi = rB_PIRead_Jaguar;
+        PhyRegDef[RfPath.RF_PATH_A].RfLSSIReadBack = rA_SIRead_Jaguar;
+        PhyRegDef[RfPath.RF_PATH_B].RfLSSIReadBack = rB_SIRead_Jaguar;
+        PhyRegDef[RfPath.RF_PATH_A].RfLSSIReadBackPi = rA_PIRead_Jaguar;
+        PhyRegDef[RfPath.RF_PATH_B].RfLSSIReadBackPi = rB_PIRead_Jaguar;
     }
 
     public RadioManagementModule(HwPort hwPort,
@@ -46,8 +56,8 @@ public class RadioManagementModule
     public void init_hw_mlme_ext(hal_com_data pHalData, SelectedChannel pmlmeext)
     {
         /* Modify to make sure first time change channel(band) would be done properly */
-        pHalData.current_channel = 0;
-        pHalData.current_channel_bw = ChannelWidth.CHANNEL_WIDTH_MAX;
+        _currentChannel = 0;
+        _currentChannelBw = ChannelWidth.CHANNEL_WIDTH_MAX;
         pHalData.current_band_type = BandType.BAND_MAX;
 
         /* set_opmode_cmd(padapter, infra_client_with_mlme); */ /* removed */
@@ -187,7 +197,7 @@ public class RadioManagementModule
 
     public void PHY_SwitchWirelessBand8812(hal_com_data pHalData, BandType Band)
     {
-        ChannelWidth current_bw = pHalData.current_channel_bw;
+        ChannelWidth current_bw = _currentChannelBw;
         bool eLNA_2g = pHalData.ExternalLNA_2G;
 
         /* RTW_INFO("==>PHY_SwitchWirelessBand8812() %s\n", ((Band==0)?"2.4G":"5G")); */
@@ -507,51 +517,46 @@ public class RadioManagementModule
         /* skip change for channel or bandwidth is the same */
         if (bSwitchChannel)
         {
-            if (pHalData.current_channel != ChannelNum)
+            if (_currentChannel != ChannelNum)
             {
-                pHalData.bSwChnl = true;
+                _swChannel = true;
             }
         }
 
         if (bSetBandWidth)
         {
-            if (pHalData.bChnlBWInitialized == false)
+            if (_channelBwInitialized == false)
             {
-                pHalData.bChnlBWInitialized = true;
-                pHalData.bSetChnlBW = true;
+                _channelBwInitialized = true;
+                _setChannelBw = true;
             }
-            else if ((pHalData.current_channel_bw != ChnlWidth) ||
-                     (pHalData.nCur40MhzPrimeSC != ChnlOffsetOf40MHz) ||
-                     (pHalData.nCur80MhzPrimeSC != ChnlOffsetOf80MHz) ||
-                     (pHalData.CurrentCenterFrequencyIndex1 != CenterFrequencyIndex1))
+            else if ((_currentChannelBw != ChnlWidth) ||
+                     (_cur40MhzPrimeSc != ChnlOffsetOf40MHz) ||
+                     (_cur80MhzPrimeSc != ChnlOffsetOf80MHz) ||
+                     (_currentCenterFrequencyIndex != CenterFrequencyIndex1))
             {
-                pHalData.bSetChnlBW = true;
+                _setChannelBw = true;
             }
         }
 
-        if (!pHalData.bSetChnlBW && !pHalData.bSwChnl && pHalData.bNeedIQK != true)
+        if (!_setChannelBw && !_swChannel && _needIQK != true)
         {
-            _logger.LogError($"<= PHY_HandleSwChnlAndSetBW8812: bSwChnl {pHalData.bSwChnl}, bSetChnlBW {pHalData.bSetChnlBW}");
+            _logger.LogError($"<= PHY_HandleSwChnlAndSetBW8812: SwChnl {_swChannel}, _setChannelBw {_setChannelBw}");
             return;
         }
 
-
-        if (pHalData.bSwChnl)
+        if (_swChannel)
         {
-            pHalData.current_channel = ChannelNum;
-            pHalData.CurrentCenterFrequencyIndex1 = ChannelNum;
+            _currentChannel = ChannelNum;
+            _currentCenterFrequencyIndex = ChannelNum;
         }
 
-
-        if (pHalData.bSetChnlBW)
+        if (_setChannelBw)
         {
-            pHalData.current_channel_bw = ChnlWidth;
-
-            pHalData.nCur40MhzPrimeSC = ChnlOffsetOf40MHz;
-            pHalData.nCur80MhzPrimeSC = ChnlOffsetOf80MHz;
-
-
-            pHalData.CurrentCenterFrequencyIndex1 = CenterFrequencyIndex1;
+            _currentChannelBw = ChnlWidth;
+            _cur40MhzPrimeSc = ChnlOffsetOf40MHz;
+            _cur80MhzPrimeSc = ChnlOffsetOf80MHz;
+            _currentCenterFrequencyIndex = CenterFrequencyIndex1;
         }
 
         /* Switch workitem or set timer to do switch channel or setbandwidth operation */
@@ -560,26 +565,26 @@ public class RadioManagementModule
 
     private void phy_SwChnlAndSetBwMode8812(hal_com_data pHalData)
     {
-        if (pHalData.bSwChnl)
+        if (_swChannel)
         {
             phy_SwChnl8812(pHalData);
-            pHalData.bSwChnl = false;
+            _swChannel = false;
         }
 
-        if (pHalData.bSetChnlBW)
+        if (_setChannelBw)
         {
             phy_PostSetBwMode8812(pHalData);
-            pHalData.bSetChnlBW = false;
+            _setChannelBw = false;
         }
 
-        _rfPowerManagement.PHY_SetTxPowerLevel8812(pHalData, pHalData.current_channel);
+        _rfPowerManagement.PHY_SetTxPowerLevel8812(pHalData, _currentChannel);
 
-        pHalData.bNeedIQK = false;
+        _needIQK = false;
     }
 
     private void phy_SwChnl8812(hal_com_data pHalData)
     {
-        u8 channelToSW = pHalData.current_channel;
+        u8 channelToSW = _currentChannel;
 
         if (phy_SwBand8812(pHalData, channelToSW) == false)
         {
@@ -644,7 +649,7 @@ public class RadioManagementModule
             }
 
             /* <20121109, Kordan> A workaround for 8812A only. */
-            phy_FixSpur_8812A(pHalData, pHalData.current_channel_bw, channelToSW);
+            phy_FixSpur_8812A(pHalData, _currentChannelBw, channelToSW);
             phy_set_rf_reg(pHalData, eRFPath, RF_CHNLBW_Jaguar, bMaskByte0, channelToSW);
         }
     }
@@ -846,7 +851,7 @@ public class RadioManagementModule
 
 
         /* 3 Set Reg668 BW */
-        phy_SetRegBW_8812(pHalData.current_channel_bw);
+        phy_SetRegBW_8812(_currentChannelBw);
 
         /* 3 Set Reg483 */
         var SubChnlNum = phy_GetSecondaryChnl_8812(pHalData);
@@ -854,7 +859,7 @@ public class RadioManagementModule
 
         reg_837 = _device.rtw_read8(rBWIndication_Jaguar + 3);
         /* 3 Set Reg848 Reg864 Reg8AC Reg8C4 RegA00 */
-        switch (pHalData.current_channel_bw)
+        switch (_currentChannelBw)
         {
             case ChannelWidth.CHANNEL_WIDTH_20:
                 _device.phy_set_bb_reg(rRFMOD_Jaguar, 0x003003C3, 0x00300200); /* 0x8ac[21,20,9:6,1,0]=8'b11100000 */
@@ -925,19 +930,19 @@ public class RadioManagementModule
                 break;
 
             default:
-                RTW_INFO("phy_PostSetBWMode8812():	unknown Bandwidth: %#X\n", pHalData.current_channel_bw);
+                RTW_INFO("phy_PostSetBWMode8812():	unknown Bandwidth: %#X", _currentChannelBw);
                 break;
         }
 
         /* <20121109, Kordan> A workaround for 8812A only. */
-        phy_FixSpur_8812A(pHalData, pHalData.current_channel_bw, pHalData.current_channel);
+        phy_FixSpur_8812A(pHalData, _currentChannelBw, _currentChannel);
 
         /* RTW_INFO("phy_PostSetBwMode8812(): Reg483: %x\n", rtw_read8(adapterState, 0x483)); */
         /* RTW_INFO("phy_PostSetBwMode8812(): Reg668: %x\n", rtw_read32(adapterState, 0x668)); */
         /* RTW_INFO("phy_PostSetBwMode8812(): Reg8AC: %x\n", phy_query_bb_reg(adapterState, rRFMOD_Jaguar, 0xffffffff)); */
 
         /* 3 Set RF related register */
-        PHY_RF6052SetBandwidth8812(pHalData, pHalData.current_channel_bw);
+        PHY_RF6052SetBandwidth8812(pHalData, _currentChannelBw);
     }
 
     private void PHY_RF6052SetBandwidth8812(hal_com_data pHalData, ChannelWidth Bandwidth) /* 20M or 40M */
@@ -992,7 +997,7 @@ public class RadioManagementModule
     private u32 phy_RFSerialRead(hal_com_data pHalData, RfPath eRFPath, u32 Offset)
     {
         u32 retValue;
-        BbRegisterDefinition pPhyReg = PHYRegDef[eRFPath];
+        BbRegisterDefinition pPhyReg = PhyRegDef[eRFPath];
         BOOLEAN bIsPIMode = false;
 
         /* <20120809, Kordan> CCA OFF(when entering), asked by James to avoid reading the wrong value. */
@@ -1060,7 +1065,7 @@ public class RadioManagementModule
 
     private void phy_RFSerialWrite(RfPath eRFPath, u32 Offset, u32 Data)
     {
-        BbRegisterDefinition pPhyReg = PHYRegDef[eRFPath];
+        BbRegisterDefinition pPhyReg = PhyRegDef[eRFPath];
 
         Offset &= 0xff;
         /* Shadow Update */
@@ -1105,14 +1110,14 @@ public class RadioManagementModule
     {
         VHT_DATA_SC SCSettingOf40 = 0, SCSettingOf20 = 0;
 
-        /* RTW_INFO("SCMapping: Case: pHalData.current_channel_bw %d, pHalData.nCur80MhzPrimeSC %d, pHalData.nCur40MhzPrimeSC %d\n",pHalData.current_channel_bw,pHalData.nCur80MhzPrimeSC,pHalData.nCur40MhzPrimeSC); */
-        if (pHalData.current_channel_bw == ChannelWidth.CHANNEL_WIDTH_80)
+        /* RTW_INFO("SCMapping: Case: pHalData._currentChannelBw %d, pHalData._cur80MhzPrimeSc %d, pHalData._cur40MhzPrimeSc %d\n",pHalData._currentChannelBw,pHalData._cur80MhzPrimeSc,pHalData._cur40MhzPrimeSc); */
+        if (_currentChannelBw == ChannelWidth.CHANNEL_WIDTH_80)
         {
-            if (pHalData.nCur80MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_LOWER)
+            if (_cur80MhzPrimeSc == HAL_PRIME_CHNL_OFFSET_LOWER)
             {
                 SCSettingOf40 = VHT_DATA_SC.VHT_DATA_SC_40_LOWER_OF_80MHZ;
             }
-            else if (pHalData.nCur80MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_UPPER)
+            else if (_cur80MhzPrimeSc == HAL_PRIME_CHNL_OFFSET_UPPER)
             {
                 SCSettingOf40 = VHT_DATA_SC.VHT_DATA_SC_40_UPPER_OF_80MHZ;
             }
@@ -1121,23 +1126,23 @@ public class RadioManagementModule
                 _logger.LogError("SCMapping: DONOT CARE Mode Setting");
             }
 
-            if ((pHalData.nCur40MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_LOWER) &&
-                (pHalData.nCur80MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_LOWER))
+            if ((_cur40MhzPrimeSc == HAL_PRIME_CHNL_OFFSET_LOWER) &&
+                (_cur80MhzPrimeSc == HAL_PRIME_CHNL_OFFSET_LOWER))
             {
                 SCSettingOf20 = VHT_DATA_SC.VHT_DATA_SC_20_LOWEST_OF_80MHZ;
             }
-            else if ((pHalData.nCur40MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_UPPER) &&
-                     (pHalData.nCur80MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_LOWER))
+            else if ((_cur40MhzPrimeSc == HAL_PRIME_CHNL_OFFSET_UPPER) &&
+                     (_cur80MhzPrimeSc == HAL_PRIME_CHNL_OFFSET_LOWER))
             {
                 SCSettingOf20 = VHT_DATA_SC.VHT_DATA_SC_20_LOWER_OF_80MHZ;
             }
-            else if ((pHalData.nCur40MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_LOWER) &&
-                     (pHalData.nCur80MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_UPPER))
+            else if ((_cur40MhzPrimeSc == HAL_PRIME_CHNL_OFFSET_LOWER) &&
+                     (_cur80MhzPrimeSc == HAL_PRIME_CHNL_OFFSET_UPPER))
             {
                 SCSettingOf20 = VHT_DATA_SC.VHT_DATA_SC_20_UPPER_OF_80MHZ;
             }
-            else if ((pHalData.nCur40MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_UPPER) &&
-                     (pHalData.nCur80MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_UPPER))
+            else if ((_cur40MhzPrimeSc == HAL_PRIME_CHNL_OFFSET_UPPER) &&
+                     (_cur80MhzPrimeSc == HAL_PRIME_CHNL_OFFSET_UPPER))
             {
                 SCSettingOf20 = VHT_DATA_SC.VHT_DATA_SC_20_UPPERST_OF_80MHZ;
             }
@@ -1146,15 +1151,15 @@ public class RadioManagementModule
                 _logger.LogError("SCMapping: DONOT CARE Mode Setting");
             }
         }
-        else if (pHalData.current_channel_bw == ChannelWidth.CHANNEL_WIDTH_40)
+        else if (_currentChannelBw == ChannelWidth.CHANNEL_WIDTH_40)
         {
-            /* RTW_INFO("SCMapping: Case: pHalData.current_channel_bw %d, pHalData.nCur40MhzPrimeSC %d\n",pHalData.current_channel_bw,pHalData.nCur40MhzPrimeSC); */
+            /* RTW_INFO("SCMapping: Case: pHalData._currentChannelBw %d, pHalData._cur40MhzPrimeSc %d\n",pHalData._currentChannelBw,pHalData._cur40MhzPrimeSc); */
 
-            if (pHalData.nCur40MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_UPPER)
+            if (_cur40MhzPrimeSc == HAL_PRIME_CHNL_OFFSET_UPPER)
             {
                 SCSettingOf20 = VHT_DATA_SC.VHT_DATA_SC_20_UPPER_OF_80MHZ;
             }
-            else if (pHalData.nCur40MhzPrimeSC == HAL_PRIME_CHNL_OFFSET_LOWER)
+            else if (_cur40MhzPrimeSc == HAL_PRIME_CHNL_OFFSET_LOWER)
             {
                 SCSettingOf20 = VHT_DATA_SC.VHT_DATA_SC_20_LOWER_OF_80MHZ;
             }

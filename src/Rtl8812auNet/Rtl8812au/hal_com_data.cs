@@ -13,7 +13,6 @@ public class hal_com_data
     }
 
     public HAL_VERSION version_id { get; }
-    public u8 current_channel { get; set; }
 
     /// <summary>
     /// It strange but this value has 2 source of truth
@@ -25,17 +24,12 @@ public class hal_com_data
     /// </summary>
     public u8 NumTotalRFPath { get; set; }
     public bool AutoloadFailFlag { get; set; }
-    public ChannelWidth current_channel_bw { get; set; }
-    public bool bSwChnl { get; set; }
-    public bool bChnlBWInitialized { get; set; }
-    public byte nCur40MhzPrimeSC { get; set; }
-    public byte nCur80MhzPrimeSC { get; set; }
-    public bool bSetChnlBW { get; set; }
-    public byte CurrentCenterFrequencyIndex1 { get; set; }
-    public bool bNeedIQK { get; set; }
-    public bool EepromOrEfuse { get; set; }
+    public bool EepromOrEfuse { get; init; }
     public u8[] efuse_eeprom_data { get; } = new u8[1024]; /*92C:256bytes, 88E:512bytes, we use union set (512bytes)*/
 
+    /// <summary>
+    /// Not used
+    /// </summary>
     public u8 InterfaceSel { get; set; } /* board type kept in eFuse */
 
     public bool EEPROMUsbSwitch { get; set; }
@@ -66,8 +60,6 @@ public class hal_com_data
 
     public TxSele OutEpQueueSel { get; init; }
     public u8 OutEpNumber { get; init; }
-
-    public u32[] IntrMask { get; } = new u32[3];
 
     public u8 rxagg_usb_size { get; init; }
 

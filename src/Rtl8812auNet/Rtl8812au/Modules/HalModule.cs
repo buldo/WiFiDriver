@@ -9,6 +9,7 @@ public class HalModule
     private readonly RX_AGG_MODE _rxAggMode = RX_AGG_MODE.RX_AGG_USB;
     private readonly u8 _rxAggDmaTimeout = 0x6; /* 6, absolute time = 34ms/(2^6) */
     private readonly u8 _rxAggDmaSize = 16; /* uint: 128b, 0x0A = 10 = MAX_RX_DMA_BUFFER_SIZE/2/pHalData.UsbBulkOutSize */
+    private readonly u32[] _intrMask = new u32[3]; // TODO: Check where is set
 
     private bool _macPwrCtrlOn;
 
@@ -98,7 +99,7 @@ public class HalModule
         // Get Rx PHY status in order to report RSSI and others.
         _InitDriverInfoSize_8812A(DRVINFO_SZ);
 
-        _InitInterrupt_8812AU(pHalData);
+        _InitInterrupt_8812AU();
         _InitNetworkType_8812A(); /* set msr	 */
         _InitWMACSetting_8812A();
         _InitAdaptiveCtrl_8812AUsb();
@@ -1161,11 +1162,11 @@ public class HalModule
         _device.rtw_write32(REG_CR, value32);
     }
 
-    private void _InitInterrupt_8812AU(hal_com_data pHalData)
+    private void _InitInterrupt_8812AU()
     {
         /* HIMR */
-        _device.rtw_write32(REG_HIMR0_8812, pHalData.IntrMask[0] & 0xFFFFFFFF);
-        _device.rtw_write32(REG_HIMR1_8812, pHalData.IntrMask[1] & 0xFFFFFFFF);
+        _device.rtw_write32(REG_HIMR0_8812, _intrMask[0] & 0xFFFFFFFF);
+        _device.rtw_write32(REG_HIMR1_8812, _intrMask[1] & 0xFFFFFFFF);
     }
 
     private void _InitDriverInfoSize_8812A(u8 drvInfoSize)
