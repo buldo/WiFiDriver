@@ -1,39 +1,35 @@
 ﻿using System.Buffers.Binary;
 
-namespace Rtl8812auNet.Rtl8812au;
+namespace Rtl8812auNet.Rtl8812au.BinaryData;
 
-internal static class Firmware
+internal class Firmware
 {
-    public const byte FWDL_ChkSum_rpt = 1 << (2);
+    public const byte FWDL_ChkSum_rpt = 1 << 2;
 
-    public static bool IS_FW_HEADER_EXIST_8812(byte [] _pFwHdr)
+    public Span<byte> Data => array_mp_8812a_fw_nic;
+
+    public UInt16 GET_FIRMWARE_HDR_VERSION_8812()
     {
-        return ((GET_FIRMWARE_HDR_SIGNATURE_8812(_pFwHdr) & 0xFFF0) == 0x9500);
+        return (UInt16)LE_BITS_TO_4BYTE(array_mp_8812a_fw_nic.AsSpan(4, 4), 0, 16); /* FW Version */
     }
 
-    private static UInt32 GET_FIRMWARE_HDR_SIGNATURE_8812(byte[] __FwHdr)
+    public UInt16 GET_FIRMWARE_HDR_SIGNATURE_8812()
     {
-
-        return LE_BITS_TO_4BYTE(__FwHdr, 0, 16); /* 92C0: test chip; 92C, 88C0: test chip; 88C1: MP A-cut; 92C1: MP A-cut */
+        return (UInt16)LE_BITS_TO_4BYTE(array_mp_8812a_fw_nic.AsSpan(0, 4), 0, 16);
+        /* 92C0: test chip; 92C, 88C0: test chip; 88C1: MP A-cut; 92C1: MP A-cut */
     }
 
-    private static UInt32 LE_BITS_TO_4BYTE(byte[] __pStart,int __BitOffset, int __BitLen)
+    public UInt16 GET_FIRMWARE_HDR_SUB_VER_8812()
     {
-        return ((LE_P4BYTE_TO_HOST_4BYTE(__pStart) >> (__BitOffset)) & BIT_LEN_MASK_32(__BitLen));
+        return (UInt16)LE_BITS_TO_4BYTE(array_mp_8812a_fw_nic.AsSpan(4, 4), 16, 8); /* FW Subversion, default 0x00 */
     }
 
-    private static UInt32 LE_P4BYTE_TO_HOST_4BYTE(byte [] __pStart)
+    public bool IS_FW_HEADER_EXIST_8812()
     {
-        //(le32_to_cpu(*((u32*)(__pStart))))
-        return BinaryPrimitives.ReadUInt32LittleEndian(__pStart.AsSpan(0, 4));
+        return (GET_FIRMWARE_HDR_SIGNATURE_8812() & 0xFFF0) == 0x9500;
     }
 
-    private static UInt32 BIT_LEN_MASK_32(int __BitLen)
-    {
-        return ((UInt32)(0xFFFFFFFF >> (32 - (__BitLen))));
-    }
-
-    public static byte[] array_mp_8812a_fw_nic =
+    private static byte[] array_mp_8812a_fw_nic =
     {
         0x01, 0x95, 0x10, 0x00, 0x34, 0x00, 0x0E, 0x00,
         0x10, 0x25, 0x11, 0x38, 0x76, 0x69, 0x00, 0x00,

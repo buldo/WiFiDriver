@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Buffers.Binary;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Rtl8812auNet.Rtl8812au;
 
@@ -70,4 +71,27 @@ public static class Bits
     public const uint BIT29 = 1 << 29;
     public const uint BIT30 = 1 << 30;
     public const uint BIT31 = 0b10000000_00000000_00000000_00000000;
+
+    public static UInt32 LE_BITS_TO_4BYTE(Span<byte> __pStart, int __BitOffset, int __BitLen)
+    {
+        return ((LE_P4BYTE_TO_HOST_4BYTE(__pStart) >> (__BitOffset)) & BIT_LEN_MASK_32(__BitLen));
+    }
+
+    public static UInt32 LE_P4BYTE_TO_HOST_4BYTE(Span<byte> __pStart)
+    {
+        return BinaryPrimitives.ReadUInt32LittleEndian(__pStart);
+    }
+
+    public static u32 LE_BITS_TO_4BYTE(byte[] __pStart, int __BitOffset, int __BitLen)
+    {
+        return LE_P4BYTE_TO_HOST_4BYTE(__pStart) >> __BitOffset & BIT_LEN_MASK_32(__BitLen);
+    }
+
+    public static u32 LE_P4BYTE_TO_HOST_4BYTE(byte[] __pStart)
+    {
+        //(le32_to_cpu(*((u32*)(__pStart))))
+        return BinaryPrimitives.ReadUInt32LittleEndian(__pStart.AsSpan(0, 4));
+    }
+
+    public static UInt32 BIT_LEN_MASK_32(int __BitLen) => ((u32)(0xFFFFFFFF >> (32 - (__BitLen))));
 }

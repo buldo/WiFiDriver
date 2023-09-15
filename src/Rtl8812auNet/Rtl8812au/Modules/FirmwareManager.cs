@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
+using Rtl8812auNet.Rtl8812au.BinaryData;
 
 namespace Rtl8812auNet.Rtl8812au.Modules;
 
 public class FirmwareManager
 {
+    private static readonly Firmware _firmware = new();
     private readonly RtlUsbAdapter _device;
 
     public FirmwareManager(RtlUsbAdapter device)
@@ -17,23 +19,16 @@ public class FirmwareManager
         u8 write_fw = 0;
         //var pHalData = adapterState.HalData;
 
-        var pFirmware = new RT_FIRMWARE_8812
-        {
-            szFwBuffer = Firmware.array_mp_8812a_fw_nic,
-            ulFwLength = (uint)Firmware.array_mp_8812a_fw_nic.Length
-        };
+        var pFirmwareBuf = _firmware.Data;
+        var FirmwareLen = (uint)_firmware.Data.Length;
 
-        var pFirmwareBuf = pFirmware.szFwBuffer.AsSpan();
-        var FirmwareLen = pFirmware.ulFwLength;
-        var pFwHdr = pFirmware.szFwBuffer;
-
-        var firmwareVersion = (u16)GET_FIRMWARE_HDR_VERSION_8812(pFwHdr);
-        var firmwareSubVersion = (u16)GET_FIRMWARE_HDR_SUB_VER_8812(pFwHdr);
-        var firmwareSignature = (u16)GET_FIRMWARE_HDR_SIGNATURE_8812(pFwHdr);
+        var firmwareVersion = _firmware.GET_FIRMWARE_HDR_VERSION_8812();
+        var firmwareSubVersion = _firmware.GET_FIRMWARE_HDR_SUB_VER_8812();
+        var firmwareSignature = _firmware.GET_FIRMWARE_HDR_SIGNATURE_8812();
 
         RTW_INFO($"FirmwareDownload8812: fw_ver={firmwareVersion} fw_subver={firmwareSubVersion} sig=0x{firmwareSignature:X}");
 
-        if (Firmware.IS_FW_HEADER_EXIST_8812(pFwHdr))
+        if (_firmware.IS_FW_HEADER_EXIST_8812())
         {
             /* Shift 32 bytes for FW header */
             pFirmwareBuf = pFirmwareBuf.Slice(32);
@@ -82,22 +77,6 @@ public class FirmwareManager
         }
 
         InitializeFirmwareVars8812();
-    }
-
-    private static UInt32 GET_FIRMWARE_HDR_SIGNATURE_8812(byte[] __FwHdr)
-    {
-        return LE_BITS_TO_4BYTE(__FwHdr.AsSpan(0, 4), 0, 16);
-        /* 92C0: test chip; 92C, 88C0: test chip; 88C1: MP A-cut; 92C1: MP A-cut */
-    }
-
-    private static UInt32 GET_FIRMWARE_HDR_VERSION_8812(byte[] __FwHdr)
-    {
-        return LE_BITS_TO_4BYTE(__FwHdr.AsSpan(4, 4), 0, 16); /* FW Version */
-    }
-
-    private static UInt32 GET_FIRMWARE_HDR_SUB_VER_8812(byte[] __FwHdr)
-    {
-        return LE_BITS_TO_4BYTE(__FwHdr.AsSpan(4, 4), 16, 8); /* FW Subversion, default 0x00 */
     }
 
     private void InitializeFirmwareVars8812()
