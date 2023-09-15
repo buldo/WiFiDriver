@@ -59,7 +59,7 @@ public class HalModule
         u32 cond2 = condition2;
         u32 cond4 = condition4;
 
-        uint cut_version_for_para = (hal.version_id.IS_A_CUT()) ? (uint)15 : (uint)hal.version_id.CUTVersion;
+        uint cut_version_for_para = (hal.Version.IS_A_CUT()) ? (uint)15 : (uint)hal.Version.CUTVersion;
         uint pkg_type_for_para = (u8)15;
 
         u32 driver1 = cut_version_for_para << 24 |
@@ -234,7 +234,7 @@ public class HalModule
 
         PHY_RF6052_Config_8812(pHalData);
 
-        if (pHalData.rf_type == RfType.RF_1T1R)
+        if (pHalData.RfType == RfType.RF_1T1R)
         {
             PHY_BB8812_Config_1T();
         }
@@ -346,7 +346,7 @@ public class HalModule
     private void PHY_RF6052_Config_8812(hal_com_data pHalData)
     {
         /* Initialize general global value */
-        if (pHalData.rf_type == RfType.RF_1T1R)
+        if (pHalData.RfType == RfType.RF_1T1R)
         {
             pHalData.NumTotalRFPath = 1;
         }

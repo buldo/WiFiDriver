@@ -216,7 +216,7 @@ public class RadioManagementModule
             /* set PWED_TH for BB Yn user guide R29 */
 
             if (current_bw == ChannelWidth.CHANNEL_WIDTH_20
-                && pHalData.rf_type == RfType.RF_1T1R
+                && pHalData.RfType == RfType.RF_1T1R
                 && eLNA_2g == false)
             {
                 /* 0x830[3:1]=3'b010 */
@@ -686,7 +686,7 @@ public class RadioManagementModule
     private void phy_FixSpur_8812A(hal_com_data pHalData, ChannelWidth Bandwidth, u8 Channel)
     {
         /* C cut Item12 ADC FIFO CLOCK */
-        if (pHalData.version_id.IS_C_CUT())
+        if (pHalData.Version.IS_C_CUT())
         {
             if (Bandwidth == ChannelWidth.CHANNEL_WIDTH_40 && Channel == 11)
             {
@@ -988,7 +988,7 @@ public class RadioManagementModule
                 _device.phy_set_bb_reg(rRFMOD_Jaguar, 0x003003C3, 0x00300200); /* 0x8ac[21,20,9:6,1,0]=8'b11100000 */
                 _device.phy_set_bb_reg(rADC_Buf_Clk_Jaguar, BIT30, 0); /* 0x8c4[30] = 1'b0 */
 
-                if (pHalData.rf_type == RfType.RF_2T2R)
+                if (pHalData.RfType == RfType.RF_2T2R)
                 {
                     _device.phy_set_bb_reg(rL1PeakTH_Jaguar, 0x03C00000, 7); /* 2R 0x848[25:22] = 0x7 */
                 }
@@ -1009,7 +1009,7 @@ public class RadioManagementModule
                     L1pkVal = 6;
                 else
                 {
-                    if (pHalData.rf_type == RfType.RF_2T2R)
+                    if (pHalData.RfType == RfType.RF_2T2R)
                         L1pkVal = 7;
                     else
                         L1pkVal = 8;
@@ -1038,7 +1038,7 @@ public class RadioManagementModule
                     L1pkVal = 5;
                 else
                 {
-                    if (pHalData.rf_type == RfType.RF_2T2R)
+                    if (pHalData.RfType == RfType.RF_2T2R)
                     {
                         L1pkVal = 6;
                     }
@@ -1125,7 +1125,7 @@ public class RadioManagementModule
 
         /* <20120809, Kordan> CCA OFF(when entering), asked by James to avoid reading the wrong value. */
         /* <20120828, Kordan> Toggling CCA would affect RF 0x0, skip it! */
-        if (Offset != 0x0 && !(pHalData.version_id.IS_C_CUT()))
+        if (Offset != 0x0 && !(pHalData.Version.IS_C_CUT()))
         {
             _device.phy_set_bb_reg(rCCAonSec_Jaguar, 0x8, 1);
         }
@@ -1143,7 +1143,7 @@ public class RadioManagementModule
 
         _device.phy_set_bb_reg((ushort)pPhyReg.RfHSSIPara2, bHSSIRead_addr_Jaguar, Offset);
 
-        if (pHalData.version_id.IS_C_CUT())
+        if (pHalData.Version.IS_C_CUT())
         {
             Thread.Sleep(20);
         }
@@ -1161,7 +1161,7 @@ public class RadioManagementModule
 
         /* <20120809, Kordan> CCA ON(when exiting), asked by James to avoid reading the wrong value. */
         /* <20120828, Kordan> Toggling CCA would affect RF 0x0, skip it! */
-        if (Offset != 0x0 && !(pHalData.version_id.IS_C_CUT()))
+        if (Offset != 0x0 && !(pHalData.Version.IS_C_CUT()))
         {
             _device.phy_set_bb_reg(rCCAonSec_Jaguar, 0x8, 0);
         }

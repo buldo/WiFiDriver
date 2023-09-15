@@ -5,21 +5,21 @@ namespace Rtl8812auNet.Rtl8812au;
 public class hal_com_data
 {
     public hal_com_data(
-        HalVersion versionId,
+        HalVersion version,
         RfType rfType,
         byte numTotalRfPath)
     {
-        version_id = versionId;
-        rf_type = rfType;
+        Version = version;
+        RfType = rfType;
         NumTotalRFPath = numTotalRfPath;
     }
 
-    public HalVersion version_id { get; }
+    public HalVersion Version { get; }
 
     /// <summary>
     /// It strange but this value has 2 source of truth
     /// </summary>
-    public RfType rf_type { get; set; } /*enum RfType*/
+    public RfType RfType { get; set; } /*enum RfType*/
 
     /// <summary>
     /// It strange but this value has 2 source of truth
@@ -28,13 +28,6 @@ public class hal_com_data
     public bool AutoloadFailFlag { get; set; }
     public bool EepromOrEfuse { get; init; }
     public u8[] efuse_eeprom_data { get; } = new u8[1024]; /*92C:256bytes, 88E:512bytes, we use union set (512bytes)*/
-
-    /// <summary>
-    /// Not used
-    /// </summary>
-    public u8 InterfaceSel { get; set; } /* board type kept in eFuse */
-
-    public bool EEPROMUsbSwitch { get; set; }
 
     public u8 EEPROMVersion { get; set; }
     public u8 EEPROMRegulatory { get; set; }

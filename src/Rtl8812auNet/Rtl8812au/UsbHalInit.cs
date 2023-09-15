@@ -36,7 +36,6 @@ public static class UsbHalInit
 
         Hal_ReadPROMVersion8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
         Hal_ReadTxPowerInfo8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
-        Hal_ReadBoardType8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
 
         /*  */
         /* Read Bluetooth co-exist and initialize */
@@ -49,9 +48,9 @@ public static class UsbHalInit
         Hal_ReadAmplifierType_8812A(adapterState, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
         Hal_ReadRFEType_8812A(adapterState.HalData, pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
 
-
-        pHalData.EEPROMUsbSwitch = ReadUsbModeSwitch8812AU(pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
-        RTW_INFO("Usb Switch: %d", pHalData.EEPROMUsbSwitch);
+        // EEPROMUsbSwitch not used in our code
+        //pHalData.EEPROMUsbSwitch = ReadUsbModeSwitch8812AU(pHalData.efuse_eeprom_data, pHalData.AutoloadFailFlag);
+        //RTW_INFO("Usb Switch: %d", pHalData.EEPROMUsbSwitch);
 
         /* 2013/04/15 MH Add for different board type recognize. */
         hal_ReadUsbType_8812AU(adapterState, pHalData.efuse_eeprom_data);
@@ -112,7 +111,7 @@ public static class UsbHalInit
             if (antenna == 1)
             {
                 /* Config 8812AU as 1*1 mode AC mode. */
-                pHalData.rf_type = RfType.RF_1T1R;
+                pHalData.RfType = RfType.RF_1T1R;
                 /* UsbModeSwitch_SetUsbModeMechOn(adapterState, FALSE); */
                 /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU_VL; */
                 RTW_INFO("%s(): EFUSE_HIDDEN_812AU_VL\n");
@@ -144,18 +143,6 @@ public static class UsbHalInit
                     RTW_INFO("%s(): EFUSE_HIDDEN_8812AU_VN");
                 }
             }
-        }
-    }
-
-    private static bool ReadUsbModeSwitch8812AU(u8[] PROMContent, BOOLEAN AutoloadFail)
-    {
-        if (AutoloadFail)
-        {
-            return false;
-        }
-        else /* check efuse 0x08 bit2 */
-        {
-            return ((PROMContent[EEPROM_USB_MODE_8812] & BIT1) >> 1) != 0;
         }
     }
 
@@ -264,27 +251,6 @@ public static class UsbHalInit
         {
             pHalData.EEPROMBluetoothCoexist = false;
         }
-    }
-
-    static void Hal_ReadBoardType8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
-    {
-        var pHalData = adapterState.HalData;
-
-        if (!AutoloadFail)
-        {
-            pHalData.InterfaceSel = (byte)((PROMContent[EEPROM_RF_BOARD_OPTION_8812] & 0xE0) >> 5);
-            if (PROMContent[EEPROM_RF_BOARD_OPTION_8812] == 0xFF)
-            {
-                pHalData.InterfaceSel = (EEPROM_DEFAULT_BOARD_OPTION & 0xE0) >> 5;
-            }
-        }
-        else
-        {
-            pHalData.InterfaceSel = 0;
-        }
-
-        RTW_INFO("Board Type: 0x%2x", pHalData.InterfaceSel);
-
     }
 
     private static void Hal_ReadTxPowerInfo8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoLoadFail)
