@@ -22,8 +22,7 @@ public class Rtl8812aDevice
         _device = device;
         _logger = logger;
 
-        var powerManagement = new RfPowerManagementModule(_device, _logger);
-        _radioManagement = new RadioManagementModule(HwPort.HW_PORT0, device, powerManagement, _logger);
+        _radioManagement = new RadioManagementModule(HwPort.HW_PORT0, device, _logger);
         _halModule = new HalModule(_device, _radioManagement);
 
         _adapterState = InitAdapter(_device);
