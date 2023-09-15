@@ -3,9 +3,22 @@ using Rtl8812auNet.Rtl8812au.Models;
 
 namespace Rtl8812auNet.Rtl8812au;
 
-public static class usb_ops_linux
+public class FrameParser
 {
-    public static List<(rx_pkt_attrib RxAtrib, byte[] Data)> recvbuf2recvframe(byte[] ptr)
+    public List<ParsedRadioPacket> ParsedRadioPacket(byte[] usbTransfer)
+    {
+
+        return recvbuf2recvframe(usbTransfer)
+            .Select(tuple => new ParsedRadioPacket
+            {
+                UsbBulkTransfer = usbTransfer,
+                Data = tuple.Data,
+                Attr = tuple.RxAtrib
+            })
+            .ToList();
+    }
+
+    private static List<(rx_pkt_attrib RxAtrib, byte[] Data)> recvbuf2recvframe(byte[] ptr)
     {
         var transfer_len = ptr.Length;
         var pbuf = ptr.AsSpan();
@@ -88,100 +101,6 @@ public static class usb_ops_linux
 
         return ret;
     }
-
-    //private static s32 pre_recv_entry(recv_frame precvframe, u8[] pphy_status)
-    //{
-    //    if (pphy_status)
-    //    {
-    //        rx_query_phy_status(precvframe, pphy_status);
-    //    }
-
-    //    ret = rtw_recv_entry(precvframe);
-
-    //    exit:
-    //    return ret;
-    //}
-
-    //private static bool rtw_os_alloc_recvframe(_adapter padapter, recv_frame precvframe, u8[] pdata, _pkt[] pskb)
-    //{
-    //    bool res = true;
-    //    u32 alloc_sz;
-
-    //    rx_pkt_attrib pattrib = precvframe.hdr.attrib;
-
-    //    if (pdata == null)
-    //    {
-    //        precvframe.hdr.pkt = null;
-    //        res = false;
-    //        return res;
-    //    }
-
-    //    /* Modified by Albert 20101213 */
-    //    /* For 8 bytes IP header alignment. */
-    //    u8 shift_sz = pattrib.qos ? (u8)6 : (u8)0; /*	Qos data, wireless lan header length is 26 */
-
-    //    u32 skb_len = pattrib.pkt_len;
-
-    //    /* for first fragment packet, driver need allocate 1536+drvinfo_sz+RXDESC_SIZE to defrag packet. */
-    //    /* modify alloc_sz for recvive crc error packet by thomas 2011-06-02 */
-    //    if ((pattrib.mfrag == true) && (pattrib.frag_num == 0))
-    //    {
-    //        /* alloc_sz = 1664;	 */ /* 1664 is 128 alignment. */
-    //        alloc_sz = (skb_len <= 1650) ? 1664 : (skb_len + 14);
-    //    }
-    //    else
-    //    {
-    //        alloc_sz = skb_len;
-    //        /*	6 is for IP header 8 bytes alignment in QoS packet case. */
-    //        /*	8 is for skb->data 4 bytes alignment. */
-    //        alloc_sz += 14;
-    //    }
-
-    //    _pkt pkt_copy = rtw_skb_alloc(alloc_sz);
-
-    //    if (pkt_copy)
-    //    {
-    //        pkt_copy.dev = padapter.pnetdev;
-    //        pkt_copy.len = skb_len;
-    //        precvframe.hdr.pkt = pkt_copy;
-    //        precvframe.hdr.rx_head = pkt_copy->head;
-    //        precvframe.hdr.rx_end = pkt_copy->data + alloc_sz;
-    //        skb_reserve(pkt_copy, 8 - ((SIZE_PTR)(pkt_copy->data) & 7)); /* force pkt_copy->data at 8-byte alignment address */
-    //        skb_reserve(pkt_copy, shift_sz); /* force ip_hdr at 8-byte alignment address according to shift_sz. */
-    //        _rtw_memcpy(pkt_copy.data, pdata, skb_len);
-    //        precvframe.hdr.rx_data = precvframe.hdr.rx_tail = pkt_copy.data;
-    //    }
-    //    else
-    //    {
-    //        if ((pattrib.mfrag == true) && (pattrib.frag_num == 0))
-    //        {
-    //            RTW_INFO("alloc_skb fail , drop frag frame");
-    //            /* rtw_free_recvframe(precvframe, pfree_recv_queue); */
-    //            return false;
-    //        }
-
-    //        if (pskb == null)
-    //        {
-    //            return false;
-    //        }
-
-    //        precvframe.hdr.pkt = rtw_skb_clone(pskb);
-    //        if (precvframe.hdr.pkt)
-    //        {
-    //            precvframe.hdr.rx_head = precvframe.hdr.rx_data = precvframe.hdr.rx_tail = pdata;
-    //            precvframe.hdr.rx_end = pdata + alloc_sz;
-    //        }
-    //        else
-    //        {
-    //            RTW_INFO("rtw_skb_clone fail");
-    //            /* rtw_free_recvframe(precvframe, pfree_recv_queue); */
-    //            /*exit_rtw_os_recv_resource_alloc;*/
-    //            res = false;
-    //        }
-    //    }
-
-    //    return res;
-    //}
 
     private static uint GET_RX_STATUS_DESC_USB_AGG_PKTNUM_8812(Span<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(12), 16, 8);

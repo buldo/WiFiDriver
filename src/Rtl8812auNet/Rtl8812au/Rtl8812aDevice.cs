@@ -11,7 +11,7 @@ public class Rtl8812aDevice
     private readonly RtlUsbAdapter _device;
     private readonly ILogger _logger;
     private readonly AdapterState _adapterState;
-    private readonly StatefulFrameParser _frameParser = new();
+    private readonly FrameParser _frameParser = new();
     private readonly RadioManagementModule _radioManagement;
 
     private Task _readTask;
