@@ -155,7 +155,7 @@ public class FirmwareManager
         return ret;
     }
 
-    private void _FWDownloadEnable_8812(BOOLEAN enable)
+    private void _FWDownloadEnable_8812(bool enable)
     {
         u8 tmp;
 

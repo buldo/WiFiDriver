@@ -491,8 +491,8 @@ public class RadioManagementModule
 
     private void PHY_HandleSwChnlAndSetBW8812(
         hal_com_data pHalData,
-        BOOLEAN bSwitchChannel,
-        BOOLEAN bSetBandWidth,
+        bool bSwitchChannel,
+        bool bSetBandWidth,
         u8 ChannelNum,
         ChannelWidth ChnlWidth,
         u8 ChnlOffsetOf40MHz,
@@ -649,10 +649,10 @@ public class RadioManagementModule
         }
     }
 
-    private BOOLEAN phy_SwBand8812(hal_com_data pHalData, u8 channelToSW)
+    private bool phy_SwBand8812(hal_com_data pHalData, u8 channelToSW)
     {
         u8 u1Btmp;
-        BOOLEAN ret_value = true;
+        bool ret_value = true;
         BandType Band;
         BandType BandToSW;
 
@@ -856,7 +856,7 @@ public class RadioManagementModule
 
     private void phy_set_tx_power_level_by_path(hal_com_data pHalData, u8 channel, RfPath path)
     {
-        BOOLEAN bIsIn24G = (pHalData.current_band_type == BandType.BAND_ON_2_4G);
+        bool bIsIn24G = (pHalData.current_band_type == BandType.BAND_ON_2_4G);
 
         if (bIsIn24G)
         {
@@ -1122,7 +1122,7 @@ public class RadioManagementModule
     {
         u32 retValue;
         BbRegisterDefinition pPhyReg = PhyRegDef[eRFPath];
-        BOOLEAN bIsPIMode = false;
+        bool bIsPIMode = false;
 
         /* <20120809, Kordan> CCA OFF(when entering), asked by James to avoid reading the wrong value. */
         /* <20120828, Kordan> Toggling CCA would affect RF 0x0, skip it! */

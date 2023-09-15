@@ -3,7 +3,6 @@ global using u16 = System.UInt16;
 global using u8 = System.Byte;
 global using s8 = System.SByte;
 global using s32 = System.Int32;
-global using BOOLEAN = System.Boolean;
 global using static Rtl8812auNet.Rtl8812au.Logging;
 global using static Rtl8812auNet.Rtl8812au.Enumerations.RTW_USB_SPEED;
 global using static Rtl8812auNet.Rtl8812au.Enumerations.libusb_speed;

@@ -147,7 +147,7 @@ public static class UsbHalInit
         }
     }
 
-    private static void Hal_ReadRFEType_8812A(hal_com_data pHalData, u8[] PROMContent, BOOLEAN AutoloadFail)
+    private static void Hal_ReadRFEType_8812A(hal_com_data pHalData, u8[] PROMContent, bool AutoloadFail)
     {
         if (!AutoloadFail)
         {
@@ -211,7 +211,7 @@ public static class UsbHalInit
         RTW_INFO("RFE Type: 0x%2x\n", pHalData.rfe_type);
     }
 
-    static void Hal_ReadThermalMeter_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
+    static void Hal_ReadThermalMeter_8812A(AdapterState adapterState, u8[] PROMContent, bool AutoloadFail)
     {
         var pHalData = adapterState.HalData;
         /* u8	tempval; */
@@ -233,10 +233,10 @@ public static class UsbHalInit
         }
 
         /* pHalData.ThermalMeter[0] = pHalData.eeprom_thermal_meter;	 */
-        RTW_INFO("ThermalMeter = 0x%x\n", pHalData.eeprom_thermal_meter);
+        RTW_INFO("ThermalMeter = 0x%x", pHalData.eeprom_thermal_meter);
     }
 
-    static void Hal_EfuseParseBTCoexistInfo8812A(AdapterState adapterState, u8[] hwinfo, BOOLEAN AutoLoadFail)
+    static void Hal_EfuseParseBTCoexistInfo8812A(AdapterState adapterState, u8[] hwinfo, bool AutoLoadFail)
     {
         var pHalData = adapterState.HalData;
 
@@ -254,7 +254,7 @@ public static class UsbHalInit
         }
     }
 
-    private static void Hal_ReadTxPowerInfo8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoLoadFail)
+    private static void Hal_ReadTxPowerInfo8812A(AdapterState adapterState, u8[] PROMContent, bool AutoLoadFail)
     {
         var pHalData = adapterState.HalData;
 
@@ -280,7 +280,7 @@ public static class UsbHalInit
         RTW_INFO("EEPROMRegulatory = 0x%x", pHalData.EEPROMRegulatory);
     }
 
-    private static void Hal_ReadAmplifierType_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
+    private static void Hal_ReadAmplifierType_8812A(AdapterState adapterState, u8[] PROMContent, bool AutoloadFail)
     {
         var pHalData = adapterState.HalData;
 
@@ -325,7 +325,7 @@ public static class UsbHalInit
     private const int EEPROM_LNA_TYPE_2G_8812AU = 0xBD;
     private const int EEPROM_LNA_TYPE_5G_8812AU = 0xBF;
 
-    private static void hal_ReadPAType_8812A(AdapterState adapterState, u8[] PROMContent, BOOLEAN AutoloadFail)
+    private static void hal_ReadPAType_8812A(AdapterState adapterState, u8[] PROMContent, bool AutoloadFail)
     {
         var pHalData = adapterState.HalData;
 

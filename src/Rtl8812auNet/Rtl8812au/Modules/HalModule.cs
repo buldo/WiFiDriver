@@ -1297,7 +1297,7 @@ public class HalModule
         u32 numNQ = 0;
         u32 value32;
         u8 value8;
-        BOOLEAN bWiFiConfig = registry_priv.wifi_spec;
+        bool bWiFiConfig = registry_priv.wifi_spec;
 
         if (!bWiFiConfig)
         {
