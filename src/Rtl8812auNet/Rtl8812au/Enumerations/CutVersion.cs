@@ -16,4 +16,5 @@ public enum CutVersion
     I_CUT_VERSION = 8,
     J_CUT_VERSION = 9,
     K_CUT_VERSION = 10,
+    ODM_CUT_TEST = 15,
 }

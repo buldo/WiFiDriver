@@ -41,6 +41,107 @@ public class HalModule
         return status;
     }
 
+    private static bool check_positive(hal_com_data hal, u32 condition1, u32 condition2, u32 condition4)
+    {
+        var originalBoardType = hal.GetBoardType();
+
+        uint boardType =
+            ((originalBoardType & BIT4) >>> 4) << 0 | /* _GLNA*/
+            ((originalBoardType & BIT3) >>> 3) << 1 | /* _GPA*/
+            ((originalBoardType & BIT7) >>> 7) << 2 | /* _ALNA*/
+            ((originalBoardType & BIT6) >>> 6) << 3 | /* _APA */
+            ((originalBoardType & BIT2) >>> 2) << 4 | /* _BT*/
+            ((originalBoardType & BIT1) >>> 1) << 5 | /* _NGFF*/
+            ((originalBoardType & BIT5) >>> 5) << 6;  /* _TRSWT*/
+
+
+        u32 cond1 = condition1;
+        u32 cond2 = condition2;
+        u32 cond4 = condition4;
+
+        uint cut_version_for_para = (hal.version_id.IS_A_CUT()) ? (uint)15 : (uint)hal.version_id.CUTVersion;
+        uint pkg_type_for_para = (u8)15;
+
+        u32 driver1 = cut_version_for_para << 24 |
+                      ((uint)RTL871X_HCI_TYPE.RTW_USB & 0xF0) << 16 |
+                      pkg_type_for_para << 12 |
+                      ((uint)RTL871X_HCI_TYPE.RTW_USB & 0x0F) << 8 |
+                      boardType;
+
+        u32 driver2 =
+            ((uint)hal.TypeGLNA & 0xFF) << 0 |
+            ((uint)hal.TypeGPA & 0xFF) << 8 |
+            ((uint)hal.TypeALNA & 0xFF) << 16 |
+            ((uint)hal.TypeAPA & 0xFF) << 24;
+
+        u32 driver4 =
+            ((uint)hal.TypeGLNA & 0xFF00) >> 8 |
+            ((uint)hal.TypeGPA & 0xFF00) |
+            ((uint)hal.TypeALNA & 0xFF00) << 8 |
+            ((uint)hal.TypeAPA & 0xFF00) << 16;
+
+        /*============== value Defined Check ===============*/
+        /*QFN type [15:12] and cut version [27:24] need to do value check*/
+
+        if (((cond1 & 0x0000F000) != 0) && ((cond1 & 0x0000F000) != (driver1 & 0x0000F000)))
+        {
+            return false;
+        }
+
+        if (((cond1 & 0x0F000000) != 0) && ((cond1 & 0x0F000000) != (driver1 & 0x0F000000)))
+        {
+            return false;
+        }
+
+        /*=============== Bit Defined Check ================*/
+        /* We don't care [31:28] */
+
+        cond1 &= 0x00FF0FFF;
+        driver1 &= 0x00FF0FFF;
+
+        if ((cond1 & driver1) == cond1)
+        {
+            u32 bit_mask = 0;
+
+            if ((cond1 & 0x0F) == 0) /* board_type is DONTCARE*/
+            {
+                return true;
+            }
+
+            if ((cond1 & BIT0) != 0) /*GLNA*/
+            {
+                bit_mask |= 0x000000FF;
+            }
+            if ((cond1 & BIT1) != 0) /*GPA*/
+            {
+                bit_mask |= 0x0000FF00;
+            }
+            if ((cond1 & BIT2) != 0) /*ALNA*/
+            {
+                bit_mask |= 0x00FF0000;
+            }
+            if ((cond1 & BIT3) != 0) /*APA*/
+            {
+                bit_mask |= 0xFF000000;
+            }
+
+            if (((cond2 & bit_mask) == (driver2 & bit_mask)) &&
+                ((cond4 & bit_mask) == (driver4 & bit_mask))) /* board_type of each RF path is matched*/
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
     private bool rtl8812au_hal_init(hal_com_data pHalData)
     {
         // Check if MAC has already power on. by tynli. 2011.05.27.
@@ -89,7 +190,7 @@ public class HalModule
         var fwManager = new FirmwareManager(_device);
         fwManager.FirmwareDownload8812();
 
-        PHY_MACConfig8812(pHalData, pHalData.odmpriv);
+        PHY_MACConfig8812(pHalData);
 
         _InitQueueReservedPage_8812AUsb(pHalData);
         _InitTxBufferBoundary_8812AUsb();
@@ -348,7 +449,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm, dm.odmpriv, pre_v1, pre_v2, v2))
+                        if (check_positive(dm, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -425,7 +526,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm, dm.odmpriv, pre_v1, pre_v2, v2))
+                        if (check_positive(dm, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -508,7 +609,7 @@ public class HalModule
         /*  */
         /* Config BB and AGC */
         /*  */
-        var rtStatus = phy_BB8812_Config_ParaFile(pHalData, pHalData.odmpriv);
+        var rtStatus = phy_BB8812_Config_ParaFile(pHalData);
 
         hal_set_crystal_cap(pHalData.crystal_cap);
 
@@ -523,9 +624,9 @@ public class HalModule
         _device.phy_set_bb_reg(REG_MAC_PHY_CTRL, 0x7FF80000u, (byte)(crystal_cap | (crystal_cap << 6)));
     }
 
-    private bool phy_BB8812_Config_ParaFile(hal_com_data hal, dm_struct dm)
+    private bool phy_BB8812_Config_ParaFile(hal_com_data hal)
     {
-        bool rtStatus = odm_config_bb_with_header_file(hal, dm, odm_bb_config_type.CONFIG_BB_PHY_REG);
+        bool rtStatus = odm_config_bb_with_header_file(hal, odm_bb_config_type.CONFIG_BB_PHY_REG);
 
         /* Read PHY_REG.TXT BB INIT!! */
 
@@ -535,7 +636,7 @@ public class HalModule
             goto phy_BB_Config_ParaFile_Fail;
         }
 
-        rtStatus = odm_config_bb_with_header_file(hal, dm, odm_bb_config_type.CONFIG_BB_AGC_TAB);
+        rtStatus = odm_config_bb_with_header_file(hal, odm_bb_config_type.CONFIG_BB_AGC_TAB);
 
         if (rtStatus != true)
         {
@@ -547,7 +648,7 @@ public class HalModule
         return rtStatus;
     }
 
-    private bool odm_config_bb_with_header_file(hal_com_data hal, dm_struct dm, odm_bb_config_type config_type)
+    private bool odm_config_bb_with_header_file(hal_com_data hal, odm_bb_config_type config_type)
     {
         bool result = true;
 
@@ -556,12 +657,12 @@ public class HalModule
         if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG)
         {
             //READ_AND_CONFIG_MP(8812a, _phy_reg);
-            odm_read_and_config_mp_8812a_phy_reg(hal, dm);
+            odm_read_and_config_mp_8812a_phy_reg(hal);
         }
         else if (config_type == odm_bb_config_type.CONFIG_BB_AGC_TAB)
         {
             //READ_AND_CONFIG_MP(8812a, _agc_tab);
-            odm_read_and_config_mp_8812a_agc_tab(hal, dm);
+            odm_read_and_config_mp_8812a_agc_tab(hal);
         }
         else if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG_PG)
         {
@@ -571,7 +672,7 @@ public class HalModule
         else if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG_MP)
         {
             //READ_AND_CONFIG_MP(8812a, _phy_reg_mp);
-            odm_read_and_config_mp_8812a_phy_reg_mp(hal, dm);
+            odm_read_and_config_mp_8812a_phy_reg_mp(hal);
         }
         else if (config_type == odm_bb_config_type.CONFIG_BB_AGC_TAB_DIFF)
         {
@@ -601,7 +702,7 @@ public class HalModule
         return result;
     }
 
-    private void odm_read_and_config_mp_8812a_agc_tab(hal_com_data hal,dm_struct dm)
+    private void odm_read_and_config_mp_8812a_agc_tab(hal_com_data hal)
     {
         u32 i = 0;
         u8 c_cond;
@@ -651,7 +752,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(hal,dm, pre_v1, pre_v2, v2))
+                        if (check_positive(hal, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -685,7 +786,7 @@ public class HalModule
         ODM_delay_us(1);
     }
 
-    private void odm_read_and_config_mp_8812a_phy_reg_mp(hal_com_data hal, dm_struct dm)
+    private void odm_read_and_config_mp_8812a_phy_reg_mp(hal_com_data hal)
     {
         u32 i = 0;
         u8 c_cond;
@@ -735,7 +836,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(hal,dm, pre_v1, pre_v2, v2))
+                        if (check_positive(hal,pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -762,7 +863,7 @@ public class HalModule
         }
     }
 
-    private void odm_read_and_config_mp_8812a_phy_reg(hal_com_data hal, dm_struct dm)
+    private void odm_read_and_config_mp_8812a_phy_reg(hal_com_data hal)
     {
         u32 i = 0;
         u8 c_cond;
@@ -812,7 +913,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(hal,dm, pre_v1, pre_v2, v2))
+                        if (check_positive(hal, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -1246,9 +1347,9 @@ public class HalModule
     }
 
 
-    private void PHY_MACConfig8812(hal_com_data hal,dm_struct dm)
+    private void PHY_MACConfig8812(hal_com_data hal)
     {
-        odm_read_and_config_mp_8812a_mac_reg(hal, dm);
+        odm_read_and_config_mp_8812a_mac_reg(hal);
     }
 
     private bool InitPowerOn()
@@ -1495,7 +1596,7 @@ public class HalModule
         _device.rtw_write32(REG_TXDMA_OFFSET_CHK, value32);
     }
 
-    private void odm_read_and_config_mp_8812a_mac_reg(hal_com_data hal, dm_struct dm)
+    private void odm_read_and_config_mp_8812a_mac_reg(hal_com_data hal)
     {
         u32 i = 0;
         u8 c_cond;
@@ -1545,7 +1646,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(hal, dm, pre_v1, pre_v2, v2))
+                        if (check_positive(hal, pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;

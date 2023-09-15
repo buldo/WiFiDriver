@@ -1,5 +1,4 @@
 ﻿global using u32 = System.UInt32;
-global using u64 = System.UInt64;
 global using u16 = System.UInt16;
 global using u8 = System.Byte;
 global using s8 = System.SByte;
@@ -11,9 +10,7 @@ global using static Rtl8812auNet.Rtl8812au.Enumerations.libusb_speed;
 global using static Rtl8812auNet.Rtl8812au.Enumerations.Bits;
 global using static Rtl8812auNet.Rtl8812au.Enumerations.CommonConsts;
 global using static Rtl8812auNet.Rtl8812au.Enumerations.odm_board_type;
-global using static Rtl8812auNet.Rtl8812au.halhwimg8812a_bb;
 global using static Rtl8812auNet.Rtl8812au.rtl8812a_dm;
-global using static Rtl8812auNet.Rtl8812au.HalVerDef;
 global using static Rtl8812auNet.Rtl8812au.Enumerations.RcrBits;
 global using static Rtl8812auNet.Rtl8812au.rtl8812a_phycfg;
 global using static Rtl8812auNet.Rtl8812au.UsbHalInit;

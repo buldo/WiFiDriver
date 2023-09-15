@@ -58,8 +58,6 @@ public class hal_com_data
     public u16 TypeAPA { get; set; }
     public u16 rfe_type { get; set; }
 
-    public dm_struct odmpriv { get; } = new dm_struct();
-
     public TxSele OutEpQueueSel { get; init; }
     public u8 OutEpNumber { get; init; }
 
@@ -68,4 +66,38 @@ public class hal_com_data
     public u8 rxagg_usb_timeout { get; init; }
 
     public BandType current_band_type { get; set; }
+
+    public u8 GetBoardType()
+    {
+        /* 1 ======= BoardType: ODM_CMNINFO_BOARD_TYPE ======= */
+        uint odm_board_type = ODM_BOARD_DEFAULT;
+
+        if (ExternalLNA_2G)
+        {
+            odm_board_type |= ODM_BOARD_EXT_LNA;
+        }
+
+        if (external_lna_5g)
+        {
+            odm_board_type |= ODM_BOARD_EXT_LNA_5G;
+        }
+
+        if (ExternalPA_2G)
+        {
+            odm_board_type |= ODM_BOARD_EXT_PA;
+        }
+
+        if (external_pa_5g)
+        {
+            odm_board_type |= ODM_BOARD_EXT_PA_5G;
+        }
+
+        if (EEPROMBluetoothCoexist)
+        {
+            odm_board_type |= ODM_BOARD_BT;
+        }
+
+        return (u8)odm_board_type;
+    }
+
 }

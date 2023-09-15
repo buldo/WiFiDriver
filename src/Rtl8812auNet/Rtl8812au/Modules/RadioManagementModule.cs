@@ -686,7 +686,7 @@ public class RadioManagementModule
     private void phy_FixSpur_8812A(hal_com_data pHalData, ChannelWidth Bandwidth, u8 Channel)
     {
         /* C cut Item12 ADC FIFO CLOCK */
-        if (IS_VENDOR_8812A_C_CUT(pHalData))
+        if (pHalData.version_id.IS_C_CUT())
         {
             if (Bandwidth == ChannelWidth.CHANNEL_WIDTH_40 && Channel == 11)
             {
@@ -1125,7 +1125,7 @@ public class RadioManagementModule
 
         /* <20120809, Kordan> CCA OFF(when entering), asked by James to avoid reading the wrong value. */
         /* <20120828, Kordan> Toggling CCA would affect RF 0x0, skip it! */
-        if (Offset != 0x0 && !(IS_VENDOR_8812A_C_CUT(pHalData)))
+        if (Offset != 0x0 && !(pHalData.version_id.IS_C_CUT()))
         {
             _device.phy_set_bb_reg(rCCAonSec_Jaguar, 0x8, 1);
         }
@@ -1143,7 +1143,7 @@ public class RadioManagementModule
 
         _device.phy_set_bb_reg((ushort)pPhyReg.RfHSSIPara2, bHSSIRead_addr_Jaguar, Offset);
 
-        if (IS_VENDOR_8812A_C_CUT(pHalData))
+        if (pHalData.version_id.IS_C_CUT())
         {
             Thread.Sleep(20);
         }
@@ -1161,7 +1161,7 @@ public class RadioManagementModule
 
         /* <20120809, Kordan> CCA ON(when exiting), asked by James to avoid reading the wrong value. */
         /* <20120828, Kordan> Toggling CCA would affect RF 0x0, skip it! */
-        if (Offset != 0x0 && !(IS_VENDOR_8812A_C_CUT(pHalData)))
+        if (Offset != 0x0 && !(pHalData.version_id.IS_C_CUT()))
         {
             _device.phy_set_bb_reg(rCCAonSec_Jaguar, 0x8, 0);
         }
