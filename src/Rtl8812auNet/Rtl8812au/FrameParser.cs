@@ -81,7 +81,7 @@ public class FrameParser
             }
 
             /* jaguar 8-byte alignment */
-            pkt_offset = (u16)_RND8(pkt_offset);
+            pkt_offset = (UInt16)_RND8(pkt_offset);
             //pkt_cnt--;
 
             if (pkt_offset >= pbuf.Length)
@@ -105,9 +105,9 @@ public class FrameParser
     private static uint GET_RX_STATUS_DESC_USB_AGG_PKTNUM_8812(Span<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(12), 16, 8);
 
-    private static u32 _RND8(int sz)
+    private static UInt32 _RND8(int sz)
     {
-        u32 val = (uint)(((sz >> 3) + ((sz & 7) != 0 ? 1 : 0)) << 3);
+        UInt32 val = (uint)(((sz >> 3) + ((sz & 7) != 0 ? 1 : 0)) << 3);
         return val;
     }
 
@@ -119,7 +119,7 @@ public class FrameParser
         pattrib.pkt_len = GET_RX_STATUS_DESC_PKT_LEN_8812(pdesc); /* (le32_to_cpu(pdesc.rxdw0)&0x00003fff) */
         pattrib.crc_err = GET_RX_STATUS_DESC_CRC32_8812(pdesc); /* ((le32_to_cpu(pdesc.rxdw0) >> 14) & 0x1); */
         pattrib.icv_err = GET_RX_STATUS_DESC_ICV_8812(pdesc); /* ((le32_to_cpu(pdesc.rxdw0) >> 15) & 0x1); */
-        pattrib.drvinfo_sz = (u8)(GET_RX_STATUS_DESC_DRVINFO_SIZE_8812(pdesc) * 8); /* ((le32_to_cpu(pdesc.rxdw0) >> 16) & 0xf) * 8; */ /* uint 2^3 = 8 bytes */
+        pattrib.drvinfo_sz = (byte)(GET_RX_STATUS_DESC_DRVINFO_SIZE_8812(pdesc) * 8); /* ((le32_to_cpu(pdesc.rxdw0) >> 16) & 0xf) * 8; */ /* uint 2^3 = 8 bytes */
         pattrib.encrypt = GET_RX_STATUS_DESC_SECURITY_8812(pdesc); /* ((le32_to_cpu(pdesc.rxdw0) >> 20) & 0x7); */
         pattrib.qos = GET_RX_STATUS_DESC_QOS_8812(pdesc); /* (( le32_to_cpu( pdesc.rxdw0 ) >> 23) & 0x1); */ /* Qos data, wireless lan header length is 26 */
         pattrib.shift_sz = GET_RX_STATUS_DESC_SHIFT_8812(pdesc); /* ((le32_to_cpu(pdesc.rxdw0) >> 24) & 0x3); */
@@ -154,13 +154,13 @@ public class FrameParser
         pattrib.bw = GET_RX_STATUS_DESC_BW_8812(pdesc);
 
         /* Offset 20 */
-        /* pattrib.tsfl=(u8)GET_RX_STATUS_DESC_TSFL_8812(pdesc); */
+        /* pattrib.tsfl=(byte)GET_RX_STATUS_DESC_TSFL_8812(pdesc); */
 
         return pattrib;
     }
 
-    private static u16 GET_RX_STATUS_DESC_PKT_LEN_8812(Span<byte> __pRxStatusDesc)
-        => (u16)LE_BITS_TO_4BYTE(__pRxStatusDesc, 0, 14);
+    private static UInt16 GET_RX_STATUS_DESC_PKT_LEN_8812(Span<byte> __pRxStatusDesc)
+        => (UInt16)LE_BITS_TO_4BYTE(__pRxStatusDesc, 0, 14);
 
     private static bool GET_RX_STATUS_DESC_CRC32_8812(Span<byte> __pRxStatusDesc)
         => LE_BITS_TO_4BYTE(__pRxStatusDesc, 14, 1) != 0;
@@ -168,17 +168,17 @@ public class FrameParser
     private static bool GET_RX_STATUS_DESC_ICV_8812(Span<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc, 15, 1) != 0;
 
-    private static u8 GET_RX_STATUS_DESC_DRVINFO_SIZE_8812(Span<byte> __pRxStatusDesc) =>
-        (u8)LE_BITS_TO_4BYTE(__pRxStatusDesc, 16, 4);
+    private static byte GET_RX_STATUS_DESC_DRVINFO_SIZE_8812(Span<byte> __pRxStatusDesc) =>
+        (byte)LE_BITS_TO_4BYTE(__pRxStatusDesc, 16, 4);
 
-    private static u8 GET_RX_STATUS_DESC_SECURITY_8812(Span<byte> __pRxStatusDesc) =>
-        (u8)LE_BITS_TO_4BYTE(__pRxStatusDesc, 20, 3);
+    private static byte GET_RX_STATUS_DESC_SECURITY_8812(Span<byte> __pRxStatusDesc) =>
+        (byte)LE_BITS_TO_4BYTE(__pRxStatusDesc, 20, 3);
 
     private static bool GET_RX_STATUS_DESC_QOS_8812(Span<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc, 23, 1) != 0;
 
-    private static u8 GET_RX_STATUS_DESC_SHIFT_8812(Span<byte> __pRxStatusDesc) =>
-        (u8)LE_BITS_TO_4BYTE(__pRxStatusDesc, 24, 2);
+    private static byte GET_RX_STATUS_DESC_SHIFT_8812(Span<byte> __pRxStatusDesc) =>
+        (byte)LE_BITS_TO_4BYTE(__pRxStatusDesc, 24, 2);
 
     private static bool GET_RX_STATUS_DESC_PHY_STATUS_8812(Span<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc, 26, 1) != 0;
@@ -186,8 +186,8 @@ public class FrameParser
     private static bool GET_RX_STATUS_DESC_SWDEC_8812(Span<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc, 27, 1) != 0;
 
-    private static u8 GET_RX_STATUS_DESC_TID_8812(Span<byte> __pRxDesc) =>
-        (u8)LE_BITS_TO_4BYTE(__pRxDesc.Slice(4), 8, 4);
+    private static byte GET_RX_STATUS_DESC_TID_8812(Span<byte> __pRxDesc) =>
+        (byte)LE_BITS_TO_4BYTE(__pRxDesc.Slice(4), 8, 4);
 
     private static bool GET_RX_STATUS_DESC_MORE_DATA_8812(Span<byte> __pRxDesc) =>
         LE_BITS_TO_4BYTE(__pRxDesc.Slice(4), 26, 1) != 0;
@@ -195,27 +195,27 @@ public class FrameParser
     private static bool GET_RX_STATUS_DESC_MORE_FRAG_8812(Span<byte> __pRxDesc) =>
         LE_BITS_TO_4BYTE(__pRxDesc.Slice(4), 27, 1) != 0;
 
-    private static u16 GET_RX_STATUS_DESC_SEQ_8812(Span<byte> __pRxStatusDesc) =>
-        (u16)LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(8), 0, 12);
+    private static UInt16 GET_RX_STATUS_DESC_SEQ_8812(Span<byte> __pRxStatusDesc) =>
+        (UInt16)LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(8), 0, 12);
 
-    private static u8 GET_RX_STATUS_DESC_FRAG_8812(Span<byte> __pRxStatusDesc) =>
-        (u8)LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(8), 12, 4);
+    private static byte GET_RX_STATUS_DESC_FRAG_8812(Span<byte> __pRxStatusDesc) =>
+        (byte)LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(8), 12, 4);
 
     private static bool GET_RX_STATUS_DESC_RPT_SEL_8812(Span<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(8), 28, 1) != 0;
 
-    private static u8 GET_RX_STATUS_DESC_RX_RATE_8812(Span<byte> __pRxStatusDesc) =>
-        (u8)LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(12), 0, 7);
+    private static byte GET_RX_STATUS_DESC_RX_RATE_8812(Span<byte> __pRxStatusDesc) =>
+        (byte)LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(12), 0, 7);
 
-    private static u8 GET_RX_STATUS_DESC_SPLCP_8812(Span<byte> __pRxDesc) =>
-        (u8)LE_BITS_TO_4BYTE(__pRxDesc.Slice(16), 0, 1);
+    private static byte GET_RX_STATUS_DESC_SPLCP_8812(Span<byte> __pRxDesc) =>
+        (byte)LE_BITS_TO_4BYTE(__pRxDesc.Slice(16), 0, 1);
 
-    private static u8 GET_RX_STATUS_DESC_LDPC_8812(Span<byte> __pRxDesc) =>
-        (u8)LE_BITS_TO_4BYTE(__pRxDesc.Slice(16), 1, 1);
+    private static byte GET_RX_STATUS_DESC_LDPC_8812(Span<byte> __pRxDesc) =>
+        (byte)LE_BITS_TO_4BYTE(__pRxDesc.Slice(16), 1, 1);
 
-    private static u8 GET_RX_STATUS_DESC_STBC_8812(Span<byte> __pRxDesc) =>
-        (u8)LE_BITS_TO_4BYTE(__pRxDesc.Slice(16), 2, 1);
+    private static byte GET_RX_STATUS_DESC_STBC_8812(Span<byte> __pRxDesc) =>
+        (byte)LE_BITS_TO_4BYTE(__pRxDesc.Slice(16), 2, 1);
 
-    private static u8 GET_RX_STATUS_DESC_BW_8812(Span<byte> __pRxDesc) =>
-        (u8)LE_BITS_TO_4BYTE(__pRxDesc.Slice(16), 4, 2);
+    private static byte GET_RX_STATUS_DESC_BW_8812(Span<byte> __pRxDesc) =>
+        (byte)LE_BITS_TO_4BYTE(__pRxDesc.Slice(16), 4, 2);
 }

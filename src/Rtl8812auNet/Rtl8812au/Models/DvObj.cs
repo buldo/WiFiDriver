@@ -10,6 +10,6 @@ public class DvObj
         UsbSpeed = usbSpeed;
     }
 
-    public u8 UsbSpeed { get; } /* 1.1, 2.0 or 3.0 */
-    public u8 OutPipesCount { get; }
+    public byte UsbSpeed { get; } /* 1.1, 2.0 or 3.0 */
+    public byte OutPipesCount { get; }
 }

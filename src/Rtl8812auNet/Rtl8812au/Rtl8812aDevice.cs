@@ -50,7 +50,7 @@ public class Rtl8812aDevice
 
     private DvObj InitDvObj(RtlUsbAdapter usbInterface)
     {
-        u8 numOutPipes = 0;
+        byte numOutPipes = 0;
 
         foreach (var endpoint in usbInterface.UsbDevice.GetEndpoints())
         {
@@ -85,8 +85,8 @@ public class Rtl8812aDevice
     {
         var dvobj = InitDvObj(_device);
 
-        u8 rxagg_usb_size;
-        u8 rxagg_usb_timeout;
+        byte rxagg_usb_size;
+        byte rxagg_usb_timeout;
         if (dvobj.UsbSpeed == RTW_USB_SPEED_3)
         {
             rxagg_usb_size = 0x7;
@@ -129,7 +129,7 @@ public class Rtl8812aDevice
         return adapterState;
     }
 
-    private (TxSele OutEpQueueSel, byte OutEpNumber) GetChipOutEP8812(u8 NumOutPipe)
+    private (TxSele OutEpQueueSel, byte OutEpNumber) GetChipOutEP8812(byte NumOutPipe)
     {
         TxSele OutEpQueueSel = 0;
         byte OutEpNumber = 0;
@@ -163,7 +163,7 @@ public class Rtl8812aDevice
 
     private (HalVersion version_id, RfType rf_type, byte numTotalRfPath) read_chip_version_8812a()
     {
-        u32 value32 = _device.rtw_read32(REG_SYS_CFG);
+        UInt32 value32 = _device.rtw_read32(REG_SYS_CFG);
         RTW_INFO($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
 
         var versionId = new HalVersion

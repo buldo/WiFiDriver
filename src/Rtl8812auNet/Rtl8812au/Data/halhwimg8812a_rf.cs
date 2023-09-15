@@ -2,7 +2,7 @@
 
 public static class halhwimg8812a_rf
 {
-    public static u32[] array_mp_8812a_radioa =
+    public static UInt32[] array_mp_8812a_radioa =
     {
         0x000, 0x00010000,
         0x018, 0x0001712A,
@@ -419,7 +419,7 @@ public static class halhwimg8812a_rf
 
     };
 
-    public static u32[] array_mp_8812a_radiob =
+    public static UInt32[] array_mp_8812a_radiob =
     {
         0x056, 0x00051CF2,
         0x066, 0x00040000,

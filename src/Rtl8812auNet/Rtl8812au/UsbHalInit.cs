@@ -57,13 +57,13 @@ public static class UsbHalInit
         hal_ReadUsbType_8812AU(adapterState, pHalData.efuse_eeprom_data);
     }
 
-    static void hal_ReadUsbType_8812AU(AdapterState adapterState, u8[] PROMContent)
+    static void hal_ReadUsbType_8812AU(AdapterState adapterState, byte[] PROMContent)
     {
         /* if (IS_HARDWARE_TYPE_8812AU(adapterState) && adapterState.UsbModeMechanism.RegForcedUsbMode == 5) */
         {
             var pHalData = adapterState.HalData;
 
-            u8 reg_tmp, i, j, antenna = 0, wmode = 0;
+            byte reg_tmp, i, j, antenna = 0, wmode = 0;
             /* Read anenna type from EFUSE 1019/1018 */
             for (i = 0; i < 2; i++)
             {
@@ -147,7 +147,7 @@ public static class UsbHalInit
         }
     }
 
-    private static void Hal_ReadRFEType_8812A(hal_com_data pHalData, u8[] PROMContent, bool AutoloadFail)
+    private static void Hal_ReadRFEType_8812A(hal_com_data pHalData, byte[] PROMContent, bool AutoloadFail)
     {
         if (!AutoloadFail)
         {
@@ -211,10 +211,10 @@ public static class UsbHalInit
         RTW_INFO("RFE Type: 0x%2x\n", pHalData.rfe_type);
     }
 
-    static void Hal_ReadThermalMeter_8812A(AdapterState adapterState, u8[] PROMContent, bool AutoloadFail)
+    static void Hal_ReadThermalMeter_8812A(AdapterState adapterState, byte[] PROMContent, bool AutoloadFail)
     {
         var pHalData = adapterState.HalData;
-        /* u8	tempval; */
+        /* byte	tempval; */
 
         /*  */
         /* ThermalMeter from EEPROM */
@@ -236,7 +236,7 @@ public static class UsbHalInit
         RTW_INFO("ThermalMeter = 0x%x", pHalData.eeprom_thermal_meter);
     }
 
-    static void Hal_EfuseParseBTCoexistInfo8812A(AdapterState adapterState, u8[] hwinfo, bool AutoLoadFail)
+    static void Hal_EfuseParseBTCoexistInfo8812A(AdapterState adapterState, byte[] hwinfo, bool AutoLoadFail)
     {
         var pHalData = adapterState.HalData;
 
@@ -254,7 +254,7 @@ public static class UsbHalInit
         }
     }
 
-    private static void Hal_ReadTxPowerInfo8812A(AdapterState adapterState, u8[] PROMContent, bool AutoLoadFail)
+    private static void Hal_ReadTxPowerInfo8812A(AdapterState adapterState, byte[] PROMContent, bool AutoLoadFail)
     {
         var pHalData = adapterState.HalData;
 
@@ -280,18 +280,18 @@ public static class UsbHalInit
         RTW_INFO("EEPROMRegulatory = 0x%x", pHalData.EEPROMRegulatory);
     }
 
-    private static void Hal_ReadAmplifierType_8812A(AdapterState adapterState, u8[] PROMContent, bool AutoloadFail)
+    private static void Hal_ReadAmplifierType_8812A(AdapterState adapterState, byte[] PROMContent, bool AutoloadFail)
     {
         var pHalData = adapterState.HalData;
 
-        u8 extTypePA_2G_A = (byte)((PROMContent[0xBD] & BIT2) >> 2); /* 0xBD[2] */
-        u8 extTypePA_2G_B = (byte)((PROMContent[0xBD] & BIT6) >> 6); /* 0xBD[6] */
-        u8 extTypePA_5G_A = (byte)((PROMContent[0xBF] & BIT2) >> 2); /* 0xBF[2] */
-        u8 extTypePA_5G_B = (byte)((PROMContent[0xBF] & BIT6) >> 6); /* 0xBF[6] */
-        u8 extTypeLNA_2G_A = (byte)((PROMContent[0xBD] & (BIT1 | BIT0)) >> 0); /* 0xBD[1:0] */
-        u8 extTypeLNA_2G_B = (byte)((PROMContent[0xBD] & (BIT5 | BIT4)) >> 4); /* 0xBD[5:4] */
-        u8 extTypeLNA_5G_A = (byte)((PROMContent[0xBF] & (BIT1 | BIT0)) >> 0); /* 0xBF[1:0] */
-        u8 extTypeLNA_5G_B = (byte)((PROMContent[0xBF] & (BIT5 | BIT4)) >> 4); /* 0xBF[5:4] */
+        byte extTypePA_2G_A = (byte)((PROMContent[0xBD] & BIT2) >> 2); /* 0xBD[2] */
+        byte extTypePA_2G_B = (byte)((PROMContent[0xBD] & BIT6) >> 6); /* 0xBD[6] */
+        byte extTypePA_5G_A = (byte)((PROMContent[0xBF] & BIT2) >> 2); /* 0xBF[2] */
+        byte extTypePA_5G_B = (byte)((PROMContent[0xBF] & BIT6) >> 6); /* 0xBF[6] */
+        byte extTypeLNA_2G_A = (byte)((PROMContent[0xBD] & (BIT1 | BIT0)) >> 0); /* 0xBD[1:0] */
+        byte extTypeLNA_2G_B = (byte)((PROMContent[0xBD] & (BIT5 | BIT4)) >> 4); /* 0xBD[5:4] */
+        byte extTypeLNA_5G_A = (byte)((PROMContent[0xBF] & (BIT1 | BIT0)) >> 0); /* 0xBF[1:0] */
+        byte extTypeLNA_5G_B = (byte)((PROMContent[0xBF] & (BIT5 | BIT4)) >> 4); /* 0xBF[5:4] */
 
         hal_ReadPAType_8812A(adapterState, PROMContent, AutoloadFail);
 
@@ -325,7 +325,7 @@ public static class UsbHalInit
     private const int EEPROM_LNA_TYPE_2G_8812AU = 0xBD;
     private const int EEPROM_LNA_TYPE_5G_8812AU = 0xBF;
 
-    private static void hal_ReadPAType_8812A(AdapterState adapterState, u8[] PROMContent, bool AutoloadFail)
+    private static void hal_ReadPAType_8812A(AdapterState adapterState, byte[] PROMContent, bool AutoloadFail)
     {
         var pHalData = adapterState.HalData;
 
@@ -420,7 +420,7 @@ public static class UsbHalInit
             $"pHalData.LNAType_5G is 0x{pHalData.LNAType_5G:X}, pHalData.external_lna_5g = {pHalData.external_lna_5g}");
     }
 
-    private static void Hal_EfuseParseXtal_8812A(AdapterState pAdapterState, u8[] hwinfo, bool AutoLoadFail)
+    private static void Hal_EfuseParseXtal_8812A(AdapterState pAdapterState, byte[] hwinfo, bool AutoLoadFail)
     {
         var pHalData = pAdapterState.HalData;
 
@@ -438,7 +438,7 @@ public static class UsbHalInit
         RTW_INFO($"crystal_cap: 0x{pHalData.crystal_cap:X}");
     }
 
-    static void Hal_ReadPROMVersion8812A(AdapterState adapterState, u8[] PROMContent, bool AutoloadFail)
+    static void Hal_ReadPROMVersion8812A(AdapterState adapterState, byte[] PROMContent, bool AutoloadFail)
     {
         var pHalData = adapterState.HalData;
 
@@ -460,10 +460,10 @@ public static class UsbHalInit
         RTW_INFO("pHalData.EEPROMVersion is 0x%x", pHalData.EEPROMVersion);
     }
 
-    static void Hal_EfuseParseIDCode8812A(AdapterState padapter, u8[] hwinfo)
+    static void Hal_EfuseParseIDCode8812A(AdapterState padapter, byte[] hwinfo)
     {
         var pHalData = padapter.HalData;
-        u16 EEPROMId;
+        UInt16 EEPROMId;
 
 
         /* Checl 0x8129 again for making sure autoload status!! */
@@ -482,7 +482,7 @@ public static class UsbHalInit
     static void hal_InitPGData_8812A(AdapterState padapter)
     {
         var pHalData = padapter.HalData;
-        u32 i;
+        UInt32 i;
 
         if (false == pHalData.AutoloadFailFlag)
         {
@@ -493,7 +493,7 @@ public static class UsbHalInit
                 for (i = 0; i < HWSET_MAX_SIZE_JAGUAR; i += 2)
                 {
                     /* value16 = EF2Byte(ReadEEprom(pAdapterState, (u2Byte) (i>>1))); */
-                    /* *((u16*)(&PROMContent[i])) = value16; */
+                    /* *((UInt16*)(&PROMContent[i])) = value16; */
                 }
             }
             else
@@ -818,7 +818,7 @@ public static class UsbHalInit
         /*  */
         /* 5. Calculate Efuse utilization. */
         /*  */
-        // TODO: SetHwReg8812AU(HW_VARIABLES.HW_VAR_EFUSE_BYTES, (u8*)&eFuse_Addr);
+        // TODO: SetHwReg8812AU(HW_VARIABLES.HW_VAR_EFUSE_BYTES, (byte*)&eFuse_Addr);
         RTW_INFO($"Hal_EfuseReadEFuse8812A: eFuse_Addr offset(0x{eFuse_Addr:X}) !!");
     }
 

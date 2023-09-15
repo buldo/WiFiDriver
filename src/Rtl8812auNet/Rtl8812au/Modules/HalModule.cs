@@ -9,11 +9,11 @@ public class HalModule
     private readonly RtlUsbAdapter _device;
     private readonly RadioManagementModule _radioManagementModule;
     private readonly bool _usbTxAggMode = true;
-    private readonly u8 _usbTxAggDescNum = 0x01; // adjust value for OQT Overflow issue 0x3; only 4 bits
+    private readonly byte _usbTxAggDescNum = 0x01; // adjust value for OQT Overflow issue 0x3; only 4 bits
     private readonly RX_AGG_MODE _rxAggMode = RX_AGG_MODE.RX_AGG_USB;
-    private readonly u8 _rxAggDmaTimeout = 0x6; /* 6, absolute time = 34ms/(2^6) */
-    private readonly u8 _rxAggDmaSize = 16; /* uint: 128b, 0x0A = 10 = MAX_RX_DMA_BUFFER_SIZE/2/pHalData.UsbBulkOutSize */
-    private readonly u32[] _intrMask = new u32[3]; // TODO: Check where is set
+    private readonly byte _rxAggDmaTimeout = 0x6; /* 6, absolute time = 34ms/(2^6) */
+    private readonly byte _rxAggDmaSize = 16; /* uint: 128b, 0x0A = 10 = MAX_RX_DMA_BUFFER_SIZE/2/pHalData.UsbBulkOutSize */
+    private readonly UInt32[] _intrMask = new UInt32[3]; // TODO: Check where is set
 
     private bool _macPwrCtrlOn;
 
@@ -42,7 +42,7 @@ public class HalModule
         return status;
     }
 
-    private static bool check_positive(hal_com_data hal, u32 condition1, u32 condition2, u32 condition4)
+    private static bool check_positive(hal_com_data hal, UInt32 condition1, UInt32 condition2, UInt32 condition4)
     {
         var originalBoardType = hal.GetBoardType();
 
@@ -56,26 +56,26 @@ public class HalModule
             ((originalBoardType & BIT5) >>> 5) << 6;  /* _TRSWT*/
 
 
-        u32 cond1 = condition1;
-        u32 cond2 = condition2;
-        u32 cond4 = condition4;
+        UInt32 cond1 = condition1;
+        UInt32 cond2 = condition2;
+        UInt32 cond4 = condition4;
 
         uint cut_version_for_para = (hal.Version.IS_A_CUT()) ? (uint)15 : (uint)hal.Version.CUTVersion;
-        uint pkg_type_for_para = (u8)15;
+        uint pkg_type_for_para = (byte)15;
 
-        u32 driver1 = cut_version_for_para << 24 |
+        UInt32 driver1 = cut_version_for_para << 24 |
                       ((uint)RTL871X_HCI_TYPE.RTW_USB & 0xF0) << 16 |
                       pkg_type_for_para << 12 |
                       ((uint)RTL871X_HCI_TYPE.RTW_USB & 0x0F) << 8 |
                       boardType;
 
-        u32 driver2 =
+        UInt32 driver2 =
             ((uint)hal.TypeGLNA & 0xFF) << 0 |
             ((uint)hal.TypeGPA & 0xFF) << 8 |
             ((uint)hal.TypeALNA & 0xFF) << 16 |
             ((uint)hal.TypeAPA & 0xFF) << 24;
 
-        u32 driver4 =
+        UInt32 driver4 =
             ((uint)hal.TypeGLNA & 0xFF00) >> 8 |
             ((uint)hal.TypeGPA & 0xFF00) |
             ((uint)hal.TypeALNA & 0xFF00) << 8 |
@@ -102,7 +102,7 @@ public class HalModule
 
         if ((cond1 & driver1) == cond1)
         {
-            u32 bit_mask = 0;
+            UInt32 bit_mask = 0;
 
             if ((cond1 & 0x0F) == 0) /* board_type is DONTCARE*/
             {
@@ -307,23 +307,23 @@ public class HalModule
         return true;
     }
 
-    private static u32 _NPQ(u32 x) => ((x) & 0xFF);
-    private static u32 _HPQ(u32 x) => ((x) & 0xFF);
-    private static u32 _LPQ(u32 x) => (((x) & 0xFF) << 8);
-    private static u32 _PUBQ(u32 x) => (((x) & 0xFF) << 16);
-    private static u32 LD_RQPN() => BIT31;
-    private static u16 _TXDMA_HIQ_MAP(u16 x) => (u16)(((x) & 0x3) << 14);
-    private static u16 _TXDMA_MGQ_MAP(u16 x) => (u16)(((x) & 0x3) << 12);
-    private static u16 _TXDMA_BKQ_MAP(u16 x) => (u16)(((x) & 0x3) << 10);
-    private static u16 _TXDMA_BEQ_MAP(u16 x) => (u16)(((x) & 0x3) << 8);
-    private static u16 _TXDMA_VIQ_MAP(u16 x) => (u16)(((x) & 0x3) << 6);
-    private static u16 _TXDMA_VOQ_MAP(u16 x) => (u16)(((x) & 0x3) << 4);
+    private static UInt32 _NPQ(UInt32 x) => ((x) & 0xFF);
+    private static UInt32 _HPQ(UInt32 x) => ((x) & 0xFF);
+    private static UInt32 _LPQ(UInt32 x) => (((x) & 0xFF) << 8);
+    private static UInt32 _PUBQ(UInt32 x) => (((x) & 0xFF) << 16);
+    private static UInt32 LD_RQPN() => BIT31;
+    private static UInt16 _TXDMA_HIQ_MAP(UInt16 x) => (UInt16)(((x) & 0x3) << 14);
+    private static UInt16 _TXDMA_MGQ_MAP(UInt16 x) => (UInt16)(((x) & 0x3) << 12);
+    private static UInt16 _TXDMA_BKQ_MAP(UInt16 x) => (UInt16)(((x) & 0x3) << 10);
+    private static UInt16 _TXDMA_BEQ_MAP(UInt16 x) => (UInt16)(((x) & 0x3) << 8);
+    private static UInt16 _TXDMA_VIQ_MAP(UInt16 x) => (UInt16)(((x) & 0x3) << 6);
+    private static UInt16 _TXDMA_VOQ_MAP(UInt16 x) => (UInt16)(((x) & 0x3) << 4);
     private static byte _PSTX(byte x) => (byte)((x) << 4);
-    private static u32 _NETTYPE(u32 x) => (((x) & 0x3) << 16);
-    private static u16 BIT_LRL(u16 x) => (u16)(((x) & BIT_MASK_LRL) << BIT_SHIFT_LRL);
-    private static u16 BIT_SRL(u16 x) => (u16)(((x) & BIT_MASK_SRL) << BIT_SHIFT_SRL);
-    private static u16 _SPEC_SIFS_CCK(u16 x) => (u16)((x) & 0xFF);
-    private static u16 _SPEC_SIFS_OFDM(u16 x) => (u16)(((x) & 0xFF) << 8);
+    private static UInt32 _NETTYPE(UInt32 x) => (((x) & 0x3) << 16);
+    private static UInt16 BIT_LRL(UInt16 x) => (UInt16)(((x) & BIT_MASK_LRL) << BIT_SHIFT_LRL);
+    private static UInt16 BIT_SRL(UInt16 x) => (UInt16)(((x) & BIT_MASK_SRL) << BIT_SHIFT_SRL);
+    private static UInt16 _SPEC_SIFS_CCK(UInt16 x) => (UInt16)((x) & 0xFF);
+    private static UInt16 _SPEC_SIFS_OFDM(UInt16 x) => (UInt16)(((x) & 0xFF) << 8);
 
     private void PHY_BB8812_Config_1T()
     {
@@ -402,13 +402,13 @@ public class HalModule
 
     private void odm_read_and_config_mp_8812a_radiob(hal_com_data dm)
     {
-        u32 i = 0;
-        u8 c_cond;
+        UInt32 i = 0;
+        byte c_cond;
         bool is_matched = true, is_skipped = false;
         var array_len = halhwimg8812a_rf.array_mp_8812a_radiob.Length;
-        u32[] array = halhwimg8812a_rf.array_mp_8812a_radiob;
+        UInt32[] array = halhwimg8812a_rf.array_mp_8812a_radiob;
 
-        u32 pre_v1 = 0, pre_v2 = 0;
+        UInt32 pre_v1 = 0, pre_v2 = 0;
 
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
 
@@ -423,7 +423,7 @@ public class HalModule
                 if ((v1 & BIT31) != 0)
                 {
                     /* positive condition*/
-                    c_cond = (u8)((v1 & (BIT29 | BIT28)) >>> 28);
+                    c_cond = (byte)((v1 & (BIT29 | BIT28)) >>> 28);
                     if (c_cond == COND_ENDIF)
                     {
                         /*end*/
@@ -479,13 +479,13 @@ public class HalModule
 
     private void odm_read_and_config_mp_8812a_radioa(hal_com_data dm)
     {
-        u32 i = 0;
-        u8 c_cond;
+        UInt32 i = 0;
+        byte c_cond;
         bool is_matched = true, is_skipped = false;
         var array_len = halhwimg8812a_rf.array_mp_8812a_radioa.Length;
-        u32[] array = halhwimg8812a_rf.array_mp_8812a_radioa;
+        UInt32[] array = halhwimg8812a_rf.array_mp_8812a_radioa;
 
-        u32 pre_v1 = 0, pre_v2 = 0;
+        UInt32 pre_v1 = 0, pre_v2 = 0;
 
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
 
@@ -500,7 +500,7 @@ public class HalModule
                 if ((v1 & BIT31) != 0)
                 {
                     /* positive condition*/
-                    c_cond = (u8)((v1 & (BIT29 | BIT28)) >>> 28);
+                    c_cond = (byte)((v1 & (BIT29 | BIT28)) >>> 28);
                     if (c_cond == COND_ENDIF)
                     {
                         /*end*/
@@ -554,23 +554,23 @@ public class HalModule
         }
     }
 
-    private void odm_config_rf_radio_a_8812a(hal_com_data dm, u32 addr, u32 data)
+    private void odm_config_rf_radio_a_8812a(hal_com_data dm, UInt32 addr, UInt32 data)
     {
-        u32 content = 0x1000; /* RF_Content: radioa_txt */
-        u32 maskfor_phy_set = (u32)(content & 0xE000);
+        UInt32 content = 0x1000; /* RF_Content: radioa_txt */
+        UInt32 maskfor_phy_set = (UInt32)(content & 0xE000);
 
-        odm_config_rf_reg_8812a(dm, addr, data, RfPath.RF_PATH_A, (u16)(addr | maskfor_phy_set));
+        odm_config_rf_reg_8812a(dm, addr, data, RfPath.RF_PATH_A, (UInt16)(addr | maskfor_phy_set));
     }
 
-    private void odm_config_rf_radio_b_8812a(hal_com_data dm, u32 addr, u32 data)
+    private void odm_config_rf_radio_b_8812a(hal_com_data dm, UInt32 addr, UInt32 data)
     {
-        u32 content = 0x1001; /* RF_Content: radiob_txt */
-        u32 maskfor_phy_set = (u32)(content & 0xE000);
+        UInt32 content = 0x1001; /* RF_Content: radiob_txt */
+        UInt32 maskfor_phy_set = (UInt32)(content & 0xE000);
 
-        odm_config_rf_reg_8812a(dm, addr, data, RfPath.RF_PATH_B, (u16)(addr | maskfor_phy_set));
+        odm_config_rf_reg_8812a(dm, addr, data, RfPath.RF_PATH_B, (UInt16)(addr | maskfor_phy_set));
     }
 
-    private void odm_config_rf_reg_8812a(hal_com_data dm, u32 addr, u32 data, RfPath RF_PATH, u16 reg_addr)
+    private void odm_config_rf_reg_8812a(hal_com_data dm, UInt32 addr, UInt32 data, RfPath RF_PATH, UInt16 reg_addr)
     {
         if (addr == 0xfe || addr == 0xffe)
         {
@@ -584,7 +584,7 @@ public class HalModule
         }
     }
 
-    private void odm_set_rf_reg(hal_com_data dm, RfPath e_rf_path, u16 reg_addr, u32 bit_mask, u32 data)
+    private void odm_set_rf_reg(hal_com_data dm, RfPath e_rf_path, UInt16 reg_addr, UInt32 bit_mask, UInt32 data)
     {
         _radioManagementModule.phy_set_rf_reg(dm, e_rf_path, reg_addr, bit_mask, data);
     }
@@ -617,7 +617,7 @@ public class HalModule
         return rtStatus;
     }
 
-    private void hal_set_crystal_cap(u8 crystal_cap)
+    private void hal_set_crystal_cap(byte crystal_cap)
     {
         crystal_cap = (byte)(crystal_cap & 0x3F);
 
@@ -705,13 +705,13 @@ public class HalModule
 
     private void odm_read_and_config_mp_8812a_agc_tab(hal_com_data hal)
     {
-        u32 i = 0;
-        u8 c_cond;
+        UInt32 i = 0;
+        byte c_cond;
         bool is_matched = true, is_skipped = false;
-        u32 array_len = (u32)array_mp_8812a_agc_tab.Length;
-        u32[] array = array_mp_8812a_agc_tab;
+        UInt32 array_len = (UInt32)array_mp_8812a_agc_tab.Length;
+        UInt32[] array = array_mp_8812a_agc_tab;
 
-        u32 pre_v1 = 0, pre_v2 = 0;
+        UInt32 pre_v1 = 0, pre_v2 = 0;
 
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
 
@@ -726,7 +726,7 @@ public class HalModule
                 if ((v1 & BIT31) != 0)
                 {
                     /* positive condition*/
-                    c_cond = (u8)((v1 & (BIT29 | BIT28)) >> 28);
+                    c_cond = (byte)((v1 & (BIT29 | BIT28)) >> 28);
                     if (c_cond == COND_ENDIF)
                     {
                         /*end*/
@@ -780,7 +780,7 @@ public class HalModule
         }
     }
 
-    private void odm_config_bb_agc_8812a(u32 addr, u32 bitmask, u32 data)
+    private void odm_config_bb_agc_8812a(UInt32 addr, UInt32 bitmask, UInt32 data)
     {
         odm_set_bb_reg(addr, bitmask, data);
         /* Add 1us delay between BB/RF register setting. */
@@ -789,13 +789,13 @@ public class HalModule
 
     private void odm_read_and_config_mp_8812a_phy_reg_mp(hal_com_data hal)
     {
-        u32 i = 0;
-        u8 c_cond;
+        UInt32 i = 0;
+        byte c_cond;
         bool is_matched = true, is_skipped = false;
-        u32 array_len = (u32)array_mp_8812a_phy_reg_mp.Length;
-        u32[] array = array_mp_8812a_phy_reg_mp;
+        UInt32 array_len = (UInt32)array_mp_8812a_phy_reg_mp.Length;
+        UInt32[] array = array_mp_8812a_phy_reg_mp;
 
-        u32 pre_v1 = 0, pre_v2 = 0;
+        UInt32 pre_v1 = 0, pre_v2 = 0;
 
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
 
@@ -810,7 +810,7 @@ public class HalModule
                 if ((v1 & BIT31) != 0)
                 {
                     /* positive condition*/
-                    c_cond = (u8)((v1 & (BIT29 | BIT28)) >> 28);
+                    c_cond = (byte)((v1 & (BIT29 | BIT28)) >> 28);
                     if (c_cond == COND_ENDIF)
                     {
                         /*end*/
@@ -866,13 +866,13 @@ public class HalModule
 
     private void odm_read_and_config_mp_8812a_phy_reg(hal_com_data hal)
     {
-        u32 i = 0;
-        u8 c_cond;
+        UInt32 i = 0;
+        byte c_cond;
         bool is_matched = true, is_skipped = false;
         int array_len = array_mp_8812a_phy_reg.Length;
-        u32[] array = array_mp_8812a_phy_reg;
+        UInt32[] array = array_mp_8812a_phy_reg;
 
-        u32 pre_v1 = 0, pre_v2 = 0;
+        UInt32 pre_v1 = 0, pre_v2 = 0;
 
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
 
@@ -887,7 +887,7 @@ public class HalModule
                 if ((v1 & BIT31) != 0)
                 {
                     /* positive condition*/
-                    c_cond = (u8)((v1 & (BIT29 | BIT28)) >> 28);
+                    c_cond = (byte)((v1 & (BIT29 | BIT28)) >> 28);
                     if (c_cond == COND_ENDIF)
                     {
                         /*end*/
@@ -943,7 +943,7 @@ public class HalModule
     }
 
 
-    private void odm_config_bb_phy_8812a(u32 addr, u32 bitmask, u32 data)
+    private void odm_config_bb_phy_8812a(UInt32 addr, UInt32 bitmask, UInt32 data)
     {
         if (addr == 0xfe)
         {
@@ -977,9 +977,9 @@ public class HalModule
         }
     }
 
-    private void odm_set_bb_reg(u32 reg_addr, u32 bit_mask, u32 data)
+    private void odm_set_bb_reg(UInt32 reg_addr, UInt32 bit_mask, UInt32 data)
     {
-        _device.phy_set_bb_reg((u16)reg_addr, bit_mask, data);
+        _device.phy_set_bb_reg((UInt16)reg_addr, bit_mask, data);
     }
 
 
@@ -1004,7 +1004,7 @@ public class HalModule
 
     private void _InitBurstPktLen()
     {
-        u8 speedvalue, provalue, temp;
+        byte speedvalue, provalue, temp;
 
         _device.rtw_write8(0xf050, 0x01); /* usb3 rx interval */
         _device.rtw_write16(REG_RXDMA_STATUS, 0x7400); /* burset lenght=4, set 0x3400 for burset length=2 */
@@ -1092,7 +1092,7 @@ public class HalModule
     private void _InitBeaconParameters_8812A()
     {
         var val8 = DIS_TSF_UDT;
-        var val16 = (u16)(val8 | (val8 << 8)); /* port0 and port1 */
+        var val16 = (UInt16)(val8 | (val8 << 8)); /* port0 and port1 */
 
         _device.rtw_write16(REG_BCN_CTRL, val16);
 
@@ -1125,7 +1125,7 @@ public class HalModule
     {
         if (_usbTxAggMode)
         {
-            u32 value32 = _device.rtw_read32(REG_TDECTRL);
+            UInt32 value32 = _device.rtw_read32(REG_TDECTRL);
             value32 = value32 & ~(BLK_DESC_NUM_MASK << BLK_DESC_NUM_SHIFT);
             value32 |= ((_usbTxAggDescNum & BLK_DESC_NUM_MASK) << BLK_DESC_NUM_SHIFT);
 
@@ -1144,10 +1144,10 @@ public class HalModule
                 valueDMA |= RXDMA_AGG_EN;
                 /* 2012/10/26 MH For TX through start rate temp fix. */
             {
-                u16 temp;
+                UInt16 temp;
 
                 /* Adjust DMA page and thresh. */
-                temp = (u16)(_rxAggDmaSize | (_rxAggDmaTimeout << 8));
+                temp = (UInt16)(_rxAggDmaSize | (_rxAggDmaTimeout << 8));
                 _device.rtw_write16(REG_RXDMA_AGG_PG_TH, temp);
                 _device.rtw_write8(REG_RXDMA_AGG_PG_TH + 3,
                     (byte)BIT7); /* for dma agg , 0x280[31]GBIT_RXDMA_AGG_OLD_MOD, set 1 */
@@ -1156,10 +1156,10 @@ public class HalModule
             case RX_AGG_MODE.RX_AGG_USB:
                 valueDMA |= RXDMA_AGG_EN;
             {
-                u16 temp;
+                UInt16 temp;
 
                 /* Adjust DMA page and thresh. */
-                temp = (u16)(pHalData.rxagg_usb_size | (pHalData.rxagg_usb_timeout << 8));
+                temp = (UInt16)(pHalData.rxagg_usb_size | (pHalData.rxagg_usb_timeout << 8));
                 _device.rtw_write16(REG_RXDMA_AGG_PG_TH, temp);
             }
                 break;
@@ -1213,7 +1213,7 @@ public class HalModule
     private void _InitAdaptiveCtrl_8812AUsb()
     {
         /* Response Rate Set */
-        u32 value32 = _device.rtw_read32(REG_RRSR);
+        UInt32 value32 = _device.rtw_read32(REG_RRSR);
         value32 &= NotRATE_BITMAP_ALL;
 
         value32 |= RATE_RRSR_WITHOUT_CCK;
@@ -1224,18 +1224,18 @@ public class HalModule
         /* m_spIoBase.rtw_write8(REG_CFEND_TH, 0x1); */
 
         /* SIFS (used in NAV) */
-        u16 value16 = (u16)(_SPEC_SIFS_CCK(0x10) | _SPEC_SIFS_OFDM(0x10));
+        UInt16 value16 = (UInt16)(_SPEC_SIFS_CCK(0x10) | _SPEC_SIFS_OFDM(0x10));
         _device.rtw_write16(REG_SPEC_SIFS, value16);
 
         /* Retry Limit */
-        value16 = (u16)(BIT_LRL(RL_VAL_STA) | BIT_SRL(RL_VAL_STA));
+        value16 = (UInt16)(BIT_LRL(RL_VAL_STA) | BIT_SRL(RL_VAL_STA));
         _device.rtw_write16(REG_RETRY_LIMIT, value16);
     }
 
     private void _InitWMACSetting_8812A()
     {
         /* rcr = AAP | APM | AM | AB | APP_ICV | ADF | AMF | APP_FCS | HTC_LOC_CTRL | APP_MIC | APP_PHYSTS; */
-        u32 rcr = RCR_APM |
+        UInt32 rcr = RCR_APM |
                   RCR_AM |
                   RCR_AB |
                   RCR_CBSSID_DATA |
@@ -1255,7 +1255,7 @@ public class HalModule
         _device.rtw_write32(REG_MAR + 4, 0xFFFFFFFF);
 
         uint value16 = BIT10 | BIT5;
-        _device.rtw_write16(REG_RXFLTMAP1, (u16)value16);
+        _device.rtw_write16(REG_RXFLTMAP1, (UInt16)value16);
     }
 
     private void _InitNetworkType_8812A()
@@ -1274,14 +1274,14 @@ public class HalModule
         _device.rtw_write32(REG_HIMR1_8812, _intrMask[1] & 0xFFFFFFFF);
     }
 
-    private void _InitDriverInfoSize_8812A(u8 drvInfoSize)
+    private void _InitDriverInfoSize_8812A(byte drvInfoSize)
     {
         _device.rtw_write8(REG_RX_DRVINFO_SZ, drvInfoSize);
     }
 
     private void _InitTransferPageSize_8812AUsb()
     {
-        u8 value8 = _PSTX(PBP_512);
+        byte value8 = _PSTX(PBP_512);
         _device.rtw_write8(REG_PBP, value8);
     }
 
@@ -1292,11 +1292,11 @@ public class HalModule
 
     private void _InitQueueReservedPage_8812AUsb(hal_com_data pHalData)
     {
-        u32 numHQ = 0;
-        u32 numLQ = 0;
-        u32 numNQ = 0;
-        u32 value32;
-        u8 value8;
+        UInt32 numHQ = 0;
+        UInt32 numLQ = 0;
+        UInt32 numNQ = 0;
+        UInt32 value32;
+        byte value8;
         bool bWiFiConfig = registry_priv.wifi_spec;
 
         if (!bWiFiConfig)
@@ -1337,9 +1337,9 @@ public class HalModule
             }
         }
 
-        u32 numPubQ = TX_TOTAL_PAGE_NUMBER_8812 - numHQ - numLQ - numNQ;
+        UInt32 numPubQ = TX_TOTAL_PAGE_NUMBER_8812 - numHQ - numLQ - numNQ;
 
-        value8 = (u8)_NPQ(numNQ);
+        value8 = (byte)_NPQ(numNQ);
         _device.rtw_write8(REG_RQPN_NPQ, value8);
 
         /* TX DMA */
@@ -1369,7 +1369,7 @@ public class HalModule
         /* Enable MAC DMA/WMAC/SCHEDULE/SEC block */
         /* Set CR bit10 to enable 32k calibration. Suggested by SD1 Gimmy. Added by tynli. 2011.08.31. */
         _device.rtw_write16(REG_CR, 0x00); /* suggseted by zhouzhou, by page, 20111230 */
-        u16 u2btmp = _device.rtw_read16(REG_CR);
+        UInt16 u2btmp = _device.rtw_read16(REG_CR);
         u2btmp |= (ushort)(
             CrBit.HCI_TXDMA_EN |
             CrBit.HCI_RXDMA_EN |
@@ -1498,7 +1498,7 @@ public class HalModule
         return true;
     }
 
-    private bool InitLLTTable8812A(u8 txpktbuf_bndy)
+    private bool InitLLTTable8812A(byte txpktbuf_bndy)
     {
         bool status;
         for (uint i = 0; i < (txpktbuf_bndy - 1); i++)
@@ -1520,7 +1520,7 @@ public class HalModule
         /* Make the other pages as ring buffer */
         /* This ring buffer is used as beacon buffer if we config this MAC as two MAC transfer. */
         /* Otherwise used as local loopback buffer. */
-        u32 Last_Entry_Of_TxPktBuf = LAST_ENTRY_OF_TX_PKT_BUFFER_8812;
+        UInt32 Last_Entry_Of_TxPktBuf = LAST_ENTRY_OF_TX_PKT_BUFFER_8812;
         for (uint i = txpktbuf_bndy; i < Last_Entry_Of_TxPktBuf; i++)
         {
             status = _LLTWrite_8812A(i, (i + 1));
@@ -1560,11 +1560,11 @@ public class HalModule
         return (((x) >> 30) & 0x3);
     }
 
-    private bool _LLTWrite_8812A(u32 address, u32 data)
+    private bool _LLTWrite_8812A(UInt32 address, UInt32 data)
     {
         bool status = true;
-        s32 count = 0;
-        u32 value = _LLT_INIT_ADDR(address) | _LLT_INIT_DATA(data) | _LLT_OP(_LLT_WRITE_ACCESS);
+        Int32 count = 0;
+        UInt32 value = _LLT_INIT_ADDR(address) | _LLT_INIT_DATA(data) | _LLT_OP(_LLT_WRITE_ACCESS);
 
         _device.rtw_write32(REG_LLT_INIT, value);
 
@@ -1592,20 +1592,20 @@ public class HalModule
     private void _InitHardwareDropIncorrectBulkOut_8812A()
     {
         var DROP_DATA_EN = BIT9;
-        u32 value32 = _device.rtw_read32(REG_TXDMA_OFFSET_CHK);
+        UInt32 value32 = _device.rtw_read32(REG_TXDMA_OFFSET_CHK);
         value32 |= DROP_DATA_EN;
         _device.rtw_write32(REG_TXDMA_OFFSET_CHK, value32);
     }
 
     private void odm_read_and_config_mp_8812a_mac_reg(hal_com_data hal)
     {
-        u32 i = 0;
-        u8 c_cond;
+        UInt32 i = 0;
+        byte c_cond;
         bool is_matched = true, is_skipped = false;
         var array_len = HalHwImg8812aMac.Mp8812aMacReg.Length;
         var array = HalHwImg8812aMac.Mp8812aMacReg;
 
-        u32 pre_v1 = 0, pre_v2 = 0;
+        UInt32 pre_v1 = 0, pre_v2 = 0;
 
         //PHYDM_DBG(dm, ODM_COMP_INIT, "===> %s\n", __func__);
 
@@ -1620,7 +1620,7 @@ public class HalModule
                 if ((v1 & BIT31) != 0)
                 {
                     /* positive condition*/
-                    c_cond = (u8)((v1 & (BIT29 | BIT28)) >> 28);
+                    c_cond = (byte)((v1 & (BIT29 | BIT28)) >> 28);
                     if (c_cond == COND_ENDIF)
                     {
                         /*end*/
@@ -1666,8 +1666,8 @@ public class HalModule
             {
                 if (is_matched)
                 {
-                    ushort addr = (u16)v1;
-                    byte data = (u8)v2;
+                    ushort addr = (UInt16)v1;
+                    byte data = (byte)v2;
                     odm_write_1byte(addr, data);
                 }
             }
@@ -1676,14 +1676,14 @@ public class HalModule
         }
     }
 
-    private void odm_write_1byte(u16 reg_addr, u8 data)
+    private void odm_write_1byte(UInt16 reg_addr, byte data)
     {
         _device.rtw_write8(reg_addr, data);
     }
 
     private void _InitTxBufferBoundary_8812AUsb()
     {
-        u8 txPageBoundary8812 = TX_PAGE_BOUNDARY_8812;
+        byte txPageBoundary8812 = TX_PAGE_BOUNDARY_8812;
 
         _device.rtw_write8(REG_BCNQ_BDNY, txPageBoundary8812);
         _device.rtw_write8(REG_MGQ_BDNY, txPageBoundary8812);
@@ -1713,8 +1713,8 @@ public class HalModule
 
     private void _InitNormalChipTwoOutEpPriority_8812AUsb(hal_com_data pHalData)
     {
-        u16 valueHi;
-        u16 valueLow;
+        UInt16 valueHi;
+        UInt16 valueLow;
 
         switch (pHalData.OutEpQueueSel)
         {
@@ -1736,7 +1736,7 @@ public class HalModule
                 break;
         }
 
-        u16 beQ, bkQ, viQ, voQ, mgtQ, hiQ;
+        UInt16 beQ, bkQ, viQ, voQ, mgtQ, hiQ;
         if (!registry_priv.wifi_spec)
         {
             beQ = valueLow;
@@ -1762,7 +1762,7 @@ public class HalModule
 
     private void _InitNormalChipThreeOutEpPriority_8812AUsb()
     {
-        u16 beQ, bkQ, viQ, voQ, mgtQ, hiQ;
+        UInt16 beQ, bkQ, viQ, voQ, mgtQ, hiQ;
 
         if (!registry_priv.wifi_spec)
         {
@@ -1790,7 +1790,7 @@ public class HalModule
 
     private void _InitNormalChipFourOutEpPriority_8812AUsb()
     {
-        u16 beQ, bkQ, viQ, voQ, mgtQ, hiQ;
+        UInt16 beQ, bkQ, viQ, voQ, mgtQ, hiQ;
 
         if (!registry_priv.wifi_spec)
         {
@@ -1818,17 +1818,17 @@ public class HalModule
     }
 
     private void _InitNormalChipRegPriority_8812AUsb(
-        u16 beQ,
-        u16 bkQ,
-        u16 viQ,
-        u16 voQ,
-        u16 mgtQ,
-        u16 hiQ
+        UInt16 beQ,
+        UInt16 bkQ,
+        UInt16 viQ,
+        UInt16 voQ,
+        UInt16 mgtQ,
+        UInt16 hiQ
     )
     {
-        u16 value16 = (u16)(_device.rtw_read16(REG_TRXDMA_CTRL) & 0x7);
+        UInt16 value16 = (UInt16)(_device.rtw_read16(REG_TRXDMA_CTRL) & 0x7);
 
-        value16 = (u16)(value16 |
+        value16 = (UInt16)(value16 |
                         _TXDMA_BEQ_MAP(beQ) | _TXDMA_BKQ_MAP(bkQ) |
                         _TXDMA_VIQ_MAP(viQ) | _TXDMA_VOQ_MAP(voQ) |
                         _TXDMA_MGQ_MAP(mgtQ) | _TXDMA_HIQ_MAP(hiQ));

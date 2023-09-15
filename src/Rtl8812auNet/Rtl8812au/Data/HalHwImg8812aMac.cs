@@ -2,7 +2,7 @@
 
 public static class HalHwImg8812aMac
 {
-    public static u32[] Mp8812aMacReg =
+    public static UInt32[] Mp8812aMacReg =
     {
         0x010, 0x0000000C,
         0x80000200, 0x00000000, 0x40000000, 0x00000000,

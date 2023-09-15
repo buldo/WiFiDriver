@@ -72,7 +72,7 @@ public static class Bits
     public const uint BIT30 = 1 << 30;
     public const uint BIT31 = 0b10000000_00000000_00000000_00000000;
 
-    public static u32 PHY_CalculateBitShift(u32 BitMask)
+    public static UInt32 PHY_CalculateBitShift(UInt32 BitMask)
     {
         int i;
 
@@ -82,29 +82,29 @@ public static class Bits
                 break;
         }
 
-        return (u32)i;
+        return (UInt32)i;
     }
 
-    public static u32 LE_BITS_TO_4BYTE(Span<byte> __pStart, int __BitOffset, int __BitLen)
+    public static UInt32 LE_BITS_TO_4BYTE(Span<byte> __pStart, int __BitOffset, int __BitLen)
     {
         return LE_P4BYTE_TO_HOST_4BYTE(__pStart) >> __BitOffset & BIT_LEN_MASK_32(__BitLen);
     }
 
-    public static u32 LE_BITS_TO_4BYTE(byte[] __pStart, int __BitOffset, int __BitLen)
+    public static UInt32 LE_BITS_TO_4BYTE(byte[] __pStart, int __BitOffset, int __BitLen)
     {
         return LE_P4BYTE_TO_HOST_4BYTE(__pStart) >> __BitOffset & BIT_LEN_MASK_32(__BitLen);
     }
 
-    private static u32 LE_P4BYTE_TO_HOST_4BYTE(Span<byte> __pStart)
+    private static UInt32 LE_P4BYTE_TO_HOST_4BYTE(Span<byte> __pStart)
     {
         return BinaryPrimitives.ReadUInt32LittleEndian(__pStart);
     }
 
-    private static u32 LE_P4BYTE_TO_HOST_4BYTE(byte[] __pStart)
+    private static UInt32 LE_P4BYTE_TO_HOST_4BYTE(byte[] __pStart)
     {
-        //(le32_to_cpu(*((u32*)(__pStart))))
+        //(le32_to_cpu(*((UInt32*)(__pStart))))
         return BinaryPrimitives.ReadUInt32LittleEndian(__pStart.AsSpan(0, 4));
     }
 
-    private static u32 BIT_LEN_MASK_32(int __BitLen) => 0xFFFFFFFF >> 32 - __BitLen;
+    private static UInt32 BIT_LEN_MASK_32(int __BitLen) => 0xFFFFFFFF >> 32 - __BitLen;
 }

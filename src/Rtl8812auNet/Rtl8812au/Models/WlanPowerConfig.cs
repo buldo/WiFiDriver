@@ -16,7 +16,7 @@ public class WlanPowerConfig
         Value = value;
     }
 
-    public u16 Offset { get; }
+    public UInt16 Offset { get; }
     public PwrCmd Command { get; }
     public uint Mask { get; }
     public uint Value { get; }

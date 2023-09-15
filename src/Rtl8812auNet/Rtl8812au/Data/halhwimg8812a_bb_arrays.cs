@@ -2,14 +2,14 @@
 
 public static class halhwimg8812a_bb_arrays
 {
-    public static u32[] array_mp_8812a_phy_reg_mp =
+    public static UInt32[] array_mp_8812a_phy_reg_mp =
     {
         0x800, 0x8020D410,
         0x830, 0x2EAA8EB8,
 
     };
 
-    public static u32[] array_mp_8812a_phy_reg =
+    public static UInt32[] array_mp_8812a_phy_reg =
     {
         0x800, 0x8020D010,
         0x804, 0x080112E0,
@@ -242,7 +242,7 @@ public static class halhwimg8812a_bb_arrays
         0xEB8, 0x00508242,
     };
 
-    public static u32[] array_mp_8812a_agc_tab =
+    public static UInt32[] array_mp_8812a_agc_tab =
     {
         0x80000001, 0x00000000, 0x40000000, 0x00000000,
         0x81C, 0xFC000001,

@@ -61,7 +61,7 @@ public class RtlUsbAdapter
 
     public void _8051Reset8812()
     {
-        u8 u1bTmp, u1bTmp2;
+        byte u1bTmp, u1bTmp2;
 
         /* Reset MCU IO Wrapper- sugggest by SD1-Gimmy */
 
@@ -123,14 +123,14 @@ public class RtlUsbAdapter
         }
     }
 
-    public void phy_set_bb_reg(u16 regAddr, u32 bitMask, u32 data) => PHY_SetBBReg8812(regAddr, bitMask, data);
+    public void phy_set_bb_reg(UInt16 regAddr, UInt32 bitMask, UInt32 data) => PHY_SetBBReg8812(regAddr, bitMask, data);
 
     private void PHY_SetBBReg8812(
-        u16 regAddr,
-        u32 bitMask,
-        u32 dataOriginal)
+        UInt16 regAddr,
+        UInt32 bitMask,
+        UInt32 dataOriginal)
     {
-        u32 data = dataOriginal;
+        UInt32 data = dataOriginal;
         if (bitMask != bMaskDWord)
         {
             /* if not "double word" write */
@@ -147,9 +147,9 @@ public class RtlUsbAdapter
 
     public void ReadEFuseByte(UInt16 _offset, byte[] pbuf)
     {
-        u32 value32;
-        u8 readbyte;
-        u16 retry;
+        UInt32 value32;
+        byte readbyte;
+        UInt16 retry;
 
         /* Write Address */
         rtw_write8(EFUSE_CTRL + 1, (byte)(_offset & 0xff));
@@ -177,7 +177,7 @@ public class RtlUsbAdapter
         Thread.Sleep(50);
         value32 = rtw_read32(EFUSE_CTRL);
 
-        pbuf[0] = (u8)(value32 & 0xff);
+        pbuf[0] = (byte)(value32 & 0xff);
     }
 
 

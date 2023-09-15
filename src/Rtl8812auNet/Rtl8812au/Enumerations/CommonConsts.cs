@@ -43,8 +43,8 @@ public static class CommonConsts
     public const uint LAST_ENTRY_OF_TX_PKT_BUFFER_8812 = 255;
     public const byte POLLING_LLT_THRESHOLD = 20;
     public const ushort REG_LLT_INIT = 0x01E0;
-    public const u32 _LLT_WRITE_ACCESS = 0x1;
-    public const u32 _LLT_NO_ACTIVE = 0x0;
+    public const UInt32 _LLT_WRITE_ACCESS = 0x1;
+    public const UInt32 _LLT_NO_ACTIVE = 0x0;
     public const ushort REG_TXDMA_OFFSET_CHK = 0x020C;
     public const ushort REG_HMETFR = 0x01CC;
     public const ushort FW_START_ADDRESS = 0x1000;
@@ -181,10 +181,10 @@ public static class CommonConsts
     public const uint FEN_BB_GLB_RSTn = BIT1;
     public const uint FEN_BBRSTB = BIT0;
 
-    public const u16 QUEUE_LOW = 1;
-    public const u16 QUEUE_NORMAL = 2;
-    public const u16 QUEUE_HIGH = 3;
-    public const u16 QUEUE_EXTRA = 0;
+    public const UInt16 QUEUE_LOW = 1;
+    public const UInt16 QUEUE_NORMAL = 2;
+    public const UInt16 QUEUE_HIGH = 3;
+    public const UInt16 QUEUE_EXTRA = 0;
 
     public const uint rA_LSSIWrite_Jaguar = 0xc90; /* RF write addr */
     public const uint rB_LSSIWrite_Jaguar = 0xe90; /* RF write addr */
@@ -202,9 +202,9 @@ public static class CommonConsts
     public const byte RL_VAL_STA = 0x30;
 
     public const int BIT_SHIFT_SRL = 8;
-    public const u16 BIT_MASK_SRL = 0x3f;
+    public const UInt16 BIT_MASK_SRL = 0x3f;
     public const int BIT_SHIFT_LRL = 0;
-    public const u16 BIT_MASK_LRL = 0x3f;
+    public const UInt16 BIT_MASK_LRL = 0x3f;
 
     public const byte NT_LINK_AP = 0x2;
 

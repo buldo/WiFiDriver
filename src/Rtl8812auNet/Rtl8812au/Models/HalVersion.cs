@@ -6,7 +6,7 @@ public class HalVersion
     public CutVersion CUTVersion { get; set; }
     public HalRFType RFType { get; set; }
 
-    public (RfType rf_type, u8 NumTotalRFPath) GetRfType()
+    public (RfType rf_type, byte NumTotalRFPath) GetRfType()
     {
         if (IS_1T1R())
         {

@@ -25,7 +25,7 @@ public class RadioManagementModule
     private byte _cur80MhzPrimeSc;
     private ChannelWidth _currentChannelBw;
     private byte _currentCenterFrequencyIndex;
-    private u8 _currentChannel;
+    private byte _currentChannel;
 
     static RadioManagementModule()
     {
@@ -75,7 +75,7 @@ public class RadioManagementModule
         hw_var_set_monitor();
     }
 
-    private void rtw_hal_set_msr(u8 net_type)
+    private void rtw_hal_set_msr(byte net_type)
     {
         switch (_hwPort)
         {
@@ -101,7 +101,7 @@ public class RadioManagementModule
     void hw_var_set_monitor()
     {
         /* Receive all type */
-        u32 rcr_bits = RCR_AAP | RCR_APM | RCR_AM | RCR_AB | RCR_APWRMGT | RCR_ADF | RCR_ACF | RCR_AMF | RCR_APP_PHYST_RXFF;
+        UInt32 rcr_bits = RCR_AAP | RCR_APM | RCR_AM | RCR_AB | RCR_APWRMGT | RCR_ADF | RCR_ACF | RCR_AMF | RCR_APP_PHYST_RXFF;
 
         /* Append FCS */
         rcr_bits |= RCR_APPFCS;
@@ -110,11 +110,11 @@ public class RadioManagementModule
         hw_var_rcr_config(rcr_bits);
 
         /* Receive all data frames */
-        u16 value_rxfltmap2 = 0xFFFF;
+        UInt16 value_rxfltmap2 = 0xFFFF;
         _device.rtw_write16(REG_RXFLTMAP2, value_rxfltmap2);
     }
 
-    public void hw_var_rcr_config(u32 rcr)
+    public void hw_var_rcr_config(UInt32 rcr)
     {
         _device.rtw_write32(REG_RCR, rcr);
     }
@@ -124,18 +124,18 @@ public class RadioManagementModule
         if (val)
         {
             /* enable RX BAR */
-            u32 val16 = _device.rtw_read16(REG_RXFLTMAP1);
+            UInt32 val16 = _device.rtw_read16(REG_RXFLTMAP1);
 
             val16 |= BIT8;
-            _device.rtw_write16(REG_RXFLTMAP1, (u16)val16);
+            _device.rtw_write16(REG_RXFLTMAP1, (UInt16)val16);
         }
         else
         {
             /* disable RX BAR */
-            u32 val16 = _device.rtw_read16(REG_RXFLTMAP1);
+            UInt32 val16 = _device.rtw_read16(REG_RXFLTMAP1);
 
             val16 &= NotBIT8;
-            _device.rtw_write16(REG_RXFLTMAP1, (u16)val16);
+            _device.rtw_write16(REG_RXFLTMAP1, (UInt16)val16);
         }
 
         _logger.LogInformation($"[HW_VAR_ENABLE_RX_BAR] 0x{REG_RXFLTMAP1:X4}=0x{_device.rtw_read16(REG_RXFLTMAP1):X4}");
@@ -144,7 +144,7 @@ public class RadioManagementModule
 
     public void set_channel_bwmode(hal_com_data pHalData, byte channel, byte channel_offset, ChannelWidth bwmode)
     {
-        u8 center_ch, chnl_offset80 = HAL_PRIME_CHNL_OFFSET_DONT_CARE;
+        byte center_ch, chnl_offset80 = HAL_PRIME_CHNL_OFFSET_DONT_CARE;
 
         //if (padapter.bNotifyChannelChange)
         //{
@@ -174,20 +174,20 @@ public class RadioManagementModule
 
     public void rtw_hal_set_chnl_bw(
         hal_com_data pHalData,
-        u8 channel,
+        byte channel,
         ChannelWidth Bandwidth,
-        u8 Offset40,
-        u8 Offset80)
+        byte Offset40,
+        byte Offset80)
     {
         PHY_SetSwChnlBWMode8812(pHalData, channel, Bandwidth, Offset40, Offset80);
     }
 
     public void PHY_SetSwChnlBWMode8812(
         hal_com_data pHalData,
-        u8 channel,
+        byte channel,
         ChannelWidth Bandwidth,
-        u8 Offset40,
-        u8 Offset80)
+        byte Offset40,
+        byte Offset80)
     {
         PHY_HandleSwChnlAndSetBW8812(pHalData, true, true, channel, Bandwidth, Offset40, Offset80, channel);
     }
@@ -251,8 +251,8 @@ public class RadioManagementModule
             /* CCK_CHECK_en */
             _device.rtw_write8(REG_CCK_CHECK_8812, (byte)(_device.rtw_read8(REG_CCK_CHECK_8812) | BIT7));
 
-            u16 count = 0;
-            u16 reg41A = _device.rtw_read16(REG_TXPKT_EMPTY);
+            UInt16 count = 0;
+            UInt16 reg41A = _device.rtw_read16(REG_TXPKT_EMPTY);
             /* RTW_INFO("Reg41A value %d", reg41A); */
             reg41A &= 0x30;
             while ((reg41A != 0x30) && (count < 50))
@@ -299,9 +299,9 @@ public class RadioManagementModule
         phy_SetBBSwingByBand_8812A(pHalData, Band);
     }
 
-    private static u8 rtw_get_center_ch(u8 channel, ChannelWidth chnl_bw, u8 chnl_offset)
+    private static byte rtw_get_center_ch(byte channel, ChannelWidth chnl_bw, byte chnl_offset)
     {
-        u8 center_ch = channel;
+        byte center_ch = channel;
 
         if (chnl_bw == ChannelWidth.CHANNEL_WIDTH_80)
         {
@@ -352,12 +352,12 @@ public class RadioManagementModule
         _device.phy_set_bb_reg(rB_TxScale_Jaguar, 0xFFE00000, phy_get_tx_bb_swing_8812a(pHalData, (BandType)Band, RfPath.RF_PATH_B)); /* 0xE1C[31:21] */
     }
 
-    private u32 phy_get_tx_bb_swing_8812a(hal_com_data pHalData, BandType Band, RfPath RFPath)
+    private UInt32 phy_get_tx_bb_swing_8812a(hal_com_data pHalData, BandType Band, RfPath RFPath)
     {
-        s8 bbSwing_2G = (s8)(-1 * registry_priv.TxBBSwing_2G);
-        s8 bbSwing_5G = (s8)(-1 * registry_priv.TxBBSwing_5G);
-        u32 _out = 0x200;
-        const s8 AUTO = -1;
+        SByte bbSwing_2G = (SByte)(-1 * registry_priv.TxBBSwing_2G);
+        SByte bbSwing_5G = (SByte)(-1 * registry_priv.TxBBSwing_5G);
+        UInt32 _out = 0x200;
+        const SByte AUTO = -1;
 
         if (pHalData.AutoloadFailFlag)
         {
@@ -483,8 +483,8 @@ public class RadioManagementModule
 
     private static void efuse_ShadowRead1Byte(
         hal_com_data pHalData,
-        u16 Offset,
-        out u8 Value)
+        UInt16 Offset,
+        out byte Value)
     {
         Value = pHalData.efuse_eeprom_data[Offset];
     }
@@ -493,11 +493,11 @@ public class RadioManagementModule
         hal_com_data pHalData,
         bool bSwitchChannel,
         bool bSetBandWidth,
-        u8 ChannelNum,
+        byte ChannelNum,
         ChannelWidth ChnlWidth,
-        u8 ChnlOffsetOf40MHz,
-        u8 ChnlOffsetOf80MHz,
-        u8 CenterFrequencyIndex1
+        byte ChnlOffsetOf40MHz,
+        byte ChnlOffsetOf80MHz,
+        byte CenterFrequencyIndex1
     )
     {
         /* RTW_INFO("=> PHY_HandleSwChnlAndSetBW8812: bSwitchChannel %d, bSetBandWidth %d\n",bSwitchChannel,bSetBandWidth); */
@@ -579,7 +579,7 @@ public class RadioManagementModule
 
     private void phy_SwChnl8812(hal_com_data pHalData)
     {
-        u8 channelToSW = _currentChannel;
+        byte channelToSW = _currentChannel;
 
         if (phy_SwBand8812(pHalData, channelToSW) == false)
         {
@@ -649,9 +649,9 @@ public class RadioManagementModule
         }
     }
 
-    private bool phy_SwBand8812(hal_com_data pHalData, u8 channelToSW)
+    private bool phy_SwBand8812(hal_com_data pHalData, byte channelToSW)
     {
-        u8 u1Btmp;
+        byte u1Btmp;
         bool ret_value = true;
         BandType Band;
         BandType BandToSW;
@@ -684,7 +684,7 @@ public class RadioManagementModule
         return ret_value;
     }
 
-    private void phy_FixSpur_8812A(hal_com_data pHalData, ChannelWidth Bandwidth, u8 Channel)
+    private void phy_FixSpur_8812A(hal_com_data pHalData, ChannelWidth Bandwidth, byte Channel)
     {
         /* C cut Item12 ADC FIFO CLOCK */
         if (pHalData.Version.IS_C_CUT())
@@ -840,21 +840,21 @@ public class RadioManagementModule
         }
     }
 
-    static u8 phy_get_tx_power_index()
+    static byte phy_get_tx_power_index()
     {
         return 16;
     }
 
-    public void PHY_SetTxPowerLevel8812(hal_com_data pHalData, u8 Channel)
+    public void PHY_SetTxPowerLevel8812(hal_com_data pHalData, byte Channel)
     {
-        for (var path = (u8)RfPath.RF_PATH_A; (byte)path < pHalData.NumTotalRFPath; ++path)
+        for (var path = (byte)RfPath.RF_PATH_A; (byte)path < pHalData.NumTotalRFPath; ++path)
         {
             phy_set_tx_power_level_by_path(pHalData, Channel, (RfPath)path);
             PHY_TxPowerTrainingByPath_8812(pHalData, (RfPath)path);
         }
     }
 
-    private void phy_set_tx_power_level_by_path(hal_com_data pHalData, u8 channel, RfPath path)
+    private void phy_set_tx_power_level_by_path(hal_com_data pHalData, byte channel, RfPath path)
     {
         bool bIsIn24G = (pHalData.current_band_type == BandType.BAND_ON_2_4G);
 
@@ -878,7 +878,7 @@ public class RadioManagementModule
     private void phy_set_tx_power_index_by_rate_section(
         hal_com_data pHalData,
         RfPath rfPath,
-        u8 channel,
+        byte channel,
         RATE_SECTION rateSection)
     {
         _logger.LogDebug("SET_TX_POWER {RfPath}; {Channel}; {RateSection}", rfPath, channel, rateSection);
@@ -899,13 +899,13 @@ public class RadioManagementModule
 
     private void PHY_TxPowerTrainingByPath_8812(hal_com_data pHalData, RfPath rfPath)
     {
-        if ((u8)rfPath >= pHalData.NumTotalRFPath)
+        if ((byte)rfPath >= pHalData.NumTotalRFPath)
         {
             return;
         }
 
-        u16 writeOffset;
-        u32 powerLevel;
+        UInt16 writeOffset;
+        UInt32 powerLevel;
         if (rfPath == RfPath.RF_PATH_A)
         {
             powerLevel = phy_get_tx_power_index();
@@ -917,8 +917,8 @@ public class RadioManagementModule
             writeOffset = rB_TxPwrTraing_Jaguar;
         }
 
-        u32 writeData = 0;
-        for (u8 i = 0; i < 3; i++)
+        UInt32 writeData = 0;
+        for (byte i = 0; i < 3; i++)
         {
             if (i == 0)
             {
@@ -950,7 +950,7 @@ public class RadioManagementModule
         }
     }
 
-    private void PHY_SetTxPowerIndex_8812A(u32 powerIndex, RfPath rfPath, MGN_RATE rate)
+    private void PHY_SetTxPowerIndex_8812A(UInt32 powerIndex, RfPath rfPath, MGN_RATE rate)
     {
         if (PowerIndexDescription.SetTable.TryGetValue(rfPath, out var rfTable))
         {
@@ -971,7 +971,7 @@ public class RadioManagementModule
 
     void phy_PostSetBwMode8812(hal_com_data pHalData)
     {
-        u8 L1pkVal = 0, reg_837 = 0;
+        byte L1pkVal = 0, reg_837 = 0;
 
 
         /* 3 Set Reg668 BW */
@@ -1097,7 +1097,7 @@ public class RadioManagementModule
         }
     }
 
-    public void phy_set_rf_reg(hal_com_data pHalData, RfPath eRFPath, u16 RegAddr, u32 BitMask, u32 Data)
+    public void phy_set_rf_reg(hal_com_data pHalData, RfPath eRFPath, UInt16 RegAddr, UInt32 BitMask, UInt32 Data)
     {
         uint data = Data;
         Console.WriteLine($"RFREG;{(byte)eRFPath};{(uint)RegAddr:X};{BitMask:X};{data:X}");
@@ -1109,7 +1109,7 @@ public class RadioManagementModule
         /* RF data is 20 bits only */
         if (BitMask != bLSSIWrite_data_Jaguar)
         {
-            u32 Original_Value, BitShift;
+            UInt32 Original_Value, BitShift;
             Original_Value = phy_RFSerialRead(pHalData, eRFPath, RegAddr);
             BitShift = PHY_CalculateBitShift(BitMask);
             data = ((Original_Value) & (~BitMask)) | (data << (int)BitShift);
@@ -1118,9 +1118,9 @@ public class RadioManagementModule
         phy_RFSerialWrite(eRFPath, RegAddr, data);
     }
 
-    private u32 phy_RFSerialRead(hal_com_data pHalData, RfPath eRFPath, u32 Offset)
+    private UInt32 phy_RFSerialRead(hal_com_data pHalData, RfPath eRFPath, UInt32 Offset)
     {
-        u32 retValue;
+        UInt32 retValue;
         BbRegisterDefinition pPhyReg = PhyRegDef[eRFPath];
         bool bIsPIMode = false;
 
@@ -1170,12 +1170,12 @@ public class RadioManagementModule
         return retValue;
     }
 
-    private u32 phy_query_bb_reg(u16 regAddr, u32 bitMask) =>
+    private UInt32 phy_query_bb_reg(UInt16 regAddr, UInt32 bitMask) =>
         PHY_QueryBBReg8812(regAddr, bitMask);
 
-    private u32 PHY_QueryBBReg8812(u16 regAddr, u32 bitMask)
+    private UInt32 PHY_QueryBBReg8812(UInt16 regAddr, UInt32 bitMask)
     {
-        u32 ReturnValue, OriginalValue, BitShift;
+        UInt32 ReturnValue, OriginalValue, BitShift;
 
         /* RTW_INFO("--.PHY_QueryBBReg8812(): RegAddr(%#x), BitMask(%#x)\n", RegAddr, BitMask); */
 
@@ -1187,7 +1187,7 @@ public class RadioManagementModule
         return ReturnValue;
     }
 
-    private void phy_RFSerialWrite(RfPath eRFPath, u32 Offset, u32 Data)
+    private void phy_RFSerialWrite(RfPath eRFPath, UInt32 Offset, UInt32 Data)
     {
         BbRegisterDefinition pPhyReg = PhyRegDef[eRFPath];
 
@@ -1205,7 +1205,7 @@ public class RadioManagementModule
 
     private void phy_SetRegBW_8812(ChannelWidth CurrentBW)
     {
-        u16 RegRfMod_BW, u2tmp;
+        UInt16 RegRfMod_BW, u2tmp;
         RegRfMod_BW = _device.rtw_read16(REG_WMAC_TRXPTCL_CTL);
 
         switch (CurrentBW)

@@ -16,7 +16,7 @@ public class FirmwareManager
     public void FirmwareDownload8812()
     {
         bool rtStatus = true;
-        u8 write_fw = 0;
+        byte write_fw = 0;
         //var pHalData = adapterState.HalData;
 
         var pFirmwareBuf = _firmware.Data;
@@ -111,15 +111,15 @@ public class FirmwareManager
         return true;
     }
 
-    private bool _FWFreeToGo8812(u32 min_cnt, u32 timeout_ms)
+    private bool _FWFreeToGo8812(UInt32 min_cnt, UInt32 timeout_ms)
     {
         bool ret = false;
-        u32 value32;
-        u32 cnt = 0;
+        UInt32 value32;
+        UInt32 cnt = 0;
 
         value32 = _device.rtw_read32(REG_MCUFWDL);
         value32 |= MCUFWDL_RDY;
-        value32 = (u32)(value32 & ~WINTINI_RDY);
+        value32 = (UInt32)(value32 & ~WINTINI_RDY);
         _device.rtw_write32(REG_MCUFWDL, value32);
 
         _device._8051Reset8812();
@@ -157,7 +157,7 @@ public class FirmwareManager
 
     private void _FWDownloadEnable_8812(bool enable)
     {
-        u8 tmp;
+        byte tmp;
 
         if (enable)
         {
@@ -242,7 +242,7 @@ public class FirmwareManager
         UInt32 blockSize_p3 = 1; /* Phase #3 : Use 1-byte, the remnant of FW image. */
         UInt32 blockCount_p1 = 0, blockCount_p2 = 0, blockCount_p3 = 0;
         UInt32 remainSize_p1 = 0, remainSize_p2 = 0;
-        //u8			*bufferPtr	= (u8 *)buffer;
+        //byte			*bufferPtr	= (byte *)buffer;
         UInt32 i = 0, offset = 0;
 
         blockSize_p1 = MAX_REG_BOLCK_SIZE;
