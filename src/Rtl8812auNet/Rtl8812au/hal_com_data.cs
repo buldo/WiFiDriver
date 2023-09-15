@@ -5,7 +5,7 @@ namespace Rtl8812auNet.Rtl8812au;
 public class hal_com_data
 {
     public hal_com_data(
-        HAL_VERSION versionId,
+        HalVersion versionId,
         RfType rfType,
         byte numTotalRfPath)
     {
@@ -14,7 +14,7 @@ public class hal_com_data
         NumTotalRFPath = numTotalRfPath;
     }
 
-    public HAL_VERSION version_id { get; }
+    public HalVersion version_id { get; }
 
     /// <summary>
     /// It strange but this value has 2 source of truth

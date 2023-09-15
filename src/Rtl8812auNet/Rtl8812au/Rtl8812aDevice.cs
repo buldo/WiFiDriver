@@ -163,12 +163,12 @@ public class Rtl8812aDevice
         return (OutEpQueueSel, OutEpNumber);
     }
 
-    private (HAL_VERSION version_id, RfType rf_type, byte numTotalRfPath) read_chip_version_8812a()
+    private (HalVersion version_id, RfType rf_type, byte numTotalRfPath) read_chip_version_8812a()
     {
         u32 value32 = _device.rtw_read32(REG_SYS_CFG);
         RTW_INFO($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
 
-        var versionId = new HAL_VERSION
+        var versionId = new HalVersion
         {
             RFType = HalRFType.RF_TYPE_2T2R /* RF_2T2R; */
         };

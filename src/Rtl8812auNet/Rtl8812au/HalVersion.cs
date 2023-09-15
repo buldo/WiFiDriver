@@ -1,7 +1,7 @@
 ﻿using Rtl8812auNet.Rtl8812au.Enumerations;
 namespace Rtl8812auNet.Rtl8812au;
 
-public class HAL_VERSION
+public class HalVersion
 {
     public CutVersion CUTVersion { get; set; }
     public HalRFType RFType { get; set; }
