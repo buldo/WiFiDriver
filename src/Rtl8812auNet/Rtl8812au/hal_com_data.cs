@@ -1,4 +1,6 @@
-﻿namespace Rtl8812auNet.Rtl8812au;
+﻿using Rtl8812auNet.Rtl8812au.Enumerations;
+
+namespace Rtl8812auNet.Rtl8812au;
 
 public class hal_com_data
 {

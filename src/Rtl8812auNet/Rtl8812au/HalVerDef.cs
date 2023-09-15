@@ -1,10 +1,9 @@
-﻿namespace Rtl8812auNet.Rtl8812au;
+﻿using Rtl8812auNet.Rtl8812au.Enumerations;
+
+namespace Rtl8812auNet.Rtl8812au;
 
 public static class HalVerDef
 {
-    public static bool IS_VENDOR_8812A_C_CUT(AdapterState adapterState) =>
-        GET_CVID_CUT_VERSION(adapterState.HalData.version_id) == CutVersion.C_CUT_VERSION;
-
     public static bool IS_VENDOR_8812A_C_CUT(hal_com_data halData) =>
         GET_CVID_CUT_VERSION(halData.version_id) == CutVersion.C_CUT_VERSION;
 

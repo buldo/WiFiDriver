@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Rtl8812auNet.Abstractions;
+using Rtl8812auNet.Rtl8812au.Enumerations;
 using Rtl8812auNet.Rtl8812au.Modules;
 
 namespace Rtl8812auNet.Rtl8812au;

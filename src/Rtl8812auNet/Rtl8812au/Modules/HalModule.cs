@@ -1,4 +1,7 @@
-﻿namespace Rtl8812auNet.Rtl8812au.Modules;
+﻿using Rtl8812auNet.Rtl8812au.Enumerations;
+using Rtl8812auNet.Rtl8812au.PredefinedData;
+
+namespace Rtl8812auNet.Rtl8812au.Modules;
 
 public class HalModule
 {

@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using Rtl8812auNet.Rtl8812au.BinaryData;
+using Rtl8812auNet.Rtl8812au.PredefinedData;
 
 namespace Rtl8812auNet.Rtl8812au.Modules;
 
