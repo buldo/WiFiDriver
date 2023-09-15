@@ -1,6 +1,7 @@
 ﻿using System.Buffers.Binary;
 using System.Text;
 using Rtl8812auNet.Rtl8812au.Enumerations;
+using Rtl8812auNet.Rtl8812au.Models;
 
 namespace Rtl8812auNet.Rtl8812au;
 

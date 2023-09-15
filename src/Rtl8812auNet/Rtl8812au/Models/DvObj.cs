@@ -1,4 +1,4 @@
-﻿namespace Rtl8812auNet.Rtl8812au;
+﻿namespace Rtl8812auNet.Rtl8812au.Models;
 
 public class DvObj
 {

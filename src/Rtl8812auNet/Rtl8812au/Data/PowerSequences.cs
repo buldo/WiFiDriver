@@ -1,4 +1,5 @@
 ﻿using Rtl8812auNet.Rtl8812au.Enumerations;
+using Rtl8812auNet.Rtl8812au.Models;
 
 namespace Rtl8812auNet.Rtl8812au.PredefinedData;
 

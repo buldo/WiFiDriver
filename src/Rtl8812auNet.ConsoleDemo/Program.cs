@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-
-using Rtl8812auNet.Rtl8812au;
 using Rtl8812auNet.Rtl8812au.Enumerations;
 
 namespace Rtl8812auNet.ConsoleDemo;

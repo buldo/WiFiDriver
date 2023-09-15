@@ -125,7 +125,7 @@ public class RtlUsbAdapter
 
     public void phy_set_bb_reg(u16 regAddr, u32 bitMask, u32 data) => PHY_SetBBReg8812(regAddr, bitMask, data);
 
-    public void PHY_SetBBReg8812(
+    private void PHY_SetBBReg8812(
         u16 regAddr,
         u32 bitMask,
         u32 dataOriginal)

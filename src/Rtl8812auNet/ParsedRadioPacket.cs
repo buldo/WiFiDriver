@@ -1,4 +1,6 @@
-﻿namespace Rtl8812auNet.Rtl8812au;
+﻿using Rtl8812auNet.Rtl8812au.Models;
+
+namespace Rtl8812auNet;
 
 public class ParsedRadioPacket
 {

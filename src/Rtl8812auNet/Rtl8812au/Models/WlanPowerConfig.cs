@@ -1,6 +1,6 @@
 ﻿using Rtl8812auNet.Rtl8812au.Enumerations;
 
-namespace Rtl8812auNet.Rtl8812au;
+namespace Rtl8812auNet.Rtl8812au.Models;
 
 public class WlanPowerConfig
 {
@@ -16,7 +16,7 @@ public class WlanPowerConfig
         Value = value;
     }
 
-    public UInt16 Offset { get; }
+    public u16 Offset { get; }
     public PwrCmd Command { get; }
     public uint Mask { get; }
     public uint Value { get; }
