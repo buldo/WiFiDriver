@@ -1,19 +1,63 @@
 ﻿using System.Buffers.Binary;
+using Microsoft.Extensions.Logging;
 using Rtl8812auNet.Abstractions;
-using Rtl8812auNet.Rtl8812au;
+using Rtl8812auNet.Rtl8812au.Enumerations;
 
 namespace Rtl8812auNet;
 
 public class RtlUsbAdapter
 {
-    private readonly IRtlUsbDevice _usbDevice;
+    private const byte BOOT_FROM_EEPROM = (byte)BIT4;
+    private const byte EEPROM_EN = (byte)BIT5;
 
-    public RtlUsbAdapter(IRtlUsbDevice usbDevice)
+    private readonly IRtlUsbDevice _usbDevice;
+    private readonly ILogger<RtlUsbAdapter> _logger;
+
+    public RtlUsbAdapter(
+        IRtlUsbDevice usbDevice,
+        ILogger<RtlUsbAdapter> logger)
     {
         _usbDevice = usbDevice;
+        _logger = logger;
+        (OutPipesCount, UsbSpeed) = InitDvObj();
+
+        if (UsbSpeed == RTW_USB_SPEED_3)
+        {
+            rxagg_usb_size = 0x7;
+            rxagg_usb_timeout = 0x1a;
+        }
+        else
+        {
+            /* the setting to reduce RX FIFO overflow on USB2.0 and increase rx throughput */
+            rxagg_usb_size = 0x5;
+            rxagg_usb_timeout = 0x20;
+        }
+
+        (OutEpQueueSel, OutEpNumber) = GetChipOutEP8812(OutPipesCount);
+
+        var eeValue = rtw_read8(REG_9346CR);
+        EepromOrEfuse = (eeValue & BOOT_FROM_EEPROM) != 0;
+        AutoloadFailFlag = (eeValue & EEPROM_EN) == 0;
+
+        _logger.LogInformation($"Boot from {(EepromOrEfuse ? "EEPROM" : "EFUSE")}, Autoload {(AutoloadFailFlag ? "Fail" : "OK")} !");
     }
 
     public IRtlUsbDevice UsbDevice => _usbDevice;
+
+    public byte UsbSpeed { get; } /* 1.1, 2.0 or 3.0 */
+
+    public byte OutPipesCount { get; }
+
+    public byte rxagg_usb_size { get; }
+
+    public byte rxagg_usb_timeout { get; }
+
+    public TxSele OutEpQueueSel { get; }
+
+    public byte OutEpNumber { get; }
+
+    public bool AutoloadFailFlag { get; set; }
+    public bool EepromOrEfuse { get; }
 
     public void rtl8812au_hw_reset()
     {
@@ -236,5 +280,70 @@ public class RtlUsbAdapter
     public void WriteBytes(ushort register, Span<byte> data)
     {
         _usbDevice.WriteBytes(register, data);
+    }
+
+    private (byte numOutPipes, byte usbSpeed) InitDvObj()
+    {
+        byte numOutPipes = 0;
+
+        foreach (var endpoint in UsbDevice.GetEndpoints())
+        {
+            var type = endpoint.Type;
+            var direction = endpoint.Direction;
+
+            if (type == RtlEndpointType.Bulk && direction == RtlEndpointDirection.Out)
+            {
+                numOutPipes++;
+            }
+        }
+
+        var usbSpeed = UsbDevice.Speed switch
+        {
+            USB_SPEED_LOW => RTW_USB_SPEED_1_1,
+            USB_SPEED_FULL => RTW_USB_SPEED_1_1,
+            USB_SPEED_HIGH => RTW_USB_SPEED_2,
+            USB_SPEED_SUPER => RTW_USB_SPEED_3,
+            _ => RTW_USB_SPEED_UNKNOWN
+        };
+
+        if (usbSpeed == RTW_USB_SPEED_UNKNOWN)
+        {
+            RTW_INFO("UNKNOWN USB SPEED MODE, ERROR !!!");
+            throw new Exception();
+        }
+
+        return (numOutPipes, usbSpeed);
+    }
+
+    private (TxSele OutEpQueueSel, byte OutEpNumber) GetChipOutEP8812(byte NumOutPipe)
+    {
+        TxSele OutEpQueueSel = 0;
+        byte OutEpNumber = 0;
+
+        switch (NumOutPipe)
+        {
+            case 4:
+                OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_LQ | TxSele.TX_SELE_NQ | TxSele.TX_SELE_EQ;
+                OutEpNumber = 4;
+                break;
+            case 3:
+                OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_LQ | TxSele.TX_SELE_NQ;
+                OutEpNumber = 3;
+                break;
+            case 2:
+                OutEpQueueSel = TxSele.TX_SELE_HQ | TxSele.TX_SELE_NQ;
+                OutEpNumber = 2;
+                break;
+            case 1:
+                OutEpQueueSel = TxSele.TX_SELE_HQ;
+                OutEpNumber = 1;
+                break;
+            default:
+                break;
+        }
+
+        RTW_INFO($"OutEpQueueSel({OutEpQueueSel}), OutEpNumber({OutEpNumber})");
+
+        return (OutEpQueueSel, OutEpNumber);
     }
 }

@@ -5,7 +5,7 @@ using Rtl8812auNet.Rtl8812au.PredefinedData;
 
 namespace Rtl8812auNet.Rtl8812au.Modules;
 
-public class RadioManagementModule
+internal class RadioManagementModule
 {
     private static readonly Dictionary<RfPath, BbRegisterDefinition> PhyRegDef = new()
     {
@@ -15,6 +15,7 @@ public class RadioManagementModule
 
     private readonly HwPort _hwPort;
     private readonly RtlUsbAdapter _device;
+    private readonly EepromManager _eepromManager;
     private readonly ILogger _logger;
 
     private bool _needIQK;
@@ -26,6 +27,7 @@ public class RadioManagementModule
     private ChannelWidth _currentChannelBw;
     private byte _currentCenterFrequencyIndex;
     private byte _currentChannel;
+    private BandType current_band_type;
 
     static RadioManagementModule()
     {
@@ -46,24 +48,25 @@ public class RadioManagementModule
 
     public RadioManagementModule(HwPort hwPort,
         RtlUsbAdapter device,
+        EepromManager eepromManager,
         ILogger logger)
     {
         _hwPort = hwPort;
         _device = device;
+        _eepromManager = eepromManager;
         _logger = logger;
     }
 
-    public void init_hw_mlme_ext(hal_com_data pHalData, SelectedChannel pmlmeext)
+    public void init_hw_mlme_ext(SelectedChannel pmlmeext)
     {
         /* Modify to make sure first time change channel(band) would be done properly */
         _currentChannel = 0;
         _currentChannelBw = ChannelWidth.CHANNEL_WIDTH_MAX;
-        pHalData.current_band_type = BandType.BAND_MAX;
+        current_band_type = BandType.BAND_MAX;
 
         /* set_opmode_cmd(padapter, infra_client_with_mlme); */ /* removed */
         Set_HW_VAR_ENABLE_RX_BAR(true);
         set_channel_bwmode(
-            pHalData,
             pmlmeext.Channel,
             pmlmeext.ChannelOffset,
             pmlmeext.ChannelWidth);
@@ -142,7 +145,7 @@ public class RadioManagementModule
     }
 
 
-    public void set_channel_bwmode(hal_com_data pHalData, byte channel, byte channel_offset, ChannelWidth bwmode)
+    public void set_channel_bwmode(byte channel, byte channel_offset, ChannelWidth bwmode)
     {
         byte center_ch, chnl_offset80 = HAL_PRIME_CHNL_OFFSET_DONT_CARE;
 
@@ -168,38 +171,36 @@ public class RadioManagementModule
             }
         }
 
-        rtw_hal_set_chnl_bw(pHalData, center_ch, bwmode, channel_offset, chnl_offset80); /* set center channel */
+        rtw_hal_set_chnl_bw(center_ch, bwmode, channel_offset, chnl_offset80); /* set center channel */
     }
 
 
     public void rtw_hal_set_chnl_bw(
-        hal_com_data pHalData,
         byte channel,
         ChannelWidth Bandwidth,
         byte Offset40,
         byte Offset80)
     {
-        PHY_SetSwChnlBWMode8812(pHalData, channel, Bandwidth, Offset40, Offset80);
+        PHY_SetSwChnlBWMode8812(channel, Bandwidth, Offset40, Offset80);
     }
 
-    public void PHY_SetSwChnlBWMode8812(
-        hal_com_data pHalData,
+    private void PHY_SetSwChnlBWMode8812(
         byte channel,
         ChannelWidth Bandwidth,
         byte Offset40,
         byte Offset80)
     {
-        PHY_HandleSwChnlAndSetBW8812(pHalData, true, true, channel, Bandwidth, Offset40, Offset80, channel);
+        PHY_HandleSwChnlAndSetBW8812(true, true, channel, Bandwidth, Offset40, Offset80, channel);
     }
 
-    public void PHY_SwitchWirelessBand8812(hal_com_data pHalData, BandType Band)
+    public void PHY_SwitchWirelessBand8812(BandType Band)
     {
         ChannelWidth current_bw = _currentChannelBw;
-        bool eLNA_2g = pHalData.ExternalLNA_2G;
+        bool eLNA_2g = _eepromManager.ExternalLNA_2G;
 
         /* RTW_INFO("==>PHY_SwitchWirelessBand8812() %s\n", ((Band==0)?"2.4G":"5G")); */
 
-        pHalData.current_band_type = (BandType)Band;
+        current_band_type = Band;
 
         if (Band == BandType.BAND_ON_2_4G)
         {
@@ -217,7 +218,7 @@ public class RadioManagementModule
             /* set PWED_TH for BB Yn user guide R29 */
 
             if (current_bw == ChannelWidth.CHANNEL_WIDTH_20
-                && pHalData.RfType == RfType.RF_1T1R
+                && _eepromManager.RfType == RfType.RF_1T1R
                 && eLNA_2g == false)
             {
                 /* 0x830[3:1]=3'b010 */
@@ -233,7 +234,7 @@ public class RadioManagementModule
             /* AGC table select */
             _device.phy_set_bb_reg(rAGC_table_Jaguar, 0x3, 0); /* 0x82C[1:0] = 2b'00 */
 
-            phy_SetRFEReg8812(pHalData, Band);
+            phy_SetRFEReg8812(Band);
 
             /* <20131106, Kordan> Workaround to fix CCK FA for scan issue. */
             /* if( pHalData.bMPMode == FALSE) */
@@ -288,7 +289,7 @@ public class RadioManagementModule
             /* AGC table select */
             _device.phy_set_bb_reg(rAGC_table_Jaguar, 0x3, 1); /* 0x82C[1:0] = 2'b00 */
 
-            phy_SetRFEReg8812(pHalData, Band);
+            phy_SetRFEReg8812(Band);
 
             /* <20131106, Kordan> Workaround to fix CCK FA for scan issue. */
             /* if( pHalData.bMPMode == FALSE) */
@@ -296,7 +297,7 @@ public class RadioManagementModule
             _device.phy_set_bb_reg(rCCK_RX_Jaguar, 0x0f000000, 0xF);
         }
 
-        phy_SetBBSwingByBand_8812A(pHalData, Band);
+        phy_SetBBSwingByBand_8812A(Band);
     }
 
     private static byte rtw_get_center_ch(byte channel, ChannelWidth chnl_bw, byte chnl_offset)
@@ -346,20 +347,20 @@ public class RadioManagementModule
     }
 
 
-    private void phy_SetBBSwingByBand_8812A(hal_com_data pHalData, BandType Band)
+    private void phy_SetBBSwingByBand_8812A(BandType Band)
     {
-        _device.phy_set_bb_reg(rA_TxScale_Jaguar, 0xFFE00000, phy_get_tx_bb_swing_8812a(pHalData, (BandType)Band, RfPath.RF_PATH_A)); /* 0xC1C[31:21] */
-        _device.phy_set_bb_reg(rB_TxScale_Jaguar, 0xFFE00000, phy_get_tx_bb_swing_8812a(pHalData, (BandType)Band, RfPath.RF_PATH_B)); /* 0xE1C[31:21] */
+        _device.phy_set_bb_reg(rA_TxScale_Jaguar, 0xFFE00000, phy_get_tx_bb_swing_8812a(Band, RfPath.RF_PATH_A)); /* 0xC1C[31:21] */
+        _device.phy_set_bb_reg(rB_TxScale_Jaguar, 0xFFE00000, phy_get_tx_bb_swing_8812a(Band, RfPath.RF_PATH_B)); /* 0xE1C[31:21] */
     }
 
-    private UInt32 phy_get_tx_bb_swing_8812a(hal_com_data pHalData, BandType Band, RfPath RFPath)
+    private UInt32 phy_get_tx_bb_swing_8812a(BandType Band, RfPath RFPath)
     {
         SByte bbSwing_2G = (SByte)(-1 * registry_priv.TxBBSwing_2G);
         SByte bbSwing_5G = (SByte)(-1 * registry_priv.TxBBSwing_5G);
         UInt32 _out = 0x200;
         const SByte AUTO = -1;
 
-        if (pHalData.AutoloadFailFlag)
+        if (_device.AutoloadFailFlag)
         {
             if (Band == BandType.BAND_ON_2_4G)
             {
@@ -373,7 +374,7 @@ public class RadioManagementModule
                     _out = 0x0B6; /* -9 dB */
                 else
                 {
-                    if (pHalData.ExternalPA_2G)
+                    if (_eepromManager.ExternalPA_2G)
                     {
                         _out = 0x16A;
                     }
@@ -416,7 +417,7 @@ public class RadioManagementModule
             {
                 if (registry_priv.TxBBSwing_2G == AUTO)
                 {
-                    efuse_ShadowRead1Byte(pHalData, EEPROM_TX_BBSWING_2G_8812, out swing);
+                    _eepromManager.efuse_ShadowRead1Byte(EEPROM_TX_BBSWING_2G_8812, out swing);
                     swing = (swing == 0xFF) ? (byte)0x00 : swing;
                 }
                 else if (bbSwing_2G == 0)
@@ -434,7 +435,7 @@ public class RadioManagementModule
             {
                 if (registry_priv.TxBBSwing_5G == AUTO)
                 {
-                    efuse_ShadowRead1Byte(pHalData, EEPROM_TX_BBSWING_5G_8812, out swing);
+                    _eepromManager.efuse_ShadowRead1Byte(EEPROM_TX_BBSWING_5G_8812, out swing);
                     swing = (swing == 0xFF) ? (byte)0x00 : swing;
                 }
                 else if (bbSwing_5G == 0)
@@ -481,16 +482,9 @@ public class RadioManagementModule
         return _out;
     }
 
-    private static void efuse_ShadowRead1Byte(
-        hal_com_data pHalData,
-        UInt16 Offset,
-        out byte Value)
-    {
-        Value = pHalData.efuse_eeprom_data[Offset];
-    }
+
 
     private void PHY_HandleSwChnlAndSetBW8812(
-        hal_com_data pHalData,
         bool bSwitchChannel,
         bool bSetBandWidth,
         byte ChannelNum,
@@ -555,33 +549,33 @@ public class RadioManagementModule
         }
 
         /* Switch workitem or set timer to do switch channel or setbandwidth operation */
-        phy_SwChnlAndSetBwMode8812(pHalData);
+        phy_SwChnlAndSetBwMode8812();
     }
 
-    private void phy_SwChnlAndSetBwMode8812(hal_com_data pHalData)
+    private void phy_SwChnlAndSetBwMode8812()
     {
         if (_swChannel)
         {
-            phy_SwChnl8812(pHalData);
+            phy_SwChnl8812();
             _swChannel = false;
         }
 
         if (_setChannelBw)
         {
-            phy_PostSetBwMode8812(pHalData);
+            phy_PostSetBwMode8812();
             _setChannelBw = false;
         }
 
-        PHY_SetTxPowerLevel8812(pHalData, _currentChannel);
+        PHY_SetTxPowerLevel8812(_currentChannel);
 
         _needIQK = false;
     }
 
-    private void phy_SwChnl8812(hal_com_data pHalData)
+    private void phy_SwChnl8812()
     {
         byte channelToSW = _currentChannel;
 
-        if (phy_SwBand8812(pHalData, channelToSW) == false)
+        if (phy_SwBand8812(channelToSW) == false)
         {
             _logger.LogError("error Chnl {ChannelToSW} !", channelToSW);
         }
@@ -614,42 +608,37 @@ public class RadioManagementModule
             _device.phy_set_bb_reg(rFc_area_Jaguar, 0x1ffe0000, 0x96a);
         }
 
-        for (RfPath eRFPath = 0; (byte)eRFPath < pHalData.NumTotalRFPath; eRFPath++)
+        for (RfPath eRFPath = 0; (byte)eRFPath < _eepromManager.NumTotalRfPath; eRFPath++)
         {
             /* RF_MOD_AG */
             if (36 <= channelToSW && channelToSW <= 80)
             {
-                phy_set_rf_reg(pHalData, eRFPath, RF_CHNLBW_Jaguar, BIT18 | BIT17 | BIT16 | BIT9 | BIT8,
-                    0x101); /* 5'b00101); */
+                phy_set_rf_reg(eRFPath, RF_CHNLBW_Jaguar, BIT18 | BIT17 | BIT16 | BIT9 | BIT8, 0x101); /* 5'b00101); */
             }
             else if (15 <= channelToSW && channelToSW <= 35)
             {
-                phy_set_rf_reg(pHalData, eRFPath, RF_CHNLBW_Jaguar, BIT18 | BIT17 | BIT16 | BIT9 | BIT8,
-                    0x101); /* 5'b00101); */
+                phy_set_rf_reg(eRFPath, RF_CHNLBW_Jaguar, BIT18 | BIT17 | BIT16 | BIT9 | BIT8, 0x101); /* 5'b00101); */
             }
             else if (82 <= channelToSW && channelToSW <= 140)
             {
-                phy_set_rf_reg(pHalData, eRFPath, RF_CHNLBW_Jaguar, BIT18 | BIT17 | BIT16 | BIT9 | BIT8,
-                    0x301); /* 5'b01101); */
+                phy_set_rf_reg(eRFPath, RF_CHNLBW_Jaguar, BIT18 | BIT17 | BIT16 | BIT9 | BIT8, 0x301); /* 5'b01101); */
             }
             else if (140 < channelToSW)
             {
-                phy_set_rf_reg(pHalData, eRFPath, RF_CHNLBW_Jaguar, BIT18 | BIT17 | BIT16 | BIT9 | BIT8,
-                    0x501); /* 5'b10101); */
+                phy_set_rf_reg(eRFPath, RF_CHNLBW_Jaguar, BIT18 | BIT17 | BIT16 | BIT9 | BIT8, 0x501); /* 5'b10101); */
             }
             else
             {
-                phy_set_rf_reg(pHalData, eRFPath, RF_CHNLBW_Jaguar, BIT18 | BIT17 | BIT16 | BIT9 | BIT8,
-                    0x000); /* 5'b00000); */
+                phy_set_rf_reg(eRFPath, RF_CHNLBW_Jaguar, BIT18 | BIT17 | BIT16 | BIT9 | BIT8, 0x000); /* 5'b00000); */
             }
 
             /* <20121109, Kordan> A workaround for 8812A only. */
-            phy_FixSpur_8812A(pHalData, _currentChannelBw, channelToSW);
-            phy_set_rf_reg(pHalData, eRFPath, RF_CHNLBW_Jaguar, bMaskByte0, channelToSW);
+            phy_FixSpur_8812A(_currentChannelBw, channelToSW);
+            phy_set_rf_reg(eRFPath, RF_CHNLBW_Jaguar, bMaskByte0, channelToSW);
         }
     }
 
-    private bool phy_SwBand8812(hal_com_data pHalData, byte channelToSW)
+    private bool phy_SwBand8812(byte channelToSW)
     {
         byte u1Btmp;
         bool ret_value = true;
@@ -678,16 +667,16 @@ public class RadioManagementModule
 
         if (BandToSW != Band)
         {
-            PHY_SwitchWirelessBand8812(pHalData, BandToSW);
+            PHY_SwitchWirelessBand8812(BandToSW);
         }
 
         return ret_value;
     }
 
-    private void phy_FixSpur_8812A(hal_com_data pHalData, ChannelWidth Bandwidth, byte Channel)
+    private void phy_FixSpur_8812A(ChannelWidth Bandwidth, byte Channel)
     {
         /* C cut Item12 ADC FIFO CLOCK */
-        if (pHalData.Version.IS_C_CUT())
+        if (_eepromManager.Version.IS_C_CUT())
         {
             if (Bandwidth == ChannelWidth.CHANNEL_WIDTH_40 && Channel == 11)
             {
@@ -734,13 +723,13 @@ public class RadioManagementModule
 
     }
 
-    private void phy_SetRFEReg8812(hal_com_data pHalData, BandType Band)
+    private void phy_SetRFEReg8812(BandType Band)
     {
         uint u1tmp = 0;
 
         if (Band == BandType.BAND_ON_2_4G)
         {
-            switch (pHalData.rfe_type)
+            switch (_eepromManager.rfe_type)
             {
                 case 0:
                 case 2:
@@ -791,7 +780,7 @@ public class RadioManagementModule
         }
         else
         {
-            switch (pHalData.rfe_type)
+            switch (_eepromManager.rfe_type)
             {
                 case 0:
                     _device.phy_set_bb_reg(rA_RFE_Pinmux_Jaguar, bMaskDWord, 0x77337717);
@@ -845,38 +834,37 @@ public class RadioManagementModule
         return 16;
     }
 
-    public void PHY_SetTxPowerLevel8812(hal_com_data pHalData, byte Channel)
+    public void PHY_SetTxPowerLevel8812(byte Channel)
     {
-        for (var path = (byte)RfPath.RF_PATH_A; (byte)path < pHalData.NumTotalRFPath; ++path)
+        for (var path = (byte)RfPath.RF_PATH_A; (byte)path < _eepromManager.NumTotalRfPath; ++path)
         {
-            phy_set_tx_power_level_by_path(pHalData, Channel, (RfPath)path);
-            PHY_TxPowerTrainingByPath_8812(pHalData, (RfPath)path);
+            phy_set_tx_power_level_by_path(Channel, (RfPath)path);
+            PHY_TxPowerTrainingByPath_8812((RfPath)path);
         }
     }
 
-    private void phy_set_tx_power_level_by_path(hal_com_data pHalData, byte channel, RfPath path)
+    private void phy_set_tx_power_level_by_path(byte channel, RfPath path)
     {
-        bool bIsIn24G = (pHalData.current_band_type == BandType.BAND_ON_2_4G);
+        bool bIsIn24G = (current_band_type == BandType.BAND_ON_2_4G);
 
         if (bIsIn24G)
         {
-            phy_set_tx_power_index_by_rate_section(pHalData, path, channel, RATE_SECTION.CCK);
+            phy_set_tx_power_index_by_rate_section(path, channel, RATE_SECTION.CCK);
         }
 
-        phy_set_tx_power_index_by_rate_section(pHalData, path, channel, RATE_SECTION.OFDM);
+        phy_set_tx_power_index_by_rate_section(path, channel, RATE_SECTION.OFDM);
 
-        phy_set_tx_power_index_by_rate_section(pHalData, path, channel, RATE_SECTION.HT_MCS0_MCS7);
-        phy_set_tx_power_index_by_rate_section(pHalData, path, channel, RATE_SECTION.VHT_1SSMCS0_1SSMCS9);
+        phy_set_tx_power_index_by_rate_section(path, channel, RATE_SECTION.HT_MCS0_MCS7);
+        phy_set_tx_power_index_by_rate_section(path, channel, RATE_SECTION.VHT_1SSMCS0_1SSMCS9);
 
-        if (pHalData.NumTotalRFPath >= 2)
+        if (_eepromManager.NumTotalRfPath >= 2)
         {
-            phy_set_tx_power_index_by_rate_section(pHalData, path, channel, RATE_SECTION.HT_MCS8_MCS15);
-            phy_set_tx_power_index_by_rate_section(pHalData, path, channel, RATE_SECTION.VHT_2SSMCS0_2SSMCS9);
+            phy_set_tx_power_index_by_rate_section(path, channel, RATE_SECTION.HT_MCS8_MCS15);
+            phy_set_tx_power_index_by_rate_section(path, channel, RATE_SECTION.VHT_2SSMCS0_2SSMCS9);
         }
     }
 
     private void phy_set_tx_power_index_by_rate_section(
-        hal_com_data pHalData,
         RfPath rfPath,
         byte channel,
         RATE_SECTION rateSection)
@@ -889,7 +877,7 @@ public class RadioManagementModule
         }
 
         // TODO: WTF is going on?
-        if (rateSection == RATE_SECTION.CCK && pHalData.current_band_type != BandType.BAND_ON_2_4G)
+        if (rateSection == RATE_SECTION.CCK && current_band_type != BandType.BAND_ON_2_4G)
         {
             return;
         }
@@ -897,9 +885,9 @@ public class RadioManagementModule
         PHY_SetTxPowerIndexByRateArray(rfPath, rates_by_sections[(int)rateSection].rates);
     }
 
-    private void PHY_TxPowerTrainingByPath_8812(hal_com_data pHalData, RfPath rfPath)
+    private void PHY_TxPowerTrainingByPath_8812(RfPath rfPath)
     {
-        if ((byte)rfPath >= pHalData.NumTotalRFPath)
+        if ((byte)rfPath >= _eepromManager.NumTotalRfPath)
         {
             return;
         }
@@ -969,7 +957,7 @@ public class RadioManagementModule
         }
     }
 
-    void phy_PostSetBwMode8812(hal_com_data pHalData)
+    void phy_PostSetBwMode8812()
     {
         byte L1pkVal = 0, reg_837 = 0;
 
@@ -989,7 +977,7 @@ public class RadioManagementModule
                 _device.phy_set_bb_reg(rRFMOD_Jaguar, 0x003003C3, 0x00300200); /* 0x8ac[21,20,9:6,1,0]=8'b11100000 */
                 _device.phy_set_bb_reg(rADC_Buf_Clk_Jaguar, BIT30, 0); /* 0x8c4[30] = 1'b0 */
 
-                if (pHalData.RfType == RfType.RF_2T2R)
+                if (_eepromManager.RfType == RfType.RF_2T2R)
                 {
                     _device.phy_set_bb_reg(rL1PeakTH_Jaguar, 0x03C00000, 7); /* 2R 0x848[25:22] = 0x7 */
                 }
@@ -1010,10 +998,14 @@ public class RadioManagementModule
                     L1pkVal = 6;
                 else
                 {
-                    if (pHalData.RfType == RfType.RF_2T2R)
+                    if (_eepromManager.RfType == RfType.RF_2T2R)
+                    {
                         L1pkVal = 7;
+                    }
                     else
+                    {
                         L1pkVal = 8;
+                    }
                 }
 
                 _device.phy_set_bb_reg(rL1PeakTH_Jaguar, 0x03C00000, L1pkVal); /* 0x848[25:22] = 0x6 */
@@ -1039,7 +1031,7 @@ public class RadioManagementModule
                     L1pkVal = 5;
                 else
                 {
-                    if (pHalData.RfType == RfType.RF_2T2R)
+                    if (_eepromManager.RfType == RfType.RF_2T2R)
                     {
                         L1pkVal = 6;
                     }
@@ -1059,45 +1051,45 @@ public class RadioManagementModule
         }
 
         /* <20121109, Kordan> A workaround for 8812A only. */
-        phy_FixSpur_8812A(pHalData, _currentChannelBw, _currentChannel);
+        phy_FixSpur_8812A(_currentChannelBw, _currentChannel);
 
         /* RTW_INFO("phy_PostSetBwMode8812(): Reg483: %x\n", rtw_read8(adapterState, 0x483)); */
         /* RTW_INFO("phy_PostSetBwMode8812(): Reg668: %x\n", rtw_read32(adapterState, 0x668)); */
         /* RTW_INFO("phy_PostSetBwMode8812(): Reg8AC: %x\n", phy_query_bb_reg(adapterState, rRFMOD_Jaguar, 0xffffffff)); */
 
         /* 3 Set RF related register */
-        PHY_RF6052SetBandwidth8812(pHalData, _currentChannelBw);
+        PHY_RF6052SetBandwidth8812(_currentChannelBw);
     }
 
-    private void PHY_RF6052SetBandwidth8812(hal_com_data pHalData, ChannelWidth Bandwidth) /* 20M or 40M */
+    private void PHY_RF6052SetBandwidth8812(ChannelWidth Bandwidth) /* 20M or 40M */
     {
         switch (Bandwidth)
         {
             case ChannelWidth.CHANNEL_WIDTH_20:
                 /* RTW_INFO("PHY_RF6052SetBandwidth8812(), set 20MHz\n"); */
-                phy_set_rf_reg(pHalData, RfPath.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 3);
-                phy_set_rf_reg(pHalData, RfPath.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 3);
+                phy_set_rf_reg(RfPath.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 3);
+                phy_set_rf_reg(RfPath.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 3);
                 break;
 
             case ChannelWidth.CHANNEL_WIDTH_40:
                 /* RTW_INFO("PHY_RF6052SetBandwidth8812(), set 40MHz\n"); */
-                phy_set_rf_reg(pHalData, RfPath.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 1);
-                phy_set_rf_reg(pHalData, RfPath.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 1);
+                phy_set_rf_reg(RfPath.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 1);
+                phy_set_rf_reg(RfPath.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 1);
                 break;
 
             case ChannelWidth.CHANNEL_WIDTH_80:
                 /* RTW_INFO("PHY_RF6052SetBandwidth8812(), set 80MHz\n"); */
-                phy_set_rf_reg(pHalData, RfPath.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 0);
-                phy_set_rf_reg(pHalData, RfPath.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 0);
+                phy_set_rf_reg(RfPath.RF_PATH_A, RF_CHNLBW_Jaguar, BIT11 | BIT10, 0);
+                phy_set_rf_reg(RfPath.RF_PATH_B, RF_CHNLBW_Jaguar, BIT11 | BIT10, 0);
                 break;
 
             default:
-                RTW_INFO("PHY_RF6052SetBandwidth8812(): unknown Bandwidth: %#X\n", Bandwidth);
+                _logger.LogError("PHY_RF6052SetBandwidth8812(): unknown Bandwidth: {Bandwidth}", Bandwidth);
                 break;
         }
     }
 
-    public void phy_set_rf_reg(hal_com_data pHalData, RfPath eRFPath, UInt16 RegAddr, UInt32 BitMask, UInt32 Data)
+    public void phy_set_rf_reg(RfPath eRFPath, UInt16 RegAddr, UInt32 BitMask, UInt32 Data)
     {
         uint data = Data;
         Console.WriteLine($"RFREG;{(byte)eRFPath};{(uint)RegAddr:X};{BitMask:X};{data:X}");
@@ -1110,7 +1102,7 @@ public class RadioManagementModule
         if (BitMask != bLSSIWrite_data_Jaguar)
         {
             UInt32 Original_Value, BitShift;
-            Original_Value = phy_RFSerialRead(pHalData, eRFPath, RegAddr);
+            Original_Value = phy_RFSerialRead(eRFPath, RegAddr);
             BitShift = PHY_CalculateBitShift(BitMask);
             data = ((Original_Value) & (~BitMask)) | (data << (int)BitShift);
         }
@@ -1118,7 +1110,7 @@ public class RadioManagementModule
         phy_RFSerialWrite(eRFPath, RegAddr, data);
     }
 
-    private UInt32 phy_RFSerialRead(hal_com_data pHalData, RfPath eRFPath, UInt32 Offset)
+    private UInt32 phy_RFSerialRead(RfPath eRFPath, UInt32 Offset)
     {
         UInt32 retValue;
         BbRegisterDefinition pPhyReg = PhyRegDef[eRFPath];
@@ -1126,7 +1118,7 @@ public class RadioManagementModule
 
         /* <20120809, Kordan> CCA OFF(when entering), asked by James to avoid reading the wrong value. */
         /* <20120828, Kordan> Toggling CCA would affect RF 0x0, skip it! */
-        if (Offset != 0x0 && !(pHalData.Version.IS_C_CUT()))
+        if (Offset != 0x0 && !(_eepromManager.Version.IS_C_CUT()))
         {
             _device.phy_set_bb_reg(rCCAonSec_Jaguar, 0x8, 1);
         }
@@ -1144,7 +1136,7 @@ public class RadioManagementModule
 
         _device.phy_set_bb_reg((ushort)pPhyReg.RfHSSIPara2, bHSSIRead_addr_Jaguar, Offset);
 
-        if (pHalData.Version.IS_C_CUT())
+        if (_eepromManager.Version.IS_C_CUT())
         {
             Thread.Sleep(20);
         }
@@ -1162,7 +1154,7 @@ public class RadioManagementModule
 
         /* <20120809, Kordan> CCA ON(when exiting), asked by James to avoid reading the wrong value. */
         /* <20120828, Kordan> Toggling CCA would affect RF 0x0, skip it! */
-        if (Offset != 0x0 && !(pHalData.Version.IS_C_CUT()))
+        if (Offset != 0x0 && !(_eepromManager.Version.IS_C_CUT()))
         {
             _device.phy_set_bb_reg(rCCAonSec_Jaguar, 0x8, 0);
         }

@@ -11,11 +11,9 @@ public static class CommonConsts
     public const ushort REG_EFUSE_TEST = 0x0034;
     public const ushort REG_SYS_CLKR = 0x0008;
     public const byte EEPROM_DEFAULT_BOARD_OPTION = 0x00;
-    public const byte EEPROM_RF_BOARD_OPTION_8812 = 0xC1;
     public const byte EEPROM_THERMAL_METER_8812 = 0xBA;
-    public const byte EEPROM_Default_ThermalMeter_8812 = 0x18;
     public const byte EEPROM_USB_MODE_8812 = 0x08;
-    public const byte EEPROM_RFE_OPTION_8812 = 0xCA;
+    
     public const ushort REG_USB_HRPWM = 0xFE58;
     public const ushort REG_BAR_MODE_CTRL = 0x04CC;
     public const ushort REG_FAST_EDCA_CTRL = 0x0460;

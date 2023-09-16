@@ -32,7 +32,7 @@ public class WiFiDriver : IDisposable
     {
         _logger.LogInformation("Creating Rtl8812aDevice");
         var usb = new LibUsbRtlUsbDevice((UsbDevice)usbDevice);
-        var rtlAdapter = new RtlUsbAdapter(usb);
+        var rtlAdapter = new RtlUsbAdapter(usb, _loggerFactory.CreateLogger<RtlUsbAdapter>());
         return new Rtl8812aDevice(rtlAdapter, _loggerFactory.CreateLogger<Rtl8812aDevice>());
     }
 

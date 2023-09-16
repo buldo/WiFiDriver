@@ -4,10 +4,11 @@ using Rtl8812auNet.Rtl8812au.PredefinedData;
 
 namespace Rtl8812auNet.Rtl8812au.Modules;
 
-public class HalModule
+internal class HalModule
 {
     private readonly RtlUsbAdapter _device;
     private readonly RadioManagementModule _radioManagementModule;
+    private readonly EepromManager _eepromManager;
     private readonly bool _usbTxAggMode = true;
     private readonly byte _usbTxAggDescNum = 0x01; // adjust value for OQT Overflow issue 0x3; only 4 bits
     private readonly RX_AGG_MODE _rxAggMode = RX_AGG_MODE.RX_AGG_USB;
@@ -19,19 +20,21 @@ public class HalModule
 
     public HalModule(
         RtlUsbAdapter device,
-        RadioManagementModule radioManagementModule)
+        RadioManagementModule radioManagementModule,
+        EepromManager eepromManager)
     {
         _device = device;
         _radioManagementModule = radioManagementModule;
+        _eepromManager = eepromManager;
     }
 
-    public bool rtw_hal_init(hal_com_data pHalData, SelectedChannel selectedChannel)
+    public bool rtw_hal_init(SelectedChannel selectedChannel)
     {
-        var status = rtl8812au_hal_init(pHalData);
+        var status = rtl8812au_hal_init();
 
         if (status)
         {
-            _radioManagementModule.init_hw_mlme_ext(pHalData, selectedChannel);
+            _radioManagementModule.init_hw_mlme_ext(selectedChannel);
             _radioManagementModule.SetMonitorMode();
         }
         else
@@ -42,9 +45,9 @@ public class HalModule
         return status;
     }
 
-    private static bool check_positive(hal_com_data hal, UInt32 condition1, UInt32 condition2, UInt32 condition4)
+    private bool check_positive(UInt32 condition1, UInt32 condition2, UInt32 condition4)
     {
-        var originalBoardType = hal.GetBoardType();
+        var originalBoardType = _eepromManager.GetBoardType();
 
         uint boardType =
             ((originalBoardType & BIT4) >>> 4) << 0 | /* _GLNA*/
@@ -60,7 +63,7 @@ public class HalModule
         UInt32 cond2 = condition2;
         UInt32 cond4 = condition4;
 
-        uint cut_version_for_para = (hal.Version.IS_A_CUT()) ? (uint)15 : (uint)hal.Version.CUTVersion;
+        uint cut_version_for_para = (_eepromManager.Version.IS_A_CUT()) ? (uint)15 : (uint)_eepromManager.Version.CUTVersion;
         uint pkg_type_for_para = (byte)15;
 
         UInt32 driver1 = cut_version_for_para << 24 |
@@ -70,16 +73,16 @@ public class HalModule
                       boardType;
 
         UInt32 driver2 =
-            ((uint)hal.TypeGLNA & 0xFF) << 0 |
-            ((uint)hal.TypeGPA & 0xFF) << 8 |
-            ((uint)hal.TypeALNA & 0xFF) << 16 |
-            ((uint)hal.TypeAPA & 0xFF) << 24;
+            ((uint)_eepromManager.TypeGLNA & 0xFF) << 0 |
+            ((uint)_eepromManager.TypeGPA & 0xFF) << 8 |
+            ((uint)_eepromManager.TypeALNA & 0xFF) << 16 |
+            ((uint)_eepromManager.TypeAPA & 0xFF) << 24;
 
         UInt32 driver4 =
-            ((uint)hal.TypeGLNA & 0xFF00) >> 8 |
-            ((uint)hal.TypeGPA & 0xFF00) |
-            ((uint)hal.TypeALNA & 0xFF00) << 8 |
-            ((uint)hal.TypeAPA & 0xFF00) << 16;
+            ((uint)_eepromManager.TypeGLNA & 0xFF00) >> 8 |
+            ((uint)_eepromManager.TypeGPA & 0xFF00) |
+            ((uint)_eepromManager.TypeALNA & 0xFF00) << 8 |
+            ((uint)_eepromManager.TypeAPA & 0xFF00) << 16;
 
         /*============== value Defined Check ===============*/
         /*QFN type [15:12] and cut version [27:24] need to do value check*/
@@ -143,7 +146,7 @@ public class HalModule
     }
 
 
-    private bool rtl8812au_hal_init(hal_com_data pHalData)
+    private bool rtl8812au_hal_init()
     {
         // Check if MAC has already power on. by tynli. 2011.05.27.
         var value8 = _device.rtw_read8(REG_SYS_CLKR + 1);
@@ -191,12 +194,12 @@ public class HalModule
         var fwManager = new FirmwareManager(_device);
         fwManager.FirmwareDownload8812();
 
-        PHY_MACConfig8812(pHalData);
+        PHY_MACConfig8812();
 
-        _InitQueueReservedPage_8812AUsb(pHalData);
+        _InitQueueReservedPage_8812AUsb();
         _InitTxBufferBoundary_8812AUsb();
 
-        _InitQueuePriority_8812AUsb(pHalData);
+        _InitQueuePriority_8812AUsb();
         _InitPageBoundary_8812AUsb();
 
         _InitTransferPageSize_8812AUsb();
@@ -211,7 +214,7 @@ public class HalModule
         _InitEDCA_8812AUsb();
 
         _InitRetryFunction_8812A();
-        init_UsbAggregationSetting_8812A(pHalData);
+        init_UsbAggregationSetting_8812A();
 
         _InitBeaconParameters_8812A();
         _InitBeaconMaxError_8812A();
@@ -227,15 +230,15 @@ public class HalModule
         _device.rtw_write16(REG_PKT_VO_VI_LIFE_TIME, 0x0400); /* unit: 256us. 256ms */
         _device.rtw_write16(REG_PKT_BE_BK_LIFE_TIME, 0x0400); /* unit: 256us. 256ms */
 
-        var bbConfig8812Status = PHY_BBConfig8812(pHalData);
+        var bbConfig8812Status = PHY_BBConfig8812();
         if (bbConfig8812Status == false)
         {
             return false;
         }
 
-        PHY_RF6052_Config_8812(pHalData);
+        PHY_RF6052_Config_8812();
 
-        if (pHalData.RfType == RfType.RF_1T1R)
+        if (_eepromManager.RfType == RfType.RF_1T1R)
         {
             PHY_BB8812_Config_1T();
         }
@@ -248,15 +251,14 @@ public class HalModule
 
         if (registry_priv.channel <= 14)
         {
-            _radioManagementModule.PHY_SwitchWirelessBand8812(pHalData, BandType.BAND_ON_2_4G);
+            _radioManagementModule.PHY_SwitchWirelessBand8812(BandType.BAND_ON_2_4G);
         }
         else
         {
-            _radioManagementModule.PHY_SwitchWirelessBand8812(pHalData, BandType.BAND_ON_5G);
+            _radioManagementModule.PHY_SwitchWirelessBand8812(BandType.BAND_ON_5G);
         }
 
         _radioManagementModule.rtw_hal_set_chnl_bw(
-            pHalData,
             registry_priv.channel,
             ChannelWidth.CHANNEL_WIDTH_20,
             HAL_PRIME_CHNL_OFFSET_DONT_CARE,
@@ -344,38 +346,28 @@ public class HalModule
         _device.phy_set_bb_reg(0xe64, bMaskDWord, 0);
     }
 
-    private void PHY_RF6052_Config_8812(hal_com_data pHalData)
+    public void PHY_RF6052_Config_8812()
     {
-        /* Initialize general global value */
-        if (pHalData.RfType == RfType.RF_1T1R)
-        {
-            pHalData.NumTotalRFPath = 1;
-        }
-        else
-        {
-            pHalData.NumTotalRFPath = 2;
-        }
-
         /*  */
         /* Config BB and RF */
         /*  */
-        phy_RF6052_Config_ParaFile_8812(pHalData);
+        phy_RF6052_Config_ParaFile_8812();
     }
 
-    private void phy_RF6052_Config_ParaFile_8812(hal_com_data pHalData)
+    private void phy_RF6052_Config_ParaFile_8812()
     {
         RfPath eRFPath;
 
-        for (eRFPath = 0; (byte)eRFPath < pHalData.NumTotalRFPath; eRFPath++)
+        for (eRFPath = 0; (byte)eRFPath < _eepromManager.NumTotalRfPath; eRFPath++)
         {
             /*----Initialize RF fom connfiguration file----*/
             switch (eRFPath)
             {
                 case RfPath.RF_PATH_A:
-                    odm_config_rf_with_header_file(pHalData, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath);
+                    odm_config_rf_with_header_file(odm_rf_config_type.CONFIG_RF_RADIO, eRFPath);
                     break;
                 case RfPath.RF_PATH_B:
-                    odm_config_rf_with_header_file(pHalData, odm_rf_config_type.CONFIG_RF_RADIO, eRFPath);
+                    odm_config_rf_with_header_file(odm_rf_config_type.CONFIG_RF_RADIO, eRFPath);
                     break;
                 default:
                     break;
@@ -383,24 +375,24 @@ public class HalModule
         }
     }
 
-    private void odm_config_rf_with_header_file(hal_com_data dm, odm_rf_config_type config_type, RfPath e_rf_path)
+    private void odm_config_rf_with_header_file(odm_rf_config_type config_type, RfPath e_rf_path)
     {
         if (config_type == odm_rf_config_type.CONFIG_RF_RADIO)
         {
             if (e_rf_path == RfPath.RF_PATH_A)
             {
                 //READ_AND_CONFIG_MP(8812a, _radioa);
-                odm_read_and_config_mp_8812a_radioa(dm);
+                odm_read_and_config_mp_8812a_radioa();
             }
             else if (e_rf_path == RfPath.RF_PATH_B)
             {
                 //READ_AND_CONFIG_MP(8812a, _radiob);
-                odm_read_and_config_mp_8812a_radiob(dm);
+                odm_read_and_config_mp_8812a_radiob();
             }
         }
     }
 
-    private void odm_read_and_config_mp_8812a_radiob(hal_com_data dm)
+    private void odm_read_and_config_mp_8812a_radiob()
     {
         UInt32 i = 0;
         byte c_cond;
@@ -450,7 +442,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm, pre_v1, pre_v2, v2))
+                        if (check_positive(pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -469,7 +461,7 @@ public class HalModule
             {
                 if (is_matched)
                 {
-                    odm_config_rf_radio_b_8812a(dm, v1, v2);
+                    odm_config_rf_radio_b_8812a(v1, v2);
                 }
             }
 
@@ -477,7 +469,7 @@ public class HalModule
         }
     }
 
-    private void odm_read_and_config_mp_8812a_radioa(hal_com_data dm)
+    private void odm_read_and_config_mp_8812a_radioa()
     {
         UInt32 i = 0;
         byte c_cond;
@@ -527,7 +519,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(dm, pre_v1, pre_v2, v2))
+                        if (check_positive(pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -546,7 +538,7 @@ public class HalModule
             {
                 if (is_matched)
                 {
-                    odm_config_rf_radio_a_8812a(dm, v1, v2);
+                    odm_config_rf_radio_a_8812a(v1, v2);
                 }
             }
 
@@ -554,23 +546,23 @@ public class HalModule
         }
     }
 
-    private void odm_config_rf_radio_a_8812a(hal_com_data dm, UInt32 addr, UInt32 data)
+    private void odm_config_rf_radio_a_8812a(UInt32 addr, UInt32 data)
     {
         UInt32 content = 0x1000; /* RF_Content: radioa_txt */
         UInt32 maskfor_phy_set = (UInt32)(content & 0xE000);
 
-        odm_config_rf_reg_8812a(dm, addr, data, RfPath.RF_PATH_A, (UInt16)(addr | maskfor_phy_set));
+        odm_config_rf_reg_8812a(addr, data, RfPath.RF_PATH_A, (UInt16)(addr | maskfor_phy_set));
     }
 
-    private void odm_config_rf_radio_b_8812a(hal_com_data dm, UInt32 addr, UInt32 data)
+    private void odm_config_rf_radio_b_8812a(UInt32 addr, UInt32 data)
     {
         UInt32 content = 0x1001; /* RF_Content: radiob_txt */
         UInt32 maskfor_phy_set = (UInt32)(content & 0xE000);
 
-        odm_config_rf_reg_8812a(dm, addr, data, RfPath.RF_PATH_B, (UInt16)(addr | maskfor_phy_set));
+        odm_config_rf_reg_8812a(addr, data, RfPath.RF_PATH_B, (UInt16)(addr | maskfor_phy_set));
     }
 
-    private void odm_config_rf_reg_8812a(hal_com_data dm, UInt32 addr, UInt32 data, RfPath RF_PATH, UInt16 reg_addr)
+    private void odm_config_rf_reg_8812a(UInt32 addr, UInt32 data, RfPath RF_PATH, UInt16 reg_addr)
     {
         if (addr == 0xfe || addr == 0xffe)
         {
@@ -578,18 +570,18 @@ public class HalModule
         }
         else
         {
-            odm_set_rf_reg(dm, RF_PATH, reg_addr, RFREGOFFSETMASK, data);
+            odm_set_rf_reg(RF_PATH, reg_addr, RFREGOFFSETMASK, data);
             /* Add 1us delay between BB/RF register setting. */
             ODM_delay_us(1);
         }
     }
 
-    private void odm_set_rf_reg(hal_com_data dm, RfPath e_rf_path, UInt16 reg_addr, UInt32 bit_mask, UInt32 data)
+    private void odm_set_rf_reg(RfPath e_rf_path, UInt16 reg_addr, UInt32 bit_mask, UInt32 data)
     {
-        _radioManagementModule.phy_set_rf_reg(dm, e_rf_path, reg_addr, bit_mask, data);
+        _radioManagementModule.phy_set_rf_reg(e_rf_path, reg_addr, bit_mask, data);
     }
 
-    private bool PHY_BBConfig8812(hal_com_data pHalData)
+    private bool PHY_BBConfig8812()
     {
         /* tangw check start 20120412 */
         /* . APLL_EN,,APLL_320_GATEB,APLL_320BIAS,  auto config by hw fsm after pfsm_go (0x4 bit 8) set */
@@ -610,9 +602,9 @@ public class HalModule
         /*  */
         /* Config BB and AGC */
         /*  */
-        var rtStatus = phy_BB8812_Config_ParaFile(pHalData);
+        var rtStatus = phy_BB8812_Config_ParaFile();
 
-        hal_set_crystal_cap(pHalData.crystal_cap);
+        hal_set_crystal_cap(_eepromManager.crystal_cap);
 
         return rtStatus;
     }
@@ -625,9 +617,9 @@ public class HalModule
         _device.phy_set_bb_reg(REG_MAC_PHY_CTRL, 0x7FF80000u, (byte)(crystal_cap | (crystal_cap << 6)));
     }
 
-    private bool phy_BB8812_Config_ParaFile(hal_com_data hal)
+    private bool phy_BB8812_Config_ParaFile()
     {
-        bool rtStatus = odm_config_bb_with_header_file(hal, odm_bb_config_type.CONFIG_BB_PHY_REG);
+        bool rtStatus = odm_config_bb_with_header_file(odm_bb_config_type.CONFIG_BB_PHY_REG);
 
         /* Read PHY_REG.TXT BB INIT!! */
 
@@ -637,7 +629,7 @@ public class HalModule
             goto phy_BB_Config_ParaFile_Fail;
         }
 
-        rtStatus = odm_config_bb_with_header_file(hal, odm_bb_config_type.CONFIG_BB_AGC_TAB);
+        rtStatus = odm_config_bb_with_header_file(odm_bb_config_type.CONFIG_BB_AGC_TAB);
 
         if (rtStatus != true)
         {
@@ -649,7 +641,7 @@ public class HalModule
         return rtStatus;
     }
 
-    private bool odm_config_bb_with_header_file(hal_com_data hal, odm_bb_config_type config_type)
+    private bool odm_config_bb_with_header_file(odm_bb_config_type config_type)
     {
         bool result = true;
 
@@ -658,12 +650,12 @@ public class HalModule
         if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG)
         {
             //READ_AND_CONFIG_MP(8812a, _phy_reg);
-            odm_read_and_config_mp_8812a_phy_reg(hal);
+            odm_read_and_config_mp_8812a_phy_reg();
         }
         else if (config_type == odm_bb_config_type.CONFIG_BB_AGC_TAB)
         {
             //READ_AND_CONFIG_MP(8812a, _agc_tab);
-            odm_read_and_config_mp_8812a_agc_tab(hal);
+            odm_read_and_config_mp_8812a_agc_tab();
         }
         else if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG_PG)
         {
@@ -673,7 +665,7 @@ public class HalModule
         else if (config_type == odm_bb_config_type.CONFIG_BB_PHY_REG_MP)
         {
             //READ_AND_CONFIG_MP(8812a, _phy_reg_mp);
-            odm_read_and_config_mp_8812a_phy_reg_mp(hal);
+            odm_read_and_config_mp_8812a_phy_reg_mp();
         }
         else if (config_type == odm_bb_config_type.CONFIG_BB_AGC_TAB_DIFF)
         {
@@ -703,7 +695,7 @@ public class HalModule
         return result;
     }
 
-    private void odm_read_and_config_mp_8812a_agc_tab(hal_com_data hal)
+    private void odm_read_and_config_mp_8812a_agc_tab()
     {
         UInt32 i = 0;
         byte c_cond;
@@ -753,7 +745,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(hal, pre_v1, pre_v2, v2))
+                        if (check_positive(pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -787,7 +779,7 @@ public class HalModule
         ODM_delay_us(1);
     }
 
-    private void odm_read_and_config_mp_8812a_phy_reg_mp(hal_com_data hal)
+    private void odm_read_and_config_mp_8812a_phy_reg_mp()
     {
         UInt32 i = 0;
         byte c_cond;
@@ -837,7 +829,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(hal,pre_v1, pre_v2, v2))
+                        if (check_positive(pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -864,7 +856,7 @@ public class HalModule
         }
     }
 
-    private void odm_read_and_config_mp_8812a_phy_reg(hal_com_data hal)
+    private void odm_read_and_config_mp_8812a_phy_reg()
     {
         UInt32 i = 0;
         byte c_cond;
@@ -914,7 +906,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(hal, pre_v1, pre_v2, v2))
+                        if (check_positive(pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -1112,13 +1104,13 @@ public class HalModule
         _device.rtw_write16(REG_BCNTCFG, 0x4413);
     }
 
-    private void init_UsbAggregationSetting_8812A(hal_com_data halData)
+    private void init_UsbAggregationSetting_8812A()
     {
         ///* Tx aggregation setting */
         usb_AggSettingTxUpdate_8812A();
 
         ///* Rx aggregation setting */
-        usb_AggSettingRxUpdate_8812A(halData);
+        usb_AggSettingRxUpdate_8812A();
     }
 
     private void usb_AggSettingTxUpdate_8812A()
@@ -1135,7 +1127,7 @@ public class HalModule
         }
     }
 
-    private void usb_AggSettingRxUpdate_8812A(hal_com_data pHalData)
+    private void usb_AggSettingRxUpdate_8812A()
     {
         uint valueDMA = _device.rtw_read8(REG_TRXDMA_CTRL);
         switch (_rxAggMode)
@@ -1159,7 +1151,7 @@ public class HalModule
                 UInt16 temp;
 
                 /* Adjust DMA page and thresh. */
-                temp = (UInt16)(pHalData.rxagg_usb_size | (pHalData.rxagg_usb_timeout << 8));
+                temp = (UInt16)(_device.rxagg_usb_size | (_device.rxagg_usb_timeout << 8));
                 _device.rtw_write16(REG_RXDMA_AGG_PG_TH, temp);
             }
                 break;
@@ -1290,7 +1282,7 @@ public class HalModule
         _device.rtw_write16((REG_TRXFF_BNDY + 2), RX_DMA_BOUNDARY_8812);
     }
 
-    private void _InitQueueReservedPage_8812AUsb(hal_com_data pHalData)
+    private void _InitQueueReservedPage_8812AUsb()
     {
         UInt32 numHQ = 0;
         UInt32 numLQ = 0;
@@ -1301,18 +1293,18 @@ public class HalModule
 
         if (!bWiFiConfig)
         {
-            if (pHalData.OutEpQueueSel.HasFlag(TxSele.TX_SELE_HQ))
+            if (_device.OutEpQueueSel.HasFlag(TxSele.TX_SELE_HQ))
             {
                 numHQ = NORMAL_PAGE_NUM_HPQ_8812;
             }
 
-            if (pHalData.OutEpQueueSel.HasFlag(TxSele.TX_SELE_LQ))
+            if (_device.OutEpQueueSel.HasFlag(TxSele.TX_SELE_LQ))
             {
                 numLQ = NORMAL_PAGE_NUM_LPQ_8812;
             }
 
             /* NOTE: This step shall be proceed before writting REG_RQPN.		 */
-            if (pHalData.OutEpQueueSel.HasFlag(TxSele.TX_SELE_NQ))
+            if (_device.OutEpQueueSel.HasFlag(TxSele.TX_SELE_NQ))
             {
                 numNQ = NORMAL_PAGE_NUM_NPQ_8812;
             }
@@ -1320,18 +1312,18 @@ public class HalModule
         else
         {
             /* WMM		 */
-            if (pHalData.OutEpQueueSel.HasFlag(TxSele.TX_SELE_HQ))
+            if (_device.OutEpQueueSel.HasFlag(TxSele.TX_SELE_HQ))
             {
                 numHQ = WMM_NORMAL_PAGE_NUM_HPQ_8812;
             }
 
-            if (pHalData.OutEpQueueSel.HasFlag(TxSele.TX_SELE_LQ))
+            if (_device.OutEpQueueSel.HasFlag(TxSele.TX_SELE_LQ))
             {
                 numLQ = WMM_NORMAL_PAGE_NUM_LPQ_8812;
             }
 
             /* NOTE: This step shall be proceed before writting REG_RQPN.		 */
-            if (pHalData.OutEpQueueSel.HasFlag(TxSele.TX_SELE_NQ))
+            if (_device.OutEpQueueSel.HasFlag(TxSele.TX_SELE_NQ))
             {
                 numNQ = WMM_NORMAL_PAGE_NUM_NPQ_8812;
             }
@@ -1348,9 +1340,9 @@ public class HalModule
     }
 
 
-    private void PHY_MACConfig8812(hal_com_data hal)
+    private void PHY_MACConfig8812()
     {
-        odm_read_and_config_mp_8812a_mac_reg(hal);
+        odm_read_and_config_mp_8812a_mac_reg();
     }
 
     private bool InitPowerOn()
@@ -1597,7 +1589,7 @@ public class HalModule
         _device.rtw_write32(REG_TXDMA_OFFSET_CHK, value32);
     }
 
-    private void odm_read_and_config_mp_8812a_mac_reg(hal_com_data hal)
+    private void odm_read_and_config_mp_8812a_mac_reg()
     {
         UInt32 i = 0;
         byte c_cond;
@@ -1647,7 +1639,7 @@ public class HalModule
                     /*negative condition*/
                     if (is_skipped == false)
                     {
-                        if (check_positive(hal, pre_v1, pre_v2, v2))
+                        if (check_positive(pre_v1, pre_v2, v2))
                         {
                             is_matched = true;
                             is_skipped = true;
@@ -1692,12 +1684,12 @@ public class HalModule
         _device.rtw_write8(REG_TDECTRL + 1, txPageBoundary8812);
     }
 
-    private void _InitQueuePriority_8812AUsb(hal_com_data pHalData)
+    private void _InitQueuePriority_8812AUsb()
     {
-        switch (pHalData.OutEpNumber)
+        switch (_device.OutEpNumber)
         {
             case 2:
-                _InitNormalChipTwoOutEpPriority_8812AUsb(pHalData);
+                _InitNormalChipTwoOutEpPriority_8812AUsb();
                 break;
             case 3:
                 _InitNormalChipThreeOutEpPriority_8812AUsb();
@@ -1711,12 +1703,12 @@ public class HalModule
         }
     }
 
-    private void _InitNormalChipTwoOutEpPriority_8812AUsb(hal_com_data pHalData)
+    private void _InitNormalChipTwoOutEpPriority_8812AUsb()
     {
         UInt16 valueHi;
         UInt16 valueLow;
 
-        switch (pHalData.OutEpQueueSel)
+        switch (_device.OutEpQueueSel)
         {
             case (TxSele.TX_SELE_HQ | TxSele.TX_SELE_LQ):
                 valueHi = QUEUE_HIGH;
