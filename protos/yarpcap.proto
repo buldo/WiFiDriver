@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "YetAnotherRemotePcap.Server";
+
+package yarpcap;
+
+// Pcap service definition.
+service Yarp {
+  // List adapters
+  rpc GetAdapters (GetAdaptersRequest) returns (GetAdaptersResponse);
+
+  // Start monitoring. Data sends over udp
+  rpc StartMonitoringUdp() returns ();
+
+  rpc SetChannel(SetChannelRequest) returns (SetChannelResponse);
+}
+
+message GetAdaptersRequest{
+}
+
+message GetAdaptersResponse{
+  repeated AdapterInformation adapters = 1;
+}
+
+message AdapterInformation{
+  string id = 1;
+  string name = 2;
+}
+
+message SetModeResponse{
+  string logMessage = 1;
+}
+
+message SetChannelRequest{
+  string id = 1;
+  int32 channel = 2;
+}
+
+message SetChannelResponse{
+  string logMessage = 1;
+}
+
+// UDP data wire format
