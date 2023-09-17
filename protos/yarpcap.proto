@@ -12,7 +12,7 @@ service Yarp {
   rpc GetAdapters (GetAdaptersRequest) returns (GetAdaptersResponse);
 
   // Start monitoring. Data sends over udp
-  rpc StartMonitoringUdp() returns ();
+  rpc StartMonitoringUdp(StartMonitoringUdpRequest) returns (google.protobuf.Empty);
 
   rpc SetChannel(SetChannelRequest) returns (SetChannelResponse);
 }
@@ -29,8 +29,8 @@ message AdapterInformation{
   string name = 2;
 }
 
-message SetModeResponse{
-  string logMessage = 1;
+message StartMonitoringUdpRequest{
+  string adapterId =1;
 }
 
 message SetChannelRequest{
