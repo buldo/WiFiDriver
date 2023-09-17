@@ -4,46 +4,67 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OpenHdDriver.Windows"
+        xmlns:viewModels="clr-namespace:OpenHdDriver.Windows.ViewModels"
+        xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
+        Title="OpenHD RTL8812AU driver" Height="450" Width="600">
+    <Grid Margin="3,0,3,3">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+
         <Grid Grid.Row="0"
-              Margin="0,0,0,3"
               VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <ListView Grid.Row="0">
+
+            <TextBlock Grid.Row="0"
+                       Margin="0,3,0,0">
+                Available cards:
+            </TextBlock>
+
+            <ListView Grid.Row="1" Margin="0,3,0,0">
 
             </ListView>
-            <StackPanel Grid.Row="1" Orientation="Horizontal">
-                <TextBlock>Status:</TextBlock>
+
+            <StackPanel Grid.Row="2"
+                        Margin="0,3,3,0"
+                        Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock>Status:</TextBlock>
+                    <TextBlock Margin="3,0,0,0">OK</TextBlock>
+                </StackPanel>
+                <StackPanel Margin="0,3,0,0"
+                            Orientation="Horizontal">
+                    <Button Width="100" Command="{Binding CloseApplicationCommand}">Exit</Button>
+                    <Button Width="100" Margin="3,0,0,0">Minimize to tray</Button>
+                </StackPanel>
+
             </StackPanel>
         </Grid>
 
         <Expander
                 Grid.Row="1"
                 Header="Logs"
+                Margin="-1,3,-1,0"
             >
             <Grid Height="200">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <ListView Grid.Row="0" Margin="3,3,3,0">
+                <ListView Grid.Row="0" Margin="0,3,0,0">
 
                 </ListView>
-                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="3">
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,3,0,0">
                     <Button Content="Open logs folder"/>
                 </StackPanel>
             </Grid>
         </Expander>
-
-
     </Grid>
 </Window>

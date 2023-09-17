@@ -1,6 +1,9 @@
 ﻿using System.Configuration;
 using System.Data;
+using System.Drawing;
 using System.Windows;
+
+using Hardcodet.Wpf.TaskbarNotification;
 
 using Microsoft.Extensions.DependencyInjection;
 using OpenHdDriver.Windows.ViewModels;
@@ -13,11 +16,15 @@ namespace OpenHdDriver.Windows
     /// </summary>
     public partial class App : Application
     {
+        private TaskbarIcon _taskbarIcon;
+
         public App()
         {
             Services = ConfigureServices();
 
             this.InitializeComponent();
+            _taskbarIcon = (TaskbarIcon)FindResource("AppNotifyIcon")!;
+
         }
 
         /// <summary>
@@ -35,7 +42,7 @@ namespace OpenHdDriver.Windows
             var services = new ServiceCollection();
 
             services.AddRtl8812auNetGrpcServer();
-            services.AddTransient<MainWindowViewModel>();
+            services.AddSingleton<MainWindowViewModel>();
 
             return services.BuildServiceProvider();
         }

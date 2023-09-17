@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.ComponentModel;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,6 +9,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using LibUsbDotNet.Main;
+
 using Microsoft.Extensions.DependencyInjection;
 using OpenHdDriver.Windows.ViewModels;
 
@@ -22,18 +25,27 @@ namespace OpenHdDriver.Windows
         {
             InitializeComponent();
             DataContext = App.Current.Services.GetRequiredService<MainWindowViewModel>();
+
         }
 
-        private void Expander_OnExpanded(object sender, RoutedEventArgs e)
+        // Minimize to system tray when application is minimized.
+        protected override void OnStateChanged(EventArgs e)
         {
-            //LogsRowDefinition.MinHeight = 80;
-            //LogsRowDefinition.Height = null;
+            if (WindowState == WindowState.Minimized) this.Hide();
+
+            base.OnStateChanged(e);
         }
 
-        private void Expander_OnCollapsed(object sender, RoutedEventArgs e)
+        // Minimize to system tray when application is closed.
+        protected override void OnClosing(CancelEventArgs e)
         {
-            //LogsRowDefinition.MinHeight = 0;
-            //LogsRowDefinition.Height = new GridLength(25);
+            // setting cancel to true will cancel the close request
+            // so the application is not closed
+            e.Cancel = true;
+
+            this.Hide();
+
+            base.OnClosing(e);
         }
     }
 }
