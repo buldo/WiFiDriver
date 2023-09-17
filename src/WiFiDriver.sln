@@ -14,7 +14,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Protos", "Protos", "{FB6533
 		..\protos\yarpcap.proto = ..\protos\yarpcap.proto
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenHdDriver", "OpenHdDriver\OpenHdDriver.csproj", "{7F020F6F-F0C1-4727-B089-4CC907763ED6}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClientApplications", "ClientApplications", "{7B609A23-9CEE-4D88-89C1-8DB3F3CDD98C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenHdDriver.Windows", "OpenHdDriver.Windows\OpenHdDriver.Windows.csproj", "{67241F81-CCB9-4812-AD28-D8BCD4CC432D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,13 +36,16 @@ Global
 		{64460206-FB69-4445-9795-77A088456255}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64460206-FB69-4445-9795-77A088456255}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64460206-FB69-4445-9795-77A088456255}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F020F6F-F0C1-4727-B089-4CC907763ED6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F020F6F-F0C1-4727-B089-4CC907763ED6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F020F6F-F0C1-4727-B089-4CC907763ED6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F020F6F-F0C1-4727-B089-4CC907763ED6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67241F81-CCB9-4812-AD28-D8BCD4CC432D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67241F81-CCB9-4812-AD28-D8BCD4CC432D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67241F81-CCB9-4812-AD28-D8BCD4CC432D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67241F81-CCB9-4812-AD28-D8BCD4CC432D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{67241F81-CCB9-4812-AD28-D8BCD4CC432D} = {7B609A23-9CEE-4D88-89C1-8DB3F3CDD98C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ACCC2971-DFBF-4B33-AA8B-2C34422F876B}

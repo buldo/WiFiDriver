@@ -7,7 +7,7 @@ option csharp_namespace = "YetAnotherRemotePcap.Server";
 package yarpcap;
 
 // Pcap service definition.
-service Yarp {
+service YarPcap {
   // List adapters
   rpc GetAdapters (GetAdaptersRequest) returns (GetAdaptersResponse);
 
