@@ -7,6 +7,43 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0"
+              Margin="0,0,0,3"
+              VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <ListView Grid.Row="0">
+
+            </ListView>
+            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                <TextBlock>Status:</TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Expander
+                Grid.Row="1"
+                Header="Logs"
+            >
+            <Grid Height="200">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <ListView Grid.Row="0" Margin="3,3,3,0">
+
+                </ListView>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="3">
+                    <Button Content="Open logs folder"/>
+                </StackPanel>
+            </Grid>
+        </Expander>
+
 
     </Grid>
 </Window>

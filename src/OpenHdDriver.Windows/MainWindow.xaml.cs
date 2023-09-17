@@ -8,6 +8,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Extensions.DependencyInjection;
+using OpenHdDriver.Windows.ViewModels;
 
 namespace OpenHdDriver.Windows
 {
@@ -19,6 +21,19 @@ namespace OpenHdDriver.Windows
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = App.Current.Services.GetRequiredService<MainWindowViewModel>();
+        }
+
+        private void Expander_OnExpanded(object sender, RoutedEventArgs e)
+        {
+            //LogsRowDefinition.MinHeight = 80;
+            //LogsRowDefinition.Height = null;
+        }
+
+        private void Expander_OnCollapsed(object sender, RoutedEventArgs e)
+        {
+            //LogsRowDefinition.MinHeight = 0;
+            //LogsRowDefinition.Height = new GridLength(25);
         }
     }
 }
