@@ -49,7 +49,8 @@ class Build : NukeBuild
         .Executes(() =>
         {
             DotNetRestore(settings => settings
-                .SetProjectFile(Solution.Rtl8812auNet));
+                .SetProjectFile(Solution.Rtl8812auNet)
+                .SetRuntime("net7.0"));
         });
 
     //Target Compile => _ => _
@@ -75,6 +76,7 @@ class Build : NukeBuild
                 .SetIncludeSymbols(true)
                 .SetDeterministic(true)
                 .SetNoBuild(false)
+                .SetRuntime("net7.0")
                 .SetSymbolPackageFormat(DotNetSymbolPackageFormat.snupkg));
         });
 
