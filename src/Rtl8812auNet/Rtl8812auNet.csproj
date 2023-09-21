@@ -4,6 +4,23 @@
     <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageId>Bld.$(AssemblyName)</PackageId>
+    <Title>RTL8812AU userspace driver</Title>
+    <Description>RTL8812AU userspace driver that supports monitoring mode</Description>
+    <RepositoryUrl>https://github.com/buldo/WiFiDriver.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/buldo/WiFiDriver</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>driver;rtl8812au;rtl8812;wifi;wi-fi</PackageTags>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +31,7 @@
   <ItemGroup>
     <PackageReference Include="LibUsbDotNet" Version="3.0.102-alpha" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

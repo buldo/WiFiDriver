@@ -12,7 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="7.0.5" />
+      <PackageReference Include="MinVer" Version="4.3.0" />
+      <PackageReference Include="Nuke.Common" Version="7.0.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageDownload Include="minver-cli" Version="[4.3.0]" />
+  </ItemGroup>
 </Project>
