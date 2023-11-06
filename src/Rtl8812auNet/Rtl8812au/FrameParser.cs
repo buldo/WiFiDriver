@@ -1,10 +1,18 @@
-﻿using Rtl8812auNet.Rtl8812au.Enumerations;
+﻿using Microsoft.Extensions.Logging;
+using Rtl8812auNet.Rtl8812au.Enumerations;
 using Rtl8812auNet.Rtl8812au.Models;
 
 namespace Rtl8812auNet.Rtl8812au;
 
 public class FrameParser
 {
+    private readonly ILogger<FrameParser> _logger;
+
+    public FrameParser(ILogger<FrameParser> logger)
+    {
+        _logger = logger;
+    }
+
     public List<ParsedRadioPacket> ParsedRadioPacket(byte[] usbTransfer)
     {
 
@@ -18,12 +26,12 @@ public class FrameParser
             .ToList();
     }
 
-    private static List<(rx_pkt_attrib RxAtrib, byte[] Data)> recvbuf2recvframe(byte[] ptr)
+    private List<(rx_pkt_attrib RxAtrib, byte[] Data)> recvbuf2recvframe(byte[] ptr)
     {
         var transfer_len = ptr.Length;
         var pbuf = ptr.AsSpan();
         var pkt_cnt = GET_RX_STATUS_DESC_USB_AGG_PKTNUM_8812(pbuf);
-        RTW_INFO($"pkt_cnt == {pkt_cnt}");
+        _logger.LogInformation($"pkt_cnt == {pkt_cnt}");
 
         List<(rx_pkt_attrib RxAtrib, byte[] Data)> ret = new();
 
@@ -33,7 +41,7 @@ public class FrameParser
 
             if ((pattrib.crc_err) || (pattrib.icv_err))
             {
-                RTW_INFO($"RX Warning! crc_err={pattrib.crc_err} icv_err={pattrib.icv_err}, skip!");
+                _logger.LogInformation($"RX Warning! crc_err={pattrib.crc_err} icv_err={pattrib.icv_err}, skip!");
                 break;
             }
 
@@ -41,14 +49,16 @@ public class FrameParser
 
             if ((pattrib.pkt_len <= 0) || (pkt_offset > transfer_len))
             {
-                RTW_WARN("RX Warning!,pkt_len<=0 or pkt_offset> transfer_len");
+                _logger.LogWarning(
+                    "RX Warning!,pkt_len <= 0 or pkt_offset > transfer_len; pkt_len: {pkt_len}, pkt_offset: {pkt_offset}, transfer_len: {transfer_len}",
+                    pattrib.pkt_len, pkt_offset, transfer_len);
                 break;
             }
 
             if (pattrib.mfrag)
             {
                 // !!! We skips this packages because ohd not use fragmentation
-                RTW_WARN("mfrag scipping");
+                _logger.LogWarning("mfrag scipping");
 
                 //if (rtw_os_alloc_recvframe(precvframe, pbuf.Slice(pattrib.shift_sz + pattrib.drvinfo_sz + RXDESC_SIZE), pskb) == false)
                 //{
@@ -71,12 +81,12 @@ public class FrameParser
                 /* pkt_rpt_type == TX_REPORT1-CCX, TX_REPORT2-TX RTP,HIS_REPORT-USB HISR RTP */
                 if (pattrib.pkt_rpt_type == RX_PACKET_TYPE.C2H_PACKET)
                 {
-                    RTW_INFO("RX USB C2H_PACKET");
+                    _logger.LogInformation("RX USB C2H_PACKET");
                     //rtw_hal_c2h_pkt_pre_hdl(padapter, precvframe.u.hdr.rx_data, pattrib.pkt_len);
                 }
                 else if (pattrib.pkt_rpt_type == RX_PACKET_TYPE.HIS_REPORT)
                 {
-                    RTW_INFO("RX USB HIS_REPORT");
+                    _logger.LogInformation("RX USB HIS_REPORT");
                 }
             }
 
@@ -97,7 +107,7 @@ public class FrameParser
         //{
         //    RTW_WARN($"Unprocessed packets: {pkt_cnt}");
         //}
-        RTW_INFO($"{ret.Count} received in frame");
+        _logger.LogInformation($"{ret.Count} received in frame");
 
         return ret;
     }

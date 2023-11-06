@@ -1,5 +1,4 @@
-﻿global using static Rtl8812auNet.Rtl8812au.Logging;
-global using static Rtl8812auNet.Rtl8812au.Enumerations.RTW_USB_SPEED;
+﻿global using static Rtl8812auNet.Rtl8812au.Enumerations.RTW_USB_SPEED;
 global using static Rtl8812auNet.Rtl8812au.Enumerations.libusb_speed;
 global using static Rtl8812auNet.Rtl8812au.Enumerations.Bits;
 global using static Rtl8812auNet.Rtl8812au.Enumerations.CommonConsts;

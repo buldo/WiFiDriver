@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Rtl8812auNet.LibUsbDotNet;
 using Rtl8812auNet.Rtl8812au;
+using Rtl8812auNet.Rtl8812au.Modules;
 
 namespace Rtl8812auNet;
 
@@ -31,9 +32,17 @@ public class WiFiDriver : IDisposable
     public Rtl8812aDevice CreateRtlDevice(IUsbDevice usbDevice)
     {
         _logger.LogInformation("Creating Rtl8812aDevice");
-        var usb = new LibUsbRtlUsbDevice((UsbDevice)usbDevice);
+        var usb = new LibUsbRtlUsbDevice(
+            (UsbDevice)usbDevice,
+            _loggerFactory.CreateLogger<LibUsbRtlUsbDevice>());
         var rtlAdapter = new RtlUsbAdapter(usb, _loggerFactory.CreateLogger<RtlUsbAdapter>());
-        return new Rtl8812aDevice(rtlAdapter, _loggerFactory.CreateLogger<Rtl8812aDevice>());
+        return new Rtl8812aDevice(
+            rtlAdapter,
+            _loggerFactory.CreateLogger<Rtl8812aDevice>(),
+            _loggerFactory.CreateLogger<EepromManager>(),
+            _loggerFactory.CreateLogger<HalModule>(),
+            _loggerFactory.CreateLogger<FrameParser>(),
+            _loggerFactory.CreateLogger<FirmwareManager>());
     }
 
     public void Dispose()

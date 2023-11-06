@@ -34,4 +34,12 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="Q:\WiFiDriver\src\Rtl8812auNet\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Q:\WiFiDriver\src\Rtl8812auNet\.editorconfig" />
+  </ItemGroup>
+
 </Project>

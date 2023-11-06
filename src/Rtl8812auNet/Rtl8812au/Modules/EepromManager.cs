@@ -1,6 +1,6 @@
 ﻿using System.Buffers.Binary;
 using System.Text;
-
+using Microsoft.Extensions.Logging;
 using Rtl8812auNet.Rtl8812au.Enumerations;
 using Rtl8812auNet.Rtl8812au.Models;
 
@@ -28,6 +28,7 @@ public class EepromManager
     private const byte EEPROM_RFE_OPTION_8812 = 0xCA;
 
     private readonly RtlUsbAdapter _device;
+    private readonly ILogger<EepromManager> _logger;
     private readonly byte[] efuse_eeprom_data = new byte[1024]; /*92C:256bytes, 88E:512bytes, we use union set (512bytes)*/
     private readonly byte EEPROMVersion;
     private readonly byte EEPROMRegulatory;
@@ -40,9 +41,12 @@ public class EepromManager
     private bool external_pa_5g;
     private bool external_lna_5g;
 
-    public EepromManager(RtlUsbAdapter device)
+    public EepromManager(
+        RtlUsbAdapter device,
+        ILogger<EepromManager> logger)
     {
         _device = device;
+        _logger = logger;
         (Version, RfType, NumTotalRfPath) = read_chip_version_8812a(device);
 
         /* Initialize general global value */
@@ -207,7 +211,7 @@ public class EepromManager
             }
         }
 
-        RTW_INFO($"RFE Type: 0x{rfe_type:X}");
+        _logger.LogInformation($"RFE Type: 0x{rfe_type:X}");
     }
 
     private void hal_ReadUsbType_8812AU()
@@ -258,7 +262,7 @@ public class EepromManager
                 }
             }
 
-            RTW_INFO("%s: antenna=%d, wmode=%d", antenna, wmode);
+            _logger.LogInformation("antenna={antenna}, wmode={wmode}", antenna, wmode);
             /* Antenna == 1 WMODE = 3 RTL8812AU-VL 11AC + USB2.0 Mode */
             if (antenna == 1)
             {
@@ -266,7 +270,7 @@ public class EepromManager
                 RfType = RfType.RF_1T1R;
                 /* UsbModeSwitch_SetUsbModeMechOn(adapterState, FALSE); */
                 /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU_VL; */
-                RTW_INFO("%s(): EFUSE_HIDDEN_812AU_VL\n");
+                _logger.LogInformation("EFUSE_HIDDEN_812AU_VL");
             }
             else if (antenna == 2)
             {
@@ -276,7 +280,7 @@ public class EepromManager
                     {
                         /* RTL8812AU Normal Mode. No further action. */
                         /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU; */
-                        RTW_INFO("%s(): EFUSE_HIDDEN_812AU");
+                        _logger.LogInformation("EFUSE_HIDDEN_812AU");
                     }
                     else
                     {
@@ -284,7 +288,7 @@ public class EepromManager
                         /* Driver will not support USB automatic switch */
                         /* UsbModeSwitch_SetUsbModeMechOn(adapterState, FALSE); */
                         /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU_VS; */
-                        RTW_INFO("%s(): EFUSE_HIDDEN_8812AU_VS");
+                        _logger.LogInformation("EFUSE_HIDDEN_8812AU_VS");
                     }
                 }
                 else if (wmode == 2)
@@ -292,7 +296,7 @@ public class EepromManager
                     /* Antenna == 2 WMODE = 2 RTL8812AU-VN 11N only + USB2.0 Mode */
                     /* UsbModeSwitch_SetUsbModeMechOn(adapterState, FALSE); */
                     /* pHalData.EFUSEHidden = EFUSE_HIDDEN_812AU_VN; */
-                    RTW_INFO("%s(): EFUSE_HIDDEN_8812AU_VN");
+                    _logger.LogInformation("EFUSE_HIDDEN_8812AU_VN");
                 }
             }
         }
@@ -331,10 +335,10 @@ public class EepromManager
             TypeALNA = (ushort)(extTypeLNA_5G_B << 2 | extTypeLNA_5G_A);
         }
 
-        RTW_INFO($"pHalData.TypeGPA = 0x{TypeGPA:X}");
-        RTW_INFO($"pHalData.TypeAPA = 0x{TypeAPA:X}");
-        RTW_INFO($"pHalData.TypeGLNA = 0x{TypeGLNA:X}");
-        RTW_INFO($"pHalData.TypeALNA = 0x{TypeALNA:X}");
+        _logger.LogInformation($"pHalData.TypeGPA = 0x{TypeGPA:X}");
+        _logger.LogInformation($"pHalData.TypeAPA = 0x{TypeAPA:X}");
+        _logger.LogInformation($"pHalData.TypeGLNA = 0x{TypeGLNA:X}");
+        _logger.LogInformation($"pHalData.TypeALNA = 0x{TypeALNA:X}");
     }
 
     private void hal_ReadPAType_8812A()
@@ -421,10 +425,10 @@ public class EepromManager
             }
         }
 
-        RTW_INFO($"pHalData.PAType_2G is 0x{PAType_2G:X}, pHalData.ExternalPA_2G = {ExternalPA_2G}");
-        RTW_INFO($"pHalData.PAType_5G is 0x{PAType_5G:X}, pHalData.external_pa_5g = {external_pa_5g}");
-        RTW_INFO($"pHalData.LNAType_2G is 0x{LNAType_2G:X}, pHalData.ExternalLNA_2G = {ExternalLNA_2G}");
-        RTW_INFO($"pHalData.LNAType_5G is 0x{LNAType_5G:X}, pHalData.external_lna_5g = {external_lna_5g}");
+        _logger.LogInformation($"pHalData.PAType_2G is 0x{PAType_2G:X}, pHalData.ExternalPA_2G = {ExternalPA_2G}");
+        _logger.LogInformation($"pHalData.PAType_5G is 0x{PAType_5G:X}, pHalData.external_pa_5g = {external_pa_5g}");
+        _logger.LogInformation($"pHalData.LNAType_2G is 0x{LNAType_2G:X}, pHalData.ExternalLNA_2G = {ExternalLNA_2G}");
+        _logger.LogInformation($"pHalData.LNAType_5G is 0x{LNAType_5G:X}, pHalData.external_lna_5g = {external_lna_5g}");
     }
 
     private void Hal_ReadThermalMeter_8812A()
@@ -448,7 +452,7 @@ public class EepromManager
         }
 
         /* pHalData.ThermalMeter[0] = pHalData.eeprom_thermal_meter;	 */
-        RTW_INFO($"ThermalMeter = 0x{eeprom_thermal_meter:X}");
+        _logger.LogInformation($"ThermalMeter = 0x{eeprom_thermal_meter:X}");
     }
 
     private void Hal_EfuseParseXtal_8812A()
@@ -466,7 +470,7 @@ public class EepromManager
             crystal_cap = EEPROM_DEFAULT_CRYSTAL_CAP_8812;
         }
 
-        RTW_INFO($"crystal_cap: 0x{crystal_cap:X}");
+        _logger.LogInformation($"crystal_cap: 0x{crystal_cap:X}");
     }
 
     private void Hal_EfuseParseBTCoexistInfo8812A()
@@ -489,7 +493,7 @@ public class EepromManager
         }
     }
 
-    private static byte Hal_ReadTxPowerInfo8812A(RtlUsbAdapter device, byte[] efuse_eeprom_data)
+    private byte Hal_ReadTxPowerInfo8812A(RtlUsbAdapter device, byte[] efuse_eeprom_data)
     {
         byte EEPROMRegulatory;
         /* 2010/10/19 MH Add Regulator recognize for CU. */
@@ -511,7 +515,7 @@ public class EepromManager
             EEPROMRegulatory = 0;
         }
 
-        RTW_INFO("EEPROMRegulatory = 0x%x", EEPROMRegulatory);
+        _logger.LogInformation("EEPROMRegulatory = 0x{EEPROMRegulatory:X}", EEPROMRegulatory);
 
         return EEPROMRegulatory;
     }
@@ -589,10 +593,10 @@ public class EepromManager
         }
     }
 
-    private static (HalVersion version_id, RfType rf_type, byte numTotalRfPath) read_chip_version_8812a(RtlUsbAdapter device)
+    private (HalVersion version_id, RfType rf_type, byte numTotalRfPath) read_chip_version_8812a(RtlUsbAdapter device)
     {
         UInt32 value32 = device.rtw_read32(REG_SYS_CFG);
-        RTW_INFO($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
+        _logger.LogInformation($"read_chip_version_8812a SYS_CFG(0x{REG_SYS_CFG:X})=0x{value32:X8}");
 
         var versionId = new HalVersion
         {
@@ -611,7 +615,7 @@ public class EepromManager
 
         var (rfType, numTotalRfPath) = versionId.GetRfType();
 
-        RTW_INFO($"rtw_hal_config_rftype RF_Type is {rfType} TotalTxPath is {numTotalRfPath}");
+        _logger.LogInformation($"rtw_hal_config_rftype RF_Type is {rfType} TotalTxPath is {numTotalRfPath}");
 
         return (versionId, rfType, numTotalRfPath);
     }
@@ -625,7 +629,7 @@ public class EepromManager
         EEPROMId = BinaryPrimitives.ReadUInt16LittleEndian(efuse_eeprom_data.AsSpan(0, 2));
         if (EEPROMId != RTL_EEPROM_ID)
         {
-            RTW_INFO($"EEPROM ID(0x{EEPROMId:X}) is invalid!!");
+            _logger.LogInformation($"EEPROM ID(0x{EEPROMId:X}) is invalid!!");
             _device.AutoloadFailFlag = true;
         }
         else
@@ -633,10 +637,10 @@ public class EepromManager
             _device.AutoloadFailFlag = false;
         }
 
-        RTW_INFO($"EEPROM ID=0x{EEPROMId}");
+        _logger.LogInformation($"EEPROM ID=0x{EEPROMId}");
     }
 
-    private static byte Hal_ReadPROMVersion8812A(RtlUsbAdapter device, byte[] efuse_eeprom_data)
+    private byte Hal_ReadPROMVersion8812A(RtlUsbAdapter device, byte[] efuse_eeprom_data)
     {
         byte EEPROMVersion;
         if (device.AutoloadFailFlag)
@@ -654,7 +658,7 @@ public class EepromManager
             }
         }
 
-        RTW_INFO("pHalData.EEPROMVersion is 0x%x", EEPROMVersion);
+        _logger.LogInformation("pHalData.EEPROMVersion is 0x{EEPROMVersion:X}", EEPROMVersion);
         return EEPROMVersion;
     }
 
@@ -699,7 +703,7 @@ public class EepromManager
                     $"  {efuse_eeprom_data[i]:X2} {efuse_eeprom_data[i + 1]:X2} {efuse_eeprom_data[i + 2]:X2} {efuse_eeprom_data[i + 3]:X2}");
             }
 
-            Console.WriteLine(builder);
+            _logger.LogTrace(builder.ToString());
         }
     }
 
@@ -825,7 +829,7 @@ public class EepromManager
         }
         else
         {
-            RTW_INFO($"EFUSE is empty efuse_Addr-{eFuse_Addr} efuse_data={rtemp8}");
+            _logger.LogInformation($"EFUSE is empty efuse_Addr-{eFuse_Addr} efuse_data={rtemp8}");
             return;
         }
 
@@ -908,7 +912,7 @@ public class EepromManager
             else
             {
                 /* deal with error offset,skip error data		 */
-                RTW_PRINT($"invalid offset:0x{offset}");
+                _logger.LogError($"invalid offset:0x{offset:X}");
                 for (i = 0; i < EFUSE_MAX_WORD_UNIT; i++)
                 {
                     /* Check word enable condition in the section				 */
@@ -959,7 +963,7 @@ public class EepromManager
         /* 5. Calculate Efuse utilization. */
         /*  */
         // TODO: SetHwReg8812AU(HW_VARIABLES.HW_VAR_EFUSE_BYTES, (byte*)&eFuse_Addr);
-        RTW_INFO($"Hal_EfuseReadEFuse8812A: eFuse_Addr offset(0x{eFuse_Addr:X}) !!");
+        _logger.LogInformation($"Hal_EfuseReadEFuse8812A: eFuse_Addr offset(0x{eFuse_Addr:X}) !!");
     }
 
     /// <remarks>

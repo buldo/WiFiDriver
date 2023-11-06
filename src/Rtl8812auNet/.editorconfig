@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CA2017: Parameter count mismatch
+dotnet_diagnostic.CA2017.severity = error

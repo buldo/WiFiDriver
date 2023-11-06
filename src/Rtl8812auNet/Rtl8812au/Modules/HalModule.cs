@@ -1,4 +1,5 @@
-﻿using Rtl8812auNet.Rtl8812au.Enumerations;
+﻿using Microsoft.Extensions.Logging;
+using Rtl8812auNet.Rtl8812au.Enumerations;
 using Rtl8812auNet.Rtl8812au.Models;
 using Rtl8812auNet.Rtl8812au.PredefinedData;
 
@@ -9,6 +10,8 @@ internal class HalModule
     private readonly RtlUsbAdapter _device;
     private readonly RadioManagementModule _radioManagementModule;
     private readonly EepromManager _eepromManager;
+    private readonly ILogger<HalModule> _logger;
+    private readonly ILogger<FirmwareManager> _firmwareManagerLogger;
     private readonly bool _usbTxAggMode = true;
     private readonly byte _usbTxAggDescNum = 0x01; // adjust value for OQT Overflow issue 0x3; only 4 bits
     private readonly RX_AGG_MODE _rxAggMode = RX_AGG_MODE.RX_AGG_USB;
@@ -21,11 +24,15 @@ internal class HalModule
     public HalModule(
         RtlUsbAdapter device,
         RadioManagementModule radioManagementModule,
-        EepromManager eepromManager)
+        EepromManager eepromManager,
+        ILogger<HalModule> logger,
+        ILogger<FirmwareManager> firmwareManagerLogger)
     {
         _device = device;
         _radioManagementModule = radioManagementModule;
         _eepromManager = eepromManager;
+        _logger = logger;
+        _firmwareManagerLogger = firmwareManagerLogger;
     }
 
     public bool rtw_hal_init(SelectedChannel selectedChannel)
@@ -39,7 +46,7 @@ internal class HalModule
         }
         else
         {
-            RTW_ERR("rtw_hal_init: fail");
+            _logger.LogError("rtw_hal_init: fail");
         }
 
         return status;
@@ -151,11 +158,11 @@ internal class HalModule
         // Check if MAC has already power on. by tynli. 2011.05.27.
         var value8 = _device.rtw_read8(REG_SYS_CLKR + 1);
         var regCr = _device.rtw_read8(REG_CR);
-        RTW_INFO(" power-on :REG_SYS_CLKR 0x09=0x%02x. REG_CR 0x100=0x%02x.\n", value8, regCr);
+        _logger.LogInformation("power-on :REG_SYS_CLKR 0x09=0x{value8:X}. REG_CR 0x100=0x{regCr:X}", value8, regCr);
         if ((value8 & BIT3) != 0 && (regCr != 0 && regCr != 0xEA))
         {
             /* pHalData.bMACFuncEnable = TRUE; */
-            RTW_INFO(" MAC has already power on.\n");
+            _logger.LogInformation("MAC has already power on");
         }
         else
         {
@@ -163,7 +170,7 @@ internal class HalModule
             /* Set FwPSState to ALL_ON mode to prevent from the I/O be return because of 32k */
             /* state which is set before sleep under wowlan mode. 2012.01.04. by tynli. */
             /* pHalData.FwPSState = FW_PS_STATE_ALL_ON_88E; */
-            RTW_INFO(" MAC has not been powered on yet.\n");
+            _logger.LogInformation("MAC has not been powered on yet");
         }
 
         _device.rtw_write8(REG_RF_CTRL, 5);
@@ -191,7 +198,7 @@ internal class HalModule
 
         _InitHardwareDropIncorrectBulkOut_8812A();
 
-        var fwManager = new FirmwareManager(_device);
+        var fwManager = new FirmwareManager(_device, _firmwareManagerLogger);
         fwManager.FirmwareDownload8812();
 
         PHY_MACConfig8812();
@@ -625,7 +632,7 @@ internal class HalModule
 
         if (rtStatus != true)
         {
-            RTW_INFO("phy_BB8812_Config_ParaFile: CONFIG_BB_PHY_REG Fail!!");
+            _logger.LogInformation("phy_BB8812_Config_ParaFile: CONFIG_BB_PHY_REG Fail!!");
             goto phy_BB_Config_ParaFile_Fail;
         }
 
@@ -633,7 +640,7 @@ internal class HalModule
 
         if (rtStatus != true)
         {
-            RTW_INFO("phy_BB8812_Config_ParaFile CONFIG_BB_AGC_TAB Fail!!");
+            _logger.LogInformation("phy_BB8812_Config_ParaFile CONFIG_BB_AGC_TAB Fail!!");
         }
 
         phy_BB_Config_ParaFile_Fail:
@@ -925,7 +932,7 @@ internal class HalModule
             {
                 if (is_matched)
                 {
-                    Console.WriteLine($"SEND_TO {v1:X4}");
+                    _logger.LogDebug($"SEND_TO {v1:X4}");
                     odm_config_bb_phy_8812a(v1, MASKDWORD, v2);
                 }
             }
@@ -1354,7 +1361,7 @@ internal class HalModule
 
         if (!HalPwrSeqCmdParsing(PowerSequences.Rtl8812_NIC_ENABLE_FLOW))
         {
-            RTW_ERR("InitPowerOn: run power on flow fail");
+            _logger.LogError("InitPowerOn: run power on flow fail");
             return false;
         }
 
@@ -1698,7 +1705,7 @@ internal class HalModule
                 _InitNormalChipFourOutEpPriority_8812AUsb();
                 break;
             default:
-                RTW_INFO("_InitQueuePriority_8812AUsb(): Shall not reach here!\n");
+                _logger.LogError("_InitQueuePriority_8812AUsb(): Shall not reach here!\n");
                 break;
         }
     }

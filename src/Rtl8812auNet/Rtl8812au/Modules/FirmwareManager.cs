@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Rtl8812auNet.Rtl8812au.PredefinedData;
 
 namespace Rtl8812auNet.Rtl8812au.Modules;
@@ -7,10 +8,14 @@ public class FirmwareManager
 {
     private static readonly Firmware _firmware = new();
     private readonly RtlUsbAdapter _device;
+    private readonly ILogger<FirmwareManager> _logger;
 
-    public FirmwareManager(RtlUsbAdapter device)
+    public FirmwareManager(
+        RtlUsbAdapter device,
+        ILogger<FirmwareManager> logger)
     {
         _device = device;
+        _logger = logger;
     }
 
     public void FirmwareDownload8812()
@@ -26,7 +31,7 @@ public class FirmwareManager
         var firmwareSubVersion = _firmware.GET_FIRMWARE_HDR_SUB_VER_8812();
         var firmwareSignature = _firmware.GET_FIRMWARE_HDR_SIGNATURE_8812();
 
-        RTW_INFO($"FirmwareDownload8812: fw_ver={firmwareVersion} fw_subver={firmwareSubVersion} sig=0x{firmwareSignature:X}");
+        _logger.LogInformation($"FirmwareDownload8812: fw_ver={firmwareVersion} fw_subver={firmwareSubVersion} sig=0x{firmwareSignature:X}");
 
         if (_firmware.IS_FW_HEADER_EXIST_8812())
         {
@@ -150,7 +155,7 @@ public class FirmwareManager
         ret = true;
 
         exit:
-        RTW_INFO($"_FWFreeToGo8812: Polling FW ready {(ret ? "OK" : "Fail")}! ({cnt}), REG_MCUFWDL:0x{value32:X8}");
+        _logger.LogInformation($"_FWFreeToGo8812: Polling FW ready {(ret ? "OK" : "Fail")}! ({cnt}), REG_MCUFWDL:0x{value32:X8}");
 
         return ret;
     }

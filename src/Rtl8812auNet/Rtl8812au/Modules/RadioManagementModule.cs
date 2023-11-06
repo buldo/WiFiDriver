@@ -1046,7 +1046,7 @@ internal class RadioManagementModule
                 break;
 
             default:
-                RTW_INFO("phy_PostSetBWMode8812():	unknown Bandwidth: %#X", _currentChannelBw);
+                _logger.LogError("phy_PostSetBWMode8812():	unknown Bandwidth: {Bandwidth}", _currentChannelBw);
                 break;
         }
 
@@ -1092,7 +1092,7 @@ internal class RadioManagementModule
     public void phy_set_rf_reg(RfPath eRFPath, UInt16 RegAddr, UInt32 BitMask, UInt32 Data)
     {
         uint data = Data;
-        Console.WriteLine($"RFREG;{(byte)eRFPath};{(uint)RegAddr:X};{BitMask:X};{data:X}");
+        _logger.LogDebug($"RFREG;{(byte)eRFPath};{(uint)RegAddr:X};{BitMask:X};{data:X}");
         if (BitMask == 0)
         {
             return;

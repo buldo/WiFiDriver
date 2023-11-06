@@ -9,7 +9,7 @@ public class Rtl8812aDevice
 {
     private readonly RtlUsbAdapter _device;
     private readonly ILogger _logger;
-    private readonly FrameParser _frameParser = new();
+    private readonly FrameParser _frameParser;
     private readonly RadioManagementModule _radioManagement;
 
     private Task _readTask;
@@ -17,14 +17,21 @@ public class Rtl8812aDevice
     private readonly HalModule _halModule;
     private Func<ParsedRadioPacket, Task> _packetProcessor;
 
-    public Rtl8812aDevice(RtlUsbAdapter device, ILogger<Rtl8812aDevice> logger)
+    internal Rtl8812aDevice(
+        RtlUsbAdapter device,
+        ILogger<Rtl8812aDevice> logger,
+        ILogger<EepromManager> eepromLogger,
+        ILogger<HalModule> halLogger,
+        ILogger<FrameParser> frameParserLogger,
+        ILogger<FirmwareManager> firmwareManagerLogger)
     {
         _device = device;
         _logger = logger;
+        _frameParser = new FrameParser(frameParserLogger);
 
-        var eepromManager = new EepromManager(device);
+        var eepromManager = new EepromManager(device, eepromLogger);
         _radioManagement = new RadioManagementModule(HwPort.HW_PORT0, device, eepromManager, _logger);
-        _halModule = new HalModule(_device, _radioManagement, eepromManager);
+        _halModule = new HalModule(_device, _radioManagement, eepromManager, halLogger, firmwareManagerLogger);
     }
 
     public void Init(
@@ -79,7 +86,7 @@ public class Rtl8812aDevice
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    _logger.LogError(e, "_packetProcessor Exception");
                 }
             }
         }

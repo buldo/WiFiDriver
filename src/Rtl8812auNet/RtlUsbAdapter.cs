@@ -128,7 +128,7 @@ public class RtlUsbAdapter
 
         rtw_write8(REG_SYS_FUNC_EN + 1, (byte)(u1bTmp | (BIT2)));
 
-        RTW_INFO("=====> _8051Reset8812(): 8051 reset success .");
+        _logger.LogError("_8051Reset8812(): 8051 reset success .");
     }
 
     public void efuse_OneByteRead(UInt16 addr, out byte data)
@@ -308,7 +308,7 @@ public class RtlUsbAdapter
 
         if (usbSpeed == RTW_USB_SPEED_UNKNOWN)
         {
-            RTW_INFO("UNKNOWN USB SPEED MODE, ERROR !!!");
+            _logger.LogError("UNKNOWN USB SPEED MODE, ERROR !!!");
             throw new Exception();
         }
 
@@ -342,7 +342,7 @@ public class RtlUsbAdapter
                 break;
         }
 
-        RTW_INFO($"OutEpQueueSel({OutEpQueueSel}), OutEpNumber({OutEpNumber})");
+        _logger.LogInformation($"OutEpQueueSel({OutEpQueueSel}), OutEpNumber({OutEpNumber})");
 
         return (OutEpQueueSel, OutEpNumber);
     }

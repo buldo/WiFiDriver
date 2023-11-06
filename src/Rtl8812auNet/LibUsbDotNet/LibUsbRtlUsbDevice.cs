@@ -2,6 +2,7 @@
 using LibUsbDotNet;
 using LibUsbDotNet.LibUsb;
 using LibUsbDotNet.Main;
+using Microsoft.Extensions.Logging;
 using Rtl8812auNet.Abstractions;
 
 namespace Rtl8812auNet.LibUsbDotNet;
@@ -12,13 +13,17 @@ public class LibUsbRtlUsbDevice : IRtlUsbDevice
     private const byte REALTEK_USB_VENQT_WRITE = 0x40;
 
     private readonly UsbDevice _usbDevice;
+    private readonly ILogger<LibUsbRtlUsbDevice> _logger;
     private readonly UsbEndpointReader _reader;
 
     private readonly Channel<byte[]> _bulkTransfersChannel = Channel.CreateUnbounded<byte[]>();
 
-    public LibUsbRtlUsbDevice(UsbDevice usbDevice)
+    public LibUsbRtlUsbDevice(
+        UsbDevice usbDevice,
+        ILogger<LibUsbRtlUsbDevice> logger)
     {
         _usbDevice = usbDevice;
+        _logger = logger;
         _usbDevice.Open();
         _usbDevice.SetConfiguration(1);
         _usbDevice.ClaimInterface(0);
@@ -42,18 +47,17 @@ public class LibUsbRtlUsbDevice : IRtlUsbDevice
                 }
                 else if (result != Error.Success)
                 {
-                    Console.WriteLine($"BULK read ERR {result}");
+                    _logger.LogError("BULK read ERR {result}", result);
                 }
 
                 if (len != 0)
                 {
-                    //Console.WriteLine($"BULK read OK {len}");
                     _bulkTransfersChannel.Writer.TryWrite(readBuffer.AsSpan(0, len).ToArray());
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _logger.LogError(e, "_reader.Read error");
             }
         }
     }
