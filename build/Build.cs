@@ -89,9 +89,9 @@ class Build : NukeBuild
                 .SetTargetPath(OutputPath.GlobFiles("*.nupkg").First())
                 .SetSource("https://api.nuget.org/v3/index.json"));
 
-            DotNetNuGetPush(settings => settings
-                .SetApiKey(NugetApiKey)
-                .SetTargetPath(OutputPath.GlobFiles("*.snupkg").First())
-                .SetSource("https://api.nuget.org/v3/index.json"));
+            //DotNetNuGetPush(settings => settings
+            //    .SetApiKey(NugetApiKey)
+            //    .SetTargetPath(OutputPath.GlobFiles("*.snupkg").First())
+            //    .SetSource("https://api.nuget.org/v3/index.json"));
         });
 }
