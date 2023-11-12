@@ -1,29 +1,54 @@
-﻿using Android.Hardware.Usb;
+﻿using System.Threading.Channels;
+using Android.Hardware.Usb;
+using Microsoft.Extensions.Logging;
+
 using Rtl8812auNet.Abstractions;
 
 namespace Rtl8812auNet.AndroidDemo.RtlUsb
 {
     internal class RtlUsbDevice : IRtlUsbDevice
     {
+        private readonly Channel<byte[]> _bulkTransfersChannel = Channel.CreateUnbounded<byte[]>();
         private readonly UsbDevice _usbDevice;
         private readonly UsbDeviceConnection _usbDeviceConnection;
+        private readonly ILogger<RtlUsbDevice> _logger;
 
-        public RtlUsbDevice(UsbDevice usbDevice, UsbDeviceConnection usbDeviceConnection)
+        public RtlUsbDevice(
+            UsbDevice usbDevice,
+            UsbDeviceConnection usbDeviceConnection,
+            ILogger<RtlUsbDevice> logger)
         {
             _usbDevice = usbDevice;
             _usbDeviceConnection = usbDeviceConnection;
+            _logger = logger;
+
+            //_usbDevice.Open();
+            //_usbDevice.SetConfiguration(1);
+            //_usbDevice.ClaimInterface(0);
+
+            //_reader = _usbDevice.OpenEndpointReader(GetInEp());
         }
         public void InfinityRead()
         {
             var ep = GetInEp();
-
-            var buffer = new byte[4096];
+            var readBuffer = new byte[8192 + 1024];
             while (true)
             {
-                var readed = _usbDeviceConnection.BulkTransfer(ep, buffer, buffer.Length, 1000);
-                if (readed != 0)
+                try
                 {
-                    Console.WriteLine($"BULK {readed}");
+                    var length = _usbDeviceConnection.BulkTransfer(ep, readBuffer, readBuffer.Length, 0);
+                    if (length < 0)
+                    {
+                        _logger.LogError("BULK read ERR {result}", length);
+                    }
+                    else
+                    {
+                        _bulkTransfersChannel.Writer.TryWrite(readBuffer.AsSpan(0, length).ToArray());
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "_reader.Read error");
                 }
             }
         }
@@ -45,6 +70,9 @@ namespace Rtl8812auNet.AndroidDemo.RtlUsb
         }
 
         public int Speed { get; } = 3;
+
+        public ChannelReader<byte[]> BulkTransfersReader => _bulkTransfersChannel.Reader;
+
         public void WriteBytes(ushort register, Span<byte> data)
         {
             _usbDeviceConnection.ControlTransfer(

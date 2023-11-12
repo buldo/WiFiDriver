@@ -16,7 +16,7 @@ namespace Rtl8812auNet.AndroidDemo
                 });
 
 #if DEBUG
-		builder.Logging.AddDebug();
+		builder.Logging.AddDebug().SetMinimumLevel(LogLevel.Trace);
 #endif
 
             return builder.Build();

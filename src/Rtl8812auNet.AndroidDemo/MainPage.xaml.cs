@@ -1,39 +1,88 @@
-﻿using Android.App;
+﻿using System.Net;
+
+using Android.App;
 using Android.Content;
 using Android.Hardware.Usb;
+using LibUsbDotNet.Main;
+using Rtl8812auNet.AndroidDemo.Platforms.Android;
 using Rtl8812auNet.AndroidDemo.RtlUsb;
 using Rtl8812auNet.Rtl8812au;
 using Application = Android.App.Application;
 
-namespace Rtl8812auNet.AndroidDemo
+namespace Rtl8812auNet.AndroidDemo;
+
+public partial class MainPage : ContentPage
 {
-    public partial class MainPage : ContentPage
+    private static string ACTION_USB_PERMISSION = "zone.bld.receiverapp.USB_PERMISSION";
+    private readonly MyBroadcastReceiver _broadcastReceiver;
+
+    public MainPage()
     {
-        int count = 0;
+        InitializeComponent();
+        _broadcastReceiver = new MyBroadcastReceiver(this);
+    }
 
-        public MainPage()
+    private void OnCounterClicked(object sender, EventArgs e)
+    {
+        var context = Android.App.Application.Context;
+        var usbManager = (UsbManager)context.GetSystemService(Android.Content.Context.UsbService);
+
+        var (_, device) = usbManager.DeviceList.FirstOrDefault(pair => pair.Value.ManufacturerName == "Realtek");
+        if (device != null)
         {
-            InitializeComponent();
+            if (usbManager.HasPermission(device))
+            {
+                StatusLabel.Text = $"Device found:{device.DeviceName}" + System.Environment.NewLine + "Starting...";
+                StartService(device);
+            }
+            else
+            {
+                var pi = PendingIntent.GetBroadcast(
+                    Android.App.Application.Context,
+                    0,
+                    new Intent(ACTION_USB_PERMISSION),
+                    PendingIntentFlags.Immutable);
+                _broadcastReceiver.Dev = device;
+                var filter = new IntentFilter(ACTION_USB_PERMISSION);
+                context.RegisterReceiver(_broadcastReceiver, filter);
+
+                StatusLabel.Text = $"Device found:{device.DeviceName}" + System.Environment.NewLine + "Requesting permissions...";
+                usbManager.RequestPermission(device, pi);
+            }
+        }
+        else
+        {
+            StatusLabel.Text = "No RTL8812AU device found";
         }
 
-        private void OnCounterClicked(object sender, EventArgs e)
+        Console.WriteLine("READY");
+    }
+
+    private void StartService(UsbDevice device)
+    {
+        StatusLabel.Text = $"Device found:{device.DeviceName}" + System.Environment.NewLine + "Starting...";
+        AndroidServiceManager.Device = device;
+        var context = Android.App.Application.Context;
+        var usbManager = (UsbManager)context.GetSystemService(Android.Content.Context.UsbService);
+        AndroidServiceManager.Connection = usbManager.OpenDevice(device);
+        AndroidServiceManager.StartWfbService();
+    }
+
+    public class MyBroadcastReceiver : BroadcastReceiver
+    {
+        private readonly MainPage _parent;
+
+        public MyBroadcastReceiver(MainPage parent)
         {
-            var context = Android.App.Application.Context;
-            var usbManager = (UsbManager)context.GetSystemService(Android.Content.Context.UsbService);
-            var dev = usbManager.DeviceList.Single(pair => pair.Value.ManufacturerName == "Realtek").Value;
-            var pi = PendingIntent.GetBroadcast(
-                Application.Context,
-                0,
-                new Intent(Context.UsbService),
-                PendingIntentFlags.Immutable);
-            usbManager.RequestPermission(dev, pi);
-
-            var conn = usbManager.OpenDevice(dev);
-            var rtlUsbDevice = new RtlUsbDevice(dev, conn);
-            var rtl = new Rtl8812aDevice(rtlUsbDevice);
-            rtl.Init();
-
-            Console.WriteLine("READY");
+            _parent = parent;
         }
+
+        public override void OnReceive(Context context, Intent intent)
+        {
+            _parent.StatusLabel.Text = $"Device found:{Dev.DeviceName}" + System.Environment.NewLine + "Starting...";
+            _parent.StartService(Dev);
+        }
+
+        public UsbDevice Dev { get; set; }
     }
 }

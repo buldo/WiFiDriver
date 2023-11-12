@@ -14,7 +14,7 @@ internal class Program
                 .SetMinimumLevel(LogLevel.Trace)
                 .AddConsole());
 
-        using var driver = new WiFiDriver(loggerFactory);
+        using var driver = new WiFiDriver(loggerFactory, true);
         var devices = driver.GetUsbDevices();
         var device = devices.First();
 
