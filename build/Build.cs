@@ -48,6 +48,7 @@ class Build : NukeBuild
         .DependsOn(Clean)
         .Executes(() =>
         {
+            DotNet($"workload restore --project {Solution.Rtl8812auNet.Path}");
             DotNetRestore(settings => settings
                 .SetProjectFile(Solution.Rtl8812auNet));
         });
