@@ -39,7 +39,7 @@ public class LibUsbRtlUsbDevice : IRtlUsbDevice
 
     public void InfinityRead()
     {
-        var readBuffer = new byte[8192 + 1024];
+        var readBuffer = new byte[32768];
         while (true)
         {
             try

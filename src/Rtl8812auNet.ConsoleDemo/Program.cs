@@ -26,7 +26,7 @@ internal class Program
             {
                 ChannelWidth = ChannelWidth.CHANNEL_WIDTH_20,
                 ChannelOffset = 0,
-                Channel = 140,
+                Channel = 149,
                 //Channel = 36
             });
 

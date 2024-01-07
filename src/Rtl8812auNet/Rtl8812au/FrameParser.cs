@@ -27,7 +27,6 @@ public class FrameParser
 
     private List<(rx_pkt_attrib RxAtrib, byte[] Data)> recvbuf2recvframe(ReadOnlySpan<byte> ptr)
     {
-        var transfer_len = ptr.Length;
         var pbuf = ptr;
         var pkt_cnt = GET_RX_STATUS_DESC_USB_AGG_PKTNUM_8812(pbuf);
         _logger.LogInformation($"pkt_cnt == {pkt_cnt}");
@@ -46,11 +45,11 @@ public class FrameParser
 
             var pkt_offset = RXDESC_SIZE + pattrib.drvinfo_sz + pattrib.shift_sz + pattrib.pkt_len; // this is offset for next package
 
-            if ((pattrib.pkt_len <= 0) || (pkt_offset > transfer_len))
+            if ((pattrib.pkt_len <= 0) || (pkt_offset > pbuf.Length))
             {
                 _logger.LogWarning(
                     "RX Warning!,pkt_len <= 0 or pkt_offset > transfer_len; pkt_len: {pkt_len}, pkt_offset: {pkt_offset}, transfer_len: {transfer_len}",
-                    pattrib.pkt_len, pkt_offset, transfer_len);
+                    pattrib.pkt_len, pkt_offset, pbuf.Length);
                 break;
             }
 
@@ -98,9 +97,7 @@ public class FrameParser
                 break;
             }
             pbuf = pbuf.Slice(pkt_offset);
-
-            transfer_len -= pkt_offset;
-        } while (transfer_len > 0);
+        } while (pbuf.Length > 0);
 
         //if (pkt_cnt != 0)
         //{
