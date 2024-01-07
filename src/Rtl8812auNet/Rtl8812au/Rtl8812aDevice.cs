@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿
+using Microsoft.Extensions.Logging;
 using Rtl8812auNet.Rtl8812au.Enumerations;
 using Rtl8812auNet.Rtl8812au.Models;
 using Rtl8812auNet.Rtl8812au.Modules;
@@ -13,9 +14,8 @@ public class Rtl8812aDevice
     private readonly RadioManagementModule _radioManagement;
 
     private Task _readTask;
-    private Task _parseTask;
     private readonly HalModule _halModule;
-    private Func<ParsedRadioPacket, Task> _packetProcessor;
+    private Action<ParsedRadioPacket> _packetProcessor;
 
     internal Rtl8812aDevice(
         RtlUsbAdapter device,
@@ -35,7 +35,7 @@ public class Rtl8812aDevice
     }
 
     public void Init(
-        Func<ParsedRadioPacket, Task> packetProcessor,
+        Action<ParsedRadioPacket> packetProcessor,
         SelectedChannel channel)
     {
         _packetProcessor = packetProcessor;
@@ -43,8 +43,8 @@ public class Rtl8812aDevice
         StartWithMonitorMode(channel);
         SetMonitorChannel(channel);
 
+        _device.UsbDevice.SetBulkDataHandler(BulkDataHandler);
         _readTask = Task.Run(() => _device.UsbDevice.InfinityRead());
-        _parseTask = Task.Run(ParseUsbData);
     }
 
     public void SetMonitorChannel(SelectedChannel channel)
@@ -73,21 +73,18 @@ public class Rtl8812aDevice
         return true;
     }
 
-    private async Task ParseUsbData()
+    private void BulkDataHandler(ReadOnlySpan<byte> data)
     {
-        await foreach (var transfer in _device.UsbDevice.BulkTransfersReader.ReadAllAsync())
+        var packet = _frameParser.ParsedRadioPacket(data);
+        foreach (var radioPacket in packet)
         {
-            var packet = _frameParser.ParsedRadioPacket(transfer);
-            foreach (var radioPacket in packet)
+            try
             {
-                try
-                {
-                    await _packetProcessor(radioPacket);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "_packetProcessor Exception");
-                }
+                _packetProcessor(radioPacket);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "_packetProcessor Exception");
             }
         }
     }

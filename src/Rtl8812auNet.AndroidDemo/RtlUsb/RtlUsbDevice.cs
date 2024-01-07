@@ -1,4 +1,5 @@
-﻿using System.Threading.Channels;
+﻿#nullable enable
+using System.Threading.Channels;
 using Android.Hardware.Usb;
 using Microsoft.Extensions.Logging;
 
@@ -8,10 +9,11 @@ namespace Rtl8812auNet.AndroidDemo.RtlUsb
 {
     internal class RtlUsbDevice : IRtlUsbDevice
     {
-        private readonly Channel<byte[]> _bulkTransfersChannel = Channel.CreateUnbounded<byte[]>();
         private readonly UsbDevice _usbDevice;
         private readonly UsbDeviceConnection _usbDeviceConnection;
         private readonly ILogger<RtlUsbDevice> _logger;
+
+        private BulkDataHandler? _bulkDataHandler;
 
         public RtlUsbDevice(
             UsbDevice usbDevice,
@@ -28,6 +30,12 @@ namespace Rtl8812auNet.AndroidDemo.RtlUsb
 
             //_reader = _usbDevice.OpenEndpointReader(GetInEp());
         }
+
+        public void SetBulkDataHandler(BulkDataHandler handler)
+        {
+            _bulkDataHandler = handler;
+        }
+
         public void InfinityRead()
         {
             var ep = GetInEp();
@@ -43,7 +51,7 @@ namespace Rtl8812auNet.AndroidDemo.RtlUsb
                     }
                     else
                     {
-                        _bulkTransfersChannel.Writer.TryWrite(readBuffer.AsSpan(0, length).ToArray());
+                        _bulkDataHandler?.Invoke(readBuffer.AsSpan(0, length));
                     }
                 }
                 catch (Exception e)
@@ -70,8 +78,6 @@ namespace Rtl8812auNet.AndroidDemo.RtlUsb
         }
 
         public int Speed { get; } = 3;
-
-        public ChannelReader<byte[]> BulkTransfersReader => _bulkTransfersChannel.Reader;
 
         public void WriteBytes(ushort register, Span<byte> data)
         {

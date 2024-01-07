@@ -1,5 +1,5 @@
 ﻿#if WINDOWS
-using System.Threading.Channels;
+#nullable enable
 using LibUsbDotNet;
 using LibUsbDotNet.LibUsb;
 using LibUsbDotNet.Main;
@@ -17,7 +17,7 @@ public class LibUsbRtlUsbDevice : IRtlUsbDevice
     private readonly ILogger<LibUsbRtlUsbDevice> _logger;
     private readonly UsbEndpointReader _reader;
 
-    private readonly Channel<byte[]> _bulkTransfersChannel = Channel.CreateUnbounded<byte[]>();
+    private BulkDataHandler? _bulkDataHandler;
 
     public LibUsbRtlUsbDevice(
         UsbDevice usbDevice,
@@ -32,7 +32,10 @@ public class LibUsbRtlUsbDevice : IRtlUsbDevice
         _reader = _usbDevice.OpenEndpointReader(GetInEp());
     }
 
-    public ChannelReader<byte[]> BulkTransfersReader => _bulkTransfersChannel.Reader;
+    public void SetBulkDataHandler(BulkDataHandler handler)
+    {
+        _bulkDataHandler = handler;
+    }
 
     public void InfinityRead()
     {
@@ -53,7 +56,7 @@ public class LibUsbRtlUsbDevice : IRtlUsbDevice
 
                 if (len != 0)
                 {
-                    _bulkTransfersChannel.Writer.TryWrite(readBuffer.AsSpan(0, len).ToArray());
+                    _bulkDataHandler?.Invoke(readBuffer.AsSpan(0, len));
                 }
             }
             catch (Exception e)

@@ -13,23 +13,22 @@ public class FrameParser
         _logger = logger;
     }
 
-    public List<ParsedRadioPacket> ParsedRadioPacket(byte[] usbTransfer)
+    public List<ParsedRadioPacket> ParsedRadioPacket(ReadOnlySpan<byte> usbTransfer)
     {
 
         return recvbuf2recvframe(usbTransfer)
             .Select(tuple => new ParsedRadioPacket
             {
-                UsbBulkTransfer = usbTransfer,
                 Data = tuple.Data,
                 Attr = tuple.RxAtrib
             })
             .ToList();
     }
 
-    private List<(rx_pkt_attrib RxAtrib, byte[] Data)> recvbuf2recvframe(byte[] ptr)
+    private List<(rx_pkt_attrib RxAtrib, byte[] Data)> recvbuf2recvframe(ReadOnlySpan<byte> ptr)
     {
         var transfer_len = ptr.Length;
-        var pbuf = ptr.AsSpan();
+        var pbuf = ptr;
         var pkt_cnt = GET_RX_STATUS_DESC_USB_AGG_PKTNUM_8812(pbuf);
         _logger.LogInformation($"pkt_cnt == {pkt_cnt}");
 
@@ -112,7 +111,7 @@ public class FrameParser
         return ret;
     }
 
-    private static uint GET_RX_STATUS_DESC_USB_AGG_PKTNUM_8812(Span<byte> __pRxStatusDesc) =>
+    private static uint GET_RX_STATUS_DESC_USB_AGG_PKTNUM_8812(ReadOnlySpan<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(12), 16, 8);
 
     private static UInt32 _RND8(int sz)
@@ -121,7 +120,7 @@ public class FrameParser
         return val;
     }
 
-    private static rx_pkt_attrib rtl8812_query_rx_desc_status(Span<byte> pdesc)
+    private static rx_pkt_attrib rtl8812_query_rx_desc_status(ReadOnlySpan<byte> pdesc)
     {
         var pattrib = new rx_pkt_attrib();
 
@@ -169,63 +168,63 @@ public class FrameParser
         return pattrib;
     }
 
-    private static UInt16 GET_RX_STATUS_DESC_PKT_LEN_8812(Span<byte> __pRxStatusDesc)
+    private static UInt16 GET_RX_STATUS_DESC_PKT_LEN_8812(ReadOnlySpan<byte> __pRxStatusDesc)
         => (UInt16)LE_BITS_TO_4BYTE(__pRxStatusDesc, 0, 14);
 
-    private static bool GET_RX_STATUS_DESC_CRC32_8812(Span<byte> __pRxStatusDesc)
+    private static bool GET_RX_STATUS_DESC_CRC32_8812(ReadOnlySpan<byte> __pRxStatusDesc)
         => LE_BITS_TO_4BYTE(__pRxStatusDesc, 14, 1) != 0;
 
-    private static bool GET_RX_STATUS_DESC_ICV_8812(Span<byte> __pRxStatusDesc) =>
+    private static bool GET_RX_STATUS_DESC_ICV_8812(ReadOnlySpan<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc, 15, 1) != 0;
 
-    private static byte GET_RX_STATUS_DESC_DRVINFO_SIZE_8812(Span<byte> __pRxStatusDesc) =>
+    private static byte GET_RX_STATUS_DESC_DRVINFO_SIZE_8812(ReadOnlySpan<byte> __pRxStatusDesc) =>
         (byte)LE_BITS_TO_4BYTE(__pRxStatusDesc, 16, 4);
 
-    private static byte GET_RX_STATUS_DESC_SECURITY_8812(Span<byte> __pRxStatusDesc) =>
+    private static byte GET_RX_STATUS_DESC_SECURITY_8812(ReadOnlySpan<byte> __pRxStatusDesc) =>
         (byte)LE_BITS_TO_4BYTE(__pRxStatusDesc, 20, 3);
 
-    private static bool GET_RX_STATUS_DESC_QOS_8812(Span<byte> __pRxStatusDesc) =>
+    private static bool GET_RX_STATUS_DESC_QOS_8812(ReadOnlySpan<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc, 23, 1) != 0;
 
-    private static byte GET_RX_STATUS_DESC_SHIFT_8812(Span<byte> __pRxStatusDesc) =>
+    private static byte GET_RX_STATUS_DESC_SHIFT_8812(ReadOnlySpan<byte> __pRxStatusDesc) =>
         (byte)LE_BITS_TO_4BYTE(__pRxStatusDesc, 24, 2);
 
-    private static bool GET_RX_STATUS_DESC_PHY_STATUS_8812(Span<byte> __pRxStatusDesc) =>
+    private static bool GET_RX_STATUS_DESC_PHY_STATUS_8812(ReadOnlySpan<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc, 26, 1) != 0;
 
-    private static bool GET_RX_STATUS_DESC_SWDEC_8812(Span<byte> __pRxStatusDesc) =>
+    private static bool GET_RX_STATUS_DESC_SWDEC_8812(ReadOnlySpan<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc, 27, 1) != 0;
 
-    private static byte GET_RX_STATUS_DESC_TID_8812(Span<byte> __pRxDesc) =>
+    private static byte GET_RX_STATUS_DESC_TID_8812(ReadOnlySpan<byte> __pRxDesc) =>
         (byte)LE_BITS_TO_4BYTE(__pRxDesc.Slice(4), 8, 4);
 
-    private static bool GET_RX_STATUS_DESC_MORE_DATA_8812(Span<byte> __pRxDesc) =>
+    private static bool GET_RX_STATUS_DESC_MORE_DATA_8812(ReadOnlySpan<byte> __pRxDesc) =>
         LE_BITS_TO_4BYTE(__pRxDesc.Slice(4), 26, 1) != 0;
 
-    private static bool GET_RX_STATUS_DESC_MORE_FRAG_8812(Span<byte> __pRxDesc) =>
+    private static bool GET_RX_STATUS_DESC_MORE_FRAG_8812(ReadOnlySpan<byte> __pRxDesc) =>
         LE_BITS_TO_4BYTE(__pRxDesc.Slice(4), 27, 1) != 0;
 
-    private static UInt16 GET_RX_STATUS_DESC_SEQ_8812(Span<byte> __pRxStatusDesc) =>
+    private static UInt16 GET_RX_STATUS_DESC_SEQ_8812(ReadOnlySpan<byte> __pRxStatusDesc) =>
         (UInt16)LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(8), 0, 12);
 
-    private static byte GET_RX_STATUS_DESC_FRAG_8812(Span<byte> __pRxStatusDesc) =>
+    private static byte GET_RX_STATUS_DESC_FRAG_8812(ReadOnlySpan<byte> __pRxStatusDesc) =>
         (byte)LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(8), 12, 4);
 
-    private static bool GET_RX_STATUS_DESC_RPT_SEL_8812(Span<byte> __pRxStatusDesc) =>
+    private static bool GET_RX_STATUS_DESC_RPT_SEL_8812(ReadOnlySpan<byte> __pRxStatusDesc) =>
         LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(8), 28, 1) != 0;
 
-    private static byte GET_RX_STATUS_DESC_RX_RATE_8812(Span<byte> __pRxStatusDesc) =>
+    private static byte GET_RX_STATUS_DESC_RX_RATE_8812(ReadOnlySpan<byte> __pRxStatusDesc) =>
         (byte)LE_BITS_TO_4BYTE(__pRxStatusDesc.Slice(12), 0, 7);
 
-    private static byte GET_RX_STATUS_DESC_SPLCP_8812(Span<byte> __pRxDesc) =>
+    private static byte GET_RX_STATUS_DESC_SPLCP_8812(ReadOnlySpan<byte> __pRxDesc) =>
         (byte)LE_BITS_TO_4BYTE(__pRxDesc.Slice(16), 0, 1);
 
-    private static byte GET_RX_STATUS_DESC_LDPC_8812(Span<byte> __pRxDesc) =>
+    private static byte GET_RX_STATUS_DESC_LDPC_8812(ReadOnlySpan<byte> __pRxDesc) =>
         (byte)LE_BITS_TO_4BYTE(__pRxDesc.Slice(16), 1, 1);
 
-    private static byte GET_RX_STATUS_DESC_STBC_8812(Span<byte> __pRxDesc) =>
+    private static byte GET_RX_STATUS_DESC_STBC_8812(ReadOnlySpan<byte> __pRxDesc) =>
         (byte)LE_BITS_TO_4BYTE(__pRxDesc.Slice(16), 2, 1);
 
-    private static byte GET_RX_STATUS_DESC_BW_8812(Span<byte> __pRxDesc) =>
+    private static byte GET_RX_STATUS_DESC_BW_8812(ReadOnlySpan<byte> __pRxDesc) =>
         (byte)LE_BITS_TO_4BYTE(__pRxDesc.Slice(16), 4, 2);
 }

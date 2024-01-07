@@ -38,10 +38,9 @@ public class DriverBackgroundService : Service
         return StartCommandResult.Sticky;
     }
 
-    private Task PacketProcessor(ParsedRadioPacket arg)
+    private void PacketProcessor(ParsedRadioPacket arg)
     {
         _logger.LogDebug("Received");
-        return Task.CompletedTask;
     }
 
     private SelectedChannel CreateCurrentChannel()

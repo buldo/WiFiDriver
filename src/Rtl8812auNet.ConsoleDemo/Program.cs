@@ -34,10 +34,8 @@ internal class Program
         Console.WriteLine("End");
     }
 
-    private static Task PacketProcessor(ParsedRadioPacket packet)
+    private static void PacketProcessor(ParsedRadioPacket packet)
     {
         Console.WriteLine($"Packet received. Data len: {packet.Data.Length}");
-
-        return Task.CompletedTask;
     }
 }

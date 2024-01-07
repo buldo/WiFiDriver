@@ -90,12 +90,22 @@ public static class Bits
         return LE_P4BYTE_TO_HOST_4BYTE(__pStart) >> __BitOffset & BIT_LEN_MASK_32(__BitLen);
     }
 
+    public static UInt32 LE_BITS_TO_4BYTE(ReadOnlySpan<byte> __pStart, int __BitOffset, int __BitLen)
+    {
+        return LE_P4BYTE_TO_HOST_4BYTE(__pStart) >> __BitOffset & BIT_LEN_MASK_32(__BitLen);
+    }
+
     public static UInt32 LE_BITS_TO_4BYTE(byte[] __pStart, int __BitOffset, int __BitLen)
     {
         return LE_P4BYTE_TO_HOST_4BYTE(__pStart) >> __BitOffset & BIT_LEN_MASK_32(__BitLen);
     }
 
     private static UInt32 LE_P4BYTE_TO_HOST_4BYTE(Span<byte> __pStart)
+    {
+        return BinaryPrimitives.ReadUInt32LittleEndian(__pStart);
+    }
+
+    private static UInt32 LE_P4BYTE_TO_HOST_4BYTE(ReadOnlySpan<byte> __pStart)
     {
         return BinaryPrimitives.ReadUInt32LittleEndian(__pStart);
     }

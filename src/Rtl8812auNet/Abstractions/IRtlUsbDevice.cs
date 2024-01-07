@@ -1,12 +1,12 @@
-﻿using System.Threading.Channels;
+﻿namespace Rtl8812auNet.Abstractions;
 
-namespace Rtl8812auNet.Abstractions;
+public delegate void BulkDataHandler(ReadOnlySpan<byte> dataHandler);
 
 public interface IRtlUsbDevice
 {
     int Speed { get; }
 
-    public ChannelReader<byte[]> BulkTransfersReader { get; }
+    void SetBulkDataHandler(BulkDataHandler handler);
 
     void InfinityRead();
 
@@ -14,5 +14,5 @@ public interface IRtlUsbDevice
 
     ReadOnlySpan<byte> ReadBytes(ushort register, ushort bytesCount);
 
-    public List<IRtlEndpoint> GetEndpoints();
+    List<IRtlEndpoint> GetEndpoints();
 }
