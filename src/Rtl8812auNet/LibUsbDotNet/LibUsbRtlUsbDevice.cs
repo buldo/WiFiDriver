@@ -1,4 +1,5 @@
-﻿using System.Threading.Channels;
+﻿#if WINDOWS
+using System.Threading.Channels;
 using LibUsbDotNet;
 using LibUsbDotNet.LibUsb;
 using LibUsbDotNet.Main;
@@ -120,3 +121,5 @@ public class LibUsbRtlUsbDevice : IRtlUsbDevice
         throw new Exception("Read EP not found");
     }
 }
+
+#endif

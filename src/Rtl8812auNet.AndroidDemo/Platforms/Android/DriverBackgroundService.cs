@@ -4,7 +4,6 @@ using Android.OS;
 using Bld.WlanUtils;
 using Java.Util.Logging;
 
-using LibUsbDotNet.LibUsb;
 using Microsoft.Extensions.Logging;
 using Rtl8812auNet.AndroidDemo.RtlUsb;
 using Rtl8812auNet.Rtl8812au;
@@ -31,7 +30,7 @@ public class DriverBackgroundService : Service
     {
         var loggerFactory = IPlatformApplication.Current.Services.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger<DriverBackgroundService>();
-        _driver = new WiFiDriver(loggerFactory, false);
+        _driver = new WiFiDriver(loggerFactory);
         _device = _driver.CreateRtlDevice(new RtlUsbDevice(AndroidServiceManager.Device, AndroidServiceManager.Connection, loggerFactory.CreateLogger<RtlUsbDevice>()));
         _device.Init(PacketProcessor, CreateCurrentChannel());
         _device.SetMonitorChannel(CreateCurrentChannel());

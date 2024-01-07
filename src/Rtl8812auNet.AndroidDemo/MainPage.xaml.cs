@@ -3,7 +3,6 @@
 using Android.App;
 using Android.Content;
 using Android.Hardware.Usb;
-using LibUsbDotNet.Main;
 using Rtl8812auNet.AndroidDemo.Platforms.Android;
 using Rtl8812auNet.AndroidDemo.RtlUsb;
 using Rtl8812auNet.Rtl8812au;

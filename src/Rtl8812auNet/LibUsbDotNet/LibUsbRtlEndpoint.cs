@@ -1,4 +1,5 @@
-﻿using LibUsbDotNet.Info;
+﻿#if WINDOWS
+using LibUsbDotNet.Info;
 using Rtl8812auNet.Abstractions;
 
 namespace Rtl8812auNet.LibUsbDotNet;
@@ -18,3 +19,4 @@ public class LibUsbRtlEndpoint : IRtlEndpoint
 
     public RtlEndpointDirection Direction => (RtlEndpointDirection)(_usbEndpointInfo.EndpointAddress & (0b1000_0000));
 }
+#endif

@@ -1,8 +1,11 @@
-﻿using LibUsbDotNet.LibUsb;
+﻿#if WINDOWS
+using LibUsbDotNet.LibUsb;
+using Rtl8812auNet.LibUsbDotNet;
+#endif
+
 using Microsoft.Extensions.Logging;
 
 using Rtl8812auNet.Abstractions;
-using Rtl8812auNet.LibUsbDotNet;
 using Rtl8812auNet.Rtl8812au;
 using Rtl8812auNet.Rtl8812au.Modules;
 
@@ -11,35 +14,28 @@ namespace Rtl8812auNet;
 public class WiFiDriver : IDisposable
 {
     private readonly ILoggerFactory _loggerFactory;
-    private readonly bool _isLibUsbMode;
     private readonly ILogger<WiFiDriver> _logger;
-    private readonly UsbContext? _usbContext;
 
-    public WiFiDriver(
-        ILoggerFactory loggerFactory,
-        bool isLibUsbMode)
+#if WINDOWS
+    private readonly UsbContext? _usbContext;
+#endif
+    public WiFiDriver(ILoggerFactory loggerFactory)
     {
         _loggerFactory = loggerFactory;
-        _isLibUsbMode = isLibUsbMode;
         _logger = loggerFactory.CreateLogger<WiFiDriver>();
 
-        if (isLibUsbMode)
-        {
-            _logger.LogTrace("Creating UsbContext");
-            _usbContext = new UsbContext();
-            _usbContext.StartHandlingEvents();
-            _usbContext.SetDebugLevel(global::LibUsbDotNet.LogLevel.Info);
-            _logger.LogTrace("LibUsbDotNet initialised");
-        }
+#if WINDOWS
+        _logger.LogTrace("Creating UsbContext");
+        _usbContext = new UsbContext();
+        _usbContext.StartHandlingEvents();
+        _usbContext.SetDebugLevel(global::LibUsbDotNet.LogLevel.Info);
+        _logger.LogTrace("LibUsbDotNet initialised");
+#endif
     }
 
+#if WINDOWS
     public List<IUsbDevice> GetUsbDevices()
     {
-        if (_usbContext == null)
-        {
-            throw new Exception("Not in libusb mode");
-        }
-
         return _usbContext.FindAll(SearchPredicate).ToList();
     }
 
@@ -58,6 +54,7 @@ public class WiFiDriver : IDisposable
             _loggerFactory.CreateLogger<FrameParser>(),
             _loggerFactory.CreateLogger<FirmwareManager>());
     }
+#endif
 
     public Rtl8812aDevice CreateRtlDevice(IRtlUsbDevice usbDevice)
     {
@@ -74,11 +71,16 @@ public class WiFiDriver : IDisposable
 
     public void Dispose()
     {
+#if WINDOWS
+        _usbContext?.StopHandlingEvents();
         _usbContext?.Dispose();
+#endif
     }
 
+#if WINDOWS
     private static bool SearchPredicate(IUsbDevice device)
     {
         return Rtl8812aDevices.Devices.Contains(new UsbDeviceVidPid(device.VendorId, device.ProductId));
     }
+#endif
 }
